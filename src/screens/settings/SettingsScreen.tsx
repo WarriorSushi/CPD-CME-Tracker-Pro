@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '../../components';
 import { theme } from '../../constants/theme';
 import { useOnboardingStatus } from '../../hooks';
 
 export const SettingsScreen: React.FC = () => {
   const { resetOnboarding } = useOnboardingStatus();
+  const insets = useSafeAreaInsets();
 
   const handleResetOnboarding = async () => {
     await resetOnboarding();
@@ -13,7 +15,7 @@ export const SettingsScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.content}>
         <Text style={styles.title}>Settings</Text>
         
@@ -27,7 +29,7 @@ export const SettingsScreen: React.FC = () => {
           />
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

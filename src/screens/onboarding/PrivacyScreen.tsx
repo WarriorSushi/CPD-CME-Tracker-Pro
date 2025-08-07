@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card } from '../../components';
@@ -24,75 +24,47 @@ export const PrivacyScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <Text style={styles.icon}>🔒</Text>
-            <Text style={styles.title}>Your Privacy is</Text>
-            <Text style={styles.subtitle}>Our Priority</Text>
-            <Text style={styles.description}>
-              Built from the ground up to protect your professional information
-            </Text>
-          </View>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.icon}>🔒</Text>
+          <Text style={styles.title}>Your Privacy is Our Priority</Text>
+          <Text style={styles.description}>
+            Built to protect your professional information
+          </Text>
+        </View>
 
-          <Card style={styles.privacyCard}>
-            <View style={styles.privacyItem}>
-              <Text style={styles.privacyIcon}>📱</Text>
-              <View style={styles.privacyContent}>
-                <Text style={styles.privacyTitle}>100% Offline</Text>
-                <Text style={styles.privacyDescription}>
-                  No internet connection required. Ever. Your data never leaves your device.
-                </Text>
-              </View>
-            </View>
+        <View style={styles.featuresGrid}>
+          <Card style={styles.featureCard}>
+            <Text style={styles.featureIcon}>📱</Text>
+            <Text style={styles.featureTitle}>100% Offline</Text>
+            <Text style={styles.featureDescription}>Data never leaves your device</Text>
           </Card>
 
-          <Card style={styles.privacyCard}>
-            <View style={styles.privacyItem}>
-              <Text style={styles.privacyIcon}>🚫</Text>
-              <View style={styles.privacyContent}>
-                <Text style={styles.privacyTitle}>No Data Collection</Text>
-                <Text style={styles.privacyDescription}>
-                  We don't collect, store, or transmit any of your personal or professional information.
-                </Text>
-              </View>
-            </View>
+          <Card style={styles.featureCard}>
+            <Text style={styles.featureIcon}>🚫</Text>
+            <Text style={styles.featureTitle}>No Collection</Text>
+            <Text style={styles.featureDescription}>We don't collect your data</Text>
           </Card>
 
-          <Card style={styles.privacyCard}>
-            <View style={styles.privacyItem}>
-              <Text style={styles.privacyIcon}>🔐</Text>
-              <View style={styles.privacyContent}>
-                <Text style={styles.privacyTitle}>Encrypted Storage</Text>
-                <Text style={styles.privacyDescription}>
-                  All sensitive data like license numbers are encrypted and stored securely on your device.
-                </Text>
-              </View>
-            </View>
+          <Card style={styles.featureCard}>
+            <Text style={styles.featureIcon}>🔐</Text>
+            <Text style={styles.featureTitle}>Encrypted</Text>
+            <Text style={styles.featureDescription}>Sensitive data is encrypted</Text>
           </Card>
 
-          <Card style={styles.privacyCard}>
-            <View style={styles.privacyItem}>
-              <Text style={styles.privacyIcon}>👤</Text>
-              <View style={styles.privacyContent}>
-                <Text style={styles.privacyTitle}>You're in Control</Text>
-                <Text style={styles.privacyDescription}>
-                  Export your data anytime. Delete it anytime. No accounts, no cloud sync, no third parties.
-                </Text>
-              </View>
-            </View>
-          </Card>
-
-          <Card style={styles.assuranceCard}>
-            <Text style={styles.assuranceTitle}>Why This Matters</Text>
-            <Text style={styles.assuranceText}>
-              As a healthcare professional, your continuing education records contain sensitive professional information. 
-              {'\n\n'}
-              With CME Tracker, you maintain complete control over your data while staying compliant with your professional requirements.
-            </Text>
+          <Card style={styles.featureCard}>
+            <Text style={styles.featureIcon}>👤</Text>
+            <Text style={styles.featureTitle}>You Control</Text>
+            <Text style={styles.featureDescription}>Export or delete anytime</Text>
           </Card>
         </View>
-      </ScrollView>
+
+        <View style={styles.assurance}>
+          <Text style={styles.assuranceText}>
+            🏥 Built specifically for healthcare professionals who value privacy and compliance
+          </Text>
+        </View>
+      </View>
 
       <View style={styles.actions}>
         <Button
@@ -117,86 +89,77 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  scrollView: {
-    flex: 1,
-  },
   content: {
+    flex: 1,
     padding: theme.spacing[5],
+    justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
     marginBottom: theme.spacing[8],
-    marginTop: theme.spacing[3],
   },
   icon: {
-    fontSize: 64,
-    marginBottom: theme.spacing[4],
+    fontSize: 48,
+    marginBottom: theme.spacing[3],
   },
   title: {
-    fontSize: theme.typography.fontSize.xxxl,
+    fontSize: theme.typography.fontSize.xxl,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: theme.typography.fontSize.xxxl,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.primary,
     textAlign: 'center',
     marginBottom: theme.spacing[3],
   },
   description: {
-    fontSize: theme.typography.fontSize.lg,
+    fontSize: theme.typography.fontSize.base,
     color: theme.colors.text.secondary,
     textAlign: 'center',
-    lineHeight: 24,
   },
-  privacyCard: {
-    marginBottom: theme.spacing[3],
-  },
-  privacyItem: {
+  featuresGrid: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: theme.spacing[6],
   },
-  privacyIcon: {
-    fontSize: 24,
-    marginRight: theme.spacing[4],
-    marginTop: theme.spacing[1],
+  featureCard: {
+    width: '48%',
+    marginBottom: theme.spacing[4],
+    alignItems: 'center',
+    paddingVertical: theme.spacing[4],
+    paddingHorizontal: theme.spacing[3],
   },
-  privacyContent: {
-    flex: 1,
+  featureIcon: {
+    fontSize: 28,
+    marginBottom: theme.spacing[2],
   },
-  privacyTitle: {
-    fontSize: theme.typography.fontSize.lg,
+  featureTitle: {
+    fontSize: theme.typography.fontSize.base,
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.text.primary,
-    marginBottom: theme.spacing[1],
-  },
-  privacyDescription: {
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.text.secondary,
-    lineHeight: 22,
-  },
-  assuranceCard: {
-    backgroundColor: theme.colors.primary,
-    marginTop: theme.spacing[4],
-  },
-  assuranceTitle: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.white,
-    marginBottom: theme.spacing[3],
     textAlign: 'center',
+    marginBottom: theme.spacing[2],
+  },
+  featureDescription: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  assurance: {
+    backgroundColor: theme.colors.primary + '10',
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing[4],
+    borderLeftWidth: 4,
+    borderLeftColor: theme.colors.primary,
   },
   assuranceText: {
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.white,
-    lineHeight: 22,
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.primary,
     textAlign: 'center',
+    lineHeight: 18,
   },
   actions: {
     padding: theme.spacing[5],
-    paddingTop: 0,
+    paddingTop: theme.spacing[3],
   },
   primaryButton: {
     marginBottom: theme.spacing[3],

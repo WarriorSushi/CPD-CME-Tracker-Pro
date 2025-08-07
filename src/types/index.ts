@@ -64,11 +64,7 @@ export type Profession =
   | 'Physician'
   | 'Nurse'
   | 'Pharmacist'
-  | 'Physical Therapist'
-  | 'Occupational Therapist'
-  | 'Medical Technologist'
-  | 'Radiologic Technologist'
-  | 'Respiratory Therapist'
+  | 'Allied Health'
   | 'Other';
 
 // Navigation types

@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProgressCircle, Card } from '../../components';
 import { theme } from '../../constants/theme';
 
 export const DashboardScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>Dashboard</Text>
@@ -38,7 +40,7 @@ export const DashboardScreen: React.FC = () => {
           </Text>
         </Card>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

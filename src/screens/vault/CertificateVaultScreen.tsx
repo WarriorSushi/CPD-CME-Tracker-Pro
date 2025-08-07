@@ -1,15 +1,17 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../../constants/theme';
 
 export const CertificateVaultScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.content}>
         <Text style={styles.title}>Certificate Vault</Text>
         <Text style={styles.subtitle}>Coming Soon...</Text>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

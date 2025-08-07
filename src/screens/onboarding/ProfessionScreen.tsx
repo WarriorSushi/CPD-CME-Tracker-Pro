@@ -16,48 +16,28 @@ interface Props {
 const PROFESSIONS: { value: Profession; title: string; description: string }[] = [
   {
     value: 'Physician',
-    title: 'Physician (MD/DO)',
-    description: 'All medical specialties and subspecialties',
+    title: 'Physician',
+    description: 'Doctors, specialists, and medical practitioners',
   },
   {
     value: 'Nurse',
-    title: 'Registered Nurse',
-    description: 'RN, NP, CNS, CRNA, CNM, and other nursing roles',
+    title: 'Nurse',
+    description: 'All nursing roles and care providers',
   },
   {
     value: 'Pharmacist',
-    title: 'Pharmacist (PharmD)',
-    description: 'Clinical, retail, hospital, and specialty pharmacy',
+    title: 'Pharmacist',
+    description: 'Medication and pharmaceutical professionals',
   },
   {
-    value: 'Physical Therapist',
-    title: 'Physical Therapist',
-    description: 'PT and related rehabilitation services',
-  },
-  {
-    value: 'Occupational Therapist',
-    title: 'Occupational Therapist',
-    description: 'OT and related rehabilitation services',
-  },
-  {
-    value: 'Medical Technologist',
-    title: 'Medical Technologist',
-    description: 'Lab tech, radiology tech, and other technical roles',
-  },
-  {
-    value: 'Radiologic Technologist',
-    title: 'Radiologic Technologist',
-    description: 'Diagnostic imaging and radiation therapy',
-  },
-  {
-    value: 'Respiratory Therapist',
-    title: 'Respiratory Therapist',
-    description: 'Pulmonary and respiratory care',
+    value: 'Allied Health',
+    title: 'Allied Health Professional',
+    description: 'Therapists, technologists, and support professionals',
   },
   {
     value: 'Other',
     title: 'Other Healthcare Professional',
-    description: 'Allied health and other licensed professionals',
+    description: 'All other licensed healthcare workers',
   },
 ];
 

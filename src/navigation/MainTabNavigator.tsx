@@ -1,5 +1,7 @@
 import React from 'react';
+import { Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../constants/theme';
 import { MainTabParamList } from '../types/navigation';
 
@@ -13,6 +15,8 @@ import { SettingsScreen } from '../screens/settings/SettingsScreen';
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export const MainTabNavigator: React.FC = () => {
+  const insets = useSafeAreaInsets();
+  
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -21,18 +25,23 @@ export const MainTabNavigator: React.FC = () => {
           backgroundColor: theme.colors.background,
           borderTopColor: theme.colors.border.light,
           borderTopWidth: 1,
-          height: theme.layout.tabBarHeight,
-          paddingBottom: theme.spacing[2],
           paddingTop: theme.spacing[2],
+          paddingBottom: insets.bottom,
+          elevation: 8,
+          shadowColor: theme.colors.text.primary,
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
         },
         tabBarLabelStyle: {
           fontSize: theme.typography.fontSize.xs,
           fontWeight: theme.typography.fontWeight.medium,
+          marginTop: theme.spacing[1],
         },
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.text.secondary,
-        tabBarIconStyle: {
-          marginBottom: theme.spacing[1],
+        tabBarItemStyle: {
+          paddingVertical: theme.spacing[1],
         },
       })}
     >
@@ -42,8 +51,7 @@ export const MainTabNavigator: React.FC = () => {
         options={{
           tabBarLabel: 'Dashboard',
           tabBarIcon: ({ color, size }) => (
-            // For now, we'll use text. Later we can add proper icons
-            <React.Fragment />
+            <Text style={{ fontSize: 20, color }}>📊</Text>
           ),
         }}
       />
@@ -53,7 +61,7 @@ export const MainTabNavigator: React.FC = () => {
         options={{
           tabBarLabel: 'CME History',
           tabBarIcon: ({ color, size }) => (
-            <React.Fragment />
+            <Text style={{ fontSize: 20, color }}>📚</Text>
           ),
         }}
       />
@@ -63,7 +71,7 @@ export const MainTabNavigator: React.FC = () => {
         options={{
           tabBarLabel: 'Certificates',
           tabBarIcon: ({ color, size }) => (
-            <React.Fragment />
+            <Text style={{ fontSize: 20, color }}>🏆</Text>
           ),
         }}
       />
@@ -73,7 +81,7 @@ export const MainTabNavigator: React.FC = () => {
         options={{
           tabBarLabel: 'Settings',
           tabBarIcon: ({ color, size }) => (
-            <React.Fragment />
+            <Text style={{ fontSize: 20, color }}>⚙️</Text>
           ),
         }}
       />

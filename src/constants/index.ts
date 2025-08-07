@@ -52,11 +52,7 @@ export const DEFAULT_CREDIT_REQUIREMENTS = {
   Physician: { CME: 50, CPD: 50, CE: 50, Hours: 50, Points: 50 },
   Nurse: { CME: 24, CPD: 24, CE: 24, Hours: 24, Points: 24 },
   Pharmacist: { CME: 30, CPD: 30, CE: 30, Hours: 30, Points: 30 },
-  'Physical Therapist': { CME: 30, CPD: 30, CE: 30, Hours: 30, Points: 30 },
-  'Occupational Therapist': { CME: 24, CPD: 24, CE: 24, Hours: 24, Points: 24 },
-  'Medical Technologist': { CME: 36, CPD: 36, CE: 36, Hours: 36, Points: 36 },
-  'Radiologic Technologist': { CME: 24, CPD: 24, CE: 24, Hours: 24, Points: 24 },
-  'Respiratory Therapist': { CME: 20, CPD: 20, CE: 20, Hours: 20, Points: 20 },
+  'Allied Health': { CME: 24, CPD: 24, CE: 24, Hours: 24, Points: 24 },
   Other: { CME: 24, CPD: 24, CE: 24, Hours: 24, Points: 24 },
 } as const;
 
