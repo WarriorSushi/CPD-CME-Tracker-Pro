@@ -1,0 +1,244 @@
+// Database schema definitions for CME Tracker
+import * as SQLite from 'expo-sqlite';
+import { APP_CONFIG } from '../../constants';
+
+// Database initialization
+export const initializeDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
+  const db = await SQLite.openDatabaseAsync(APP_CONFIG.DATABASE_NAME);
+  
+  // Enable foreign key constraints
+  await db.execAsync('PRAGMA foreign_keys = ON;');
+  
+  return db;
+};
+
+// Create all tables
+export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => {
+  try {
+    // Start transaction
+    await db.execAsync('BEGIN TRANSACTION;');
+
+    // Users table for multi-user support (future)
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        profession TEXT NOT NULL,
+        country TEXT NOT NULL,
+        credit_system TEXT NOT NULL,
+        annual_requirement INTEGER NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // CME entries table
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS cme_entries (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        provider TEXT NOT NULL,
+        date_attended DATE NOT NULL,
+        credits_earned REAL NOT NULL,
+        category TEXT NOT NULL,
+        notes TEXT,
+        certificate_path TEXT,
+        user_id INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+      );
+    `);
+
+    // Certificates table
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS certificates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        file_path TEXT NOT NULL,
+        file_name TEXT NOT NULL,
+        file_size INTEGER NOT NULL,
+        mime_type TEXT NOT NULL,
+        thumbnail_path TEXT,
+        cme_entry_id INTEGER,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (cme_entry_id) REFERENCES cme_entries (id) ON DELETE CASCADE
+      );
+    `);
+
+    // License renewals table
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS license_renewals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        license_type TEXT NOT NULL,
+        issuing_authority TEXT NOT NULL,
+        license_number TEXT,
+        expiration_date DATE NOT NULL,
+        renewal_date DATE,
+        required_credits REAL NOT NULL DEFAULT 0,
+        completed_credits REAL NOT NULL DEFAULT 0,
+        status TEXT NOT NULL DEFAULT 'active',
+        user_id INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+      );
+    `);
+
+    // App settings table
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS app_settings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        key TEXT UNIQUE NOT NULL,
+        value TEXT NOT NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Create indexes for better performance
+    await db.execAsync(`
+      CREATE INDEX IF NOT EXISTS idx_cme_entries_date_attended ON cme_entries (date_attended);
+    `);
+
+    await db.execAsync(`
+      CREATE INDEX IF NOT EXISTS idx_cme_entries_user_id ON cme_entries (user_id);
+    `);
+
+    await db.execAsync(`
+      CREATE INDEX IF NOT EXISTS idx_certificates_cme_entry_id ON certificates (cme_entry_id);
+    `);
+
+    await db.execAsync(`
+      CREATE INDEX IF NOT EXISTS idx_license_renewals_expiration_date ON license_renewals (expiration_date);
+    `);
+
+    await db.execAsync(`
+      CREATE INDEX IF NOT EXISTS idx_license_renewals_user_id ON license_renewals (user_id);
+    `);
+
+    await db.execAsync(`
+      CREATE INDEX IF NOT EXISTS idx_app_settings_key ON app_settings (key);
+    `);
+
+    // Create triggers for automatic updated_at timestamps
+    await db.execAsync(`
+      CREATE TRIGGER IF NOT EXISTS update_users_timestamp 
+      AFTER UPDATE ON users
+      FOR EACH ROW
+      BEGIN
+        UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+      END;
+    `);
+
+    await db.execAsync(`
+      CREATE TRIGGER IF NOT EXISTS update_cme_entries_timestamp 
+      AFTER UPDATE ON cme_entries
+      FOR EACH ROW
+      BEGIN
+        UPDATE cme_entries SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+      END;
+    `);
+
+    await db.execAsync(`
+      CREATE TRIGGER IF NOT EXISTS update_license_renewals_timestamp 
+      AFTER UPDATE ON license_renewals
+      FOR EACH ROW
+      BEGIN
+        UPDATE license_renewals SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+      END;
+    `);
+
+    await db.execAsync(`
+      CREATE TRIGGER IF NOT EXISTS update_app_settings_timestamp 
+      AFTER UPDATE ON app_settings
+      FOR EACH ROW
+      BEGIN
+        UPDATE app_settings SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+      END;
+    `);
+
+    // Insert default user if none exists
+    await db.execAsync(`
+      INSERT OR IGNORE INTO users (id, profession, country, credit_system, annual_requirement)
+      VALUES (1, 'Physician', 'United States', 'CME', 50);
+    `);
+
+    // Insert default app settings
+    await db.execAsync(`
+      INSERT OR IGNORE INTO app_settings (key, value) VALUES
+      ('onboarding_completed', 'false'),
+      ('notification_enabled', 'true'),
+      ('biometric_enabled', 'false'),
+      ('theme_mode', 'light'),
+      ('backup_enabled', 'true'),
+      ('auto_scan_enabled', 'true');
+    `);
+
+    // Commit transaction
+    await db.execAsync('COMMIT;');
+    
+    console.log('Database tables created successfully');
+  } catch (error) {
+    // Rollback on error
+    await db.execAsync('ROLLBACK;');
+    console.error('Error creating database tables:', error);
+    throw error;
+  }
+};
+
+// Database migration functions
+export const migrateDatabase = async (
+  db: SQLite.SQLiteDatabase,
+  currentVersion: number,
+  targetVersion: number
+): Promise<void> => {
+  console.log(`Migrating database from version ${currentVersion} to ${targetVersion}`);
+  
+  // Future migration logic will go here
+  // For now, we only have version 1
+  if (currentVersion < 1 && targetVersion >= 1) {
+    await createTables(db);
+  }
+};
+
+// Get current database version
+export const getDatabaseVersion = async (db: SQLite.SQLiteDatabase): Promise<number> => {
+  try {
+    const result = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
+    return result?.user_version || 0;
+  } catch (error) {
+    console.error('Error getting database version:', error);
+    return 0;
+  }
+};
+
+// Set database version
+export const setDatabaseVersion = async (
+  db: SQLite.SQLiteDatabase,
+  version: number
+): Promise<void> => {
+  try {
+    await db.execAsync(`PRAGMA user_version = ${version}`);
+  } catch (error) {
+    console.error('Error setting database version:', error);
+    throw error;
+  }
+};
+
+// Initialize and migrate database
+export const setupDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
+  try {
+    const db = await initializeDatabase();
+    
+    const currentVersion = await getDatabaseVersion(db);
+    const targetVersion = APP_CONFIG.DATABASE_VERSION;
+    
+    if (currentVersion < targetVersion) {
+      await migrateDatabase(db, currentVersion, targetVersion);
+      await setDatabaseVersion(db, targetVersion);
+    }
+    
+    return db;
+  } catch (error) {
+    console.error('Error setting up database:', error);
+    throw error;
+  }
+};
