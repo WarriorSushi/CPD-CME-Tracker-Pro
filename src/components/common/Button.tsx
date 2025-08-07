@@ -1,183 +1,178 @@
 import React from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-  ViewStyle,
-  TextStyle,
-} from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-  interpolate,
-} from 'react-native-reanimated';
-import { theme } from '../../constants/theme';
-import { ButtonProps } from '../../types';
+import { Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
+import { PressableFX } from './PressableFX';
+import { useColors, useTokens } from '../../theme';
 
-const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+export interface ButtonProps {
+  title: string;
+  onPress: () => void;
+  variant?: 'primary' | 'outline' | 'destructive';
+  size?: 'sm' | 'md' | 'lg';
+  disabled?: boolean;
+  loading?: boolean;
+  style?: ViewStyle | ViewStyle[];
+}
 
 export const Button: React.FC<ButtonProps> = ({
   title,
   onPress,
   variant = 'primary',
-  size = 'medium',
+  size = 'md',
   disabled = false,
   loading = false,
   style,
-  ...props
 }) => {
-  const pressAnimation = useSharedValue(0);
+  const getColor = useColors();
+  const tokens = useTokens();
 
-  const handlePressIn = () => {
-    // Instant press animation - no duration
-    pressAnimation.value = withTiming(1, {
-      duration: 50, // Very fast, almost instant
-    });
-  };
+  // Get variant-specific styles
+  const variantStyles = getVariantStyles(variant, getColor, tokens);
+  const sizeStyles = getSizeStyles(size, tokens);
+  
+  // Get ledge height and press distance based on variant
+  const ledgeHeight = variant === 'primary' ? 5 : 2;
+  const pressTranslateY = variant === 'primary' ? 3 : 1;
 
-  const handlePressOut = () => {
-    // Quick release animation
-    pressAnimation.value = withTiming(0, {
-      duration: 150, // Quick but smooth release
-    });
-  };
+  const buttonStyle: ViewStyle[] = [
+    styles.base,
+    variantStyles.container,
+    sizeStyles.container,
+    disabled && styles.disabled,
+    ...(Array.isArray(style) ? style : [style]).filter(Boolean),
+  ];
 
-  const animatedStyle = useAnimatedStyle(() => {
-    // All button variants: 5px bottom border → 0px on press
-    const borderBottomWidth = interpolate(pressAnimation.value, [0, 1], [5, 0]);
-    
-    // Slight transform to simulate the pressed effect
-    const translateY = interpolate(pressAnimation.value, [0, 1], [0, 2]);
-
-    return {
-      borderBottomWidth,
-      transform: [{ translateY }],
-    };
-  });
-
-  const getButtonStyle = (): ViewStyle => {
-    const baseStyle: ViewStyle = {
-      ...styles.button,
-      borderRadius: theme.borderRadius.base,
-    };
-
-    // Add 5px bottom border for all buttons
-    Object.assign(baseStyle, styles.primaryButton);
-
-    // Size variations
-    switch (size) {
-      case 'small':
-        baseStyle.height = theme.layout.buttonHeight - 8;
-        baseStyle.paddingHorizontal = theme.spacing[4];
-        break;
-      case 'large':
-        baseStyle.height = theme.layout.buttonHeight + 8;
-        baseStyle.paddingHorizontal = theme.spacing[8];
-        break;
-      default: // medium
-        baseStyle.height = theme.layout.buttonHeight;
-        baseStyle.paddingHorizontal = theme.spacing[6];
-    }
-
-    // Variant styles
-    switch (variant) {
-      case 'secondary':
-        baseStyle.backgroundColor = theme.colors.button.secondary;
-        break;
-      case 'outline':
-        baseStyle.backgroundColor = 'transparent';
-        baseStyle.borderWidth = 2;
-        baseStyle.borderColor = theme.colors.button.primary;
-        // Override bottom border color for outline
-        baseStyle.borderBottomColor = theme.colors.button.primary;
-        break;
-      default: // primary
-        baseStyle.backgroundColor = theme.colors.button.primary;
-    }
-
-    // Disabled state
-    if (disabled) {
-      baseStyle.backgroundColor = theme.colors.button.disabled;
-      baseStyle.borderColor = theme.colors.button.disabled;
-    }
-
-    return baseStyle;
-  };
-
-  const getTextStyle = (): TextStyle => {
-    const baseStyle: TextStyle = {
-      fontWeight: theme.typography.fontWeight.semibold,
-      textAlign: 'center',
-    };
-
-    // Size variations
-    switch (size) {
-      case 'small':
-        baseStyle.fontSize = theme.typography.fontSize.sm;
-        break;
-      case 'large':
-        baseStyle.fontSize = theme.typography.fontSize.lg;
-        break;
-      default: // medium
-        baseStyle.fontSize = theme.typography.fontSize.base;
-    }
-
-    // Variant text colors
-    switch (variant) {
-      case 'secondary':
-        baseStyle.color = theme.colors.button.textSecondary;
-        break;
-      case 'outline':
-        baseStyle.color = disabled 
-          ? theme.colors.button.textDisabled 
-          : theme.colors.button.primary;
-        break;
-      default: // primary
-        baseStyle.color = theme.colors.button.text;
-    }
-
-    // Disabled text color
-    if (disabled) {
-      baseStyle.color = theme.colors.button.textDisabled;
-    }
-
-    return baseStyle;
-  };
+  const textStyle: TextStyle[] = [
+    styles.text,
+    variantStyles.text,
+    sizeStyles.text,
+    disabled && styles.disabledText,
+  ];
 
   return (
-    <AnimatedTouchableOpacity
-      style={[getButtonStyle(), animatedStyle, style]}
-      onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
+    <PressableFX
+      onPress={disabled || loading ? undefined : onPress}
       disabled={disabled || loading}
-      activeOpacity={0.8}
-      {...props}
+      ledgeHeight={ledgeHeight}
+      pressTranslateY={pressTranslateY}
+      style={buttonStyle}
     >
       {loading ? (
         <ActivityIndicator 
-          color={variant === 'primary' ? theme.colors.white : theme.colors.button.primary} 
-          size="small"
+          size="small" 
+          color={variantStyles.text.color} 
         />
       ) : (
-        <Text style={getTextStyle()}>{title}</Text>
+        <Text style={textStyle}>{title}</Text>
       )}
-    </AnimatedTouchableOpacity>
+    </PressableFX>
   );
 };
 
+// Helper function to get variant-specific styles
+const getVariantStyles = (variant: ButtonProps['variant'], getColor: any, tokens: any) => {
+  const variants = {
+    primary: {
+      container: {
+        backgroundColor: getColor('primary'),
+        borderWidth: 0,
+        shadowColor: getColor('primaryDark'),
+        shadowOffset: { width: 0, height: 5 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      },
+      text: {
+        color: getColor('white'),
+        fontWeight: tokens.fontWeight.semibold,
+      },
+    },
+    outline: {
+      container: {
+        backgroundColor: getColor('white'),
+        borderWidth: 1,
+        borderColor: getColor('border'),
+        shadowColor: getColor('border'),
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      },
+      text: {
+        color: getColor('textPrimary'),
+        fontWeight: tokens.fontWeight.medium,
+      },
+    },
+    destructive: {
+      container: {
+        backgroundColor: getColor('white'),
+        borderWidth: 2,
+        borderColor: getColor('error'),
+        shadowColor: getColor('error'),
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.8,
+        shadowRadius: 0,
+      },
+      text: {
+        color: getColor('error'),
+        fontWeight: tokens.fontWeight.semibold,
+      },
+    },
+  };
+
+  return variants[variant || 'primary'];
+};
+
+// Helper function to get size-specific styles
+const getSizeStyles = (size: ButtonProps['size'], tokens: any) => {
+  const sizes = {
+    sm: {
+      container: {
+        paddingVertical: tokens.space[2],
+        paddingHorizontal: tokens.space[4],
+        minHeight: 36,
+      },
+      text: {
+        fontSize: tokens.fontSize.sm,
+      },
+    },
+    md: {
+      container: {
+        paddingVertical: tokens.space[3],
+        paddingHorizontal: tokens.space[5],
+        minHeight: 44,
+      },
+      text: {
+        fontSize: tokens.fontSize.base,
+      },
+    },
+    lg: {
+      container: {
+        paddingVertical: tokens.space[4],
+        paddingHorizontal: tokens.space[6],
+        minHeight: 52,
+      },
+      text: {
+        fontSize: tokens.fontSize.lg,
+      },
+    },
+  };
+
+  return sizes[size || 'md'];
+};
+
 const styles = StyleSheet.create({
-  button: {
-    justifyContent: 'center',
+  base: {
+    borderRadius: 5, // tokens.radius.button
     alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
   },
-  primaryButton: {
-    // 5px bottom border for primary/secondary buttons
-    borderBottomWidth: 5,
-    borderBottomColor: '#4B5563',
+  text: {
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+  disabledText: {
+    opacity: 0.7,
   },
 });
-
-export default Button;
