@@ -30,18 +30,23 @@ export const useOnboardingStatus = () => {
 
   const completeOnboarding = async () => {
     try {
+      console.log('🔄 Setting onboarding completion flag...');
       const result = await settingsOperations.setSetting(
         STORAGE_KEYS.ONBOARDING_COMPLETED, 
         'true'
       );
+      console.log('📊 Database setSetting result:', result);
       
       if (result.success) {
+        console.log('✨ Setting state isOnboardingComplete to true');
         setIsOnboardingComplete(true);
+      } else {
+        console.error('❌ Database setSetting failed:', result.error);
       }
       
       return result.success;
     } catch (error) {
-      console.error('Error completing onboarding:', error);
+      console.error('💥 Exception in completeOnboarding:', error);
       return false;
     }
   };
