@@ -58,7 +58,17 @@ export const userOperations = {
   getCurrentUser: async (): Promise<DatabaseOperationResult<User>> => {
     try {
       const db = await getDatabase();
-      const user = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = 1');
+      const user = await db.getFirstAsync<any>(`
+        SELECT 
+          id,
+          profession,
+          country,
+          credit_system as creditSystem,
+          annual_requirement as annualRequirement,
+          requirement_period as requirementPeriod,
+          created_at as createdAt
+        FROM users WHERE id = 1
+      `);
       
       return {
         success: true,
@@ -95,6 +105,10 @@ export const userOperations = {
       if (userData.annualRequirement) {
         fields.push('annual_requirement = ?');
         values.push(userData.annualRequirement);
+      }
+      if (userData.requirementPeriod) {
+        fields.push('requirement_period = ?');
+        values.push(userData.requirementPeriod);
       }
 
       if (fields.length === 0) {
@@ -210,8 +224,8 @@ export const cmeOperations = {
       if (!userCheck) {
         console.log('⚠️ cmeOperations.addEntry: User with ID 1 does not exist, creating default user...');
         await db.runAsync(`
-          INSERT OR IGNORE INTO users (id, profession, country, credit_system, annual_requirement)
-          VALUES (1, 'Healthcare Professional', 'United States', 'Credits', 50)
+          INSERT OR IGNORE INTO users (id, profession, country, credit_system, annual_requirement, requirement_period)
+          VALUES (1, 'Healthcare Professional', 'United States', 'Credits', 50, 1)
         `);
         console.log('✅ cmeOperations.addEntry: Default user created');
       }

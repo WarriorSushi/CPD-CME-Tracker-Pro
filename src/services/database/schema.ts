@@ -26,6 +26,7 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
         country TEXT NOT NULL,
         credit_system TEXT NOT NULL,
         annual_requirement INTEGER NOT NULL,
+        requirement_period INTEGER NOT NULL DEFAULT 1,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
@@ -157,8 +158,8 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
 
     // Insert default user if none exists
     await db.execAsync(`
-      INSERT OR IGNORE INTO users (id, profession, country, credit_system, annual_requirement)
-      VALUES (1, 'Physician', 'United States', 'CME', 50);
+      INSERT OR IGNORE INTO users (id, profession, country, credit_system, annual_requirement, requirement_period)
+      VALUES (1, 'Physician', 'United States', 'CME', 50, 1);
     `);
 
     // Insert default app settings
@@ -192,10 +193,30 @@ export const migrateDatabase = async (
 ): Promise<void> => {
   console.log(`Migrating database from version ${currentVersion} to ${targetVersion}`);
   
-  // Future migration logic will go here
-  // For now, we only have version 1
-  if (currentVersion < 1 && targetVersion >= 1) {
-    await createTables(db);
+  try {
+    // Migration from version 0 to 1 - initial setup
+    if (currentVersion < 1 && targetVersion >= 1) {
+      console.log('🔄 Running migration 0 -> 1: Creating initial tables...');
+      
+      // Check if users table exists and add missing column if needed
+      const tableInfo = await db.getAllAsync(`PRAGMA table_info(users)`);
+      const hasRequirementPeriod = tableInfo.some((col: any) => col.name === 'requirement_period');
+      
+      if (!hasRequirementPeriod && tableInfo.length > 0) {
+        // Table exists but missing requirement_period column
+        console.log('⚙️ Adding requirement_period column to existing users table...');
+        await db.execAsync(`ALTER TABLE users ADD COLUMN requirement_period INTEGER NOT NULL DEFAULT 1`);
+      } else if (tableInfo.length === 0) {
+        // Table doesn't exist, create all tables
+        console.log('🏗️ Creating all database tables...');
+        await createTables(db);
+      }
+      
+      console.log('✅ Migration 0 -> 1 completed successfully');
+    }
+  } catch (error) {
+    console.error('💥 Migration failed:', error);
+    throw error;
   }
 };
 

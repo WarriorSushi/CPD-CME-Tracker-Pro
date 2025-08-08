@@ -133,8 +133,8 @@ export const ProgressCircle: React.FC<ProgressCircleProps> = ({
             cy={size / 2}
             r={radius}
             stroke={backgroundColor}
-            strokeWidth={strokeWidth - 1}
-            fill="transparent"
+            strokeWidth={strokeWidth}
+            fill="none"
           />
           
           {/* Progress circle */}
@@ -144,7 +144,7 @@ export const ProgressCircle: React.FC<ProgressCircleProps> = ({
             r={radius}
             stroke="url(#progressGradient)"
             strokeWidth={strokeWidth}
-            fill="transparent"
+            fill="none"
             strokeDasharray={circumference}
             strokeLinecap="round"
             animatedProps={animatedProps}

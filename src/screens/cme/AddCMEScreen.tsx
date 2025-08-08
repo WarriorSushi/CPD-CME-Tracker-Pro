@@ -62,6 +62,23 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
 
+  // Reset form when route params change or when coming from dashboard
+  useEffect(() => {
+    const currentEditEntry = route.params?.editEntry;
+    
+    setFormData({
+      title: currentEditEntry?.title || '',
+      provider: currentEditEntry?.provider || '',
+      dateAttended: currentEditEntry ? new Date(currentEditEntry.dateAttended) : new Date(),
+      creditsEarned: currentEditEntry?.creditsEarned?.toString() || '',
+      category: currentEditEntry?.category || CME_CATEGORIES[0],
+      notes: currentEditEntry?.notes || '',
+    });
+    
+    // Clear any errors when resetting
+    setErrors({});
+  }, [route.params?.editEntry]);
+
   // Validation
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};

@@ -972,8 +972,8 @@ const styles = StyleSheet.create({
     color: theme.colors.background,
   },
 
-  // Bottom spacing
+  // Bottom spacing for tab bar
   bottomSpacing: {
-    height: theme.spacing[8],
+    height: 100, // Ensure content is fully above bottom tab bar
   },
 });

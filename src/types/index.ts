@@ -6,6 +6,7 @@ export interface User {
   country: string;
   creditSystem: CreditSystem;
   annualRequirement: number;
+  requirementPeriod: number; // Period in years (1, 2, 3, 5, etc.)
   createdAt: string;
 }
 

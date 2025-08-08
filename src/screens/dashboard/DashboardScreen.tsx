@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, D
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { ProgressCircle, Card, Button, LoadingSpinner } from '../../components';
+import { Card, Button, LoadingSpinner } from '../../components';
+import { SimpleProgressRing } from '../../components/charts/SimpleProgressRing';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { MainTabParamList } from '../../types/navigation';
@@ -121,53 +122,91 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        {/* Progress Section */}
+        {/* Enhanced Progress Section */}
         <View style={styles.progressSection}>
-          <View style={styles.progressHeader}>
-            <Text style={styles.sectionTitle}>Annual Progress</Text>
-            <Text style={styles.yearText}>{new Date().getFullYear()}</Text>
-          </View>
-
           <Card style={styles.progressCard}>
-            <View style={styles.progressContent}>
+            <View style={styles.progressHeader}>
+              <View style={styles.progressTitleContainer}>
+                <Text style={styles.progressMainTitle}>Your Progress</Text>
+                <Text style={styles.progressSubtitle}>
+                  {user?.requirementPeriod && user.requirementPeriod > 1 
+                    ? `${user.requirementPeriod}-Year Cycle` 
+                    : 'Annual Goal'
+                  }
+                </Text>
+              </View>
+              <View style={styles.progressBadge}>
+                <Text style={styles.progressBadgeText}>
+                  {currentYearProgress ? getStatusIcon(currentYearProgress.status) : '🎯'}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.progressMainContent}>
               <View style={styles.progressCircleContainer}>
-                <ProgressCircle 
+                <SimpleProgressRing 
                   progress={currentYearProgress ? currentYearProgress.percentage / 100 : 0} 
-                  size={120}
+                  size={160}
                   color={currentYearProgress ? getProgressColor(currentYearProgress.status) : theme.colors.gray.medium}
-                  gradientColors={[
-                    currentYearProgress ? getProgressColor(currentYearProgress.status) : theme.colors.gray.medium,
-                    currentYearProgress ? getProgressColor(currentYearProgress.status) + '80' : theme.colors.gray.light
-                  ]}
-                  strokeWidth={10}
-                  showGlow={true}
-                  pulseOnComplete={true}
-                  showShadow={true}
-                  duration={1500}
+                  backgroundColor={theme.colors.gray.light + '60'}
+                  strokeWidth={12}
+                  duration={2000}
                 />
               </View>
 
-              <View style={styles.progressDetails}>
-                <View style={styles.progressRow}>
-                  <Text style={styles.progressLabel}>Credits Earned</Text>
-                  <Text style={styles.progressValue}>
+              <View style={styles.progressStats}>
+                <View style={styles.progressStatItem}>
+                  <Text style={styles.progressStatValue}>
                     {currentYearProgress?.totalCompleted?.toFixed(1) || '0'}
                   </Text>
+                  <Text style={styles.progressStatLabel}>Credits Earned</Text>
                 </View>
-                <View style={styles.progressRow}>
-                  <Text style={styles.progressLabel}>Annual Goal</Text>
-                  <Text style={styles.progressValue}>
+                
+                <View style={styles.progressStatDivider} />
+                
+                <View style={styles.progressStatItem}>
+                  <Text style={styles.progressStatValue}>
                     {currentYearProgress?.totalRequired || user?.annualRequirement || 0}
                   </Text>
-                </View>
-                <View style={styles.statusRow}>
-                  <Text style={styles.statusIcon}>
-                    {currentYearProgress ? getStatusIcon(currentYearProgress.status) : '🎯'}
-                  </Text>
-                  <Text style={styles.statusText}>
-                    {currentYearProgress?.remainingDays ? `${currentYearProgress.remainingDays} days left` : 'Getting started'}
+                  <Text style={styles.progressStatLabel}>Goal
                   </Text>
                 </View>
+                
+                <View style={styles.progressStatDivider} />
+                
+                <View style={styles.progressStatItem}>
+                  <Text style={styles.progressStatValue}>
+                    {Math.max(
+                      (currentYearProgress?.totalRequired || 0) - (currentYearProgress?.totalCompleted || 0), 
+                      0
+                    ).toFixed(1)}
+                  </Text>
+                  <Text style={styles.progressStatLabel}>Remaining</Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.progressFooter}>
+              <View style={styles.progressTimeInfo}>
+                <Text style={styles.progressTimeValue}>
+                  {currentYearProgress?.remainingDays || 0}
+                </Text>
+                <Text style={styles.progressTimeLabel}>
+                  days remaining
+                  {user?.requirementPeriod && user.requirementPeriod > 1 
+                    ? ` in ${user.requirementPeriod}-year cycle` 
+                    : ' this year'
+                  }
+                </Text>
+              </View>
+              <View style={[styles.progressStatusIndicator, { backgroundColor: currentYearProgress ? getProgressColor(currentYearProgress.status) : theme.colors.gray.medium }]}>
+                <Text style={styles.progressStatusText}>
+                  {currentYearProgress?.status === 'completed' && 'Complete!'}
+                  {currentYearProgress?.status === 'on_track' && 'On Track'}
+                  {currentYearProgress?.status === 'behind' && 'Behind Schedule'}
+                  {currentYearProgress?.status === 'overdue' && 'Overdue'}
+                  {!currentYearProgress && 'Getting Started'}
+                </Text>
               </View>
             </View>
           </Card>
@@ -177,7 +216,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.addEntrySection}>
           <TouchableOpacity 
             style={styles.addEntryButton}
-            onPress={() => navigation.navigate('CME')}
+            onPress={() => navigation.navigate('CME', { screen: 'AddCME', params: { editEntry: undefined } })}
           >
             <View style={styles.addEntryContent}>
               <View style={styles.addEntryIcon}>
@@ -200,7 +239,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.quickActionsGrid}>
             <TouchableOpacity 
               style={styles.quickActionItem}
-              onPress={() => navigation.navigate('CME')}
+              onPress={() => navigation.navigate('CME', { screen: 'AddCME', params: { editEntry: undefined } })}
             >
               <Text style={styles.quickActionIcon}>📚</Text>
               <Text style={styles.quickActionText}>Add CME</Text>
@@ -214,7 +253,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.quickActionItem}
-              onPress={() => navigation.navigate('CME')}
+              onPress={() => navigation.navigate('CME', { screen: 'CMEHistory' })}
             >
               <Text style={styles.quickActionIcon}>📊</Text>
               <Text style={styles.quickActionText}>History</Text>
@@ -314,7 +353,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         )}
 
-        {/* Bottom spacer */}
+        {/* Bottom spacer for tab bar */}
         <View style={styles.bottomSpacer} />
       </ScrollView>
     </View>
@@ -385,89 +424,129 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
   },
 
-  // Sections
+  // Enhanced Progress Section
   progressSection: {
     paddingHorizontal: theme.spacing[4],
     paddingTop: theme.spacing[4],
   },
-  progressHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: theme.spacing[3],
-  },
-  sectionTitle: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text.primary,
-  },
-  yearText: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text.secondary,
-    fontWeight: theme.typography.fontWeight.medium,
-  },
-
-  // Progress Card
   progressCard: {
-    padding: theme.spacing[4],
+    paddingVertical: theme.spacing[6],
+    paddingHorizontal: theme.spacing[5],
     marginBottom: theme.spacing[4],
     backgroundColor: theme.colors.background,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 6,
     },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 10,
+    borderRadius: theme.spacing[5],
   },
-  progressContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  progressCircleContainer: {
-    marginRight: theme.spacing[4],
-  },
-  progressInner: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  progressPercentage: {
-    fontSize: theme.typography.fontSize.xl,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text.primary,
-  },
-  progressDetails: {
-    flex: 1,
-  },
-  progressRow: {
+  progressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing[2],
+    marginBottom: theme.spacing[5],
   },
-  progressLabel: {
+  progressTitleContainer: {
+    flex: 1,
+  },
+  progressMainTitle: {
+    fontSize: theme.typography.fontSize.xl,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[1],
+  },
+  progressSubtitle: {
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
+    fontWeight: theme.typography.fontWeight.medium,
   },
-  progressValue: {
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.semibold,
+  progressBadge: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: theme.colors.gray.light,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  progressBadgeText: {
+    fontSize: 24,
+  },
+  progressMainContent: {
+    alignItems: 'center',
+    marginBottom: theme.spacing[5],
+  },
+  progressCircleContainer: {
+    marginBottom: theme.spacing[5],
+  },
+  progressStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    width: '100%',
+  },
+  progressStatItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  progressStatValue: {
+    fontSize: theme.typography.fontSize.xl,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.primary,
+    marginBottom: theme.spacing[1],
+  },
+  progressStatLabel: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+    fontWeight: theme.typography.fontWeight.medium,
+  },
+  progressStatDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: theme.colors.border.light,
+    marginHorizontal: theme.spacing[2],
+  },
+  progressFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: theme.spacing[4],
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border.light,
+  },
+  progressTimeInfo: {
+    flex: 1,
+  },
+  progressTimeValue: {
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
   },
-  statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: theme.spacing[2],
-  },
-  statusIcon: {
-    fontSize: 16,
-    marginRight: theme.spacing[2],
-  },
-  statusText: {
-    fontSize: theme.typography.fontSize.sm,
+  progressTimeLabel: {
+    fontSize: theme.typography.fontSize.xs,
     color: theme.colors.text.secondary,
-    fontStyle: 'italic',
+    marginTop: theme.spacing[1],
+  },
+  progressStatusIndicator: {
+    paddingHorizontal: theme.spacing[4],
+    paddingVertical: theme.spacing[2],
+    borderRadius: theme.spacing[4],
+  },
+  progressStatusText: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.background,
+  },
+
+  // Section Title
+  sectionTitle: {
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
   },
 
   // Add Entry Section
@@ -488,10 +567,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 12,
     elevation: 8,
-    // Button pressed effect preparation
-    borderWidth: 0,
-    borderBottomWidth: 5,
-    borderBottomColor: theme.colors.primary + 'DD',
   },
   addEntryContent: {
     flexDirection: 'row',
@@ -710,8 +785,8 @@ const styles = StyleSheet.create({
     color: theme.colors.background,
   },
 
-  // Bottom spacer
+  // Bottom spacer for tab bar
   bottomSpacer: {
-    height: theme.spacing[6],
+    height: 100, // Ensure content is fully above bottom tab bar
   },
 });

@@ -72,19 +72,24 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [isLoadingCertificates, setIsLoadingCertificates] = useState(true);
   const [isLoadingLicenses, setIsLoadingLicenses] = useState(true);
 
-  // Calculate progress based on current data
+  // Calculate progress based on current data and user's requirement period
   const calculateProgress = (user: User, totalCredits: number): Progress => {
-    const currentYear = new Date().getFullYear();
-    const startOfYear = new Date(currentYear, 0, 1);
-    const endOfYear = new Date(currentYear, 11, 31);
     const now = new Date();
+    const periodYears = user.requirementPeriod || 1;
     
-    const totalDaysInYear = Math.ceil((endOfYear.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
-    const daysPassed = Math.ceil((now.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
-    const remainingDays = totalDaysInYear - daysPassed;
+    // Calculate based on the user's requirement period
+    // For multi-year periods, we track from when they started their current cycle
+    // For now, we'll assume they started at beginning of current year for simplicity
+    const currentYear = now.getFullYear();
+    const startOfPeriod = new Date(currentYear, 0, 1);
+    const endOfPeriod = new Date(currentYear + periodYears, 0, 1);
+    
+    const totalDaysInPeriod = Math.ceil((endOfPeriod.getTime() - startOfPeriod.getTime()) / (1000 * 60 * 60 * 24));
+    const daysPassed = Math.ceil((now.getTime() - startOfPeriod.getTime()) / (1000 * 60 * 60 * 24));
+    const remainingDays = Math.max(totalDaysInPeriod - daysPassed, 0);
     
     const percentage = user.annualRequirement > 0 ? (totalCredits / user.annualRequirement) * 100 : 0;
-    const expectedProgress = (daysPassed / totalDaysInYear) * 100;
+    const expectedProgress = (daysPassed / totalDaysInPeriod) * 100;
     
     let status: Progress['status'];
     if (percentage >= 100) {
@@ -101,7 +106,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       totalRequired: user.annualRequirement,
       totalCompleted: totalCredits,
       percentage: Math.min(percentage, 100),
-      remainingDays: Math.max(remainingDays, 0),
+      remainingDays,
       status,
     };
   };
