@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '../../components';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
-import { useOnboardingStatus } from '../../hooks';
+import { useOnboardingContext } from '../../contexts/OnboardingContext';
 
 type SetupCompleteScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'SetupComplete'>;
 
@@ -16,7 +16,7 @@ interface Props {
 export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const [isLoading, setIsLoading] = useState(false);
-  const { completeOnboarding } = useOnboardingStatus();
+  const { completeOnboarding } = useOnboardingContext();
 
   const handleStartUsingApp = async () => {
     console.log('🚀 Starting app button pressed');
@@ -29,6 +29,11 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
       
       if (success) {
         console.log('🎉 Onboarding completed successfully - navigation should switch automatically');
+        // Force a small delay to ensure state propagation
+        setTimeout(() => {
+          console.log('⏰ Triggering manual state refresh check...');
+          // This should trigger any listeners to recheck the state
+        }, 200);
         // Navigation will automatically switch to main app due to the navigation logic
         // in AppNavigator based on onboarding status
       } else {

@@ -1,8 +1,22 @@
-import { useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { settingsOperations } from '../services/database';
 import { STORAGE_KEYS } from '../constants';
 
-export const useOnboardingStatus = () => {
+interface OnboardingContextType {
+  isOnboardingComplete: boolean;
+  isLoading: boolean;
+  completeOnboarding: () => Promise<boolean>;
+  resetOnboarding: () => Promise<boolean>;
+  checkOnboardingStatus: () => Promise<void>;
+}
+
+const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
+
+interface OnboardingProviderProps {
+  children: ReactNode;
+}
+
+export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children }) => {
   const [isOnboardingComplete, setIsOnboardingComplete] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -12,12 +26,15 @@ export const useOnboardingStatus = () => {
 
   const checkOnboardingStatus = async () => {
     try {
+      console.log('🔍 Checking onboarding status from context...');
       const result = await settingsOperations.getSetting(STORAGE_KEYS.ONBOARDING_COMPLETED);
       
       if (result.success && result.data) {
-        setIsOnboardingComplete(result.data === 'true');
+        const isComplete = result.data === 'true';
+        console.log('📋 Onboarding status from DB:', isComplete);
+        setIsOnboardingComplete(isComplete);
       } else {
-        // If setting doesn't exist, onboarding is not complete
+        console.log('📋 No onboarding setting found, defaulting to false');
         setIsOnboardingComplete(false);
       }
     } catch (error) {
@@ -38,11 +55,8 @@ export const useOnboardingStatus = () => {
       console.log('📊 Database setSetting result:', result);
       
       if (result.success) {
-        console.log('✨ Setting state isOnboardingComplete to true');
+        console.log('✨ Setting context state isOnboardingComplete to true');
         setIsOnboardingComplete(true);
-        // Force a recheck to ensure all hook instances get updated
-        console.log('🔄 Forcing recheck of onboarding status...');
-        setTimeout(() => checkOnboardingStatus(), 100);
       } else {
         console.error('❌ Database setSetting failed:', result.error);
       }
@@ -72,11 +86,25 @@ export const useOnboardingStatus = () => {
     }
   };
 
-  return {
+  const value: OnboardingContextType = {
     isOnboardingComplete,
     isLoading,
     completeOnboarding,
     resetOnboarding,
     checkOnboardingStatus,
   };
+
+  return (
+    <OnboardingContext.Provider value={value}>
+      {children}
+    </OnboardingContext.Provider>
+  );
+};
+
+export const useOnboardingContext = (): OnboardingContextType => {
+  const context = useContext(OnboardingContext);
+  if (context === undefined) {
+    throw new Error('useOnboardingContext must be used within an OnboardingProvider');
+  }
+  return context;
 };

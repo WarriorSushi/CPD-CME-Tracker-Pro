@@ -2,11 +2,11 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { OnboardingNavigator } from './OnboardingNavigator';
 import { MainTabNavigator } from './MainTabNavigator';
-import { useOnboardingStatus } from '../hooks/useOnboardingStatus';
+import { useOnboardingContext } from '../contexts/OnboardingContext';
 import { LoadingSpinner } from '../components';
 
 export const AppNavigator: React.FC = () => {
-  const { isOnboardingComplete, isLoading } = useOnboardingStatus();
+  const { isOnboardingComplete, isLoading } = useOnboardingContext();
 
   console.log('🧭 AppNavigator render - isLoading:', isLoading, 'isOnboardingComplete:', isOnboardingComplete);
 
