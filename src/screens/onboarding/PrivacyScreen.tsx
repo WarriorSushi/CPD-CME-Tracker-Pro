@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card } from '../../components';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
+import { getColor } from '../../theme';
 
 type PrivacyScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Privacy'>;
 
@@ -145,7 +146,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   assurance: {
-    backgroundColor: theme.colors.primary + '10',
+    backgroundColor: getColor('selectedBg'),
     borderRadius: theme.borderRadius.medium,
     padding: theme.spacing[4],
     borderLeftWidth: 4,

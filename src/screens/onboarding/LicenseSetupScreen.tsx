@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card } from '../../components';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
+import { getColor } from '../../theme';
 
 type LicenseSetupScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'LicenseSetup'>;
 
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: theme.colors.primary + '15',
+    backgroundColor: getColor('selectedBg'),
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: theme.spacing[3],

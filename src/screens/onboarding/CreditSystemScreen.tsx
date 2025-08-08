@@ -6,6 +6,7 @@ import { Button, Card } from '../../components';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { CreditSystem } from '../../types';
+import { getColor } from '../../theme';
 
 type CreditSystemScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'CreditSystem'>;
 
@@ -134,7 +135,7 @@ const styles = StyleSheet.create({
   },
   selectedSystemCard: {
     borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primary + '10',
+    backgroundColor: getColor('selectedBg'),
   },
   systemContent: {
     flex: 1,

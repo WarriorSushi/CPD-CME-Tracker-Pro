@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card, Input } from '../../components';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
+import { getColor } from '../../theme';
 
 type CountryScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Country'>;
 
@@ -87,21 +88,25 @@ export const CountryScreen: React.FC<Props> = ({ navigation }) => {
             {filteredCountries.map((country) => (
               <TouchableOpacity
                 key={country}
-                style={[
-                  styles.countryItem,
-                  selectedCountry === country && styles.selectedCountryItem,
-                ]}
                 onPress={() => setSelectedCountry(country)}
+                activeOpacity={0.7}
               >
-                <Text style={[
-                  styles.countryText,
-                  selectedCountry === country && styles.selectedCountryText,
-                ]}>
-                  {country}
-                </Text>
-                {selectedCountry === country && (
-                  <Text style={styles.checkmark}>✓</Text>
-                )}
+                <Card 
+                  variant={selectedCountry === country ? 'selected' : 'outline'}
+                  style={styles.countryCard}
+                >
+                  <View style={styles.countryContent}>
+                    <Text style={[
+                      styles.countryText,
+                      selectedCountry === country && styles.selectedCountryText,
+                    ]}>
+                      {country}
+                    </Text>
+                    {selectedCountry === country && (
+                      <Text style={styles.checkmark}>✓</Text>
+                    )}
+                  </View>
+                </Card>
               </TouchableOpacity>
             ))}
             {filteredCountries.length === 0 && (
@@ -166,21 +171,13 @@ const styles = StyleSheet.create({
   countriesList: {
     // Countries list container
   },
-  countryItem: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.medium,
-    borderWidth: 2,
-    borderColor: theme.colors.border.light,
-    paddingVertical: theme.spacing[4],
-    paddingHorizontal: theme.spacing[4],
+  countryCard: {
     marginBottom: theme.spacing[2],
+  },
+  countryContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  selectedCountryItem: {
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primary + '10',
   },
   noResults: {
     fontSize: theme.typography.fontSize.base,

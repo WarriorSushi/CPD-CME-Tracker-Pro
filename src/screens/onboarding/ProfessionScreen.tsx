@@ -6,6 +6,7 @@ import { Button, Card } from '../../components';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList, Profession } from '../../types';
 import { userOperations } from '../../services/database';
+import { getColor } from '../../theme';
 
 type ProfessionScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Profession'>;
 
@@ -89,35 +90,38 @@ export const ProfessionScreen: React.FC<Props> = ({ navigation }) => {
             {PROFESSIONS.map((profession) => (
               <TouchableOpacity
                 key={profession.value}
-                style={[
-                  styles.professionItem,
-                  selectedProfession === profession.value && styles.selectedProfessionItem,
-                ]}
                 onPress={() => setSelectedProfession(profession.value)}
                 activeOpacity={0.7}
               >
-                <View style={styles.professionContent}>
-                  <Text style={[
-                    styles.professionTitle,
-                    selectedProfession === profession.value && styles.selectedProfessionTitle,
-                  ]}>
-                    {profession.title}
-                  </Text>
-                  <Text style={[
-                    styles.professionDescription,
-                    selectedProfession === profession.value && styles.selectedProfessionDescription,
-                  ]}>
-                    {profession.description}
-                  </Text>
-                </View>
-                <View style={[
-                  styles.radioButton,
-                  selectedProfession === profession.value && styles.selectedRadioButton,
-                ]}>
-                  {selectedProfession === profession.value && (
-                    <View style={styles.radioButtonInner} />
-                  )}
-                </View>
+                <Card 
+                  variant={selectedProfession === profession.value ? 'selected' : 'outline'}
+                  style={styles.compactCard}
+                >
+                  <View style={styles.professionContent}>
+                    <View style={styles.professionTextContent}>
+                      <Text style={[
+                        styles.professionTitle,
+                        selectedProfession === profession.value && styles.selectedProfessionTitle,
+                      ]}>
+                        {profession.title}
+                      </Text>
+                      <Text style={[
+                        styles.professionDescription,
+                        selectedProfession === profession.value && styles.selectedProfessionDescription,
+                      ]}>
+                        {profession.description}
+                      </Text>
+                    </View>
+                    <View style={[
+                      styles.radioButton,
+                      selectedProfession === profession.value && styles.selectedRadioButton,
+                    ]}>
+                      {selectedProfession === profession.value && (
+                        <View style={styles.radioButtonInner} />
+                      )}
+                    </View>
+                  </View>
+                </Card>
               </TouchableOpacity>
             ))}
           </View>
@@ -173,46 +177,40 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   professionList: {
-    gap: theme.spacing[3],
+    gap: theme.spacing[2], // Reduced from spacing[3] to spacing[2]
   },
-  professionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: theme.spacing[4],
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.borderRadius.base,
-    borderWidth: 2,
-    borderColor: theme.colors.border.light,
-  },
-  selectedProfessionItem: {
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primary + '10', // 10% opacity
+  compactCard: {
+    padding: theme.spacing[3], // Override default Card padding (was 16px, now 12px)
   },
   professionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  professionTextContent: {
     flex: 1,
-    marginRight: theme.spacing[3],
+    marginRight: theme.spacing[2], // Reduced margin
   },
   professionTitle: {
-    fontSize: theme.typography.fontSize.lg,
+    fontSize: theme.typography.fontSize.base, // Reduced from lg to base
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.text.primary,
-    marginBottom: theme.spacing[1],
+    marginBottom: theme.spacing[0], // Reduced margin between title and description
   },
   selectedProfessionTitle: {
     color: theme.colors.primary,
   },
   professionDescription: {
-    fontSize: theme.typography.fontSize.sm,
+    fontSize: theme.typography.fontSize.xs, // Reduced from sm to xs
     color: theme.colors.text.secondary,
-    lineHeight: 18,
+    lineHeight: 16, // Reduced line height
   },
   selectedProfessionDescription: {
     color: theme.colors.text.primary,
   },
   radioButton: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 20, // Reduced from 24 to 20
+    height: 20, // Reduced from 24 to 20
+    borderRadius: 10, // Adjusted for new size
     borderWidth: 2,
     borderColor: theme.colors.border.medium,
     alignItems: 'center',
@@ -222,9 +220,9 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.primary,
   },
   radioButtonInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 10, // Reduced from 12 to 10
+    height: 10, // Reduced from 12 to 10
+    borderRadius: 5, // Adjusted for new size
     backgroundColor: theme.colors.primary,
   },
   actions: {

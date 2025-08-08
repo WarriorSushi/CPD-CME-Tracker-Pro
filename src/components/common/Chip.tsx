@@ -27,15 +27,15 @@ export const Chip: React.FC<ChipProps> = ({
   const chipStyle: ViewStyle[] = [
     styles.base,
     variantStyles.container,
-    disabled && styles.disabled,
-    ...(Array.isArray(style) ? style : [style]).filter(Boolean),
-  ];
+    disabled ? styles.disabled : {},
+    ...(Array.isArray(style) ? style : [style]).filter((s): s is ViewStyle => s != null),
+  ].filter((s): s is ViewStyle => s != null);
 
   const textStyle: TextStyle[] = [
     styles.text,
     variantStyles.text,
-    disabled && styles.disabledText,
-  ];
+    disabled ? styles.disabledText : {},
+  ].filter((s): s is TextStyle => s != null);
 
   // If no onPress, render as static view
   if (!onPress) {

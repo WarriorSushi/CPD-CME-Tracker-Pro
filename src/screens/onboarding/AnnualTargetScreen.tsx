@@ -5,7 +5,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Card } from '../../components';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
-import { DEFAULT_CREDIT_REQUIREMENTS, Profession } from '../../constants';
+import { DEFAULT_CREDIT_REQUIREMENTS } from '../../constants';
+import { Profession } from '../../types';
+import { getColor } from '../../theme';
 
 type AnnualTargetScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'AnnualTarget'>;
 
@@ -230,7 +232,7 @@ const styles = StyleSheet.create({
   },
   selectedCard: {
     borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primary + '10',
+    backgroundColor: getColor('selectedBg'),
   },
   optionText: {
     fontSize: theme.typography.fontSize.base,

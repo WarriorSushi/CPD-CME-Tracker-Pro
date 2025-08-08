@@ -4,7 +4,9 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
+  withSpring,
   interpolate,
+  Easing,
 } from 'react-native-reanimated';
 
 export interface PressableFXProps extends Omit<PressableProps, 'style'> {
@@ -30,28 +32,39 @@ export const PressableFX: React.FC<PressableFXProps> = ({
   const pressAnimation = useSharedValue(0);
 
   const handlePressIn = (event: any) => {
-    pressAnimation.value = withTiming(1, { duration: 50 }); // Quick press
+    pressAnimation.value = withTiming(1, { 
+      duration: 100, 
+      easing: Easing.out(Easing.quad) 
+    });
     onPressIn?.(event);
   };
 
   const handlePressOut = (event: any) => {
-    pressAnimation.value = withTiming(0, { duration: pressAnimationDuration });
+    pressAnimation.value = withSpring(0, {
+      damping: 12,
+      stiffness: 200,
+      mass: 0.8,
+    });
     onPressOut?.(event);
   };
 
   const animatedStyle = useAnimatedStyle(() => {
+    // Enhanced overtravel with bounce-back
+    const travelDistance = pressTranslateY * 1.2; // 1.2× overtravel
     const translateY = interpolate(
       pressAnimation.value,
       [0, 1],
-      [0, pressTranslateY]
+      [-1, travelDistance] // Start slightly above, travel with overtravel
     );
 
+    // Shadow fades faster than movement for depth illusion
     const shadowOpacity = interpolate(
       pressAnimation.value,
-      [0, 1],
-      [1, 0]
+      [0, 0.6, 1],
+      [1, 0.3, 0]
     );
 
+    // Ledge shadow (margin) shrinks on press
     const marginBottom = interpolate(
       pressAnimation.value,
       [0, 1],
@@ -71,7 +84,7 @@ export const PressableFX: React.FC<PressableFXProps> = ({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >
-      <Animated.View style={[style, animatedStyle, pressedStyle && pressAnimation.value && pressedStyle]}>
+      <Animated.View style={[style, animatedStyle, pressedStyle && pressAnimation.value > 0 && pressedStyle]}>
         {children}
       </Animated.View>
     </Pressable>

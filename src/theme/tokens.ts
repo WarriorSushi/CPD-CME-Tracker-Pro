@@ -5,6 +5,7 @@ export const tokens = {
     primary:        'hsl(212 100% 40%)', // #0066CC
     primaryDark:    'hsl(212 100% 30%)', // #004A99
     primaryLight:   'hsl(212 60% 55%)',  // ~#3385D6
+    primaryDisabled: 'hsl(212 30% 80%)', // Reduced saturation, raised lightness
 
     // Base colors
     white:          'hsl(0 0% 100%)',    // #FFFFFF
@@ -30,6 +31,7 @@ export const tokens = {
     warningBorder:  'hsl(36 92% 50%)',   // #F59E0B
     warningText:    'hsl(26 91% 31%)',   // #92400E
     error:          'hsl(0 83% 57%)',    // #EF4444
+    errorDisabled:  'hsl(0 30% 75%)',    // Reduced saturation, raised lightness  
     info:           'hsl(217 91% 60%)',  // #3B82F6
   },
   

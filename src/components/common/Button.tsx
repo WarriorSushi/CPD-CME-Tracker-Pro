@@ -1,178 +1,248 @@
 import React from 'react';
-import { Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
-import { PressableFX } from './PressableFX';
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  ViewStyle,
+  TextStyle,
+} from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  withSpring,
+  interpolate,
+  interpolateColor,
+  Easing,
+} from 'react-native-reanimated';
 import { useColors, useTokens } from '../../theme';
+import { ButtonProps } from '../../types';
 
-export interface ButtonProps {
-  title: string;
-  onPress: () => void;
-  variant?: 'primary' | 'outline' | 'destructive';
-  size?: 'sm' | 'md' | 'lg';
-  disabled?: boolean;
-  loading?: boolean;
-  style?: ViewStyle | ViewStyle[];
-}
+const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
 export const Button: React.FC<ButtonProps> = ({
   title,
   onPress,
   variant = 'primary',
-  size = 'md',
+  size = 'medium',
   disabled = false,
   loading = false,
   style,
 }) => {
   const getColor = useColors();
   const tokens = useTokens();
+  const pressAnimation = useSharedValue(0);
 
-  // Get variant-specific styles
-  const variantStyles = getVariantStyles(variant, getColor, tokens);
-  const sizeStyles = getSizeStyles(size, tokens);
-  
-  // Get ledge height and press distance based on variant
-  const ledgeHeight = variant === 'primary' ? 5 : 2;
-  const pressTranslateY = variant === 'primary' ? 3 : 1;
+  const handlePressIn = () => {
+    if (!disabled) { // No animation for disabled buttons
+      pressAnimation.value = withTiming(1, { 
+        duration: 100, 
+        easing: Easing.out(Easing.quad) 
+      });
+    }
+  };
+
+  const handlePressOut = () => {
+    if (!disabled) { // No animation for disabled buttons
+      pressAnimation.value = withSpring(0, {
+        damping: 12,
+        stiffness: 200,
+        mass: 0.8,
+      });
+    }
+  };
+
+  // Pre-calculate colors outside animation context
+  const colors = {
+    primary: getColor('primary'),
+    primaryDark: getColor('primaryDark'),
+    primaryDisabled: getColor('primaryDisabled'),
+    gray100: getColor('gray100'),
+    gray300: getColor('gray300'),
+    gray400: getColor('gray400'),
+    error: getColor('error'),
+    errorDisabled: getColor('errorDisabled'),
+    white: getColor('white'),
+  };
+
+  // Enhanced tactile animation with color interpolation and reduced travel
+  const animatedStyle = useAnimatedStyle(() => {
+    // Skip animations entirely for disabled buttons
+    if (disabled) {
+      return {};
+    }
+    
+    const ledgeHeight = variant === 'outline' ? 5 : 5; // All buttons get 5px ledge
+    const travelDistance = ledgeHeight * 0.8; // Reduced travel distance
+    
+    // Position with bounce-back overtravel
+    const translateY = interpolate(
+      pressAnimation.value, 
+      [0, 1], 
+      [-1, travelDistance] // Start slightly above resting, travel down with overtravel
+    );
+    
+    // Ledge shadow (border-bottom) disappears on press
+    const borderBottomWidth = interpolate(pressAnimation.value, [0, 1], [ledgeHeight, 0]);
+    
+    // Shadow fades faster than movement for depth illusion
+    const shadowOpacity = interpolate(pressAnimation.value, [0, 0.6, 1], [0.1, 0.05, 0]);
+    
+    // Color interpolation based on variant
+    let backgroundColor, borderColor;
+    
+    switch (variant) {
+      case 'primary':
+        backgroundColor = interpolateColor(
+          pressAnimation.value,
+          [0, 1],
+          [colors.primary, colors.primaryDark]
+        );
+        break;
+        
+      case 'outline':
+        backgroundColor = interpolateColor(
+          pressAnimation.value,
+          [0, 1],
+          ['transparent', colors.gray100]
+        );
+        borderColor = interpolateColor(
+          pressAnimation.value,
+          [0, 1],
+          [colors.gray400, colors.gray400] // Keep darker ledge color consistent
+        );
+        break;
+        
+      case 'destructive':
+        backgroundColor = interpolateColor(
+          pressAnimation.value,
+          [0, 1],
+          [colors.error, colors.error] // TODO: Add errorDark token
+        );
+        break;
+        
+      default:
+        backgroundColor = colors.primary;
+        break;
+    }
+    
+    return {
+      borderBottomWidth,
+      transform: [{ translateY }],
+      shadowOpacity,
+      backgroundColor,
+      ...(borderColor && { borderColor }),
+    };
+  });
+
+  const getBaseStyle = (): ViewStyle => {
+    const baseStyle: ViewStyle = {
+      borderRadius: tokens.radius.small,
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 48,
+      paddingHorizontal: tokens.space[5],
+    };
+
+    // Add shadow/elevation for non-outline buttons
+    if (variant !== 'outline') {
+      baseStyle.shadowColor = '#000';
+      baseStyle.shadowOffset = { width: 0, height: 4 };
+      baseStyle.shadowRadius = 0;
+      baseStyle.elevation = 4;
+      
+      // Disabled buttons get faint flat shadow, no ledge
+      if (disabled) {
+        baseStyle.shadowOpacity = 0.05; // Faint shadow
+      } else {
+        baseStyle.shadowOpacity = 0.1; // Normal shadow
+      }
+    }
+
+    // Size variations
+    if (size === 'small') {
+      baseStyle.minHeight = 40;
+      baseStyle.paddingHorizontal = tokens.space[3];
+    } else if (size === 'large') {
+      baseStyle.minHeight = 56;
+      baseStyle.paddingHorizontal = tokens.space[6];
+    }
+
+    return baseStyle;
+  };
+
+  const getVariantStyle = (): ViewStyle & TextStyle => {
+    switch (variant) {
+      case 'outline':
+        return {
+          backgroundColor: 'transparent',
+          borderColor: disabled ? getColor('gray200') : getColor('gray300'),
+          borderWidth: 1,
+          borderBottomWidth: disabled ? 1 : 6, // Remove ledge when disabled
+          borderBottomColor: disabled ? getColor('gray200') : getColor('gray400'),
+          color: disabled ? getColor('textDisabled') : getColor('textPrimary'),
+        };
+      case 'destructive':
+        return {
+          backgroundColor: disabled ? colors.errorDisabled : colors.error,
+          borderBottomWidth: disabled ? 0 : 5, // Remove ledge when disabled
+          borderBottomColor: disabled ? 'transparent' : colors.error,
+          color: disabled ? `rgba(255, 255, 255, 0.85)` : colors.white, // 85% white opacity for disabled
+        };
+      default: // primary
+        return {
+          backgroundColor: disabled ? colors.primaryDisabled : colors.primary,
+          borderBottomWidth: disabled ? 0 : 5, // Remove ledge when disabled
+          borderBottomColor: disabled ? 'transparent' : colors.primaryDark,
+          color: disabled ? `rgba(255, 255, 255, 0.85)` : colors.white, // 85% white opacity for disabled
+        };
+    }
+  };
+
+  const baseStyle = getBaseStyle();
+  const variantStyle = getVariantStyle();
 
   const buttonStyle: ViewStyle[] = [
-    styles.base,
-    variantStyles.container,
-    sizeStyles.container,
-    disabled && styles.disabled,
+    styles.button,
+    baseStyle,
+    variantStyle,
+    // Removed disabled opacity fade - using proper disabled colors instead
     ...(Array.isArray(style) ? style : [style]).filter(Boolean),
   ];
 
-  const textStyle: TextStyle[] = [
+  const textStyle = [
     styles.text,
-    variantStyles.text,
-    sizeStyles.text,
-    disabled && styles.disabledText,
+    { color: variantStyle.color },
+    // Color is now handled in getVariantStyle for disabled state
   ];
 
   return (
-    <PressableFX
+    <AnimatedTouchableOpacity
+      style={[buttonStyle, animatedStyle]}
       onPress={disabled || loading ? undefined : onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
       disabled={disabled || loading}
-      ledgeHeight={ledgeHeight}
-      pressTranslateY={pressTranslateY}
-      style={buttonStyle}
+      activeOpacity={1}
     >
       {loading ? (
-        <ActivityIndicator 
-          size="small" 
-          color={variantStyles.text.color} 
-        />
+        <ActivityIndicator size="small" color={variantStyle.color as string} />
       ) : (
         <Text style={textStyle}>{title}</Text>
       )}
-    </PressableFX>
+    </AnimatedTouchableOpacity>
   );
 };
 
-// Helper function to get variant-specific styles
-const getVariantStyles = (variant: ButtonProps['variant'], getColor: any, tokens: any) => {
-  const variants = {
-    primary: {
-      container: {
-        backgroundColor: getColor('primary'),
-        borderWidth: 0,
-        shadowColor: getColor('primaryDark'),
-        shadowOffset: { width: 0, height: 5 },
-        shadowOpacity: 1,
-        shadowRadius: 0,
-      },
-      text: {
-        color: getColor('white'),
-        fontWeight: tokens.fontWeight.semibold,
-      },
-    },
-    outline: {
-      container: {
-        backgroundColor: getColor('white'),
-        borderWidth: 1,
-        borderColor: getColor('border'),
-        shadowColor: getColor('border'),
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 1,
-        shadowRadius: 0,
-      },
-      text: {
-        color: getColor('textPrimary'),
-        fontWeight: tokens.fontWeight.medium,
-      },
-    },
-    destructive: {
-      container: {
-        backgroundColor: getColor('white'),
-        borderWidth: 2,
-        borderColor: getColor('error'),
-        shadowColor: getColor('error'),
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.8,
-        shadowRadius: 0,
-      },
-      text: {
-        color: getColor('error'),
-        fontWeight: tokens.fontWeight.semibold,
-      },
-    },
-  };
-
-  return variants[variant || 'primary'];
-};
-
-// Helper function to get size-specific styles
-const getSizeStyles = (size: ButtonProps['size'], tokens: any) => {
-  const sizes = {
-    sm: {
-      container: {
-        paddingVertical: tokens.space[2],
-        paddingHorizontal: tokens.space[4],
-        minHeight: 36,
-      },
-      text: {
-        fontSize: tokens.fontSize.sm,
-      },
-    },
-    md: {
-      container: {
-        paddingVertical: tokens.space[3],
-        paddingHorizontal: tokens.space[5],
-        minHeight: 44,
-      },
-      text: {
-        fontSize: tokens.fontSize.base,
-      },
-    },
-    lg: {
-      container: {
-        paddingVertical: tokens.space[4],
-        paddingHorizontal: tokens.space[6],
-        minHeight: 52,
-      },
-      text: {
-        fontSize: tokens.fontSize.lg,
-      },
-    },
-  };
-
-  return sizes[size || 'md'];
-};
-
 const styles = StyleSheet.create({
-  base: {
-    borderRadius: 5, // tokens.radius.button
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
+  button: {
+    // Base button styles handled by getBaseStyle
   },
   text: {
+    fontSize: 16, // tokens.fontSize.base
+    fontWeight: '600', // tokens.fontWeight.semibold
     textAlign: 'center',
-    lineHeight: 20,
   },
-  disabled: {
-    opacity: 0.5,
-  },
-  disabledText: {
-    opacity: 0.7,
-  },
+  // Removed opacity-based disabled styling - using proper HSL colors instead
 });

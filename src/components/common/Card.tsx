@@ -23,8 +23,8 @@ export const Card: React.FC<CardProps> = ({
   const cardStyle: ViewStyle[] = [
     styles.base,
     variantStyles,
-    ...(Array.isArray(style) ? style : [style]).filter(Boolean),
-  ];
+    ...(Array.isArray(style) ? style : [style]).filter((s): s is ViewStyle => s != null),
+  ].filter((s): s is ViewStyle => s != null);
 
   return (
     <View style={cardStyle}>
@@ -81,13 +81,6 @@ const getVariantStyles = (variant: CardProps['variant'], getColor: any, tokens: 
   return variants[variant || 'base'];
 };
 
-const styles = StyleSheet.create({
-  base: {
-    borderRadius: 12, // tokens.radius.card
-    padding: 16, // tokens.space[4]
-  },
-});
-
 // Export a specialized CardTitle component for consistent title styling
 export interface CardTitleProps {
   children: React.ReactNode;
@@ -106,35 +99,27 @@ export const CardTitle: React.FC<CardTitleProps> = ({
   const titleVariants = {
     base: {
       color: getColor('textPrimary'),
-      fontWeight: tokens.fontWeight.medium,
+      fontWeight: tokens.fontWeight.medium as any,
     },
     selected: {
       color: getColor('primary'),
-      fontWeight: tokens.fontWeight.semibold,
+      fontWeight: tokens.fontWeight.semibold as any,
     },
     success: {
       color: getColor('success'),
-      fontWeight: tokens.fontWeight.semibold,
+      fontWeight: tokens.fontWeight.semibold as any,
     },
   };
 
   const titleStyle: TextStyle[] = [
     styles.title,
     titleVariants[variant],
-    ...(Array.isArray(style) ? style : [style]).filter(Boolean),
-  ];
+    ...(Array.isArray(style) ? style : [style]).filter((s): s is TextStyle => s != null),
+  ].filter((s): s is TextStyle => s != null);
 
   return <Text style={titleStyle}>{children}</Text>;
 };
 
-const titleStyles = StyleSheet.create({
-  title: {
-    fontSize: 16, // tokens.fontSize.base
-    lineHeight: 20,
-  },
-});
-
-// Merge title styles into main styles
 const styles = StyleSheet.create({
   base: {
     borderRadius: 12, // tokens.radius.card

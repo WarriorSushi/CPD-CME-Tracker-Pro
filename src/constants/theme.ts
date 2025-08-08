@@ -1,68 +1,76 @@
-// Theme constants for CME Tracker
+// LEGACY: Theme constants for CME Tracker - MIGRATE TO NEW THEME SYSTEM
+// This is maintained for backward compatibility during migration
+// TODO: Replace all imports of this with the new theme system
+
+import { tokens } from '../theme/tokens';
+import { getColor } from '../theme';
+
 export const theme = {
   colors: {
-    // Primary colors
-    primary: '#0066CC',
-    primaryDark: '#004A99',
-    primaryLight: '#3385D6',
+    // Primary colors - now using HSL tokens
+    primary: tokens.color.primary,        // 'hsl(212 100% 40%)'
+    primaryDark: tokens.color.primaryDark, // 'hsl(212 100% 30%)'
+    primaryLight: tokens.color.primaryLight, // 'hsl(212 60% 55%)'
     
     // Secondary colors
-    secondary: '#00A86B',
-    secondaryDark: '#007A4D',
-    secondaryLight: '#33BA85',
+    secondary: tokens.color.success,      // 'hsl(158 64% 52%)'
+    secondaryDark: 'hsl(158 64% 42%)',   // Darker version
+    secondaryLight: 'hsl(158 64% 62%)',  // Lighter version
     
-    // Neutral colors
-    white: '#FFFFFF',
-    black: '#000000',
+    // Base colors
+    white: tokens.color.white,           // 'hsl(0 0% 100%)'
+    black: tokens.color.black,           // 'hsl(0 0% 0%)'
+    
+    // Gray scale - using new HSL tokens
     gray: {
-      50: '#F9FAFB',
-      100: '#F3F4F6',
-      200: '#E5E7EB',
-      300: '#D1D5DB',
-      400: '#9CA3AF',
-      500: '#6B7280',
-      600: '#4B5563',
-      700: '#374151',
-      800: '#1F2937',
-      900: '#111827',
+      50: tokens.color.gray50,   // 'hsl(210 20% 98%)'
+      100: tokens.color.gray100, // 'hsl(210 20% 96%)'
+      200: tokens.color.gray200, // 'hsl(214 20% 89%)'
+      300: tokens.color.gray300, // 'hsl(216 18% 72%)'
+      400: tokens.color.gray400, // 'hsl(220 10% 62%)'
+      500: tokens.color.gray500, // 'hsl(220 9% 46%)'
+      600: tokens.color.gray600, // 'hsl(215 14% 34%)'
+      700: tokens.color.gray700, // 'hsl(215 28% 24%)'
+      800: tokens.color.gray800, // 'hsl(215 28% 14%)'
+      900: tokens.color.gray900, // 'hsl(222 47% 11%)'
     },
     
-    // Semantic colors
-    success: '#10B981',
-    warning: '#F59E0B',
-    error: '#EF4444',
-    info: '#3B82F6',
+    // Semantic colors - using new tokens
+    success: tokens.color.success,       // 'hsl(158 64% 52%)'
+    warning: tokens.color.warningBorder, // 'hsl(36 92% 50%)'
+    error: tokens.color.error,           // 'hsl(0 83% 57%)'
+    info: tokens.color.info,             // 'hsl(217 91% 60%)'
     
     // Background colors
-    background: '#FFFFFF',
-    surface: '#F9FAFB',
-    card: '#FFFFFF',
+    background: tokens.color.white,      // 'hsl(0 0% 100%)'
+    surface: tokens.color.gray50,        // 'hsl(210 20% 98%)'
+    card: tokens.color.white,            // 'hsl(0 0% 100%)'
     
     // Text colors
     text: {
-      primary: '#111827',
-      secondary: '#6B7280',
-      disabled: '#9CA3AF',
-      inverse: '#FFFFFF',
+      primary: tokens.color.gray900,     // 'hsl(222 47% 11%)'
+      secondary: tokens.color.gray500,   // 'hsl(220 9% 46%)'
+      disabled: tokens.color.gray400,    // 'hsl(220 10% 62%)'
+      inverse: tokens.color.white,       // 'hsl(0 0% 100%)'
     },
     
     // Button colors
     button: {
-      primary: '#0066CC',
-      primaryPressed: '#004A99',
-      secondary: '#F3F4F6',
-      secondaryPressed: '#E5E7EB',
-      disabled: '#E5E7EB',
-      text: '#FFFFFF',
-      textSecondary: '#374151',
-      textDisabled: '#9CA3AF',
+      primary: tokens.color.primary,        // 'hsl(212 100% 40%)'
+      primaryPressed: tokens.color.primaryDark, // 'hsl(212 100% 30%)'
+      secondary: tokens.color.gray100,      // 'hsl(210 20% 96%)'
+      secondaryPressed: tokens.color.gray200, // 'hsl(214 20% 89%)'
+      disabled: tokens.color.gray200,       // 'hsl(214 20% 89%)'
+      text: tokens.color.white,             // 'hsl(0 0% 100%)'
+      textSecondary: tokens.color.gray700,  // 'hsl(215 28% 24%)'
+      textDisabled: tokens.color.gray400,   // 'hsl(220 10% 62%)'
     },
     
     // Border colors
     border: {
-      light: '#E5E7EB',
-      medium: '#D1D5DB',
-      dark: '#9CA3AF',
+      light: tokens.color.gray200,       // 'hsl(214 20% 89%)'
+      medium: tokens.color.gray300,      // 'hsl(216 18% 72%)'
+      dark: tokens.color.gray400,        // 'hsl(220 10% 62%)'
     },
   },
   
@@ -114,8 +122,10 @@ export const theme = {
   borderRadius: {
     none: 0,
     sm: 2,
+    small: 2, // Alias for sm
     base: 5, // Standard 5px as specified
     md: 6,
+    medium: 6, // Alias for md
     lg: 8,
     xl: 12,
     full: 9999,
@@ -188,9 +198,9 @@ export const theme = {
   
   // Progress circle colors
   progress: {
-    background: '#E5E7EB',
-    fill: '#0066CC',
-    text: '#374151',
+    background: getColor('gray200'),
+    fill: getColor('primary'),
+    text: getColor('gray700'),
   },
 } as const;
 
@@ -203,11 +213,11 @@ export const getTheme = () => theme;
 export const commonStyles = {
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: getColor('white'),
     padding: 20,
   },
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: getColor('white'),
     borderRadius: 5,
     padding: 16,
     shadowColor: '#000',
@@ -227,24 +237,24 @@ export const commonStyles = {
     height: 48,
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: getColor('gray200'),
     paddingHorizontal: 16,
     fontSize: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: getColor('white'),
   },
   text: {
     primary: {
-      color: '#111827',
+      color: getColor('gray900'),
       fontSize: 16,
       fontWeight: '400',
     },
     secondary: {
-      color: '#6B7280',
+      color: getColor('gray500'),
       fontSize: 14,
       fontWeight: '400',
     },
     heading: {
-      color: '#111827',
+      color: getColor('gray900'),
       fontSize: 24,
       fontWeight: '700',
     },
