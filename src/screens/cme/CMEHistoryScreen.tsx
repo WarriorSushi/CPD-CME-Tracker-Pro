@@ -190,12 +190,15 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>CME History</Text>
-        <Button
-          title="Add Entry"
-          onPress={() => navigation.navigate('AddCME', {})}
-          size="small"
+        <TouchableOpacity 
           style={styles.addButton}
-        />
+          onPress={() => navigation.navigate('AddCME', {})}
+        >
+          <View style={styles.addButtonContent}>
+            <Text style={styles.addButtonIcon}>+</Text>
+            <Text style={styles.addButtonText}>Add Entry</Text>
+          </View>
+        </TouchableOpacity>
       </View>
 
       {/* Search and Stats */}
@@ -293,7 +296,37 @@ const styles = StyleSheet.create({
     color: theme.colors.background,
   },
   addButton: {
-    minWidth: 80,
+    backgroundColor: theme.colors.success,
+    borderRadius: theme.spacing[3],
+    paddingHorizontal: theme.spacing[4],
+    paddingVertical: theme.spacing[2],
+    shadowColor: theme.colors.success,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
+    // Button pressed effect
+    borderBottomWidth: 3,
+    borderBottomColor: theme.colors.success + 'CC',
+  },
+  addButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addButtonIcon: {
+    fontSize: 18,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.background,
+    marginRight: theme.spacing[2],
+  },
+  addButtonText: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.background,
   },
 
   // Controls

@@ -211,7 +211,7 @@ export const cmeOperations = {
         console.log('⚠️ cmeOperations.addEntry: User with ID 1 does not exist, creating default user...');
         await db.runAsync(`
           INSERT OR IGNORE INTO users (id, profession, country, credit_system, annual_requirement)
-          VALUES (1, 'Healthcare Professional', 'United States', 'Credits', 25)
+          VALUES (1, 'Healthcare Professional', 'United States', 'Credits', 50)
         `);
         console.log('✅ cmeOperations.addEntry: Default user created');
       }

@@ -133,16 +133,18 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
               <View style={styles.progressCircleContainer}>
                 <ProgressCircle 
                   progress={currentYearProgress ? currentYearProgress.percentage / 100 : 0} 
-                  size={100}
+                  size={120}
                   color={currentYearProgress ? getProgressColor(currentYearProgress.status) : theme.colors.gray.medium}
-                  strokeWidth={8}
-                >
-                  <View style={styles.progressInner}>
-                    <Text style={styles.progressPercentage}>
-                      {currentYearProgress?.percentage?.toFixed(0) || '0'}%
-                    </Text>
-                  </View>
-                </ProgressCircle>
+                  gradientColors={[
+                    currentYearProgress ? getProgressColor(currentYearProgress.status) : theme.colors.gray.medium,
+                    currentYearProgress ? getProgressColor(currentYearProgress.status) + '80' : theme.colors.gray.light
+                  ]}
+                  strokeWidth={10}
+                  showGlow={true}
+                  pulseOnComplete={true}
+                  showShadow={true}
+                  duration={1500}
+                />
               </View>
 
               <View style={styles.progressDetails}>
@@ -169,6 +171,27 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
               </View>
             </View>
           </Card>
+        </View>
+
+        {/* Large Add Entry Button */}
+        <View style={styles.addEntrySection}>
+          <TouchableOpacity 
+            style={styles.addEntryButton}
+            onPress={() => navigation.navigate('CME')}
+          >
+            <View style={styles.addEntryContent}>
+              <View style={styles.addEntryIcon}>
+                <Text style={styles.addEntryIconText}>+</Text>
+              </View>
+              <View style={styles.addEntryTextContainer}>
+                <Text style={styles.addEntryTitle}>Add New CME Entry</Text>
+                <Text style={styles.addEntrySubtitle}>Log your continuing education credits</Text>
+              </View>
+              <View style={styles.addEntryArrow}>
+                <Text style={styles.addEntryArrowText}>→</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
         </View>
 
         {/* Quick Actions */}
@@ -445,6 +468,72 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
     fontStyle: 'italic',
+  },
+
+  // Add Entry Section
+  addEntrySection: {
+    paddingHorizontal: theme.spacing[4],
+    marginBottom: theme.spacing[4],
+  },
+  addEntryButton: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.spacing[4],
+    paddingVertical: theme.spacing[5],
+    paddingHorizontal: theme.spacing[4],
+    shadowColor: theme.colors.primary,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+    // Button pressed effect preparation
+    borderWidth: 0,
+    borderBottomWidth: 5,
+    borderBottomColor: theme.colors.primary + 'DD',
+  },
+  addEntryContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  addEntryIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: theme.spacing[4],
+  },
+  addEntryIconText: {
+    fontSize: 24,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.background,
+  },
+  addEntryTextContainer: {
+    flex: 1,
+  },
+  addEntryTitle: {
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.background,
+    marginBottom: theme.spacing[1],
+  },
+  addEntrySubtitle: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.background + 'CC',
+  },
+  addEntryArrow: {
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addEntryArrowText: {
+    fontSize: 18,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.background,
   },
 
   // Quick Actions
