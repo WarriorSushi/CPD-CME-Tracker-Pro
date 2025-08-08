@@ -10,15 +10,46 @@ import {
 } from '../../types';
 import { setupDatabase } from './schema';
 
-// Database instance
+// Database instance with proper singleton pattern
 let dbInstance: SQLite.SQLiteDatabase | null = null;
+let dbInitPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
-// Get database instance
+// Get database instance with proper singleton pattern
 const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
-  if (!dbInstance) {
-    dbInstance = await setupDatabase();
+  // If instance exists, return it
+  if (dbInstance) {
+    return dbInstance;
   }
-  return dbInstance;
+  
+  // If initialization is in progress, wait for it
+  if (dbInitPromise) {
+    console.log('⏳ getDatabase: Waiting for existing database initialization...');
+    return await dbInitPromise;
+  }
+  
+  // Start new initialization
+  console.log('🔄 getDatabase: Starting new database initialization...');
+  dbInitPromise = setupDatabase();
+  
+  try {
+    dbInstance = await dbInitPromise;
+    console.log('✅ getDatabase: Database instance created successfully');
+    return dbInstance;
+  } catch (error) {
+    console.error('💥 getDatabase: Database initialization failed:', error);
+    dbInitPromise = null; // Reset promise so we can try again
+    throw error;
+  } finally {
+    dbInitPromise = null; // Clear promise after completion
+  }
+};
+
+// Reset database instance (for complete app reset)
+export const resetDatabaseInstance = (): void => {
+  console.log('🔄 resetDatabaseInstance: Clearing database instance...');
+  dbInstance = null;
+  dbInitPromise = null;
+  console.log('✅ resetDatabaseInstance: Database instance reset - will be recreated on next access');
 };
 
 // User operations
@@ -167,7 +198,33 @@ export const cmeOperations = {
   // Add new CME entry
   addEntry: async (entry: Omit<CMEEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<DatabaseOperationResult<number>> => {
     try {
+      console.log('🗃️ cmeOperations.addEntry: Starting database operation...');
       const db = await getDatabase();
+      console.log('🗃️ cmeOperations.addEntry: Database connection established');
+      
+      // First, ensure user exists
+      console.log('👤 cmeOperations.addEntry: Checking if user exists...');
+      const userCheck = await db.getFirstAsync('SELECT id FROM users WHERE id = 1');
+      console.log('👤 cmeOperations.addEntry: User check result:', userCheck);
+      
+      if (!userCheck) {
+        console.log('⚠️ cmeOperations.addEntry: User with ID 1 does not exist, creating default user...');
+        await db.runAsync(`
+          INSERT OR IGNORE INTO users (id, profession, country, credit_system, annual_requirement)
+          VALUES (1, 'Healthcare Professional', 'United States', 'Credits', 25)
+        `);
+        console.log('✅ cmeOperations.addEntry: Default user created');
+      }
+      
+      console.log('📝 cmeOperations.addEntry: Preparing to insert CME entry with data:', {
+        title: entry.title,
+        provider: entry.provider,
+        dateAttended: entry.dateAttended,
+        creditsEarned: entry.creditsEarned,
+        category: entry.category,
+        notes: entry.notes || null,
+        certificatePath: entry.certificatePath || null,
+      });
       
       const result = await db.runAsync(`
         INSERT INTO cme_entries (
@@ -184,11 +241,14 @@ export const cmeOperations = {
         entry.certificatePath || null,
       ]);
       
+      console.log('✅ cmeOperations.addEntry: Insert successful, lastInsertRowId:', result.lastInsertRowId);
+      
       return {
         success: true,
         data: result.lastInsertRowId,
       };
     } catch (error) {
+      console.error('💥 cmeOperations.addEntry: Database error occurred:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to add CME entry',
@@ -548,19 +608,93 @@ export const settingsOperations = {
 
   // Set setting
   setSetting: async (key: string, value: string): Promise<DatabaseOperationResult> => {
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    while (retryCount < maxRetries) {
+      try {
+        console.log(`⚙️ settingsOperations.setSetting: Attempt ${retryCount + 1} - Starting with key:`, key, 'value:', value);
+        const db = await getDatabase();
+        console.log('⚙️ settingsOperations.setSetting: Database connection established');
+        
+        // First, ensure the app_settings table exists
+        await db.execAsync(`
+          CREATE TABLE IF NOT EXISTS app_settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+          )
+        `);
+        console.log('✅ settingsOperations.setSetting: Table ensured to exist');
+        
+        // Use execAsync for more reliable execution
+        await db.execAsync(`
+          INSERT OR REPLACE INTO app_settings (key, value) 
+          VALUES ('${key}', '${value}')
+        `);
+        
+        console.log('✅ settingsOperations.setSetting: Setting saved successfully');
+        return { success: true };
+        
+      } catch (error) {
+        retryCount++;
+        console.error(`💥 settingsOperations.setSetting: Attempt ${retryCount} failed:`, error);
+        
+        if (retryCount >= maxRetries) {
+          console.error('💥 settingsOperations.setSetting: Max retries reached, giving up');
+          return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Failed to set setting after retries',
+          };
+        }
+        
+        // Wait a bit before retrying
+        console.log(`⏳ settingsOperations.setSetting: Waiting before retry ${retryCount + 1}...`);
+        await new Promise(resolve => setTimeout(resolve, 100 * retryCount));
+      }
+    }
+    
+    return { success: false, error: 'Unexpected error in setSetting' };
+  },
+
+  // Complete app reset - wipe all data and reset database
+  resetAllData: async (): Promise<DatabaseOperationResult> => {
     try {
+      console.log('🧹 settingsOperations.resetAllData: Starting complete app reset...');
       const db = await getDatabase();
+      console.log('🧹 settingsOperations.resetAllData: Database connection established');
       
-      await db.runAsync(`
-        INSERT OR REPLACE INTO app_settings (key, value) 
-        VALUES (?, ?)
-      `, [key, value]);
+      // Delete all data from all tables
+      await db.runAsync('DELETE FROM cme_entries');
+      console.log('✅ settingsOperations.resetAllData: CME entries cleared');
       
+      await db.runAsync('DELETE FROM certificates');
+      console.log('✅ settingsOperations.resetAllData: Certificates cleared');
+      
+      await db.runAsync('DELETE FROM license_renewals');
+      console.log('✅ settingsOperations.resetAllData: License renewals cleared');
+      
+      await db.runAsync('DELETE FROM users');
+      console.log('✅ settingsOperations.resetAllData: Users cleared');
+      
+      await db.runAsync('DELETE FROM app_settings');
+      console.log('✅ settingsOperations.resetAllData: App settings cleared');
+      
+      // Reset database version to 0 to force recreation of tables and data
+      console.log('🔄 settingsOperations.resetAllData: Resetting database version...');
+      await db.execAsync('PRAGMA user_version = 0');
+      
+      // Reset the database instance so it gets recreated properly on next access
+      console.log('🔄 settingsOperations.resetAllData: Resetting database instance...');
+      resetDatabaseInstance();
+      
+      console.log('🎉 settingsOperations.resetAllData: Complete app reset successful');
       return { success: true };
     } catch (error) {
+      console.error('💥 settingsOperations.resetAllData: Error occurred:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to set setting',
+        error: error instanceof Error ? error.message : 'Failed to reset app data',
       };
     }
   },

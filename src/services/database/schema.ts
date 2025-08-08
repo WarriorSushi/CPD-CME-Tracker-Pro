@@ -226,19 +226,48 @@ export const setDatabaseVersion = async (
 // Initialize and migrate database
 export const setupDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
   try {
+    console.log('🗃️ setupDatabase: Initializing database...');
     const db = await initializeDatabase();
     
     const currentVersion = await getDatabaseVersion(db);
     const targetVersion = APP_CONFIG.DATABASE_VERSION;
+    console.log(`🗃️ setupDatabase: Current version: ${currentVersion}, Target version: ${targetVersion}`);
     
     if (currentVersion < targetVersion) {
+      console.log('🗃️ setupDatabase: Running migration...');
       await migrateDatabase(db, currentVersion, targetVersion);
       await setDatabaseVersion(db, targetVersion);
     }
     
+    // Always ensure tables exist (safety mechanism)
+    console.log('🗃️ setupDatabase: Verifying tables exist...');
+    await ensureTablesExist(db);
+    
+    console.log('✅ setupDatabase: Database setup complete');
     return db;
   } catch (error) {
-    console.error('Error setting up database:', error);
+    console.error('💥 setupDatabase: Error setting up database:', error);
     throw error;
+  }
+};
+
+// Safety mechanism to ensure all tables exist
+const ensureTablesExist = async (db: SQLite.SQLiteDatabase): Promise<void> => {
+  try {
+    // Check if app_settings table exists
+    const tableCheck = await db.getFirstAsync<{ name: string }>(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='app_settings'"
+    );
+    
+    if (!tableCheck) {
+      console.log('⚠️ ensureTablesExist: Tables missing, creating them...');
+      await createTables(db);
+    } else {
+      console.log('✅ ensureTablesExist: All tables exist');
+    }
+  } catch (error) {
+    console.error('💥 ensureTablesExist: Error checking tables:', error);
+    // If there's any error, try to create tables anyway
+    await createTables(db);
   }
 };

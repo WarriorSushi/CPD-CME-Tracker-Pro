@@ -5,9 +5,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../constants/theme';
 import { MainTabParamList } from '../types/navigation';
 
-// Import screens (we'll create these next)
+// Import screens and navigators
 import { DashboardScreen } from '../screens/dashboard/DashboardScreen';
-import { CMEHistoryScreen } from '../screens/cme/CMEHistoryScreen';
+import { CMENavigator } from './CMENavigator';
 import { CertificateVaultScreen } from '../screens/vault/CertificateVaultScreen';
 import { SettingsScreen } from '../screens/settings/SettingsScreen';
 
@@ -25,24 +25,32 @@ export const MainTabNavigator: React.FC = () => {
           backgroundColor: theme.colors.background,
           borderTopColor: theme.colors.border.light,
           borderTopWidth: 1,
+          height: 60 + insets.bottom, // Fixed height + safe area
           paddingTop: theme.spacing[2],
-          paddingBottom: insets.bottom,
+          paddingBottom: Math.max(insets.bottom, theme.spacing[2]), // Ensure minimum padding
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
           elevation: 8,
           shadowColor: theme.colors.text.primary,
           shadowOffset: { width: 0, height: -2 },
           shadowOpacity: 0.1,
           shadowRadius: 4,
+          position: 'absolute', // Ensure it stays at bottom
+          bottom: 0,
+          left: 0,
+          right: 0,
+        },
+        tabBarItemStyle: {
+          paddingVertical: theme.spacing[1],
         },
         tabBarLabelStyle: {
           fontSize: theme.typography.fontSize.xs,
           fontWeight: theme.typography.fontWeight.medium,
           marginTop: theme.spacing[1],
+          marginBottom: theme.spacing[1],
         },
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.text.secondary,
-        tabBarItemStyle: {
-          paddingVertical: theme.spacing[1],
-        },
       })}
     >
       <Tab.Screen
@@ -57,7 +65,7 @@ export const MainTabNavigator: React.FC = () => {
       />
       <Tab.Screen
         name="CME"
-        component={CMEHistoryScreen}
+        component={CMENavigator}
         options={{
           tabBarLabel: 'CME History',
           tabBarIcon: ({ color, size }) => (

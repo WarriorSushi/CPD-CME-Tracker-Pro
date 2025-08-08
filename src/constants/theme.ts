@@ -33,6 +33,9 @@ export const theme = {
       700: tokens.color.gray700, // 'hsl(215 28% 24%)'
       800: tokens.color.gray800, // 'hsl(215 28% 14%)'
       900: tokens.color.gray900, // 'hsl(222 47% 11%)'
+      light: tokens.color.gray100, // Alias for common usage
+      medium: tokens.color.gray400, // Alias for common usage
+      dark: tokens.color.gray600,   // Alias for common usage
     },
     
     // Semantic colors - using new tokens

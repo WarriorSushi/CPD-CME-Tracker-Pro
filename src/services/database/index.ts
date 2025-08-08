@@ -16,4 +16,5 @@ export {
   licenseOperations,
   settingsOperations,
   userOperations,
+  resetDatabaseInstance,
 } from './operations';
