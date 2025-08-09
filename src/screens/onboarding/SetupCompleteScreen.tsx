@@ -53,7 +53,7 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
         <Text style={styles.icon}>🎉</Text>
         <Text style={styles.title}>You're all set!</Text>
         <Text style={styles.subtitle}>
-          Your CME Tracker is now configured and ready to help you stay compliant with your continuing education requirements.
+          Your CPD/CME Tracker is now configured and ready to help you stay compliant with your continuing education requirements.
         </Text>
         
         <View style={styles.nextSteps}>
@@ -67,7 +67,7 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
       
       <View style={styles.actions}>
         <Button
-          title="Start Using CME Tracker"
+          title="Start Using CPD/CME Tracker"
           onPress={handleStartUsingApp}
           loading={isLoading}
           style={styles.primaryButton}

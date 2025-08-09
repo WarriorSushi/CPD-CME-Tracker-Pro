@@ -3,7 +3,7 @@ export * from './theme';
 
 // App configuration constants
 export const APP_CONFIG = {
-  NAME: 'CME Tracker',
+  NAME: 'CPD/CME Tracker',
   VERSION: '1.0.0',
   DATABASE_VERSION: 1,
   DATABASE_NAME: 'cme_tracker.db',

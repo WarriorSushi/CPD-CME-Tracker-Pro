@@ -24,52 +24,54 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>Welcome to</Text>
-          <Text style={styles.appName}>CME Tracker</Text>
+          <Text style={styles.appName}>CPD/CME Tracker</Text>
           <Text style={styles.subtitle}>
             Your secure, offline continuing education companion
           </Text>
         </View>
 
         {/* Key Features Section */}
-        <Card style={styles.featuresCard}>
+        <View style={styles.featuresSection}>
           <Text style={styles.sectionTitle}>✨ Key Features</Text>
+          
           <View style={styles.featuresGrid}>
-            <View style={styles.featureItem}>
+            <Card style={styles.featureCard}>
               <Text style={styles.featureIcon}>📊</Text>
-              <Text style={styles.featureText}>Track Progress</Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Text style={styles.featureIcon}>📷</Text>
-              <Text style={styles.featureText}>Smart Scanner</Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Text style={styles.featureIcon}>🗂️</Text>
-              <Text style={styles.featureText}>Digital Vault</Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Text style={styles.featureIcon}>⏰</Text>
-              <Text style={styles.featureText}>Smart Reminders</Text>
-            </View>
-          </View>
-        </Card>
+              <Text style={styles.featureHeading}>Track Your Progress</Text>
+              <Text style={styles.featureSubtext}>Visual progress tracking with circular charts showing your completion percentage and time remaining</Text>
+            </Card>
 
-        {/* Privacy Section */}
-        <Card style={styles.privacyCard}>
-          <View style={styles.privacyHeader}>
-            <Text style={styles.privacyIcon}>🔒</Text>
-            <Text style={styles.sectionTitle}>Your Privacy is Protected</Text>
+            <Card style={styles.featureCard}>
+              <Text style={styles.featureIcon}>📷</Text>
+              <Text style={styles.featureHeading}>Smart Certificate Scanner</Text>
+              <Text style={styles.featureSubtext}>Automatically extract CME data from certificates using advanced OCR technology</Text>
+            </Card>
+
+            <Card style={styles.featureCard}>
+              <Text style={styles.featureIcon}>🗂️</Text>
+              <Text style={styles.featureHeading}>Secure Digital Vault</Text>
+              <Text style={styles.featureSubtext}>Store and organize all your certificates with encrypted, searchable storage</Text>
+            </Card>
+
+            <Card style={styles.featureCard}>
+              <Text style={styles.featureIcon}>⏰</Text>
+              <Text style={styles.featureHeading}>Smart Renewal Reminders</Text>
+              <Text style={styles.featureSubtext}>Never miss license renewals with customizable notifications and deadline tracking</Text>
+            </Card>
+
+            <Card style={styles.featureCard}>
+              <Text style={styles.featureIcon}>🔒</Text>
+              <Text style={styles.featureHeading}>100% Private & Offline</Text>
+              <Text style={styles.featureSubtext}>All your data stays on your device - no cloud storage, no data collection</Text>
+            </Card>
+
+            <Card style={styles.featureCard}>
+              <Text style={styles.featureIcon}>📤</Text>
+              <Text style={styles.featureHeading}>Export Your Data</Text>
+              <Text style={styles.featureSubtext}>Generate professional reports and export to CSV for compliance audits</Text>
+            </Card>
           </View>
-          <View style={styles.privacyGrid}>
-            <View style={styles.privacyItem}>
-              <Text style={styles.privacyFeatureIcon}>📱</Text>
-              <Text style={styles.privacyText}>100% Offline - Data never leaves your device</Text>
-            </View>
-            <View style={styles.privacyItem}>
-              <Text style={styles.privacyFeatureIcon}>🔐</Text>
-              <Text style={styles.privacyText}>Encrypted storage - Your data is secure</Text>
-            </View>
-          </View>
-        </Card>
+        </View>
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
@@ -106,33 +108,32 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[3],
   },
   title: {
-    fontSize: theme.typography.fontSize.base,
+    fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
     textAlign: 'center',
     marginBottom: theme.spacing[1],
   },
   appName: {
-    fontSize: theme.typography.fontSize.xl,
+    fontSize: theme.typography.fontSize.xxxxl,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.primary,
     textAlign: 'center',
-    marginBottom: theme.spacing[2],
+    marginBottom: theme.spacing[3],
   },
   subtitle: {
-    fontSize: theme.typography.fontSize.sm,
+    fontSize: theme.typography.fontSize.xs,
     color: theme.colors.text.secondary,
     textAlign: 'center',
     lineHeight: 16,
   },
   
   // Features section
-  featuresCard: {
-    marginBottom: theme.spacing[3],
-    padding: theme.spacing[3],
+  featuresSection: {
+    marginBottom: theme.spacing[2],
   },
   sectionTitle: {
     fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.semibold,
+    fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
     textAlign: 'center',
     marginBottom: theme.spacing[3],
@@ -142,55 +143,38 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  featureItem: {
+  featureCard: {
     width: '48%',
-    alignItems: 'center',
     marginBottom: theme.spacing[2],
+    alignItems: 'center',
+    padding: theme.spacing[3],
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   featureIcon: {
-    fontSize: 18,
+    fontSize: 24,
     marginBottom: theme.spacing[1],
   },
-  featureText: {
-    fontSize: 10,
-    fontWeight: theme.typography.fontWeight.medium,
+  featureHeading: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
+    marginBottom: theme.spacing[1],
     textAlign: 'center',
   },
-  
-  // Privacy section
-  privacyCard: {
-    marginBottom: theme.spacing[3],
-    padding: theme.spacing[3],
-    backgroundColor: theme.colors.surface,
-    borderLeftWidth: 3,
-    borderLeftColor: theme.colors.primary,
-  },
-  privacyHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: theme.spacing[3],
-  },
-  privacyIcon: {
-    fontSize: 16,
-    marginRight: theme.spacing[2],
-  },
-  privacyGrid: {
-    gap: theme.spacing[2],
-  },
-  privacyItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  privacyFeatureIcon: {
-    fontSize: 14,
-    marginRight: theme.spacing[2],
-  },
-  privacyText: {
-    fontSize: 10,
-    color: theme.colors.text.primary,
-    flex: 1,
+  featureSubtext: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.secondary,
+    lineHeight: 14,
+    textAlign: 'center',
   },
   
   footer: {
@@ -198,17 +182,17 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing[1],
   },
   footerText: {
-    fontSize: 9,
+    fontSize: theme.typography.fontSize.xs,
     color: theme.colors.text.secondary,
     textAlign: 'center',
     fontStyle: 'italic',
-    lineHeight: 12,
+    lineHeight: 14,
   },
   actions: {
     padding: theme.spacing[3],
     paddingTop: theme.spacing[2],
   },
   primaryButton: {
-    marginBottom: theme.spacing[1],
+    marginBottom: theme.spacing[2],
   },
 });

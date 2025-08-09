@@ -17,7 +17,7 @@ export const DesignSystemDemo: React.FC = () => {
           {/* Header */}
           <View style={styles.header}>
             <Text style={[styles.title, { color: getColor('textPrimary') }]}>
-              CME Tracker Design System
+              CPD/CME Tracker Design System
             </Text>
             <Text style={[styles.subtitle, { color: getColor('textSecondary') }]}>
               Improved contrast, interactive states, and tactile feedback
