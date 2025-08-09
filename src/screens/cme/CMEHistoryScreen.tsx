@@ -278,8 +278,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: theme.spacing[5],
-    paddingVertical: theme.spacing[4],
-    backgroundColor: theme.colors.primary,
+    paddingVertical: theme.spacing[5],
+    backgroundColor: '#1e3a8a', // Dark blue
     borderBottomLeftRadius: theme.spacing[6],
     borderBottomRightRadius: theme.spacing[6],
     shadowColor: '#000',
@@ -287,9 +287,9 @@ const styles = StyleSheet.create({
       width: 0,
       height: 4,
     },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
-    elevation: 8,
+    elevation: 10,
   },
   title: {
     fontSize: theme.typography.fontSize.xl,

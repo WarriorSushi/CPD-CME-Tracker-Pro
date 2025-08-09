@@ -45,9 +45,7 @@ export const getCreditTerminology = (creditSystem: CreditSystem) => {
 
 // Helper functions for common use cases
 export const getCreditUnit = (creditSystem: CreditSystem): string => {
-  const terminology = getCreditTerminology(creditSystem);
-  console.log('🎯 getCreditUnit: creditSystem =', creditSystem, '→ unit =', terminology.unit);
-  return terminology.unit;
+  return getCreditTerminology(creditSystem).unit;
 };
 
 export const getCreditSingular = (creditSystem: CreditSystem): string => {

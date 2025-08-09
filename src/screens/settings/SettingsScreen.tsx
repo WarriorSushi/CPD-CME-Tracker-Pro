@@ -521,14 +521,22 @@ const styles = StyleSheet.create({
   
   // Beautiful Header
   header: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: '#003087', // HSL(215°, 100%, 26%)
     paddingHorizontal: theme.spacing[5],
-    paddingVertical: theme.spacing[6],
+    paddingVertical: theme.spacing[5],
     borderBottomLeftRadius: theme.spacing[6],
     borderBottomRightRadius: theme.spacing[6],
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 10,
   },
   headerTitle: {
-    fontSize: theme.typography.fontSize.xxl,
+    fontSize: theme.typography.fontSize.xl,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.background,
     marginBottom: theme.spacing[1],

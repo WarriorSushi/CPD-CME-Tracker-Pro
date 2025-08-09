@@ -31,11 +31,6 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     refreshAllData,
   } = useAppContext();
 
-  // Debug logging
-  React.useEffect(() => {
-    console.log('📊 Dashboard: User data changed:', user);
-    console.log('🎯 Dashboard: Credit system:', user?.creditSystem);
-  }, [user]);
 
   const [refreshing, setRefreshing] = React.useState(false);
 
@@ -142,21 +137,16 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                   }
                 </Text>
               </View>
-              <View style={styles.progressBadge}>
-                <Text style={styles.progressBadgeText}>
-                  {currentYearProgress ? getStatusIcon(currentYearProgress.status) : '🎯'}
-                </Text>
-              </View>
             </View>
 
             <View style={styles.progressMainContent}>
               <View style={styles.progressCircleContainer}>
                 <SimpleProgressRing 
                   progress={currentYearProgress ? currentYearProgress.percentage / 100 : 0} 
-                  size={160}
+                  size={140}
                   color={currentYearProgress ? getProgressColor(currentYearProgress.status) : theme.colors.gray.medium}
                   backgroundColor={theme.colors.gray.light + '60'}
-                  strokeWidth={12}
+                  strokeWidth={10}
                   duration={2000}
                 />
               </View>
@@ -219,25 +209,13 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           </Card>
         </View>
 
-        {/* Large Add Entry Button */}
+        {/* Add Entry Button */}
         <View style={styles.addEntrySection}>
-          <TouchableOpacity 
-            style={styles.addEntryButton}
+          <Button
+            title="+ Add New Entry"
             onPress={() => navigation.navigate('CME', { screen: 'AddCME', params: { editEntry: undefined } })}
-          >
-            <View style={styles.addEntryContent}>
-              <View style={styles.addEntryIcon}>
-                <Text style={styles.addEntryIconText}>+</Text>
-              </View>
-              <View style={styles.addEntryTextContainer}>
-                <Text style={styles.addEntryTitle}>Add New Entry</Text>
-                <Text style={styles.addEntrySubtitle}>Log your continuing education {user?.creditSystem ? getCreditUnit(user.creditSystem).toLowerCase() : 'credits'}</Text>
-              </View>
-              <View style={styles.addEntryArrow}>
-                <Text style={styles.addEntryArrowText}>→</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
+            style={styles.addEntryButton}
+          />
         </View>
 
         {/* Quick Actions */}
@@ -384,9 +362,9 @@ const styles = StyleSheet.create({
 
   // Header
   header: {
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: theme.spacing[4],
-    paddingVertical: theme.spacing[4],
+    backgroundColor: '#003087', // HSL(215°, 100%, 26%)
+    paddingHorizontal: theme.spacing[5],
+    paddingVertical: theme.spacing[5],
     borderBottomLeftRadius: theme.spacing[6],
     borderBottomRightRadius: theme.spacing[6],
     shadowColor: '#000',
@@ -394,9 +372,9 @@ const styles = StyleSheet.create({
       width: 0,
       height: 4,
     },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
-    elevation: 8,
+    elevation: 10,
   },
   headerContent: {
     flexDirection: 'row',
@@ -434,60 +412,48 @@ const styles = StyleSheet.create({
   // Enhanced Progress Section
   progressSection: {
     paddingHorizontal: theme.spacing[4],
-    paddingTop: theme.spacing[4],
+    paddingTop: theme.spacing[3],
   },
   progressCard: {
-    paddingVertical: theme.spacing[6],
-    paddingHorizontal: theme.spacing[5],
-    marginBottom: theme.spacing[4],
+    paddingVertical: theme.spacing[2],
+    paddingHorizontal: theme.spacing[3],
+    marginBottom: theme.spacing[2],
     backgroundColor: theme.colors.background,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 6,
+      height: 2,
     },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 10,
-    borderRadius: theme.spacing[5],
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 4,
+    borderRadius: theme.spacing[3],
   },
   progressHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: theme.spacing[5],
+    marginBottom: theme.spacing[3],
   },
   progressTitleContainer: {
-    flex: 1,
+    alignItems: 'center',
   },
   progressMainTitle: {
     fontSize: theme.typography.fontSize.xl,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
     marginBottom: theme.spacing[1],
+    textAlign: 'center',
   },
   progressSubtitle: {
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
     fontWeight: theme.typography.fontWeight.medium,
-  },
-  progressBadge: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: theme.colors.gray.light,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  progressBadgeText: {
-    fontSize: 24,
+    textAlign: 'center',
   },
   progressMainContent: {
     alignItems: 'center',
-    marginBottom: theme.spacing[5],
+    marginBottom: theme.spacing[3],
   },
   progressCircleContainer: {
-    marginBottom: theme.spacing[5],
+    marginBottom: theme.spacing[3],
   },
   progressStats: {
     flexDirection: 'row',
@@ -521,7 +487,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: theme.spacing[4],
+    paddingTop: theme.spacing[3],
     borderTopWidth: 1,
     borderTopColor: theme.colors.border.light,
   },
@@ -562,60 +528,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[4],
   },
   addEntryButton: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.spacing[4],
-    paddingVertical: theme.spacing[5],
-    paddingHorizontal: theme.spacing[4],
-    shadowColor: theme.colors.primary,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  addEntryContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  addEntryIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: theme.spacing[4],
-  },
-  addEntryIconText: {
-    fontSize: 24,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.background,
-  },
-  addEntryTextContainer: {
-    flex: 1,
-  },
-  addEntryTitle: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.background,
-    marginBottom: theme.spacing[1],
-  },
-  addEntrySubtitle: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.background + 'CC',
-  },
-  addEntryArrow: {
-    width: 30,
-    height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  addEntryArrowText: {
-    fontSize: 18,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.background,
+    // Custom styling for the button if needed
   },
 
   // Quick Actions

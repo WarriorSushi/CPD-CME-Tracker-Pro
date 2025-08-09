@@ -46,7 +46,7 @@ interface FormErrors {
 
 export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
-  const { addCMEEntry, updateCMEEntry } = useAppContext();
+  const { user, addCMEEntry, updateCMEEntry } = useAppContext();
   
   const editEntry = route.params?.editEntry;
   const isEditing = !!editEntry;
