@@ -23,12 +23,15 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   const {
     user,
     currentYearProgress,
-    cmeEntries,
+    recentCMEEntries,
     licenses,
+    isInitializing,
     isLoadingUser,
     isLoadingCME,
     isLoadingLicenses,
+    error,
     refreshAllData,
+    clearError,
   } = useAppContext();
 
 
@@ -90,14 +93,33 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     }).sort((a, b) => new Date(a.expirationDate).getTime() - new Date(b.expirationDate).getTime());
   };
 
-  const recentEntries = cmeEntries.slice(0, 2);
+  const recentEntries = recentCMEEntries.slice(0, 2);
   const upcomingRenewals = getUpcomingRenewals().slice(0, 2);
 
-  if (isLoadingUser) {
+  if (isInitializing || isLoadingUser) {
     return (
       <View style={[styles.container, styles.centerContent]}>
         <LoadingSpinner size={40} />
-        <Text style={styles.loadingText}>Loading your data...</Text>
+        <Text style={styles.loadingText}>
+          {isInitializing ? 'Initializing app...' : 'Loading your data...'}
+        </Text>
+      </View>
+    );
+  }
+  
+  // Show error state if there's an error
+  if (error && !user) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <Text style={styles.errorText}>⚠️ {error}</Text>
+        <Button
+          title="Retry"
+          onPress={() => {
+            clearError();
+            refreshAllData();
+          }}
+          style={styles.retryButton}
+        />
       </View>
     );
   }
@@ -699,6 +721,18 @@ const styles = StyleSheet.create({
   },
   renewalDaysUrgent: {
     color: theme.colors.background,
+  },
+
+  // Error handling styles
+  errorText: {
+    fontSize: theme.typography.fontSize.md,
+    color: theme.colors.error,
+    textAlign: 'center',
+    marginBottom: theme.spacing[4],
+    paddingHorizontal: theme.spacing[4],
+  },
+  retryButton: {
+    minWidth: 120,
   },
 
   // Bottom spacer for tab bar

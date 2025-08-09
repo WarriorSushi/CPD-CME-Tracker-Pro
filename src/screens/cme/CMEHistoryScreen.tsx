@@ -28,16 +28,20 @@ interface Props {
 export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { 
-    cmeEntries, 
+    recentCMEEntries,
     isLoadingCME, 
     refreshCMEData,
     deleteCMEEntry,
+    loadAllCMEEntries,
     user 
   } = useAppContext();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [allEntries, setAllEntries] = useState<CMEEntry[]>([]);
+  const [isLoadingAll, setIsLoadingAll] = useState(false);
+  const [showAllEntries, setShowAllEntries] = useState(false);
 
   // Refresh data when screen comes into focus
   useFocusEffect(
@@ -49,11 +53,36 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await refreshCMEData();
+    // If showing all entries, refresh them too
+    if (showAllEntries) {
+      const freshEntries = await loadAllCMEEntries();
+      setAllEntries(freshEntries);
+    }
     setRefreshing(false);
-  }, [refreshCMEData]);
+  }, [refreshCMEData, showAllEntries, loadAllCMEEntries]);
 
+  // Load all entries when user wants to see more
+  const handleLoadAllEntries = useCallback(async () => {
+    if (isLoadingAll) return;
+    
+    setIsLoadingAll(true);
+    try {
+      const entries = await loadAllCMEEntries();
+      setAllEntries(entries);
+      setShowAllEntries(true);
+    } catch (error) {
+      console.error('Error loading all entries:', error);
+      Alert.alert('Error', 'Failed to load all entries. Please try again.');
+    } finally {
+      setIsLoadingAll(false);
+    }
+  }, [loadAllCMEEntries, isLoadingAll]);
+
+  // Use appropriate entries based on whether we've loaded all
+  const entriesToFilter = showAllEntries ? allEntries : recentCMEEntries;
+  
   // Filter entries based on search and year
-  const filteredEntries = cmeEntries.filter(entry => {
+  const filteredEntries = entriesToFilter.filter(entry => {
     const matchesSearch = !searchQuery || 
       entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       entry.provider.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -64,12 +93,15 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
 
     return matchesSearch && matchesYear;
   });
+  
+  // Check if we need to show "Load More" button
+  const canLoadMore = !showAllEntries && recentCMEEntries.length > 0;
 
   // Calculate total credits for filtered entries
   const totalCredits = filteredEntries.reduce((sum, entry) => sum + entry.creditsEarned, 0);
 
-  // Get available years
-  const availableYears = [...new Set(cmeEntries.map(entry => 
+  // Get available years from entries we have loaded
+  const availableYears = [...new Set(entriesToFilter.map(entry => 
     new Date(entry.dateAttended).getFullYear()
   ))].sort((a, b) => b - a);
 
@@ -260,6 +292,22 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
           ListEmptyComponent={renderEmptyState}
+          ListFooterComponent={() => 
+            canLoadMore ? (
+              <View style={styles.loadMoreContainer}>
+                <Button
+                  title={isLoadingAll ? "Loading..." : "Load All Entries"}
+                  onPress={handleLoadAllEntries}
+                  disabled={isLoadingAll}
+                  variant="outline"
+                  style={styles.loadMoreButton}
+                />
+                <Text style={styles.loadMoreText}>
+                  Showing recent entries. Tap to load complete history.
+                </Text>
+              </View>
+            ) : null
+          }
         />
       )}
     </View>
@@ -533,5 +581,21 @@ const styles = StyleSheet.create({
   },
   emptyButton: {
     minWidth: 150,
+  },
+
+  // Load more styles
+  loadMoreContainer: {
+    alignItems: 'center',
+    padding: theme.spacing[4],
+    marginTop: theme.spacing[2],
+  },
+  loadMoreButton: {
+    minWidth: 200,
+    marginBottom: theme.spacing[2],
+  },
+  loadMoreText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
   },
 });

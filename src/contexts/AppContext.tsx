@@ -13,22 +13,26 @@ interface AppContextType {
   // User data
   user: User | null;
   
-  // CME data
-  cmeEntries: CMEEntry[];
+  // CME data (lazy loaded)
+  recentCMEEntries: CMEEntry[]; // Last 10 entries for quick access
   totalCredits: number;
   currentYearProgress: Progress | null;
   
-  // Certificates
+  // Certificates (lazy loaded)
   certificates: Certificate[];
   
   // Licenses
   licenses: LicenseRenewal[];
   
-  // Loading states
+  // Enhanced loading states
+  isInitializing: boolean; // First-time app setup
   isLoadingUser: boolean;
   isLoadingCME: boolean;
   isLoadingCertificates: boolean;
   isLoadingLicenses: boolean;
+  
+  // Error states
+  error: string | null;
   
   // Actions
   refreshUserData: () => Promise<void>;
@@ -36,6 +40,10 @@ interface AppContextType {
   refreshCertificates: () => Promise<void>;
   refreshLicenses: () => Promise<void>;
   refreshAllData: () => Promise<void>;
+  
+  // Lazy loading actions
+  loadAllCMEEntries: () => Promise<CMEEntry[]>;
+  clearError: () => void;
   
   // CME actions
   addCMEEntry: (entry: Omit<CMEEntry, 'id' | 'createdAt' | 'updatedAt'>) => Promise<boolean>;
@@ -60,17 +68,26 @@ interface AppProviderProps {
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // State
   const [user, setUser] = useState<User | null>(null);
-  const [cmeEntries, setCMEEntries] = useState<CMEEntry[]>([]);
+  const [recentCMEEntries, setRecentCMEEntries] = useState<CMEEntry[]>([]);
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [currentYearProgress, setCurrentYearProgress] = useState<Progress | null>(null);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [licenses, setLicenses] = useState<LicenseRenewal[]>([]);
   
-  // Loading states
-  const [isLoadingUser, setIsLoadingUser] = useState(true);
-  const [isLoadingCME, setIsLoadingCME] = useState(true);
-  const [isLoadingCertificates, setIsLoadingCertificates] = useState(true);
-  const [isLoadingLicenses, setIsLoadingLicenses] = useState(true);
+  // Enhanced loading states
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [isLoadingUser, setIsLoadingUser] = useState(false);
+  const [isLoadingCME, setIsLoadingCME] = useState(false);
+  const [isLoadingCertificates, setIsLoadingCertificates] = useState(false);
+  const [isLoadingLicenses, setIsLoadingLicenses] = useState(false);
+  
+  // Error state
+  const [error, setError] = useState<string | null>(null);
+  
+  // Clear error function
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
 
   // Calculate progress based on current data and user's requirement period
   const calculateProgress = (user: User, totalCredits: number): Progress => {
@@ -146,18 +163,24 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const refreshCMEData = useCallback(async (): Promise<void> => {
     try {
       setIsLoadingCME(true);
+      clearError();
       
       // Get current user to determine cycle dates
       const userResult = await databaseOperations.user.getCurrentUser();
       const userData = userResult.success ? userResult.data : null;
       
+      if (!userData) {
+        console.log('⚠️ AppContext: No user data, skipping CME refresh');
+        return;
+      }
+      
       let startDate: string;
       let endDate: string;
       
-      if (userData?.cycleStartDate && userData?.cycleEndDate) {
+      if (userData.cycleStartDate && userData.cycleEndDate) {
         startDate = userData.cycleStartDate;
         endDate = userData.cycleEndDate;
-      } else if (userData?.cycleStartDate) {
+      } else if (userData.cycleStartDate) {
         startDate = userData.cycleStartDate;
         const endDateObj = new Date(userData.cycleStartDate);
         endDateObj.setFullYear(endDateObj.getFullYear() + (userData.requirementPeriod || 1));
@@ -166,26 +189,74 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         // Fall back to current year if no cycle dates set
         const currentYear = new Date().getFullYear();
         startDate = `${currentYear}-01-01`;
-        const periodYears = userData?.requirementPeriod || 1;
+        const periodYears = userData.requirementPeriod || 1;
         endDate = `${currentYear + periodYears}-01-01`;
       }
       
-      const [entriesResult, creditsResult] = await Promise.all([
-        databaseOperations.cme.getEntriesInDateRange(startDate, endDate),
+      // Load recent entries (last 10) and total credits in parallel
+      const [recentEntriesResult, creditsResult] = await Promise.all([
+        databaseOperations.cme.getEntriesInDateRange(startDate, endDate).then(result => {
+          if (result.success && result.data) {
+            // Limit to most recent 10 entries for performance
+            return { success: true, data: result.data.slice(0, 10) };
+          }
+          return result;
+        }),
         databaseOperations.cme.getTotalCreditsInRange(startDate, endDate),
       ]);
       
-      if (entriesResult.success) {
-        setCMEEntries(entriesResult.data || []);
+      if (recentEntriesResult.success) {
+        setRecentCMEEntries(recentEntriesResult.data || []);
+      } else {
+        setError('Failed to load recent CME entries. Please try again.');
       }
       
       if (creditsResult.success) {
         setTotalCredits(creditsResult.data || 0);
+      } else {
+        setError('Failed to calculate total credits. Please try again.');
       }
     } catch (error) {
       console.error('Error refreshing CME data:', error);
+      setError('Unable to load CME data. Please check your connection and try again.');
     } finally {
       setIsLoadingCME(false);
+    }
+  }, [clearError]);
+
+  // Lazy load all CME entries when needed (e.g., for CME history screen)
+  const loadAllCMEEntries = useCallback(async (): Promise<CMEEntry[]> => {
+    try {
+      const userResult = await databaseOperations.user.getCurrentUser();
+      const userData = userResult.success ? userResult.data : null;
+      
+      if (!userData) {
+        return [];
+      }
+      
+      let startDate: string;
+      let endDate: string;
+      
+      if (userData.cycleStartDate && userData.cycleEndDate) {
+        startDate = userData.cycleStartDate;
+        endDate = userData.cycleEndDate;
+      } else if (userData.cycleStartDate) {
+        startDate = userData.cycleStartDate;
+        const endDateObj = new Date(userData.cycleStartDate);
+        endDateObj.setFullYear(endDateObj.getFullYear() + (userData.requirementPeriod || 1));
+        endDate = endDateObj.toISOString().split('T')[0];
+      } else {
+        const currentYear = new Date().getFullYear();
+        startDate = `${currentYear}-01-01`;
+        const periodYears = userData.requirementPeriod || 1;
+        endDate = `${currentYear + periodYears}-01-01`;
+      }
+      
+      const result = await databaseOperations.cme.getEntriesInDateRange(startDate, endDate);
+      return result.success ? (result.data || []) : [];
+    } catch (error) {
+      console.error('Error loading all CME entries:', error);
+      return [];
     }
   }, []);
 
@@ -340,38 +411,77 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   }, [user, totalCredits, isLoadingCME]);
 
-  // Initial data load - only once
+  // Smart initial data loading - prioritize essential data
   useEffect(() => {
     let mounted = true;
-    const loadInitialData = async () => {
-      if (mounted) {
-        console.log('🔄 AppContext: Loading initial data...');
-        await refreshAllData();
-        console.log('✅ AppContext: Initial data load complete');
+    
+    const loadEssentialData = async () => {
+      if (!mounted) return;
+      
+      try {
+        console.log('🚀 AppContext: Starting smart initial data load...');
+        setIsInitializing(true);
+        
+        // Load user first (essential for everything else)
+        await refreshUserData();
+        
+        if (!mounted) return;
+        
+        // Load essential data in parallel
+        await Promise.all([
+          refreshCMEData(), // Only recent entries + totals
+          // Skip certificates and licenses initially - load on demand
+        ]);
+        
+        console.log('✅ AppContext: Essential data loaded quickly');
+        
+        // Load secondary data in background after a brief delay
+        setTimeout(async () => {
+          if (mounted) {
+            console.log('🔄 AppContext: Loading secondary data...');
+            await Promise.all([
+              refreshCertificates(),
+              refreshLicenses(),
+            ]);
+            console.log('✅ AppContext: All data loaded');
+          }
+        }, 100); // Short delay to prioritize UI responsiveness
+        
+      } catch (error) {
+        console.error('💥 AppContext: Error during initial load:', error);
+        setError('Failed to load app data. Please restart the app.');
+      } finally {
+        if (mounted) {
+          setIsInitializing(false);
+        }
       }
     };
     
-    loadInitialData();
+    loadEssentialData();
     
     return () => {
       mounted = false;
     };
-  }, []); // Remove refreshAllData dependency to prevent re-runs
+  }, []); // No dependencies - run once on mount
 
   const value = useMemo<AppContextType>(() => ({
     // Data
     user,
-    cmeEntries,
+    recentCMEEntries,
     totalCredits,
     currentYearProgress,
     certificates,
     licenses,
     
-    // Loading states
+    // Enhanced loading states
+    isInitializing,
     isLoadingUser,
     isLoadingCME,
     isLoadingCertificates,
     isLoadingLicenses,
+    
+    // Error state
+    error,
     
     // Refresh functions
     refreshUserData,
@@ -379,6 +489,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     refreshCertificates,
     refreshLicenses,
     refreshAllData,
+    
+    // Lazy loading actions
+    loadAllCMEEntries,
+    clearError,
     
     // Actions
     addCMEEntry,
@@ -390,20 +504,24 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     updateUser,
   }), [
     user,
-    cmeEntries,
+    recentCMEEntries,
     totalCredits,
     currentYearProgress,
     certificates,
     licenses,
+    isInitializing,
     isLoadingUser,
     isLoadingCME,
     isLoadingCertificates,
     isLoadingLicenses,
+    error,
     refreshUserData,
     refreshCMEData,
     refreshCertificates,
     refreshLicenses,
     refreshAllData,
+    loadAllCMEEntries,
+    clearError,
     addCMEEntry,
     updateCMEEntry,
     deleteCMEEntry,

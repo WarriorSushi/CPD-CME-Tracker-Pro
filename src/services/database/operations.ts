@@ -14,21 +14,11 @@ import { setupDatabase } from './schema';
 let dbInstance: SQLite.SQLiteDatabase | null = null;
 let dbInitPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
-// Force clean database migration
+// Force clean database migration with proper cleanup
 const forceCleanMigration = async (): Promise<SQLite.SQLiteDatabase> => {
   console.log('🧹 Force migration: Starting clean database migration...');
   
   try {
-    // Close existing database if any
-    if (dbInstance) {
-      await dbInstance.closeAsync();
-      console.log('🔒 Force migration: Closed existing database');
-    }
-    
-    // Delete existing database file completely
-    await SQLite.deleteDatabaseAsync('cme_tracker.db');
-    console.log('🗑️ Force migration: Deleted existing database file');
-    
     // Create fresh database with simple initialization
     const db = await SQLite.openDatabaseAsync('cme_tracker.db');
     await db.execAsync('PRAGMA foreign_keys = ON;');
@@ -37,7 +27,14 @@ const forceCleanMigration = async (): Promise<SQLite.SQLiteDatabase> => {
     console.log('🏗️ Force migration: Creating fresh tables...');
     await createSimpleTables(db);
     
-    console.log('✅ Force migration: Created fresh database');
+    // Test the new database before returning
+    const isHealthy = await testDatabaseHealth(db);
+    if (!isHealthy) {
+      await safeCloseDatabase(db);
+      throw new Error('Newly created database failed health check');
+    }
+    
+    console.log('✅ Force migration: Created and verified fresh database');
     return db;
   } catch (error) {
     console.error('💥 Force migration: Error during clean migration:', error);
@@ -146,53 +143,172 @@ const createSimpleTables = async (db: SQLite.SQLiteDatabase): Promise<void> => {
   }
 };
 
-// Get database instance with proper singleton pattern
-const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
-  // If instance exists, return it
+// Test if database instance is healthy
+const testDatabaseHealth = async (db: SQLite.SQLiteDatabase): Promise<boolean> => {
+  try {
+    // Simple test query to verify database is functional
+    await db.getFirstAsync('SELECT 1 as test');
+    return true;
+  } catch (error) {
+    console.log('🩺 testDatabaseHealth: Database health check failed:', error);
+    return false;
+  }
+};
+
+// Safely close database with error handling
+const safeCloseDatabase = async (db: SQLite.SQLiteDatabase): Promise<void> => {
+  try {
+    await db.closeAsync();
+    console.log('🔒 safeCloseDatabase: Database closed successfully');
+  } catch (error) {
+    console.log('⚠️ safeCloseDatabase: Error closing database (may already be closed):', error);
+  }
+};
+
+// Force close and delete database with proper cleanup
+const forceCleanupDatabase = async (): Promise<void> => {
+  console.log('🧹 forceCleanupDatabase: Starting database cleanup...');
+  
+  // First, try to close the existing instance if it exists
   if (dbInstance) {
-    console.log('♻️ getDatabase: Returning cached database instance');
-    return dbInstance;
+    console.log('🔒 forceCleanupDatabase: Closing existing database instance...');
+    await safeCloseDatabase(dbInstance);
+    dbInstance = null;
+  }
+  
+  // Try to delete the database file with multiple attempts
+  let attempts = 0;
+  const maxAttempts = 3;
+  
+  while (attempts < maxAttempts) {
+    try {
+      console.log(`🗑️ forceCleanupDatabase: Delete attempt ${attempts + 1}/${maxAttempts}`);
+      await SQLite.deleteDatabaseAsync('cme_tracker.db');
+      console.log('✅ forceCleanupDatabase: Database file deleted successfully');
+      break;
+    } catch (error) {
+      attempts++;
+      console.log(`💥 forceCleanupDatabase: Delete attempt ${attempts} failed:`, error);
+      
+      if (attempts >= maxAttempts) {
+        console.log('⚠️ forceCleanupDatabase: All delete attempts failed, proceeding anyway...');
+        break;
+      }
+      
+      // Wait a bit before retrying
+      await new Promise(resolve => setTimeout(resolve, 200 * attempts));
+    }
+  }
+};
+
+// Get database instance with robust health checking
+const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
+  // If instance exists, test its health before returning it
+  if (dbInstance) {
+    console.log('🩺 getDatabase: Testing cached database health...');
+    const isHealthy = await testDatabaseHealth(dbInstance);
+    
+    if (isHealthy) {
+      console.log('✅ getDatabase: Cached database is healthy, returning it');
+      return dbInstance;
+    } else {
+      console.log('💀 getDatabase: Cached database is corrupted, cleaning up...');
+      await safeCloseDatabase(dbInstance);
+      dbInstance = null;
+      // Continue to create new instance
+    }
   }
   
   // If initialization is in progress, wait for it
   if (dbInitPromise) {
     console.log('⏳ getDatabase: Waiting for existing database initialization...');
-    return await dbInitPromise;
+    try {
+      const db = await dbInitPromise;
+      // Test the initialized database before returning
+      const isHealthy = await testDatabaseHealth(db);
+      if (!isHealthy) {
+        console.log('💀 getDatabase: Newly initialized database is unhealthy, forcing cleanup...');
+        dbInitPromise = null;
+        throw new Error('Database initialization produced unhealthy instance');
+      }
+      return db;
+    } catch (error) {
+      console.error('💥 getDatabase: Waiting for initialization failed:', error);
+      dbInitPromise = null;
+      // Continue to create new instance
+    }
   }
   
-  // Check if we need to force clean migration
-  try {
-    console.log('🔄 getDatabase: Starting database initialization...');
-    
-    // Try to open existing database to check for country column issue
-    const testDb = await SQLite.openDatabaseAsync('cme_tracker.db');
-    
-    // Check if users table exists with country column
-    const tableInfo = await testDb.getFirstAsync(`
-      SELECT sql FROM sqlite_master WHERE type='table' AND name='users'
-    `);
-    
-    if (tableInfo && tableInfo.sql && tableInfo.sql.includes('country TEXT NOT NULL')) {
-      console.log('⚠️ getDatabase: Found problematic country column, forcing clean migration...');
-      await testDb.closeAsync();
-      dbInitPromise = forceCleanMigration();
-    } else {
-      console.log('📊 getDatabase: Using normal setup...');
-      await testDb.closeAsync();
-      dbInitPromise = setupDatabase();
+  // Start new database initialization
+  console.log('🔄 getDatabase: Starting fresh database initialization...');
+  
+  dbInitPromise = (async () => {
+    try {
+      // Check if we need to force clean migration
+      let needsCleanMigration = false;
+      
+      try {
+        // Try to open existing database to check its state
+        const testDb = await SQLite.openDatabaseAsync('cme_tracker.db');
+        
+        try {
+          // Test if database is functional
+          await testDb.getFirstAsync('SELECT 1 as test');
+          
+          // Check if users table exists with country column
+          const tableInfo = await testDb.getFirstAsync(`
+            SELECT sql FROM sqlite_master WHERE type='table' AND name='users'
+          `);
+          
+          if (tableInfo && tableInfo.sql && tableInfo.sql.includes('country TEXT NOT NULL')) {
+            console.log('⚠️ getDatabase: Found problematic country column, needs clean migration');
+            needsCleanMigration = true;
+          }
+          
+          await safeCloseDatabase(testDb);
+        } catch (testError) {
+          console.log('💀 getDatabase: Database test failed, needs clean migration:', testError);
+          await safeCloseDatabase(testDb);
+          needsCleanMigration = true;
+        }
+      } catch (openError) {
+        console.log('🆕 getDatabase: Database doesn\'t exist or can\'t be opened, creating new...');
+        needsCleanMigration = false; // Just create normally
+      }
+      
+      let db: SQLite.SQLiteDatabase;
+      
+      if (needsCleanMigration) {
+        console.log('🧹 getDatabase: Performing clean migration...');
+        await forceCleanupDatabase();
+        db = await forceCleanMigration();
+      } else {
+        console.log('📊 getDatabase: Using normal setup...');
+        db = await setupDatabase();
+      }
+      
+      // Final health check before caching
+      const isHealthy = await testDatabaseHealth(db);
+      if (!isHealthy) {
+        await safeCloseDatabase(db);
+        throw new Error('Database created but failed health check');
+      }
+      
+      console.log('✅ getDatabase: Database instance created and verified healthy');
+      return db;
+      
+    } catch (error) {
+      console.error('💥 getDatabase: Database initialization failed:', error);
+      throw error;
     }
-  } catch (error) {
-    console.log('🆕 getDatabase: Database doesn\'t exist, creating new...');
-    dbInitPromise = setupDatabase();
-  }
+  })();
   
   try {
     dbInstance = await dbInitPromise;
-    console.log('✅ getDatabase: Database instance created successfully');
     return dbInstance;
   } catch (error) {
-    console.error('💥 getDatabase: Database initialization failed:', error);
-    // Reset both instance and promise so we can try again
+    console.error('💥 getDatabase: Failed to get database instance:', error);
+    // Reset state for next attempt
     dbInstance = null;
     dbInitPromise = null;
     throw error;
@@ -200,10 +316,18 @@ const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
 };
 
 // Reset database instance (for complete app reset)
-export const resetDatabaseInstance = (): void => {
-  console.log('🔄 resetDatabaseInstance: Clearing database instance...');
+export const resetDatabaseInstance = async (): Promise<void> => {
+  console.log('🔄 resetDatabaseInstance: Starting database instance reset...');
+  
+  // Safely close existing database
+  if (dbInstance) {
+    await safeCloseDatabase(dbInstance);
+  }
+  
+  // Clear references
   dbInstance = null;
   dbInitPromise = null;
+  
   console.log('✅ resetDatabaseInstance: Database instance reset - will be recreated on next access');
 };
 
@@ -424,58 +548,27 @@ export const cmeOperations = {
     }
   },
 
-  // Add new CME entry
+  // Add new CME entry - simplified with robust database layer
   addEntry: async (entry: Omit<CMEEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<DatabaseOperationResult<number>> => {
     try {
       console.log('🗃️ cmeOperations.addEntry: Starting database operation...');
       
-      // Get database with improved error handling
-      let db: SQLite.SQLiteDatabase;
-      try {
-        db = await getDatabase();
-        console.log('🗃️ cmeOperations.addEntry: Database connection established');
-      } catch (dbError) {
-        console.error('💥 cmeOperations.addEntry: Failed to get database, forcing clean migration...', dbError);
-        // Force a clean database reset if connection fails
-        resetDatabaseInstance();
-        db = await forceCleanMigration();
-        console.log('🔄 cmeOperations.addEntry: Clean database created');
-      }
+      // Get healthy database instance (handles all corruption automatically)
+      const db = await getDatabase();
+      console.log('🗃️ cmeOperations.addEntry: Healthy database connection established');
       
-      // Verify tables exist
-      try {
-        await db.getFirstAsync("SELECT name FROM sqlite_master WHERE type='table' AND name='cme_entries'");
-        console.log('✅ cmeOperations.addEntry: CME entries table exists');
-      } catch (tableError) {
-        console.error('💥 cmeOperations.addEntry: CME entries table missing, recreating...', tableError);
-        await createSimpleTables(db);
-        console.log('🏗️ cmeOperations.addEntry: Tables recreated');
-      }
-      
-      // First, ensure user exists with proper error handling
+      // Ensure user exists
       console.log('👤 cmeOperations.addEntry: Checking if user exists...');
-      let userCheck;
-      try {
-        userCheck = await db.getFirstAsync('SELECT id FROM users WHERE id = 1');
-        console.log('👤 cmeOperations.addEntry: User check result:', userCheck);
-      } catch (userCheckError) {
-        console.error('💥 cmeOperations.addEntry: User check failed:', userCheckError);
-        // If user check fails, assume no user exists
-        userCheck = null;
-      }
+      const userCheck = await db.getFirstAsync('SELECT id FROM users WHERE id = 1');
+      console.log('👤 cmeOperations.addEntry: User check result:', userCheck);
       
       if (!userCheck) {
         console.log('⚠️ cmeOperations.addEntry: User with ID 1 does not exist, creating default user...');
-        try {
-          await db.runAsync(`
-            INSERT OR IGNORE INTO users (id, profession, credit_system, annual_requirement, requirement_period)
-            VALUES (1, 'Healthcare Professional', 'Credits', 50, 1)
-          `);
-          console.log('✅ cmeOperations.addEntry: Default user created');
-        } catch (createUserError) {
-          console.error('💥 cmeOperations.addEntry: Failed to create default user:', createUserError);
-          throw new Error('Failed to create default user: ' + createUserError.message);
-        }
+        await db.runAsync(`
+          INSERT OR IGNORE INTO users (id, profession, credit_system, annual_requirement, requirement_period)
+          VALUES (1, 'Healthcare Professional', 'Credits', 50, 1)
+        `);
+        console.log('✅ cmeOperations.addEntry: Default user created');
       }
       
       console.log('📝 cmeOperations.addEntry: Preparing to insert CME entry with data:', {
@@ -511,44 +604,6 @@ export const cmeOperations = {
       };
     } catch (error) {
       console.error('💥 cmeOperations.addEntry: Database error occurred:', error);
-      
-      // If we get a specific database corruption error, try one more time with clean migration
-      if (error instanceof Error && (
-        error.message.includes('NullPointerException') || 
-        error.message.includes('database is locked') ||
-        error.message.includes('no such table')
-      )) {
-        console.log('🔄 cmeOperations.addEntry: Attempting recovery with clean database...');
-        try {
-          resetDatabaseInstance();
-          const cleanDb = await forceCleanMigration();
-          
-          // Try the insertion again with clean database
-          const retryResult = await cleanDb.runAsync(`
-            INSERT INTO cme_entries (
-              title, provider, date_attended, credits_earned, 
-              category, notes, certificate_path, user_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, 1)
-          `, [
-            entry.title,
-            entry.provider,
-            entry.dateAttended,
-            entry.creditsEarned,
-            entry.category,
-            entry.notes || null,
-            entry.certificatePath || null,
-          ]);
-          
-          console.log('✅ cmeOperations.addEntry: Retry successful after clean migration');
-          return {
-            success: true,
-            data: retryResult.lastInsertRowId,
-          };
-        } catch (retryError) {
-          console.error('💥 cmeOperations.addEntry: Retry also failed:', retryError);
-        }
-      }
-      
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to add CME entry',
@@ -1047,7 +1102,7 @@ export const settingsOperations = {
       
       // Reset the database instance so it gets recreated properly on next access
       console.log('🔄 settingsOperations.resetAllData: Resetting database instance...');
-      resetDatabaseInstance();
+      await resetDatabaseInstance();
       
       console.log('🎉 settingsOperations.resetAllData: Complete app reset successful');
       return { success: true };
