@@ -7,6 +7,8 @@ import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { CreditSystem } from '../../types';
 import { getColor } from '../../theme';
+import { userOperations } from '../../services/database';
+import { useAppContext } from '../../contexts/AppContext';
 
 type CreditSystemScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'CreditSystem'>;
 
@@ -24,12 +26,37 @@ const CREDIT_SYSTEMS: { value: CreditSystem; title: string; description: string 
 
 export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const { refreshUserData } = useAppContext();
   const [selectedSystem, setSelectedSystem] = useState<CreditSystem | ''>('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (selectedSystem) {
-      // TODO: Save credit system to onboarding data
-      navigation.navigate('AnnualTarget');
+      setIsLoading(true);
+      try {
+        console.log('🔄 CreditSystemScreen: Selected system:', selectedSystem);
+        
+        // Save credit system to user data
+        const result = await userOperations.updateUser({
+          creditSystem: selectedSystem,
+        });
+
+        console.log('💾 CreditSystemScreen: Update result:', result);
+
+        if (result.success) {
+          console.log('✅ CreditSystemScreen: Successfully saved, refreshing user data...');
+          // Refresh user data in context to pick up the new credit system
+          await refreshUserData();
+          console.log('✅ CreditSystemScreen: User data refreshed, navigating...');
+          navigation.navigate('AnnualTarget');
+        } else {
+          console.error('❌ CreditSystemScreen: Failed to save credit system:', result.error);
+        }
+      } catch (error) {
+        console.error('💥 CreditSystemScreen: Error saving credit system:', error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -82,6 +109,7 @@ export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
           onPress={handleContinue}
           style={styles.primaryButton}
           disabled={!selectedSystem}
+          loading={isLoading}
         />
         <Button
           title="Back"

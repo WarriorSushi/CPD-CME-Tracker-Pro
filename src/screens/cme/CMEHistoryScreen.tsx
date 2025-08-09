@@ -17,6 +17,7 @@ import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { CMEStackParamList } from '../../types/navigation';
 import { CMEEntry } from '../../types';
+import { getCreditUnit, getCreditPlural } from '../../utils/creditTerminology';
 
 type CMEHistoryScreenNavigationProp = StackNavigationProp<CMEStackParamList, 'CMEHistory'>;
 
@@ -102,7 +103,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyIcon}>📚</Text>
-      <Text style={styles.emptyTitle}>No CME entries found</Text>
+      <Text style={styles.emptyTitle}>No entries found</Text>
       <Text style={styles.emptySubtitle}>
         {searchQuery 
           ? 'Try adjusting your search criteria'
@@ -139,7 +140,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
         
         <View style={styles.entryCredits}>
           <Text style={styles.creditsValue}>{item.creditsEarned}</Text>
-          <Text style={styles.creditsLabel}>{user?.creditSystem || 'hrs'}</Text>
+          <Text style={styles.creditsLabel}>{user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits'}</Text>
         </View>
       </View>
 
@@ -189,7 +190,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>CME History</Text>
+        <Text style={styles.title}>Education History</Text>
         <TouchableOpacity 
           style={styles.addButton}
           onPress={() => navigation.navigate('AddCME', {})}
@@ -218,7 +219,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{totalCredits.toFixed(1)}</Text>
-              <Text style={styles.statLabel}>Total {user?.creditSystem || 'Credits'}</Text>
+              <Text style={styles.statLabel}>Total {user?.creditSystem ? getCreditPlural(user.creditSystem) : 'Credits'}</Text>
             </View>
             {user?.annualRequirement && (
               <View style={styles.statItem}>

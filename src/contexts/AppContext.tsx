@@ -128,12 +128,16 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const refreshUserData = useCallback(async (): Promise<void> => {
     try {
       setIsLoadingUser(true);
+      console.log('🔄 AppContext: Refreshing user data...');
       const result = await databaseOperations.user.getCurrentUser();
+      console.log('📊 AppContext: User data result:', result);
       if (result.success && result.data) {
+        console.log('✅ AppContext: User data loaded:', result.data);
+        console.log('🎯 AppContext: Credit system from DB:', result.data?.creditSystem);
         setUser(result.data);
       }
     } catch (error) {
-      console.error('Error refreshing user data:', error);
+      console.error('💥 AppContext: Error refreshing user data:', error);
     } finally {
       setIsLoadingUser(false);
     }

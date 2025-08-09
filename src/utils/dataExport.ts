@@ -2,12 +2,14 @@
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { CMEEntry, LicenseRenewal, User } from '../types';
+import { getCreditUnit } from './creditTerminology';
 
 // CSV Export functionality
 export const exportCMEToCSV = async (entries: CMEEntry[], user: User): Promise<boolean> => {
   try {
     // Create CSV header
-    const header = 'Title,Provider,Date Attended,Credits Earned,Category,Notes,Created Date\n';
+    const creditUnit = getCreditUnit(user.creditSystem || 'CME');
+    const header = `Title,Provider,Date Attended,${creditUnit} Earned,Category,Notes,Created Date\n`;
     
     // Create CSV rows
     const rows = entries.map(entry => {
@@ -51,7 +53,7 @@ export const exportCMEToCSV = async (entries: CMEEntry[], user: User): Promise<b
 // License export functionality
 export const exportLicensesToCSV = async (licenses: LicenseRenewal[]): Promise<boolean> => {
   try {
-    // Create CSV header
+    // Create CSV header  
     const header = 'License Type,Issuing Authority,License Number,Expiration Date,Required Credits,Completed Credits,Status,Created Date\n';
     
     // Create CSV rows
@@ -111,6 +113,10 @@ export const generateSummaryReport = async (
       ? ((totalCredits / user.annualRequirement) * 100).toFixed(1) 
       : '0';
 
+    // Get dynamic terminology
+    const creditUnit = getCreditUnit(user.creditSystem || 'CME');
+    const creditPlural = creditUnit.toLowerCase() + 's';
+
     // Create summary content
     const reportContent = `CME TRACKER SUMMARY REPORT
 Generated: ${new Date().toLocaleDateString()}
@@ -120,11 +126,11 @@ PROFILE INFORMATION
 Name: ${user.profession}
 Country: ${user.country}
 Credit System: ${user.creditSystem}
-Annual Requirement: ${user.annualRequirement} ${user.creditSystem.toLowerCase()}
+Annual Requirement: ${user.annualRequirement} ${creditPlural}
 
 ${currentYear} PROGRESS
 =====================
-Total Credits Earned: ${totalCredits.toFixed(1)}
+Total ${creditUnit} Earned: ${totalCredits.toFixed(1)}
 Progress: ${progressPercentage}% of annual requirement
 Total Entries: ${currentYearEntries.length}
 
@@ -136,7 +142,7 @@ ${currentYearEntries
   .map((entry, index) => 
     `${index + 1}. ${entry.title} (${entry.provider})
     Date: ${entry.dateAttended}
-    Credits: ${entry.creditsEarned}
+    ${creditUnit}: ${entry.creditsEarned}
     Category: ${entry.category}
 `
   ).join('\n')}

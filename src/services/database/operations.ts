@@ -85,7 +85,26 @@ export const userOperations = {
   // Update user information
   updateUser: async (userData: Partial<User>): Promise<DatabaseOperationResult> => {
     try {
+      console.log('💾 DB Operations: updateUser called with:', userData);
       const db = await getDatabase();
+      
+      // First, check if user exists
+      const existingUser = await db.getFirstAsync<any>('SELECT id FROM users WHERE id = 1');
+      
+      if (!existingUser) {
+        console.log('⚠️ DB Operations: No user found, creating default user...');
+        // Create default user first
+        await db.runAsync(`
+          INSERT INTO users (id, profession, country, credit_system, annual_requirement, requirement_period)
+          VALUES (1, ?, ?, ?, 50, 1)
+        `, [
+          userData.profession || 'Healthcare Professional',
+          userData.country || 'United States', 
+          userData.creditSystem || 'CME'
+        ]);
+        console.log('✅ DB Operations: Default user created');
+        return { success: true };
+      }
       
       const fields = [];
       const values = [];
@@ -99,6 +118,7 @@ export const userOperations = {
         values.push(userData.country);
       }
       if (userData.creditSystem) {
+        console.log('🎯 DB Operations: Adding creditSystem to update:', userData.creditSystem);
         fields.push('credit_system = ?');
         values.push(userData.creditSystem);
       }
@@ -118,7 +138,11 @@ export const userOperations = {
       values.push(1); // user ID
 
       const query = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
-      await db.runAsync(query, values);
+      console.log('📝 DB Operations: Executing query:', query);
+      console.log('📝 DB Operations: With values:', values);
+      
+      const result = await db.runAsync(query, values);
+      console.log('✅ DB Operations: Update result:', result);
 
       return { success: true };
     } catch (error) {

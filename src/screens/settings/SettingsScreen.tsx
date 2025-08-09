@@ -17,6 +17,7 @@ import { useAppContext } from '../../contexts/AppContext';
 import { useOnboardingContext } from '../../contexts/OnboardingContext';
 import { LicenseRenewal } from '../../types';
 import { APP_CONFIG } from '../../constants';
+import { getCreditUnit } from '../../utils/creditTerminology';
 import { 
   exportCMEToCSV, 
   exportLicensesToCSV, 
@@ -271,7 +272,7 @@ export const SettingsScreen: React.FC = () => {
           {license.requiredCredits > 0 && (
             <View style={styles.creditsInfo}>
               <Text style={styles.creditsText}>
-                Credits: {license.completedCredits}/{license.requiredCredits}
+                {user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits'}: {license.completedCredits}/{license.requiredCredits}
               </Text>
               <View style={styles.creditsBar}>
                 <View 
@@ -348,7 +349,7 @@ export const SettingsScreen: React.FC = () => {
           {user ? (
             <View style={styles.profileStats}>
               <View style={styles.statItem}>
-                <Text style={styles.statValue}>{user.creditSystem || 'Credits'}</Text>
+                <Text style={styles.statValue}>{user.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits'}</Text>
                 <Text style={styles.statLabel}>System</Text>
               </View>
               <View style={styles.statDivider} />

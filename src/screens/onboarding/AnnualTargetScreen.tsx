@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -6,8 +6,10 @@ import { Button, Input, Card, ProgressIndicator } from '../../components';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { DEFAULT_CREDIT_REQUIREMENTS } from '../../constants';
-import { Profession } from '../../types';
+import { Profession, CreditSystem } from '../../types';
 import { getColor } from '../../theme';
+import { getCreditTerminology } from '../../utils/creditTerminology';
+import { userOperations } from '../../services/database';
 
 type AnnualTargetScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'AnnualTarget'>;
 
@@ -33,6 +35,26 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
   const [selectedPeriod, setSelectedPeriod] = useState<number | null>(null);
   const [useCustomTarget, setUseCustomTarget] = useState(false);
   const [useCustomPeriod, setUseCustomPeriod] = useState(false);
+  const [creditSystem, setCreditSystem] = useState<CreditSystem>('CME');
+
+  // Load user's selected credit system
+  useEffect(() => {
+    const loadCreditSystem = async () => {
+      try {
+        const result = await userOperations.getCurrentUser();
+        if (result.success && result.data?.creditSystem) {
+          setCreditSystem(result.data.creditSystem);
+        }
+      } catch (error) {
+        console.error('Error loading credit system:', error);
+      }
+    };
+
+    loadCreditSystem();
+  }, []);
+
+  // Get dynamic terminology based on selected credit system
+  const terminology = getCreditTerminology(creditSystem);
 
   const handleContinue = () => {
     const target = useCustomTarget ? parseInt(customTarget) : selectedTarget;
@@ -81,13 +103,13 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
         <ProgressIndicator currentStep={3} totalSteps={5} />
         
         <View style={styles.header}>
-          <Text style={styles.title}>Credit Requirements</Text>
-          <Text style={styles.subtitle}>How many credits do you need and over what period?</Text>
+          <Text style={styles.title}>{terminology.title}</Text>
+          <Text style={styles.subtitle}>How many {terminology.plural} do you need and over what period?</Text>
         </View>
 
         <View style={styles.targetContainer}>
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Number of Credits</Text>
+            <Text style={styles.sectionTitle}>{terminology.label}</Text>
             <View style={styles.optionsGrid}>
               {COMMON_REQUIREMENTS.map((target) => (
                 <TouchableOpacity
@@ -150,7 +172,7 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
             <Text style={styles.examplesTitle}>Examples:</Text>
             {COMMON_EXAMPLES.map((example, index) => (
               <Text key={index} style={styles.exampleText}>
-                {example.credits} credits / {example.period} year{example.period > 1 ? 's' : ''} ({example.example})
+                {example.credits} {terminology.plural} / {example.period} year{example.period > 1 ? 's' : ''} ({example.example})
               </Text>
             ))}
           </View>

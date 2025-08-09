@@ -18,6 +18,7 @@ import { useAppContext } from '../../contexts/AppContext';
 import { CMEStackParamList } from '../../types/navigation';
 import { CME_CATEGORIES } from '../../constants';
 import { CMEEntry } from '../../types';
+import { getCreditUnit } from '../../utils/creditTerminology';
 
 type AddCMEScreenNavigationProp = StackNavigationProp<CMEStackParamList, 'AddCME'>;
 type AddCMEScreenRouteProp = RouteProp<CMEStackParamList, 'AddCME'>;
@@ -92,11 +93,13 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
     }
 
     if (!formData.creditsEarned.trim()) {
-      newErrors.creditsEarned = 'Credits earned is required';
+      const creditUnit = user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits';
+      newErrors.creditsEarned = `${creditUnit} earned is required`;
     } else {
       const credits = parseFloat(formData.creditsEarned);
       if (isNaN(credits) || credits <= 0) {
-        newErrors.creditsEarned = 'Credits must be a positive number';
+        const creditUnit = user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits';
+        newErrors.creditsEarned = `${creditUnit} must be a positive number`;
       }
     }
 
@@ -192,7 +195,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={styles.backButton}>←</Text>
         </TouchableOpacity>
         <Text style={styles.title}>
-          {isEditing ? 'Edit CME Entry' : 'Add CME Entry'}
+          {isEditing ? 'Edit Entry' : 'Add New Entry'}
         </Text>
         <View style={styles.headerSpacer} />
       </View>
@@ -225,7 +228,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
             </View>
           </View>
 
-          {/* Row 2: Date and Credits */}
+          {/* Row 2: Date and Credit Amount */}
           <View style={styles.row}>
             <View style={[styles.fieldContainer, styles.fieldHalf]}>
               <Text style={styles.label}>Date *</Text>
@@ -238,7 +241,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
             </View>
 
             <View style={[styles.fieldContainer, styles.fieldHalf]}>
-              <Text style={styles.label}>Credits *</Text>
+              <Text style={styles.label}>{user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits'} *</Text>
               <Input
                 value={formData.creditsEarned}
                 onChangeText={(value) => updateFormData('creditsEarned', value)}

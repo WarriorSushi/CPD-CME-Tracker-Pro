@@ -8,6 +8,7 @@ import { SimpleProgressRing } from '../../components/charts/SimpleProgressRing';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { MainTabParamList } from '../../types/navigation';
+import { getCreditUnit } from '../../utils/creditTerminology';
 
 const { width, height } = Dimensions.get('window');
 
@@ -29,6 +30,12 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     isLoadingLicenses,
     refreshAllData,
   } = useAppContext();
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('📊 Dashboard: User data changed:', user);
+    console.log('🎯 Dashboard: Credit system:', user?.creditSystem);
+  }, [user]);
 
   const [refreshing, setRefreshing] = React.useState(false);
 
@@ -159,7 +166,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                   <Text style={styles.progressStatValue}>
                     {currentYearProgress?.totalCompleted?.toFixed(1) || '0'}
                   </Text>
-                  <Text style={styles.progressStatLabel}>Credits Earned</Text>
+                  <Text style={styles.progressStatLabel}>{user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits'} Earned</Text>
                 </View>
                 
                 <View style={styles.progressStatDivider} />
@@ -223,8 +230,8 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.addEntryIconText}>+</Text>
               </View>
               <View style={styles.addEntryTextContainer}>
-                <Text style={styles.addEntryTitle}>Add New CME Entry</Text>
-                <Text style={styles.addEntrySubtitle}>Log your continuing education credits</Text>
+                <Text style={styles.addEntryTitle}>Add New Entry</Text>
+                <Text style={styles.addEntrySubtitle}>Log your continuing education {user?.creditSystem ? getCreditUnit(user.creditSystem).toLowerCase() : 'credits'}</Text>
               </View>
               <View style={styles.addEntryArrow}>
                 <Text style={styles.addEntryArrowText}>→</Text>
@@ -242,7 +249,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
               onPress={() => navigation.navigate('CME', { screen: 'AddCME', params: { editEntry: undefined } })}
             >
               <Text style={styles.quickActionIcon}>📚</Text>
-              <Text style={styles.quickActionText}>Add CME</Text>
+              <Text style={styles.quickActionText}>Add Entry</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.quickActionItem}
@@ -297,7 +304,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                   </View>
                   <View style={styles.activityCredits}>
                     <Text style={styles.creditsValue}>{entry.creditsEarned}</Text>
-                    <Text style={styles.creditsUnit}>{user?.creditSystem || 'hrs'}</Text>
+                    <Text style={styles.creditsUnit}>{user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits'}</Text>
                   </View>
                 </View>
               </Card>
