@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   View, 
   Text, 
@@ -10,6 +10,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
 
 import { Button, Card, Input, LoadingSpinner, DatePicker } from '../../components';
@@ -63,9 +64,11 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // Reset form when route params change or when coming from dashboard
+  // Reset form when screen comes into focus or params change
   useEffect(() => {
     const currentEditEntry = route.params?.editEntry;
+    
+    console.log('🔄 AddCMEScreen: Resetting form with editEntry:', currentEditEntry);
     
     setFormData({
       title: currentEditEntry?.title || '',
@@ -78,7 +81,28 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
     
     // Clear any errors when resetting
     setErrors({});
-  }, [route.params?.editEntry]);
+  }, [route.params?.editEntry, route.params]);
+
+  // Additional reset when screen gets focus (ensures clean slate for new entries)
+  useFocusEffect(
+    useCallback(() => {
+      const currentEditEntry = route.params?.editEntry;
+      
+      // Only reset if this is a new entry (no editEntry)
+      if (!currentEditEntry) {
+        console.log('🔄 AddCMEScreen: Screen focused, resetting for new entry');
+        setFormData({
+          title: '',
+          provider: '',
+          dateAttended: new Date(),
+          creditsEarned: '',
+          category: CME_CATEGORIES[0],
+          notes: '',
+        });
+        setErrors({});
+      }
+    }, [route.params?.editEntry])
+  );
 
   // Validation
   const validateForm = (): boolean => {

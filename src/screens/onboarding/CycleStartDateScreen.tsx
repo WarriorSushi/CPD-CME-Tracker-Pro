@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card, ModernDatePicker, ProgressIndicator } from '../../components';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
+import { userOperations } from '../../services/database';
 
 type CycleStartDateScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'CycleStartDate'>;
 
@@ -56,17 +57,48 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
     setAskAboutLicenseSync(true);
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (selectedOption !== null || customDate) {
       const selectedDate = getSelectedDate();
+      if (!selectedDate) return;
       
-      // TODO: Save cycle start date and license sync preference to onboarding data
-      // This would typically be saved to onboarding context or passed as navigation params
+      console.log('💾 CycleStartDateScreen: Saving cycle dates...');
       
-      navigation.navigate('LicenseSetup', {
-        cycleStartDate: selectedDate?.toISOString(),
-        syncWithLicense: licenseSyncSelected === true,
-      });
+      try {
+        // Get user's requirement period to calculate end date
+        const userResult = await userOperations.getCurrentUser();
+        const requirementPeriod = userResult.data?.requirementPeriod || 1;
+        
+        // Calculate cycle end date
+        const cycleEndDate = new Date(selectedDate);
+        cycleEndDate.setFullYear(selectedDate.getFullYear() + requirementPeriod);
+        
+        console.log('📅 CycleStartDateScreen: Cycle dates calculated:', {
+          startDate: selectedDate.toISOString().split('T')[0],
+          endDate: cycleEndDate.toISOString().split('T')[0],
+          period: requirementPeriod
+        });
+        
+        // Save cycle dates to database
+        const result = await userOperations.updateUser({
+          cycleStartDate: selectedDate.toISOString().split('T')[0], // YYYY-MM-DD format
+          cycleEndDate: cycleEndDate.toISOString().split('T')[0]
+        });
+        
+        console.log('📊 CycleStartDateScreen: Save result:', result);
+        
+        if (result.success) {
+          console.log('✅ CycleStartDateScreen: Successfully saved cycle dates, navigating...');
+          navigation.navigate('LicenseSetup', {
+            cycleStartDate: selectedDate?.toISOString(),
+            syncWithLicense: licenseSyncSelected === true,
+          });
+        } else {
+          console.error('❌ CycleStartDateScreen: Failed to save cycle dates');
+        }
+      } catch (error) {
+        console.error('💥 CycleStartDateScreen: Error saving cycle dates:', error);
+      }
     }
   };
 

@@ -14,10 +14,143 @@ import { setupDatabase } from './schema';
 let dbInstance: SQLite.SQLiteDatabase | null = null;
 let dbInitPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
+// Force clean database migration
+const forceCleanMigration = async (): Promise<SQLite.SQLiteDatabase> => {
+  console.log('🧹 Force migration: Starting clean database migration...');
+  
+  try {
+    // Close existing database if any
+    if (dbInstance) {
+      await dbInstance.closeAsync();
+      console.log('🔒 Force migration: Closed existing database');
+    }
+    
+    // Delete existing database file completely
+    await SQLite.deleteDatabaseAsync('cme_tracker.db');
+    console.log('🗑️ Force migration: Deleted existing database file');
+    
+    // Create fresh database with simple initialization
+    const db = await SQLite.openDatabaseAsync('cme_tracker.db');
+    await db.execAsync('PRAGMA foreign_keys = ON;');
+    
+    // Create tables directly without migration system
+    console.log('🏗️ Force migration: Creating fresh tables...');
+    await createSimpleTables(db);
+    
+    console.log('✅ Force migration: Created fresh database');
+    return db;
+  } catch (error) {
+    console.error('💥 Force migration: Error during clean migration:', error);
+    throw error;
+  }
+};
+
+// Simple table creation without migration complexity
+const createSimpleTables = async (db: SQLite.SQLiteDatabase): Promise<void> => {
+  await db.execAsync('BEGIN TRANSACTION;');
+  
+  try {
+    // Users table without country column
+    await db.execAsync(`
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        profession TEXT,
+        credit_system TEXT,
+        annual_requirement INTEGER,
+        requirement_period INTEGER DEFAULT 1,
+        cycle_start_date DATE,
+        cycle_end_date DATE,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // CME entries table
+    await db.execAsync(`
+      CREATE TABLE cme_entries (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        provider TEXT NOT NULL,
+        date_attended DATE NOT NULL,
+        credits_earned REAL NOT NULL,
+        category TEXT NOT NULL,
+        notes TEXT,
+        certificate_path TEXT,
+        user_id INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+      );
+    `);
+
+    // Certificates table
+    await db.execAsync(`
+      CREATE TABLE certificates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        file_path TEXT NOT NULL,
+        file_name TEXT NOT NULL,
+        file_size INTEGER NOT NULL,
+        mime_type TEXT NOT NULL,
+        thumbnail_path TEXT,
+        cme_entry_id INTEGER,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (cme_entry_id) REFERENCES cme_entries (id) ON DELETE CASCADE
+      );
+    `);
+
+    // License renewals table  
+    await db.execAsync(`
+      CREATE TABLE license_renewals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        license_type TEXT NOT NULL,
+        issuing_authority TEXT NOT NULL,
+        license_number TEXT,
+        expiration_date DATE NOT NULL,
+        renewal_date DATE,
+        required_credits REAL NOT NULL DEFAULT 0,
+        completed_credits REAL NOT NULL DEFAULT 0,
+        status TEXT NOT NULL DEFAULT 'active',
+        user_id INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+      );
+    `);
+
+    // App settings table
+    await db.execAsync(`
+      CREATE TABLE app_settings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        key TEXT UNIQUE NOT NULL,
+        value TEXT NOT NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Insert default app settings
+    await db.execAsync(`
+      INSERT INTO app_settings (key, value) VALUES
+      ('onboarding_completed', 'false'),
+      ('notification_enabled', 'true'),
+      ('biometric_enabled', 'false'),
+      ('theme_mode', 'light'),
+      ('backup_enabled', 'true'),
+      ('auto_scan_enabled', 'true');
+    `);
+
+    await db.execAsync('COMMIT;');
+    console.log('✅ Simple tables created successfully');
+  } catch (error) {
+    await db.execAsync('ROLLBACK;');
+    throw error;
+  }
+};
+
 // Get database instance with proper singleton pattern
 const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
   // If instance exists, return it
   if (dbInstance) {
+    console.log('♻️ getDatabase: Returning cached database instance');
     return dbInstance;
   }
   
@@ -27,9 +160,31 @@ const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
     return await dbInitPromise;
   }
   
-  // Start new initialization
-  console.log('🔄 getDatabase: Starting new database initialization...');
-  dbInitPromise = setupDatabase();
+  // Check if we need to force clean migration
+  try {
+    console.log('🔄 getDatabase: Starting database initialization...');
+    
+    // Try to open existing database to check for country column issue
+    const testDb = await SQLite.openDatabaseAsync('cme_tracker.db');
+    
+    // Check if users table exists with country column
+    const tableInfo = await testDb.getFirstAsync(`
+      SELECT sql FROM sqlite_master WHERE type='table' AND name='users'
+    `);
+    
+    if (tableInfo && tableInfo.sql && tableInfo.sql.includes('country TEXT NOT NULL')) {
+      console.log('⚠️ getDatabase: Found problematic country column, forcing clean migration...');
+      await testDb.closeAsync();
+      dbInitPromise = forceCleanMigration();
+    } else {
+      console.log('📊 getDatabase: Using normal setup...');
+      await testDb.closeAsync();
+      dbInitPromise = setupDatabase();
+    }
+  } catch (error) {
+    console.log('🆕 getDatabase: Database doesn\'t exist, creating new...');
+    dbInitPromise = setupDatabase();
+  }
   
   try {
     dbInstance = await dbInitPromise;
@@ -37,10 +192,10 @@ const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
     return dbInstance;
   } catch (error) {
     console.error('💥 getDatabase: Database initialization failed:', error);
-    dbInitPromise = null; // Reset promise so we can try again
+    // Reset both instance and promise so we can try again
+    dbInstance = null;
+    dbInitPromise = null;
     throw error;
-  } finally {
-    dbInitPromise = null; // Clear promise after completion
   }
 };
 
@@ -62,10 +217,11 @@ export const userOperations = {
         SELECT 
           id,
           profession,
-          country,
           credit_system as creditSystem,
           annual_requirement as annualRequirement,
           requirement_period as requirementPeriod,
+          cycle_start_date as cycleStartDate,
+          cycle_end_date as cycleEndDate,
           created_at as createdAt
         FROM users WHERE id = 1
       `);
@@ -92,17 +248,48 @@ export const userOperations = {
       const existingUser = await db.getFirstAsync<any>('SELECT id FROM users WHERE id = 1');
       
       if (!existingUser) {
-        console.log('⚠️ DB Operations: No user found, creating default user...');
-        // Create default user first
+        console.log('⚠️ DB Operations: No user found, creating user with provided data only...');
+        // Create user with only the fields that were actually provided
+        const createFields = ['id'];
+        const createPlaceholders = ['1']; // User ID is always 1
+        const createValues: any[] = [];
+        
+        if (userData.profession) {
+          createFields.push('profession');
+          createPlaceholders.push('?');
+          createValues.push(userData.profession);
+        }
+        if (userData.creditSystem) {
+          createFields.push('credit_system');
+          createPlaceholders.push('?');
+          createValues.push(userData.creditSystem);
+        }
+        if (userData.annualRequirement) {
+          createFields.push('annual_requirement');
+          createPlaceholders.push('?');
+          createValues.push(userData.annualRequirement);
+        }
+        if (userData.requirementPeriod) {
+          createFields.push('requirement_period');
+          createPlaceholders.push('?');
+          createValues.push(userData.requirementPeriod);
+        }
+        if (userData.cycleStartDate) {
+          createFields.push('cycle_start_date');
+          createPlaceholders.push('?');
+          createValues.push(userData.cycleStartDate);
+        }
+        if (userData.cycleEndDate) {
+          createFields.push('cycle_end_date');
+          createPlaceholders.push('?');
+          createValues.push(userData.cycleEndDate);
+        }
+        
         await db.runAsync(`
-          INSERT INTO users (id, profession, country, credit_system, annual_requirement, requirement_period)
-          VALUES (1, ?, ?, ?, 50, 1)
-        `, [
-          userData.profession || 'Healthcare Professional',
-          userData.country || 'United States', 
-          userData.creditSystem || 'CME'
-        ]);
-        console.log('✅ DB Operations: Default user created');
+          INSERT INTO users (${createFields.join(', ')})
+          VALUES (${createPlaceholders.join(', ')})
+        `, createValues);
+        console.log('✅ DB Operations: User created with provided fields only');
         return { success: true };
       }
       
@@ -112,10 +299,6 @@ export const userOperations = {
       if (userData.profession) {
         fields.push('profession = ?');
         values.push(userData.profession);
-      }
-      if (userData.country) {
-        fields.push('country = ?');
-        values.push(userData.country);
       }
       if (userData.creditSystem) {
         console.log('🎯 DB Operations: Adding creditSystem to update:', userData.creditSystem);
@@ -129,6 +312,14 @@ export const userOperations = {
       if (userData.requirementPeriod) {
         fields.push('requirement_period = ?');
         values.push(userData.requirementPeriod);
+      }
+      if (userData.cycleStartDate) {
+        fields.push('cycle_start_date = ?');
+        values.push(userData.cycleStartDate);
+      }
+      if (userData.cycleEndDate) {
+        fields.push('cycle_end_date = ?');
+        values.push(userData.cycleEndDate);
       }
 
       if (fields.length === 0) {
@@ -237,21 +428,54 @@ export const cmeOperations = {
   addEntry: async (entry: Omit<CMEEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<DatabaseOperationResult<number>> => {
     try {
       console.log('🗃️ cmeOperations.addEntry: Starting database operation...');
-      const db = await getDatabase();
-      console.log('🗃️ cmeOperations.addEntry: Database connection established');
       
-      // First, ensure user exists
+      // Get database with improved error handling
+      let db: SQLite.SQLiteDatabase;
+      try {
+        db = await getDatabase();
+        console.log('🗃️ cmeOperations.addEntry: Database connection established');
+      } catch (dbError) {
+        console.error('💥 cmeOperations.addEntry: Failed to get database, forcing clean migration...', dbError);
+        // Force a clean database reset if connection fails
+        resetDatabaseInstance();
+        db = await forceCleanMigration();
+        console.log('🔄 cmeOperations.addEntry: Clean database created');
+      }
+      
+      // Verify tables exist
+      try {
+        await db.getFirstAsync("SELECT name FROM sqlite_master WHERE type='table' AND name='cme_entries'");
+        console.log('✅ cmeOperations.addEntry: CME entries table exists');
+      } catch (tableError) {
+        console.error('💥 cmeOperations.addEntry: CME entries table missing, recreating...', tableError);
+        await createSimpleTables(db);
+        console.log('🏗️ cmeOperations.addEntry: Tables recreated');
+      }
+      
+      // First, ensure user exists with proper error handling
       console.log('👤 cmeOperations.addEntry: Checking if user exists...');
-      const userCheck = await db.getFirstAsync('SELECT id FROM users WHERE id = 1');
-      console.log('👤 cmeOperations.addEntry: User check result:', userCheck);
+      let userCheck;
+      try {
+        userCheck = await db.getFirstAsync('SELECT id FROM users WHERE id = 1');
+        console.log('👤 cmeOperations.addEntry: User check result:', userCheck);
+      } catch (userCheckError) {
+        console.error('💥 cmeOperations.addEntry: User check failed:', userCheckError);
+        // If user check fails, assume no user exists
+        userCheck = null;
+      }
       
       if (!userCheck) {
         console.log('⚠️ cmeOperations.addEntry: User with ID 1 does not exist, creating default user...');
-        await db.runAsync(`
-          INSERT OR IGNORE INTO users (id, profession, country, credit_system, annual_requirement, requirement_period)
-          VALUES (1, 'Healthcare Professional', 'United States', 'Credits', 50, 1)
-        `);
-        console.log('✅ cmeOperations.addEntry: Default user created');
+        try {
+          await db.runAsync(`
+            INSERT OR IGNORE INTO users (id, profession, credit_system, annual_requirement, requirement_period)
+            VALUES (1, 'Healthcare Professional', 'Credits', 50, 1)
+          `);
+          console.log('✅ cmeOperations.addEntry: Default user created');
+        } catch (createUserError) {
+          console.error('💥 cmeOperations.addEntry: Failed to create default user:', createUserError);
+          throw new Error('Failed to create default user: ' + createUserError.message);
+        }
       }
       
       console.log('📝 cmeOperations.addEntry: Preparing to insert CME entry with data:', {
@@ -287,6 +511,44 @@ export const cmeOperations = {
       };
     } catch (error) {
       console.error('💥 cmeOperations.addEntry: Database error occurred:', error);
+      
+      // If we get a specific database corruption error, try one more time with clean migration
+      if (error instanceof Error && (
+        error.message.includes('NullPointerException') || 
+        error.message.includes('database is locked') ||
+        error.message.includes('no such table')
+      )) {
+        console.log('🔄 cmeOperations.addEntry: Attempting recovery with clean database...');
+        try {
+          resetDatabaseInstance();
+          const cleanDb = await forceCleanMigration();
+          
+          // Try the insertion again with clean database
+          const retryResult = await cleanDb.runAsync(`
+            INSERT INTO cme_entries (
+              title, provider, date_attended, credits_earned, 
+              category, notes, certificate_path, user_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+          `, [
+            entry.title,
+            entry.provider,
+            entry.dateAttended,
+            entry.creditsEarned,
+            entry.category,
+            entry.notes || null,
+            entry.certificatePath || null,
+          ]);
+          
+          console.log('✅ cmeOperations.addEntry: Retry successful after clean migration');
+          return {
+            success: true,
+            data: retryResult.lastInsertRowId,
+          };
+        } catch (retryError) {
+          console.error('💥 cmeOperations.addEntry: Retry also failed:', retryError);
+        }
+      }
+      
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to add CME entry',

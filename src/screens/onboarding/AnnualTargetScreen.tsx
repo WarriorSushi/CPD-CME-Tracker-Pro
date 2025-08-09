@@ -56,12 +56,27 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
   // Get dynamic terminology based on selected credit system
   const terminology = getCreditTerminology(creditSystem);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     const target = useCustomTarget ? parseInt(customTarget) : selectedTarget;
     const period = useCustomPeriod ? parseInt(customPeriod) : selectedPeriod;
     if (target && target > 0 && period && period > 0) {
-      // TODO: Save target and period to onboarding data
-      navigation.navigate('CycleStartDate');
+      console.log('💾 AnnualTargetScreen: Saving target and period:', { target, period });
+      try {
+        // Save both annual requirement and requirement period
+        const result = await userOperations.updateUser({
+          annualRequirement: target,
+          requirementPeriod: period
+        });
+        console.log('📊 AnnualTargetScreen: Save result:', result);
+        if (result.success) {
+          console.log('✅ AnnualTargetScreen: Successfully saved, navigating...');
+          navigation.navigate('CycleStartDate');
+        } else {
+          console.error('❌ AnnualTargetScreen: Failed to save target and period');
+        }
+      } catch (error) {
+        console.error('💥 AnnualTargetScreen: Error saving:', error);
+      }
     }
   };
 

@@ -3,7 +3,6 @@
 export interface User {
   id: number;
   profession: string;
-  country: string;
   creditSystem: CreditSystem;
   annualRequirement: number;
   requirementPeriod: number; // Period in years (1, 2, 3, 5, etc.)

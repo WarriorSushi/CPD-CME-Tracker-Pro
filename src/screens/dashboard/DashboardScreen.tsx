@@ -189,19 +189,15 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                   {currentYearProgress?.remainingDays || 0}
                 </Text>
                 <Text style={styles.progressTimeLabel}>
-                  days remaining
-                  {user?.requirementPeriod && user.requirementPeriod > 1 
-                    ? ` in ${user.requirementPeriod}-year cycle` 
-                    : ' this year'
-                  }
+                  days remaining in cycle
                 </Text>
               </View>
               <View style={[styles.progressStatusIndicator, { backgroundColor: currentYearProgress ? getProgressColor(currentYearProgress.status) : theme.colors.gray.medium }]}>
                 <Text style={styles.progressStatusText}>
                   {currentYearProgress?.status === 'completed' && 'Complete!'}
                   {currentYearProgress?.status === 'on_track' && 'On Track'}
-                  {currentYearProgress?.status === 'behind' && 'Behind Schedule'}
-                  {currentYearProgress?.status === 'overdue' && 'Overdue'}
+                  {currentYearProgress?.status === 'behind' && 'Keep Going'}
+                  {currentYearProgress?.status === 'overdue' && 'Action Needed'}
                   {!currentYearProgress && 'Getting Started'}
                 </Text>
               </View>

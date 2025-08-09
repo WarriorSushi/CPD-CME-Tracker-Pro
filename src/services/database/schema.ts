@@ -12,27 +12,98 @@ export const initializeDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
   return db;
 };
 
-// Create all tables
+// Create all tables (assumes transaction is already started by caller)
 export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => {
   try {
-    // Start transaction
-    await db.execAsync('BEGIN TRANSACTION;');
+    console.log('🏗️ createTables: Starting table creation/migration...');
 
-    // Users table for multi-user support (future)
-    await db.execAsync(`
-      CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        profession TEXT NOT NULL,
-        country TEXT NOT NULL,
-        credit_system TEXT NOT NULL,
-        annual_requirement INTEGER NOT NULL,
-        requirement_period INTEGER NOT NULL DEFAULT 1,
-        cycle_start_date DATE,
-        cycle_end_date DATE,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      );
+    // First, handle users table migration/creation
+    const tableExists = await db.getFirstAsync(`
+      SELECT name FROM sqlite_master WHERE type='table' AND name='users'
     `);
+    
+    if (tableExists) {
+      console.log('🔍 Migration: Checking if users table needs migration...');
+      
+      // Check if country column exists (means we need migration)
+      const countryColumnExists = await db.getFirstAsync(`
+        PRAGMA table_info(users)
+      `).then(async () => {
+        const columns = await db.getAllAsync('PRAGMA table_info(users)');
+        return columns.some((col: any) => col.name === 'country');
+      });
+      
+      if (countryColumnExists) {
+        console.log('🔄 Migration: Country column found, recreating users table...');
+        
+        // Backup existing user data (exclude country)
+        const existingUsers = await db.getAllAsync(`
+          SELECT id, profession, credit_system, annual_requirement, 
+                 requirement_period, cycle_start_date, cycle_end_date, created_at
+          FROM users
+        `);
+        
+        console.log('📦 Migration: Backed up', existingUsers.length, 'user records');
+        
+        // Drop old table
+        await db.execAsync('DROP TABLE users');
+        console.log('🗑️ Migration: Dropped old users table');
+        
+        // Create new table without country column
+        await db.execAsync(`
+          CREATE TABLE users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            profession TEXT,
+            credit_system TEXT,
+            annual_requirement INTEGER,
+            requirement_period INTEGER DEFAULT 1,
+            cycle_start_date DATE,
+            cycle_end_date DATE,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
+        console.log('🆕 Migration: Created new users table');
+        
+        // Restore data without country column
+        for (const user of existingUsers) {
+          await db.runAsync(`
+            INSERT INTO users (id, profession, credit_system, annual_requirement, requirement_period, cycle_start_date, cycle_end_date, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          `, [
+            user.id,
+            user.profession,
+            user.credit_system,
+            user.annual_requirement || null,
+            user.requirement_period || 1,
+            user.cycle_start_date || null,
+            user.cycle_end_date || null,
+            user.created_at
+          ]);
+        }
+        
+        console.log('✅ Migration: Successfully migrated', existingUsers.length, 'users to new table');
+      } else {
+        console.log('ℹ️ Migration: Users table already migrated, no action needed');
+      }
+    } else {
+      // Create table normally (first time)
+      console.log('🆕 Creating users table for the first time...');
+      await db.execAsync(`
+        CREATE TABLE users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          profession TEXT,
+          credit_system TEXT,
+          annual_requirement INTEGER,
+          requirement_period INTEGER DEFAULT 1,
+          cycle_start_date DATE,
+          cycle_end_date DATE,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+      console.log('✅ Created new users table');
+    }
 
     // CME entries table
     await db.execAsync(`
@@ -158,11 +229,7 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
       END;
     `);
 
-    // Insert default user if none exists
-    await db.execAsync(`
-      INSERT OR IGNORE INTO users (id, profession, country, credit_system, annual_requirement, requirement_period)
-      VALUES (1, 'Physician', 'United States', 'CME', 50, 1);
-    `);
+    // Note: User will be created during onboarding flow - no default user needed
 
     // Insert default app settings
     await db.execAsync(`
@@ -175,14 +242,10 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
       ('auto_scan_enabled', 'true');
     `);
 
-    // Commit transaction
-    await db.execAsync('COMMIT;');
     
-    console.log('Database tables created successfully');
+    console.log('✅ createTables: Database tables created successfully');
   } catch (error) {
-    // Rollback on error
-    await db.execAsync('ROLLBACK;');
-    console.error('Error creating database tables:', error);
+    console.error('💥 createTables: Error creating database tables:', error);
     throw error;
   }
 };
