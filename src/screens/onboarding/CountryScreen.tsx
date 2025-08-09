@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Card, Input } from '../../components';
+import { Button, Card, Input, ProgressIndicator } from '../../components';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { getColor } from '../../theme';
@@ -69,6 +69,8 @@ export const CountryScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <View style={styles.content}>
+        <ProgressIndicator currentStep={2} totalSteps={6} />
+        
         <View style={styles.header}>
           <Text style={styles.title}>Where are you located?</Text>
           <Text style={styles.subtitle}>This helps us configure your CME requirements</Text>

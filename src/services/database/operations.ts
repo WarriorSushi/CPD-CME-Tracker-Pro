@@ -366,6 +366,67 @@ export const cmeOperations = {
       };
     }
   },
+
+  // Get CME entries within a date range
+  getEntriesInDateRange: async (startDate: string, endDate: string): Promise<DatabaseOperationResult<CMEEntry[]>> => {
+    try {
+      const db = await getDatabase();
+      
+      const entries = await db.getAllAsync<CMEEntry>(`
+        SELECT 
+          id,
+          title,
+          provider,
+          date_attended as dateAttended,
+          credits_earned as creditsEarned,
+          category,
+          notes,
+          certificate_path as certificatePath,
+          created_at as createdAt,
+          updated_at as updatedAt
+        FROM cme_entries 
+        WHERE user_id = 1
+        AND date_attended >= ?
+        AND date_attended < ?
+        ORDER BY date_attended DESC
+      `, [startDate, endDate]);
+      
+      return {
+        success: true,
+        data: entries,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get CME entries in date range',
+      };
+    }
+  },
+
+  // Get total credits within a date range
+  getTotalCreditsInRange: async (startDate: string, endDate: string): Promise<DatabaseOperationResult<number>> => {
+    try {
+      const db = await getDatabase();
+      
+      const result = await db.getFirstAsync<{ total: number }>(`
+        SELECT COALESCE(SUM(credits_earned), 0) as total
+        FROM cme_entries 
+        WHERE user_id = 1 
+        AND date_attended >= ?
+        AND date_attended < ?
+      `, [startDate, endDate]);
+      
+      return {
+        success: true,
+        data: result?.total || 0,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get total credits in range',
+      };
+    }
+  },
 };
 
 // Certificate operations

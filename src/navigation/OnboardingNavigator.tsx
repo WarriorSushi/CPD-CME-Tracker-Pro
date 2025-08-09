@@ -5,12 +5,10 @@ import { OnboardingStackParamList } from '../types/navigation';
 
 // Import screens (we'll create these next)
 import { WelcomeScreen } from '../screens/onboarding/WelcomeScreen';
-import { FeaturesScreen } from '../screens/onboarding/FeaturesScreen';
-import { PrivacyScreen } from '../screens/onboarding/PrivacyScreen';
 import { ProfessionScreen } from '../screens/onboarding/ProfessionScreen';
-import { CountryScreen } from '../screens/onboarding/CountryScreen';
 import { CreditSystemScreen } from '../screens/onboarding/CreditSystemScreen';
 import { AnnualTargetScreen } from '../screens/onboarding/AnnualTargetScreen';
+import { CycleStartDateScreen } from '../screens/onboarding/CycleStartDateScreen';
 import { LicenseSetupScreen } from '../screens/onboarding/LicenseSetupScreen';
 import { SetupCompleteScreen } from '../screens/onboarding/SetupCompleteScreen';
 
@@ -50,20 +48,8 @@ export const OnboardingNavigator: React.FC = () => {
         }}
       />
       <Stack.Screen 
-        name="Features" 
-        component={FeaturesScreen}
-      />
-      <Stack.Screen 
-        name="Privacy" 
-        component={PrivacyScreen}
-      />
-      <Stack.Screen 
         name="Profession" 
         component={ProfessionScreen}
-      />
-      <Stack.Screen 
-        name="Country" 
-        component={CountryScreen}
       />
       <Stack.Screen 
         name="CreditSystem" 
@@ -72,6 +58,10 @@ export const OnboardingNavigator: React.FC = () => {
       <Stack.Screen 
         name="AnnualTarget" 
         component={AnnualTargetScreen}
+      />
+      <Stack.Screen 
+        name="CycleStartDate" 
+        component={CycleStartDateScreen}
       />
       <Stack.Screen 
         name="LicenseSetup" 

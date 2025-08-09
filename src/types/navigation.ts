@@ -6,13 +6,11 @@ export type RootStackParamList = {
 
 export type OnboardingStackParamList = {
   Welcome: undefined;
-  Features: undefined;
-  Privacy: undefined;
   Profession: undefined;
-  Country: undefined;
   CreditSystem: undefined;
   AnnualTarget: undefined;
-  LicenseSetup: undefined;
+  CycleStartDate: undefined;
+  LicenseSetup: { cycleStartDate?: string; syncWithLicense?: boolean } | undefined;
   SetupComplete: undefined;
 };
 

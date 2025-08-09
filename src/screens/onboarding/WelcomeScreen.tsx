@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card } from '../../components';
@@ -16,18 +16,12 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   
   const handleContinue = () => {
-    navigation.navigate('Features');
-  };
-
-  const handleSkip = () => {
-    // For now, we'll go through the full onboarding
-    // In a real app, we might check if user already has data
-    navigation.navigate('Features');
+    navigation.navigate('Profession');
   };
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      <View style={styles.content}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>Welcome to</Text>
           <Text style={styles.appName}>CME Tracker</Text>
@@ -36,59 +30,59 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
           </Text>
         </View>
 
-        <Card style={styles.benefitsCard}>
-          <View style={styles.benefitItem}>
-            <Text style={styles.benefitIcon}>🔒</Text>
-            <Text style={styles.benefitText}>
-              <Text style={styles.benefitTitle}>100% Private</Text>
-              {'\n'}All your data stays on your device
-            </Text>
+        {/* Key Features Section */}
+        <Card style={styles.featuresCard}>
+          <Text style={styles.sectionTitle}>✨ Key Features</Text>
+          <View style={styles.featuresGrid}>
+            <View style={styles.featureItem}>
+              <Text style={styles.featureIcon}>📊</Text>
+              <Text style={styles.featureText}>Track Progress</Text>
+            </View>
+            <View style={styles.featureItem}>
+              <Text style={styles.featureIcon}>📷</Text>
+              <Text style={styles.featureText}>Smart Scanner</Text>
+            </View>
+            <View style={styles.featureItem}>
+              <Text style={styles.featureIcon}>🗂️</Text>
+              <Text style={styles.featureText}>Digital Vault</Text>
+            </View>
+            <View style={styles.featureItem}>
+              <Text style={styles.featureIcon}>⏰</Text>
+              <Text style={styles.featureText}>Smart Reminders</Text>
+            </View>
           </View>
+        </Card>
 
-          <View style={styles.benefitItem}>
-            <Text style={styles.benefitIcon}>📱</Text>
-            <Text style={styles.benefitText}>
-              <Text style={styles.benefitTitle}>Works Offline</Text>
-              {'\n'}No internet required, ever
-            </Text>
+        {/* Privacy Section */}
+        <Card style={styles.privacyCard}>
+          <View style={styles.privacyHeader}>
+            <Text style={styles.privacyIcon}>🔒</Text>
+            <Text style={styles.sectionTitle}>Your Privacy is Protected</Text>
           </View>
-
-          <View style={styles.benefitItem}>
-            <Text style={styles.benefitIcon}>🎯</Text>
-            <Text style={styles.benefitText}>
-              <Text style={styles.benefitTitle}>Never Miss Deadlines</Text>
-              {'\n'}Smart reminders for renewals
-            </Text>
-          </View>
-
-          <View style={styles.benefitItem}>
-            <Text style={styles.benefitIcon}>📄</Text>
-            <Text style={styles.benefitText}>
-              <Text style={styles.benefitTitle}>Scan Certificates</Text>
-              {'\n'}Auto-extract information from photos
-            </Text>
+          <View style={styles.privacyGrid}>
+            <View style={styles.privacyItem}>
+              <Text style={styles.privacyFeatureIcon}>📱</Text>
+              <Text style={styles.privacyText}>100% Offline - Data never leaves your device</Text>
+            </View>
+            <View style={styles.privacyItem}>
+              <Text style={styles.privacyFeatureIcon}>🔐</Text>
+              <Text style={styles.privacyText}>Encrypted storage - Your data is secure</Text>
+            </View>
           </View>
         </Card>
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Built specifically for healthcare professionals
+            🏥 Built specifically for healthcare professionals who value privacy
           </Text>
         </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.actions}>
         <Button
-          title="Get Started"
+          title="Let's Get Started"
           onPress={handleContinue}
           style={styles.primaryButton}
-        />
-        
-        <Button
-          title="Skip Introduction"
-          variant="outline"
-          onPress={handleSkip}
-          style={styles.secondaryButton}
         />
       </View>
     </View>
@@ -100,74 +94,121 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  content: {
+  scrollView: {
     flex: 1,
-    padding: theme.spacing[5],
-    justifyContent: 'center',
+  },
+  content: {
+    padding: theme.spacing[3],
+    paddingBottom: theme.spacing[1],
   },
   header: {
     alignItems: 'center',
-    marginBottom: theme.spacing[8],
+    marginBottom: theme.spacing[3],
   },
   title: {
-    fontSize: theme.typography.fontSize.xl,
+    fontSize: theme.typography.fontSize.base,
     color: theme.colors.text.secondary,
     textAlign: 'center',
     marginBottom: theme.spacing[1],
   },
   appName: {
-    fontSize: theme.typography.fontSize.xxxxl,
+    fontSize: theme.typography.fontSize.xl,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.primary,
     textAlign: 'center',
-    marginBottom: theme.spacing[3],
+    marginBottom: theme.spacing[2],
   },
   subtitle: {
-    fontSize: theme.typography.fontSize.lg,
-    color: theme.colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  benefitsCard: {
-    marginBottom: theme.spacing[8],
-  },
-  benefitItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: theme.spacing[5],
-  },
-  benefitIcon: {
-    fontSize: 24,
-    marginRight: theme.spacing[4],
-    marginTop: theme.spacing[1],
-  },
-  benefitText: {
-    flex: 1,
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.text.primary,
-    lineHeight: 22,
-  },
-  benefitTitle: {
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text.primary,
-  },
-  footer: {
-    alignItems: 'center',
-  },
-  footerText: {
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
     textAlign: 'center',
-    fontStyle: 'italic',
+    lineHeight: 16,
   },
-  actions: {
-    padding: theme.spacing[5],
-    paddingTop: 0,
+  
+  // Features section
+  featuresCard: {
+    marginBottom: theme.spacing[3],
+    padding: theme.spacing[3],
   },
-  primaryButton: {
+  sectionTitle: {
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+    textAlign: 'center',
     marginBottom: theme.spacing[3],
   },
-  secondaryButton: {
-    // Secondary button styles
+  featuresGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  featureItem: {
+    width: '48%',
+    alignItems: 'center',
+    marginBottom: theme.spacing[2],
+  },
+  featureIcon: {
+    fontSize: 18,
+    marginBottom: theme.spacing[1],
+  },
+  featureText: {
+    fontSize: 10,
+    fontWeight: theme.typography.fontWeight.medium,
+    color: theme.colors.text.primary,
+    textAlign: 'center',
+  },
+  
+  // Privacy section
+  privacyCard: {
+    marginBottom: theme.spacing[3],
+    padding: theme.spacing[3],
+    backgroundColor: theme.colors.surface,
+    borderLeftWidth: 3,
+    borderLeftColor: theme.colors.primary,
+  },
+  privacyHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: theme.spacing[3],
+  },
+  privacyIcon: {
+    fontSize: 16,
+    marginRight: theme.spacing[2],
+  },
+  privacyGrid: {
+    gap: theme.spacing[2],
+  },
+  privacyItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  privacyFeatureIcon: {
+    fontSize: 14,
+    marginRight: theme.spacing[2],
+  },
+  privacyText: {
+    fontSize: 10,
+    color: theme.colors.text.primary,
+    flex: 1,
+  },
+  
+  footer: {
+    alignItems: 'center',
+    marginTop: theme.spacing[1],
+  },
+  footerText: {
+    fontSize: 9,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    lineHeight: 12,
+  },
+  actions: {
+    padding: theme.spacing[3],
+    paddingTop: theme.spacing[2],
+  },
+  primaryButton: {
+    marginBottom: theme.spacing[1],
   },
 });

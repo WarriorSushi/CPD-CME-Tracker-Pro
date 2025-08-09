@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Card } from '../../components';
+import { Button, Card, ProgressIndicator } from '../../components';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList, Profession } from '../../types';
 import { userOperations } from '../../services/database';
@@ -59,7 +59,7 @@ export const ProfessionScreen: React.FC<Props> = ({ navigation }) => {
       });
 
       if (result.success) {
-        navigation.navigate('Country');
+        navigation.navigate('CreditSystem');
       } else {
         // Handle error - in a real app, we'd show an error message
         console.error('Failed to save profession:', result.error);
@@ -79,6 +79,8 @@ export const ProfessionScreen: React.FC<Props> = ({ navigation }) => {
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
+          <ProgressIndicator currentStep={1} totalSteps={5} />
+          
           <View style={styles.header}>
             <Text style={styles.title}>What's your profession?</Text>
             <Text style={styles.subtitle}>
@@ -157,30 +159,30 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: theme.spacing[5],
+    padding: theme.spacing[3],
   },
   header: {
-    marginBottom: theme.spacing[6],
-    marginTop: theme.spacing[3],
+    marginBottom: theme.spacing[3],
+    marginTop: theme.spacing[1],
   },
   title: {
-    fontSize: theme.typography.fontSize.xxxl,
+    fontSize: theme.typography.fontSize.lg,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
     textAlign: 'center',
-    marginBottom: theme.spacing[3],
+    marginBottom: theme.spacing[2],
   },
   subtitle: {
-    fontSize: theme.typography.fontSize.base,
+    fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 18,
   },
   professionList: {
-    gap: theme.spacing[2], // Reduced from spacing[3] to spacing[2]
+    gap: theme.spacing[1],
   },
   compactCard: {
-    padding: theme.spacing[3], // Override default Card padding (was 16px, now 12px)
+    padding: theme.spacing[2],
   },
   professionContent: {
     flexDirection: 'row',
@@ -188,29 +190,29 @@ const styles = StyleSheet.create({
   },
   professionTextContent: {
     flex: 1,
-    marginRight: theme.spacing[2], // Reduced margin
+    marginRight: theme.spacing[1],
   },
   professionTitle: {
-    fontSize: theme.typography.fontSize.base, // Reduced from lg to base
+    fontSize: theme.typography.fontSize.sm,
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.text.primary,
-    marginBottom: theme.spacing[0], // Reduced margin between title and description
+    marginBottom: 0,
   },
   selectedProfessionTitle: {
     color: theme.colors.primary,
   },
   professionDescription: {
-    fontSize: theme.typography.fontSize.xs, // Reduced from sm to xs
+    fontSize: 10,
     color: theme.colors.text.secondary,
-    lineHeight: 16, // Reduced line height
+    lineHeight: 12,
   },
   selectedProfessionDescription: {
     color: theme.colors.text.primary,
   },
   radioButton: {
-    width: 20, // Reduced from 24 to 20
-    height: 20, // Reduced from 24 to 20
-    borderRadius: 10, // Adjusted for new size
+    width: 16,
+    height: 16,
+    borderRadius: 8,
     borderWidth: 2,
     borderColor: theme.colors.border.medium,
     alignItems: 'center',
@@ -220,17 +222,17 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.primary,
   },
   radioButtonInner: {
-    width: 10, // Reduced from 12 to 10
-    height: 10, // Reduced from 12 to 10
-    borderRadius: 5, // Adjusted for new size
+    width: 6,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: theme.colors.primary,
   },
   actions: {
-    padding: theme.spacing[5],
+    padding: theme.spacing[3],
     paddingTop: 0,
   },
   primaryButton: {
-    marginBottom: theme.spacing[3],
+    marginBottom: theme.spacing[2],
   },
   secondaryButton: {
     // Secondary button styles

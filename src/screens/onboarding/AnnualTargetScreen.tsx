@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Input, Card } from '../../components';
+import { Button, Input, Card, ProgressIndicator } from '../../components';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { DEFAULT_CREDIT_REQUIREMENTS } from '../../constants';
@@ -39,7 +39,7 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
     const period = useCustomPeriod ? parseInt(customPeriod) : selectedPeriod;
     if (target && target > 0 && period && period > 0) {
       // TODO: Save target and period to onboarding data
-      navigation.navigate('LicenseSetup');
+      navigation.navigate('CycleStartDate');
     }
   };
 
@@ -78,6 +78,8 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <View style={styles.content}>
+        <ProgressIndicator currentStep={3} totalSteps={5} />
+        
         <View style={styles.header}>
           <Text style={styles.title}>Credit Requirements</Text>
           <Text style={styles.subtitle}>How many credits do you need and over what period?</Text>
@@ -179,22 +181,22 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: theme.spacing[5],
+    padding: theme.spacing[3],
     justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
-    marginBottom: theme.spacing[8],
+    marginBottom: theme.spacing[4],
   },
   title: {
-    fontSize: theme.typography.fontSize.xxl,
+    fontSize: theme.typography.fontSize.lg,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
     textAlign: 'center',
-    marginBottom: theme.spacing[3],
+    marginBottom: theme.spacing[2],
   },
   subtitle: {
-    fontSize: theme.typography.fontSize.base,
+    fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
     textAlign: 'center',
   },
@@ -203,39 +205,39 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   section: {
-    marginBottom: theme.spacing[3],
+    marginBottom: theme.spacing[2],
   },
   sectionTitle: {
-    fontSize: theme.typography.fontSize.xs,
+    fontSize: 10,
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.text.primary,
-    marginBottom: theme.spacing[2],
+    marginBottom: theme.spacing[1],
   },
   optionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: theme.spacing[3],
+    marginBottom: theme.spacing[2],
   },
   optionCard: {
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.medium,
     borderWidth: 2,
     borderColor: theme.colors.border.light,
-    paddingVertical: theme.spacing[3],
-    paddingHorizontal: theme.spacing[3],
-    marginBottom: theme.spacing[3],
+    paddingVertical: theme.spacing[2],
+    paddingHorizontal: theme.spacing[2],
+    marginBottom: theme.spacing[2],
     alignItems: 'center',
     justifyContent: 'center',
     width: '22%',
-    minHeight: 50,
+    minHeight: 35,
   },
   selectedCard: {
     borderColor: theme.colors.primary,
     backgroundColor: getColor('selectedBg'),
   },
   optionText: {
-    fontSize: theme.typography.fontSize.base,
+    fontSize: theme.typography.fontSize.sm,
     fontWeight: theme.typography.fontWeight.medium,
     color: theme.colors.text.primary,
   },
@@ -250,10 +252,10 @@ const styles = StyleSheet.create({
   examplesSection: {
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.small,
-    padding: theme.spacing[2],
+    padding: theme.spacing[1],
     borderLeftWidth: 2,
     borderLeftColor: theme.colors.primary,
-    marginTop: theme.spacing[2],
+    marginTop: theme.spacing[1],
   },
   examplesTitle: {
     fontSize: 10,
@@ -268,10 +270,10 @@ const styles = StyleSheet.create({
     lineHeight: 11,
   },
   actions: {
-    padding: theme.spacing[5],
-    paddingTop: theme.spacing[3],
+    padding: theme.spacing[3],
+    paddingTop: theme.spacing[2],
   },
   primaryButton: {
-    marginBottom: theme.spacing[3],
+    marginBottom: theme.spacing[2],
   },
 });

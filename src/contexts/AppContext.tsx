@@ -77,19 +77,32 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     const now = new Date();
     const periodYears = user.requirementPeriod || 1;
     
-    // Calculate based on the user's requirement period
-    // For multi-year periods, we track from when they started their current cycle
-    // For now, we'll assume they started at beginning of current year for simplicity
-    const currentYear = now.getFullYear();
-    const startOfPeriod = new Date(currentYear, 0, 1);
-    const endOfPeriod = new Date(currentYear + periodYears, 0, 1);
+    // Use actual cycle dates if available, otherwise fall back to current year calculation
+    let startOfPeriod: Date;
+    let endOfPeriod: Date;
+    
+    if (user.cycleStartDate && user.cycleEndDate) {
+      // User has set their actual cycle dates
+      startOfPeriod = new Date(user.cycleStartDate);
+      endOfPeriod = new Date(user.cycleEndDate);
+    } else if (user.cycleStartDate) {
+      // User has set start date, calculate end date
+      startOfPeriod = new Date(user.cycleStartDate);
+      endOfPeriod = new Date(startOfPeriod);
+      endOfPeriod.setFullYear(startOfPeriod.getFullYear() + periodYears);
+    } else {
+      // No cycle dates set, fall back to current year assumption
+      const currentYear = now.getFullYear();
+      startOfPeriod = new Date(currentYear, 0, 1);
+      endOfPeriod = new Date(currentYear + periodYears, 0, 1);
+    }
     
     const totalDaysInPeriod = Math.ceil((endOfPeriod.getTime() - startOfPeriod.getTime()) / (1000 * 60 * 60 * 24));
     const daysPassed = Math.ceil((now.getTime() - startOfPeriod.getTime()) / (1000 * 60 * 60 * 24));
-    const remainingDays = Math.max(totalDaysInPeriod - daysPassed, 0);
+    const remainingDays = Math.max(Math.ceil((endOfPeriod.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)), 0);
     
     const percentage = user.annualRequirement > 0 ? (totalCredits / user.annualRequirement) * 100 : 0;
-    const expectedProgress = (daysPassed / totalDaysInPeriod) * 100;
+    const expectedProgress = daysPassed > 0 ? (daysPassed / totalDaysInPeriod) * 100 : 0;
     
     let status: Progress['status'];
     if (percentage >= 100) {
@@ -129,11 +142,33 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const refreshCMEData = useCallback(async (): Promise<void> => {
     try {
       setIsLoadingCME(true);
-      const currentYear = new Date().getFullYear();
+      
+      // Get current user to determine cycle dates
+      const userResult = await databaseOperations.user.getCurrentUser();
+      const userData = userResult.success ? userResult.data : null;
+      
+      let startDate: string;
+      let endDate: string;
+      
+      if (userData?.cycleStartDate && userData?.cycleEndDate) {
+        startDate = userData.cycleStartDate;
+        endDate = userData.cycleEndDate;
+      } else if (userData?.cycleStartDate) {
+        startDate = userData.cycleStartDate;
+        const endDateObj = new Date(userData.cycleStartDate);
+        endDateObj.setFullYear(endDateObj.getFullYear() + (userData.requirementPeriod || 1));
+        endDate = endDateObj.toISOString().split('T')[0];
+      } else {
+        // Fall back to current year if no cycle dates set
+        const currentYear = new Date().getFullYear();
+        startDate = `${currentYear}-01-01`;
+        const periodYears = userData?.requirementPeriod || 1;
+        endDate = `${currentYear + periodYears}-01-01`;
+      }
       
       const [entriesResult, creditsResult] = await Promise.all([
-        databaseOperations.cme.getAllEntries(currentYear),
-        databaseOperations.cme.getTotalCredits(currentYear),
+        databaseOperations.cme.getEntriesInDateRange(startDate, endDate),
+        databaseOperations.cme.getTotalCreditsInRange(startDate, endDate),
       ]);
       
       if (entriesResult.success) {

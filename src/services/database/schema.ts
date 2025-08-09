@@ -27,6 +27,8 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
         credit_system TEXT NOT NULL,
         annual_requirement INTEGER NOT NULL,
         requirement_period INTEGER NOT NULL DEFAULT 1,
+        cycle_start_date DATE,
+        cycle_end_date DATE,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
@@ -198,15 +200,27 @@ export const migrateDatabase = async (
     if (currentVersion < 1 && targetVersion >= 1) {
       console.log('🔄 Running migration 0 -> 1: Creating initial tables...');
       
-      // Check if users table exists and add missing column if needed
+      // Check if users table exists and add missing columns if needed
       const tableInfo = await db.getAllAsync(`PRAGMA table_info(users)`);
       const hasRequirementPeriod = tableInfo.some((col: any) => col.name === 'requirement_period');
+      const hasCycleStartDate = tableInfo.some((col: any) => col.name === 'cycle_start_date');
+      const hasCycleEndDate = tableInfo.some((col: any) => col.name === 'cycle_end_date');
       
-      if (!hasRequirementPeriod && tableInfo.length > 0) {
-        // Table exists but missing requirement_period column
-        console.log('⚙️ Adding requirement_period column to existing users table...');
-        await db.execAsync(`ALTER TABLE users ADD COLUMN requirement_period INTEGER NOT NULL DEFAULT 1`);
-      } else if (tableInfo.length === 0) {
+      if (tableInfo.length > 0) {
+        // Table exists, add missing columns
+        if (!hasRequirementPeriod) {
+          console.log('⚙️ Adding requirement_period column to existing users table...');
+          await db.execAsync(`ALTER TABLE users ADD COLUMN requirement_period INTEGER NOT NULL DEFAULT 1`);
+        }
+        if (!hasCycleStartDate) {
+          console.log('⚙️ Adding cycle_start_date column to existing users table...');
+          await db.execAsync(`ALTER TABLE users ADD COLUMN cycle_start_date DATE`);
+        }
+        if (!hasCycleEndDate) {
+          console.log('⚙️ Adding cycle_end_date column to existing users table...');
+          await db.execAsync(`ALTER TABLE users ADD COLUMN cycle_end_date DATE`);
+        }
+      } else {
         // Table doesn't exist, create all tables
         console.log('🏗️ Creating all database tables...');
         await createTables(db);

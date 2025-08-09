@@ -7,6 +7,8 @@ export interface User {
   creditSystem: CreditSystem;
   annualRequirement: number;
   requirementPeriod: number; // Period in years (1, 2, 3, 5, etc.)
+  cycleStartDate?: string; // When their current requirement cycle started
+  cycleEndDate?: string; // When their current requirement cycle ends
   createdAt: string;
 }
 

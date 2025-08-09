@@ -63,7 +63,7 @@ export const SimpleProgressRing: React.FC<SimpleProgressRingProps> = ({
   // Create progress segments starting from 12 o'clock (top) going clockwise
   const createSegments = () => {
     const segments = [];
-    const totalSegments = 60; // Fewer segments for better performance
+    const totalSegments = 80; // More segments for smoother appearance
     const filledSegments = Math.floor(progress * totalSegments);
     
     for (let i = 0; i < totalSegments; i++) {
@@ -78,10 +78,10 @@ export const SimpleProgressRing: React.FC<SimpleProgressRingProps> = ({
             styles.segment,
             {
               position: 'absolute',
-              width: 3,
-              height: strokeWidth - 2,
+              width: 4.5, // Slightly wider to reduce gaps
+              height: strokeWidth,
               backgroundColor: isActive ? color : backgroundColor,
-              borderRadius: 1.5,
+              borderRadius: 2,
               transform: [
                 { rotate: `${angle}deg` },
                 { translateY: -radius },
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   },
   circularBackground: {
     position: 'absolute',
-    backgroundColor: theme.colors.background,
+    backgroundColor: '#f8f9fa', // Match the dashboard background
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

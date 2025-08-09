@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Card } from '../../components';
+import { Button, Card, ProgressIndicator } from '../../components';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { getColor } from '../../theme';
@@ -38,9 +38,22 @@ export const LicenseSetupScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <View style={styles.content}>
+        <ProgressIndicator currentStep={5} totalSteps={5} />
+        
         <View style={styles.header}>
           <Text style={styles.title}>License Management</Text>
           <Text style={styles.subtitle}>Stay on top of your license renewals</Text>
+          
+          {/* Privacy-friendly guidance */}
+          <View style={styles.privacyTip}>
+            <Text style={styles.privacyIcon}>🔒</Text>
+            <View style={styles.privacyTextContainer}>
+              <Text style={styles.privacyText}>
+                <Text style={styles.privacyBold}>Pro tip:</Text> Just use license types like "RN License" or "Medical License" instead of license numbers. 
+                This keeps your information private while still tracking renewals!
+              </Text>
+            </View>
+          </View>
         </View>
 
         <View style={styles.optionsContainer}>
@@ -113,34 +126,61 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: theme.spacing[5],
+    padding: theme.spacing[3],
     justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
-    marginBottom: theme.spacing[8],
+    marginBottom: theme.spacing[4],
   },
   title: {
-    fontSize: theme.typography.fontSize.xl,
+    fontSize: theme.typography.fontSize.lg,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
     textAlign: 'center',
-    marginBottom: theme.spacing[2],
+    marginBottom: theme.spacing[1],
   },
   subtitle: {
-    fontSize: theme.typography.fontSize.base,
+    fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
     textAlign: 'center',
   },
+  privacyTip: {
+    flexDirection: 'row',
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing[2],
+    marginTop: theme.spacing[2],
+    borderLeftWidth: 3,
+    borderLeftColor: theme.colors.primary,
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
+  },
+  privacyIcon: {
+    fontSize: 14,
+    marginRight: theme.spacing[2],
+  },
+  privacyTextContainer: {
+    flex: 1,
+  },
+  privacyText: {
+    fontSize: 11,
+    color: theme.colors.text.primary,
+    lineHeight: 14,
+  },
+  privacyBold: {
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.primary,
+  },
   optionsContainer: {
-    marginBottom: theme.spacing[8],
+    marginBottom: theme.spacing[4],
   },
   modernOption: {
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.medium,
-    paddingVertical: theme.spacing[4],
-    paddingHorizontal: theme.spacing[4],
-    marginBottom: theme.spacing[3],
+    paddingVertical: theme.spacing[3],
+    paddingHorizontal: theme.spacing[3],
+    marginBottom: theme.spacing[2],
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -153,28 +193,28 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: getColor('selectedBg'),
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: theme.spacing[3],
+    marginRight: theme.spacing[2],
   },
   optionIcon: {
-    fontSize: 20,
+    fontSize: 16,
   },
   optionContent: {
     flex: 1,
   },
   optionTitle: {
-    fontSize: theme.typography.fontSize.base,
+    fontSize: theme.typography.fontSize.sm,
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.text.primary,
-    marginBottom: theme.spacing[1],
+    marginBottom: 2,
   },
   optionDescription: {
-    fontSize: theme.typography.fontSize.sm,
+    fontSize: 10,
     color: theme.colors.text.secondary,
   },
   arrow: {
@@ -213,8 +253,8 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   actions: {
-    padding: theme.spacing[5],
-    paddingTop: theme.spacing[3],
+    padding: theme.spacing[3],
+    paddingTop: theme.spacing[2],
   },
   backButton: {
     // Back button styles
