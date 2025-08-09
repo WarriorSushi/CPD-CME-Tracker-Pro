@@ -614,6 +614,9 @@ export const cmeOperations = {
   // Update CME entry
   updateEntry: async (id: number, entry: Partial<CMEEntry>): Promise<DatabaseOperationResult> => {
     try {
+      console.log('✏️ cmeOperations.updateEntry: Starting update for ID:', id);
+      console.log('📝 cmeOperations.updateEntry: Update data:', entry);
+      
       const db = await getDatabase();
       
       const fields = [];
@@ -649,16 +652,22 @@ export const cmeOperations = {
       }
 
       if (fields.length === 0) {
+        console.log('⚠️ cmeOperations.updateEntry: No fields to update');
         return { success: true };
       }
 
       values.push(id);
 
       const query = `UPDATE cme_entries SET ${fields.join(', ')} WHERE id = ? AND user_id = 1`;
-      await db.runAsync(query, values);
+      console.log('📝 cmeOperations.updateEntry: Executing query:', query);
+      console.log('📝 cmeOperations.updateEntry: With values:', values);
+      
+      const result = await db.runAsync(query, values);
+      console.log('✅ cmeOperations.updateEntry: Update result:', result);
 
       return { success: true };
     } catch (error) {
+      console.error('💥 cmeOperations.updateEntry: Database error occurred:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to update CME entry',
@@ -669,12 +678,38 @@ export const cmeOperations = {
   // Delete CME entry
   deleteEntry: async (id: number): Promise<DatabaseOperationResult> => {
     try {
+      console.log('🗑️ cmeOperations.deleteEntry: Starting delete for ID:', id);
+      
       const db = await getDatabase();
       
-      await db.runAsync('DELETE FROM cme_entries WHERE id = ? AND user_id = 1', [id]);
+      // First check if entry exists
+      const existingEntry = await db.getFirstAsync(
+        'SELECT id, title FROM cme_entries WHERE id = ? AND user_id = 1', 
+        [id]
+      );
+      console.log('🔍 cmeOperations.deleteEntry: Existing entry check:', existingEntry);
+      
+      if (!existingEntry) {
+        console.log('⚠️ cmeOperations.deleteEntry: Entry not found');
+        return { 
+          success: false, 
+          error: 'Entry not found' 
+        };
+      }
+      
+      const result = await db.runAsync('DELETE FROM cme_entries WHERE id = ? AND user_id = 1', [id]);
+      console.log('✅ cmeOperations.deleteEntry: Delete result:', result);
+      
+      // Verify deletion
+      const verifyDeleted = await db.getFirstAsync(
+        'SELECT id FROM cme_entries WHERE id = ? AND user_id = 1', 
+        [id]
+      );
+      console.log('🔍 cmeOperations.deleteEntry: Verify deleted:', verifyDeleted);
       
       return { success: true };
     } catch (error) {
+      console.error('💥 cmeOperations.deleteEntry: Database error occurred:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to delete CME entry',

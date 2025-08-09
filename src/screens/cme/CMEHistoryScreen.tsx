@@ -43,11 +43,28 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
   const [isLoadingAll, setIsLoadingAll] = useState(false);
   const [showAllEntries, setShowAllEntries] = useState(false);
 
-  // Refresh data when screen comes into focus
+  // Refresh data when screen comes into focus (e.g., returning from edit)
   useFocusEffect(
     useCallback(() => {
-      refreshCMEData();
-    }, [refreshCMEData])
+      console.log('🔄 CME History screen focused, refreshing data...');
+      
+      const refreshAllData = async () => {
+        await refreshCMEData();
+        
+        // If showing all entries, refresh them too
+        if (showAllEntries) {
+          console.log('🔄 Refreshing all entries since showAllEntries is true...');
+          try {
+            const freshEntries = await loadAllCMEEntries();
+            setAllEntries(freshEntries);
+          } catch (error) {
+            console.error('Error refreshing all entries:', error);
+          }
+        }
+      };
+      
+      refreshAllData();
+    }, [refreshCMEData, showAllEntries, loadAllCMEEntries])
   );
 
   const onRefresh = useCallback(async () => {
@@ -106,7 +123,14 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
   ))].sort((a, b) => b - a);
 
   const handleEditEntry = (entry: CMEEntry) => {
-    navigation.navigate('AddCME', { editEntry: entry });
+    try {
+      console.log('✏️ Attempting to edit entry:', entry.id, entry.title);
+      navigation.navigate('AddCME', { editEntry: entry });
+      console.log('✅ Navigation to AddCME screen initiated');
+    } catch (error) {
+      console.error('💥 Error navigating to edit screen:', error);
+      Alert.alert('Error', 'Failed to open edit screen. Please try again.');
+    }
   };
 
   const handleDeleteEntry = (entry: CMEEntry) => {
@@ -122,9 +146,31 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            const success = await deleteCMEEntry(entry.id);
-            if (!success) {
-              Alert.alert('Error', 'Failed to delete entry. Please try again.');
+            try {
+              console.log('🗑️ Attempting to delete entry:', entry.id);
+              const success = await deleteCMEEntry(entry.id);
+              
+              if (success) {
+                console.log('✅ Entry deleted successfully, refreshing local state...');
+                
+                // Update local state immediately for better UX
+                if (showAllEntries) {
+                  // Remove from allEntries if we're showing all
+                  setAllEntries(prev => prev.filter(e => e.id !== entry.id));
+                }
+                
+                // Also refresh the context data to ensure consistency
+                await refreshCMEData();
+                
+                // Show success message
+                Alert.alert('Success', 'Entry deleted successfully.');
+              } else {
+                console.error('❌ Delete operation returned false');
+                Alert.alert('Error', 'Failed to delete entry. Please try again.');
+              }
+            } catch (error) {
+              console.error('💥 Error during delete operation:', error);
+              Alert.alert('Error', 'An unexpected error occurred while deleting the entry.');
             }
           },
         },
@@ -185,14 +231,22 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
       <View style={styles.entryActions}>
         <TouchableOpacity 
           style={[styles.actionButton, styles.editButton]}
-          onPress={() => handleEditEntry(item)}
+          onPress={() => {
+            console.log('🖱️ Edit button pressed for entry:', item.id);
+            handleEditEntry(item);
+          }}
+          activeOpacity={0.7}
         >
           <Text style={styles.editButtonText}>Edit</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
           style={[styles.actionButton, styles.deleteButton]}
-          onPress={() => handleDeleteEntry(item)}
+          onPress={() => {
+            console.log('🖱️ Delete button pressed for entry:', item.id);
+            handleDeleteEntry(item);
+          }}
+          activeOpacity={0.7}
         >
           <Text style={styles.deleteButtonText}>Delete</Text>
         </TouchableOpacity>
