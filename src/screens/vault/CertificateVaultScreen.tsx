@@ -8,8 +8,7 @@ import {
   RefreshControl,
   Alert,
   Image,
-  Dimensions,
-  Modal
+  Dimensions
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -23,8 +22,6 @@ import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { Certificate } from '../../types';
 import { SUPPORTED_FILE_TYPES, MAX_FILE_SIZES, FILE_PATHS } from '../../constants';
-import { OCRService } from '../../services/ocrService';
-import { DocumentEdgeDetectionService } from '../../services/documentEdgeDetection';
 import { ThumbnailService } from '../../services/thumbnailService';
 
 const { width } = Dimensions.get('window');
@@ -43,8 +40,6 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [cameraPermission, setCameraPermission] = useState<boolean | null>(null);
   const [isScanning, setIsScanning] = useState(false);
-  const [ocrResult, setOCRResult] = useState<any>(null);
-  const [showOCRModal, setShowOCRModal] = useState(false);
 
   // Check camera permissions on mount
   useFocusEffect(
@@ -135,33 +130,15 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         await FileSystem.makeDirectoryAsync(certificatesDir, { intermediates: true });
       }
 
-      // Step 1: Document edge detection and enhancement
-      console.log('🔍 Starting document edge detection...');
-      let processedImageUri = imageAsset.uri;
-      
-      try {
-        const edgeDetectionResult = await DocumentEdgeDetectionService.detectAndCropDocument(imageAsset.uri);
-        processedImageUri = edgeDetectionResult.croppedImageUri;
-        console.log('✅ Document edge detection completed, confidence:', edgeDetectionResult.confidence);
-      } catch (edgeError) {
-        console.warn('⚠️ Edge detection failed, using original image:', edgeError);
-        // Fallback to basic image enhancement
-        try {
-          processedImageUri = await DocumentEdgeDetectionService.enhanceImageForOCR(imageAsset.uri);
-        } catch (enhanceError) {
-          console.warn('⚠️ Image enhancement also failed, using original:', enhanceError);
-        }
-      }
-
       // Generate unique filename
       const timestamp = Date.now();
       const extension = imageAsset.uri.split('.').pop() || 'jpg';
-      const newFileName = `scanned_certificate_${timestamp}.${extension}`;
+      const newFileName = `certificate_${timestamp}.${extension}`;
       const newFilePath = `${certificatesDir}${newFileName}`;
 
-      // Copy processed image to app documents
+      // Copy image to app documents
       await FileSystem.copyAsync({
-        from: processedImageUri,
+        from: imageAsset.uri,
         to: newFilePath,
       });
 
@@ -169,37 +146,20 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
       const fileInfo = await FileSystem.getInfoAsync(newFilePath);
       console.log('📁 Certificate saved to:', newFilePath);
 
-      // Step 2: Perform OCR text extraction on the processed image
-      console.log('🔍 Starting OCR processing...');
-      try {
-        const ocrResult = await OCRService.extractText(processedImageUri);
-        console.log('✅ OCR completed successfully');
-        
-        // Store OCR result and show modal
-        setOCRResult({
-          ...ocrResult,
-          imagePath: newFilePath,
-          fileName: newFileName,
-        });
-        setShowOCRModal(true);
-
-      } catch (ocrError) {
-        console.warn('⚠️ OCR failed, saving certificate without text extraction:', ocrError);
-        // Still save the certificate even if OCR fails
-        Alert.alert('Certificate Saved', 'Certificate saved successfully! OCR text extraction failed, but you can still view the image.');
-      }
-
-      // Step 3: Generate thumbnail
+      // Generate thumbnail
       console.log('📸 Generating thumbnail...');
+      let thumbnailPath = null;
       try {
-        const thumbnailResult = await ThumbnailService.generateThumbnail(processedImageUri, newFileName);
-        console.log('✅ Thumbnail generated successfully:', thumbnailResult.thumbnailUri);
+        const thumbnailResult = await ThumbnailService.generateThumbnail(imageAsset.uri, newFileName);
+        thumbnailPath = thumbnailResult.thumbnailUri;
+        console.log('✅ Thumbnail generated successfully:', thumbnailPath);
       } catch (thumbnailError) {
         console.warn('⚠️ Thumbnail generation failed:', thumbnailError);
-        // Continue without thumbnail - not critical for functionality
       }
 
-      // TODO: Save to database with OCR data and thumbnail path
+      // TODO: Save certificate to database with thumbnail path
+      // For now, just show success
+      Alert.alert('Success', 'Certificate saved to your vault!');
 
       await refreshCertificates();
 
@@ -215,31 +175,6 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
     cert.fileName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleCreateCMEEntry = () => {
-    if (!ocrResult || !navigation) return;
-    
-    // Navigate to AddCME screen with OCR data pre-filled
-    const extractedData = ocrResult.extractedData || {};
-    navigation.navigate('AddCME', {
-      ocrData: {
-        title: extractedData.title || '',
-        provider: extractedData.provider || '',
-        date: extractedData.date || '',
-        credits: extractedData.credits || '',
-        category: extractedData.category || '',
-        certificatePath: ocrResult.imagePath,
-      }
-    });
-    
-    setShowOCRModal(false);
-    setOCRResult(null);
-  };
-
-  const handleSaveCertificateOnly = () => {
-    Alert.alert('Success', 'Certificate saved to your vault!');
-    setShowOCRModal(false);
-    setOCRResult(null);
-  };
 
   const handleUploadCertificate = async () => {
     try {
@@ -481,7 +416,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         <Text style={styles.title}>Certificate Vault</Text>
         <TouchableOpacity 
           style={styles.infoButton}
-          onPress={() => Alert.alert('Certificate Vault', 'Scan or upload your certificates to keep them organized and easily accessible. Use OCR to automatically extract data for CME entries.')}
+          onPress={() => Alert.alert('Certificate Vault', 'Take photos or upload your certificates to keep them organized and easily accessible.')}
         >
           <Text style={styles.infoButtonText}>ℹ️</Text>
         </TouchableOpacity>
@@ -490,9 +425,9 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
       {/* Scanning Section */}
       <View style={styles.scanningSection}>
         <Card style={styles.scanningCard}>
-          <Text style={styles.scanningTitle}>📸 Scan New Certificate</Text>
+          <Text style={styles.scanningTitle}>📸 Add New Certificate</Text>
           <Text style={styles.scanningSubtitle}>
-            Take a photo or choose from gallery to add certificates instantly
+            Take a photo or choose from gallery to add certificates to your vault
           </Text>
           
           <View style={styles.scanningActions}>
@@ -541,7 +476,9 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{filteredCertificates.length}</Text>
-              <Text style={styles.statLabel}>Certificates</Text>
+              <Text style={styles.statLabel}>
+                {searchQuery ? 'Found' : 'Certificates'}
+              </Text>
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>
@@ -549,6 +486,14 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
               </Text>
               <Text style={styles.statLabel}>MB Used</Text>
             </View>
+            {searchQuery && (
+              <TouchableOpacity 
+                style={styles.clearSearchButton}
+                onPress={() => setSearchQuery('')}
+              >
+                <Text style={styles.clearSearchText}>Clear</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </Card>
       </View>
@@ -576,88 +521,6 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         />
       )}
 
-      {/* OCR Results Modal */}
-      <Modal
-        visible={showOCRModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowOCRModal(false)}
-      >
-        <View style={styles.ocrModalOverlay}>
-          <View style={styles.ocrModalContent}>
-            <Text style={styles.ocrModalTitle}>📄 Text Extracted!</Text>
-            
-            {ocrResult && (
-              <View style={styles.ocrResultContainer}>
-                {/* Preview Image */}
-                <View style={styles.ocrImagePreview}>
-                  <Image 
-                    source={{ uri: ocrResult.imagePath }}
-                    style={styles.ocrImage}
-                    resizeMode="cover"
-                  />
-                </View>
-
-                {/* Extracted Data Preview */}
-                <View style={styles.ocrDataPreview}>
-                  <Text style={styles.ocrDataTitle}>Detected Information:</Text>
-                  
-                  {ocrResult.extractedData?.title && (
-                    <View style={styles.ocrDataRow}>
-                      <Text style={styles.ocrDataLabel}>Title:</Text>
-                      <Text style={styles.ocrDataValue}>{ocrResult.extractedData.title}</Text>
-                    </View>
-                  )}
-                  
-                  {ocrResult.extractedData?.provider && (
-                    <View style={styles.ocrDataRow}>
-                      <Text style={styles.ocrDataLabel}>Provider:</Text>
-                      <Text style={styles.ocrDataValue}>{ocrResult.extractedData.provider}</Text>
-                    </View>
-                  )}
-                  
-                  {ocrResult.extractedData?.date && (
-                    <View style={styles.ocrDataRow}>
-                      <Text style={styles.ocrDataLabel}>Date:</Text>
-                      <Text style={styles.ocrDataValue}>{ocrResult.extractedData.date}</Text>
-                    </View>
-                  )}
-                  
-                  {ocrResult.extractedData?.credits && (
-                    <View style={styles.ocrDataRow}>
-                      <Text style={styles.ocrDataLabel}>Credits:</Text>
-                      <Text style={styles.ocrDataValue}>{ocrResult.extractedData.credits}</Text>
-                    </View>
-                  )}
-
-                  {!ocrResult.extractedData || Object.keys(ocrResult.extractedData).length === 0 && (
-                    <Text style={styles.ocrNoDataText}>
-                      No structured data detected. You can still create a CME entry manually.
-                    </Text>
-                  )}
-                </View>
-
-                {/* Action Buttons */}
-                <View style={styles.ocrActions}>
-                  <TouchableOpacity 
-                    style={[styles.ocrActionButton, styles.ocrSaveButton]}
-                    onPress={handleSaveCertificateOnly}
-                  >
-                    <Text style={styles.ocrSaveButtonText}>Save Certificate Only</Text>
-                  </TouchableOpacity>
-                  
-                  <TouchableOpacity 
-                    style={[styles.ocrActionButton, styles.ocrCreateButton]}
-                    onPress={handleCreateCMEEntry}
-                  >
-                    <Text style={styles.ocrCreateButtonText}>Create CME Entry</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };
@@ -930,115 +793,18 @@ const styles = StyleSheet.create({
     minWidth: 150,
   },
 
-  // OCR Modal Styles
-  ocrModalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: theme.spacing[4],
-  },
-  ocrModalContent: {
-    backgroundColor: theme.colors.background,
-    borderRadius: theme.spacing[4],
-    width: '100%',
-    maxHeight: '80%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  ocrModalTitle: {
-    fontSize: theme.typography.fontSize.xl,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text.primary,
-    textAlign: 'center',
-    padding: theme.spacing[4],
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border.light,
-  },
-  ocrResultContainer: {
-    padding: theme.spacing[4],
-  },
-  ocrImagePreview: {
-    height: 120,
-    borderRadius: theme.spacing[3],
-    overflow: 'hidden',
-    marginBottom: theme.spacing[4],
-    backgroundColor: theme.colors.gray.light,
-  },
-  ocrImage: {
-    width: '100%',
-    height: '100%',
-  },
-  ocrDataPreview: {
-    marginBottom: theme.spacing[4],
-  },
-  ocrDataTitle: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing[3],
-  },
-  ocrDataRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: theme.spacing[2],
-    paddingVertical: theme.spacing[2],
+  // Search and management styles
+  clearSearchButton: {
+    paddingVertical: theme.spacing[1],
     paddingHorizontal: theme.spacing[3],
-    backgroundColor: '#f8fafc',
+    backgroundColor: theme.colors.primary,
     borderRadius: theme.spacing[2],
+    marginLeft: theme.spacing[3],
   },
-  ocrDataLabel: {
-    fontSize: theme.typography.fontSize.sm,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text.secondary,
-    width: 80,
-  },
-  ocrDataValue: {
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.text.primary,
-    flex: 1,
-    fontWeight: theme.typography.fontWeight.medium,
-  },
-  ocrNoDataText: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text.secondary,
-    textAlign: 'center',
-    fontStyle: 'italic',
-    padding: theme.spacing[4],
-  },
-  ocrActions: {
-    flexDirection: 'row',
-    gap: theme.spacing[3],
-  },
-  ocrActionButton: {
-    flex: 1,
-    paddingVertical: theme.spacing[4],
-    paddingHorizontal: theme.spacing[3],
-    borderRadius: theme.spacing[3],
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  ocrSaveButton: {
-    backgroundColor: '#64748b',
-  },
-  ocrSaveButtonText: {
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.semibold,
+  clearSearchText: {
+    fontSize: theme.typography.fontSize.xs,
     color: theme.colors.background,
+    fontWeight: theme.typography.fontWeight.semibold,
   },
-  ocrCreateButton: {
-    backgroundColor: '#22c55e',
-  },
-  ocrCreateButtonText: {
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.background,
-  },
+
 });

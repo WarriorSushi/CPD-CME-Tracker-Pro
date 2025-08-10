@@ -1,9 +1,9 @@
 import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { Card, Button, LoadingSpinner } from '../../components';
+import { Card, Button, LoadingSpinner, CertificateViewer } from '../../components';
 import { SimpleProgressRing } from '../../components/charts/SimpleProgressRing';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
@@ -36,6 +36,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
 
   const [refreshing, setRefreshing] = React.useState(false);
+  const [selectedCertificate, setSelectedCertificate] = React.useState<string | undefined>(undefined);
 
   // Refresh data when screen comes into focus
   useFocusEffect(
@@ -284,9 +285,21 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             {recentEntries.map((entry, index) => (
               <Card key={entry.id} style={styles.activityItem}>
                 <View style={styles.activityContent}>
-                  <View style={styles.activityIcon}>
-                    <Text style={styles.activityEmoji}>📖</Text>
-                  </View>
+                  <TouchableOpacity 
+                    style={styles.activityIcon}
+                    onPress={() => entry.certificatePath && setSelectedCertificate(entry.certificatePath)}
+                    disabled={!entry.certificatePath}
+                  >
+                    {entry.certificatePath ? (
+                      <Image 
+                        source={{ uri: entry.certificatePath }}
+                        style={styles.certificateThumbnailDashboard}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <Text style={styles.activityEmoji}>📖</Text>
+                    )}
+                  </TouchableOpacity>
                   <View style={styles.activityDetails}>
                     <Text style={styles.activityTitle} numberOfLines={1}>
                       {entry.title}
@@ -359,6 +372,13 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         {/* Bottom spacer for tab bar */}
         <View style={styles.bottomSpacer} />
       </ScrollView>
+
+      {/* Certificate Viewer */}
+      <CertificateViewer
+        visible={!!selectedCertificate}
+        imageUri={selectedCertificate}
+        onClose={() => setSelectedCertificate(undefined)}
+      />
     </View>
   );
 };
@@ -738,5 +758,13 @@ const styles = StyleSheet.create({
   // Bottom spacer for tab bar
   bottomSpacer: {
     height: 100, // Ensure content is fully above bottom tab bar
+  },
+
+  // Certificate Thumbnail Styles
+  certificateThumbnailDashboard: {
+    width: 32,
+    height: 32,
+    borderRadius: theme.spacing[2],
+    backgroundColor: theme.colors.gray.light,
   },
 });

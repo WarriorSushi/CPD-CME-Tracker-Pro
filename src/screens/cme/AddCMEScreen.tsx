@@ -5,21 +5,26 @@ import {
   StyleSheet, 
   ScrollView, 
   Alert,
-  TouchableOpacity 
+  TouchableOpacity,
+  Image
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
+import { Camera } from 'expo-camera';
 
 import { Button, Card, Input, LoadingSpinner, DatePicker } from '../../components';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { CMEStackParamList } from '../../types/navigation';
-import { CME_CATEGORIES } from '../../constants';
+import { CME_CATEGORIES, FILE_PATHS } from '../../constants';
 import { CMEEntry } from '../../types';
 import { getCreditUnit } from '../../utils/creditTerminology';
+import { ThumbnailService } from '../../services/thumbnailService';
 
 type AddCMEScreenNavigationProp = StackNavigationProp<CMEStackParamList, 'AddCME'>;
 type AddCMEScreenRouteProp = RouteProp<CMEStackParamList, 'AddCME'>;
@@ -36,6 +41,7 @@ interface FormData {
   creditsEarned: string;
   category: string;
   notes: string;
+  certificatePath?: string;
 }
 
 interface FormErrors {
@@ -82,10 +88,13 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
     creditsEarned: editEntry?.creditsEarned?.toString() || ocrData?.credits || '',
     category: editEntry?.category || ocrData?.category || CME_CATEGORIES[0],
     notes: editEntry?.notes || '',
+    certificatePath: editEntry?.certificatePath || ocrData?.certificatePath || undefined,
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [cameraPermission, setCameraPermission] = useState<boolean | null>(null);
+  const [isUploadingCertificate, setIsUploadingCertificate] = useState(false);
 
   // Reset form when screen comes into focus or params change
   useEffect(() => {
@@ -104,6 +113,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       creditsEarned: currentEditEntry?.creditsEarned?.toString() || currentOcrData?.credits || '',
       category: currentEditEntry?.category || currentOcrData?.category || CME_CATEGORIES[0],
       notes: currentEditEntry?.notes || '',
+      certificatePath: currentEditEntry?.certificatePath || currentOcrData?.certificatePath || undefined,
     });
     
     // Clear any errors when resetting
@@ -125,6 +135,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
           creditsEarned: '',
           category: CME_CATEGORIES[0],
           notes: '',
+          certificatePath: undefined,
         });
         setErrors({});
       } else {
@@ -132,6 +143,146 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       }
     }, [route.params?.editEntry, formData.title, formData.provider])
   );
+
+  // Camera permission handling
+  const checkCameraPermissions = async () => {
+    const { status } = await Camera.getCameraPermissionsAsync();
+    setCameraPermission(status === 'granted');
+  };
+
+  const requestCameraPermissions = async () => {
+    const { status } = await Camera.requestCameraPermissionsAsync();
+    setCameraPermission(status === 'granted');
+    return status === 'granted';
+  };
+
+  // Certificate handling functions
+  const handleTakePhoto = async () => {
+    if (!cameraPermission) {
+      const granted = await requestCameraPermissions();
+      if (!granted) {
+        Alert.alert('Camera Permission', 'Camera access is required to take photos.');
+        return;
+      }
+    }
+
+    try {
+      setIsUploadingCertificate(true);
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+        base64: false,
+      });
+
+      if (!result.canceled) {
+        await processCertificateImage(result.assets[0]);
+      }
+    } catch (error) {
+      console.error('Camera error:', error);
+      Alert.alert('Error', 'Failed to open camera. Please try again.');
+    } finally {
+      setIsUploadingCertificate(false);
+    }
+  };
+
+  const handleChooseFromGallery = async () => {
+    try {
+      setIsUploadingCertificate(true);
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+        base64: false,
+      });
+
+      if (!result.canceled) {
+        await processCertificateImage(result.assets[0]);
+      }
+    } catch (error) {
+      console.error('Gallery error:', error);
+      Alert.alert('Error', 'Failed to open photo gallery. Please try again.');
+    } finally {
+      setIsUploadingCertificate(false);
+    }
+  };
+
+  const processCertificateImage = async (imageAsset: any) => {
+    try {
+      console.log('📄 Processing certificate image for CME entry:', imageAsset.uri);
+      
+      // Create certificates directory if it doesn't exist
+      const certificatesDir = `${FileSystem.documentDirectory}${FILE_PATHS.CERTIFICATES}`;
+      const dirInfo = await FileSystem.getInfoAsync(certificatesDir);
+      
+      if (!dirInfo.exists) {
+        await FileSystem.makeDirectoryAsync(certificatesDir, { intermediates: true });
+      }
+
+      // Generate unique filename
+      const timestamp = Date.now();
+      const extension = imageAsset.uri.split('.').pop() || 'jpg';
+      const newFileName = `cme_certificate_${timestamp}.${extension}`;
+      const newFilePath = `${certificatesDir}${newFileName}`;
+
+      // Copy image to app documents
+      await FileSystem.copyAsync({
+        from: imageAsset.uri,
+        to: newFilePath,
+      });
+
+      // Generate thumbnail
+      try {
+        await ThumbnailService.generateThumbnail(imageAsset.uri, newFileName);
+      } catch (thumbnailError) {
+        console.warn('⚠️ Thumbnail generation failed:', thumbnailError);
+      }
+
+      // Update form data with certificate path
+      setFormData(prev => ({
+        ...prev,
+        certificatePath: newFilePath,
+      }));
+
+      Alert.alert('Success', 'Certificate added to CME entry!');
+
+    } catch (error) {
+      console.error('💥 Error processing certificate:', error);
+      Alert.alert('Error', 'Failed to process certificate. Please try again.');
+    }
+  };
+
+  const handleChooseFromVault = () => {
+    // Navigate to certificate vault in selection mode
+    navigation.navigate('CertificateVault', { selectionMode: true });
+  };
+
+  const handleRemoveCertificate = () => {
+    Alert.alert(
+      'Remove Certificate',
+      'Are you sure you want to remove the certificate from this entry?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => {
+            setFormData(prev => ({
+              ...prev,
+              certificatePath: undefined,
+            }));
+          },
+        },
+      ]
+    );
+  };
+
+  // Check camera permissions on mount
+  useEffect(() => {
+    checkCameraPermissions();
+  }, []);
 
   // Validation
   const validateForm = (): boolean => {
@@ -184,7 +335,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
         creditsEarned: parseFloat(formData.creditsEarned),
         category: formData.category,
         notes: formData.notes.trim() || undefined,
-        certificatePath: undefined, // For now, no certificate attachment in form
+        certificatePath: formData.certificatePath,
       };
 
       console.log('📝 handleSubmit: Entry data prepared:', entryData);
@@ -334,6 +485,66 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
               style={styles.notesInput}
             />
           </View>
+        </Card>
+
+        {/* Certificate Section */}
+        <Card style={styles.certificateCard}>
+          <Text style={styles.sectionTitle}>📄 Certificate (Optional)</Text>
+          <Text style={styles.sectionSubtitle}>
+            Attach a certificate or photo for this CME activity
+          </Text>
+
+          {formData.certificatePath ? (
+            // Show certificate preview
+            <View style={styles.certificatePreview}>
+              <Image 
+                source={{ uri: formData.certificatePath }}
+                style={styles.certificateImage}
+                resizeMode="cover"
+              />
+              <View style={styles.certificateActions}>
+                <TouchableOpacity 
+                  style={styles.removeCertButton}
+                  onPress={handleRemoveCertificate}
+                >
+                  <Text style={styles.removeCertButtonText}>🗑️ Remove</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            // Show upload options
+            <View style={styles.certificateUploadSection}>
+              <View style={styles.uploadButtonsRow}>
+                <TouchableOpacity 
+                  style={[styles.uploadButton, styles.cameraButton]}
+                  onPress={handleTakePhoto}
+                  disabled={isUploadingCertificate}
+                >
+                  <Text style={styles.uploadButtonIcon}>📷</Text>
+                  <Text style={styles.uploadButtonText}>Take Photo</Text>
+                  {isUploadingCertificate && <LoadingSpinner size={16} />}
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[styles.uploadButton, styles.galleryButton]}
+                  onPress={handleChooseFromGallery}
+                  disabled={isUploadingCertificate}
+                >
+                  <Text style={styles.uploadButtonIcon}>🖼️</Text>
+                  <Text style={styles.uploadButtonText}>Gallery</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[styles.uploadButton, styles.vaultButton]}
+                  onPress={handleChooseFromVault}
+                  disabled={isUploadingCertificate}
+                >
+                  <Text style={styles.uploadButtonIcon}>📁</Text>
+                  <Text style={styles.uploadButtonText}>From Vault</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
         </Card>
 
         {/* Action Buttons */}
@@ -493,5 +704,87 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: theme.spacing[4],
     marginBottom: theme.spacing[4],
+  },
+
+  // Certificate Section
+  certificateCard: {
+    marginBottom: theme.spacing[4],
+  },
+  sectionTitle: {
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[2],
+  },
+  sectionSubtitle: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    marginBottom: theme.spacing[4],
+    lineHeight: 20,
+  },
+  certificateUploadSection: {
+    alignItems: 'center',
+  },
+  uploadButtonsRow: {
+    flexDirection: 'row',
+    gap: theme.spacing[3],
+    justifyContent: 'space-around',
+    width: '100%',
+  },
+  uploadButton: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: theme.spacing[4],
+    paddingHorizontal: theme.spacing[2],
+    borderRadius: theme.spacing[3],
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cameraButton: {
+    backgroundColor: '#3b82f6',
+  },
+  galleryButton: {
+    backgroundColor: '#10b981',
+  },
+  vaultButton: {
+    backgroundColor: '#8b5cf6',
+  },
+  uploadButtonIcon: {
+    fontSize: 20,
+    marginBottom: theme.spacing[1],
+  },
+  uploadButtonText: {
+    fontSize: theme.typography.fontSize.xs,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.background,
+    textAlign: 'center',
+  },
+  certificatePreview: {
+    alignItems: 'center',
+    gap: theme.spacing[3],
+  },
+  certificateImage: {
+    width: '100%',
+    height: 150,
+    borderRadius: theme.spacing[3],
+    backgroundColor: theme.colors.gray.light,
+  },
+  certificateActions: {
+    alignSelf: 'stretch',
+    alignItems: 'center',
+  },
+  removeCertButton: {
+    paddingVertical: theme.spacing[2],
+    paddingHorizontal: theme.spacing[4],
+    borderRadius: theme.spacing[2],
+    backgroundColor: '#ef4444',
+  },
+  removeCertButtonText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.background,
+    fontWeight: theme.typography.fontWeight.semibold,
   },
 });

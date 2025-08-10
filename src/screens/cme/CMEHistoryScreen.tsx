@@ -6,13 +6,14 @@ import {
   FlatList, 
   TouchableOpacity, 
   RefreshControl,
-  Alert
+  Alert,
+  Image
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-import { Card, Button, Input, LoadingSpinner } from '../../components';
+import { Card, Button, Input, LoadingSpinner, CertificateViewer } from '../../components';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { CMEStackParamList } from '../../types/navigation';
@@ -50,6 +51,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
   const [allEntries, setAllEntries] = useState<CMEEntry[]>([]);
   const [isLoadingAll, setIsLoadingAll] = useState(false);
   const [showAllEntries, setShowAllEntries] = useState(false);
+  const [selectedCertificate, setSelectedCertificate] = useState<string | undefined>(undefined);
 
   // Refresh data when screen comes into focus (e.g., returning from edit)
   useFocusEffect(
@@ -223,6 +225,21 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
             <Text style={styles.entryCategory}>• {item.category}</Text>
           </View>
         </View>
+
+        {/* Certificate Thumbnail */}
+        {item.certificatePath && (
+          <TouchableOpacity 
+            style={styles.certificateThumbnailContainer}
+            onPress={() => setSelectedCertificate(item.certificatePath)}
+          >
+            <Image 
+              source={{ uri: item.certificatePath }}
+              style={styles.certificateThumbnail}
+              resizeMode="cover"
+            />
+            <Text style={styles.certificateLabel}>📄</Text>
+          </TouchableOpacity>
+        )}
         
         <View style={styles.entryCredits}>
           <Text style={styles.creditsValue}>{item.creditsEarned}</Text>
@@ -372,6 +389,13 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
           }
         />
       )}
+
+      {/* Certificate Viewer */}
+      <CertificateViewer
+        visible={!!selectedCertificate}
+        imageUri={selectedCertificate}
+        onClose={() => setSelectedCertificate(undefined)}
+      />
     </View>
   );
 };
@@ -659,5 +683,22 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
     textAlign: 'center',
+  },
+
+  // Certificate Thumbnail Styles
+  certificateThumbnailContainer: {
+    alignItems: 'center',
+    marginHorizontal: theme.spacing[3],
+  },
+  certificateThumbnail: {
+    width: 40,
+    height: 40,
+    borderRadius: theme.spacing[2],
+    backgroundColor: theme.colors.gray.light,
+    marginBottom: theme.spacing[1],
+  },
+  certificateLabel: {
+    fontSize: 10,
+    opacity: 0.7,
   },
 });
