@@ -96,6 +96,7 @@ export const MainTabNavigator: React.FC = () => {
         listeners={{
           tabPress: (e) => {
             console.log('📚 MainTabNavigator: History tab pressed!');
+            // Let the CMENavigator handle the initial route logic
           },
         }}
       />

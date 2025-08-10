@@ -93,8 +93,8 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
     useCallback(() => {
       const currentEditEntry = route.params?.editEntry;
       
-      // Only reset if this is a new entry (no editEntry)
-      if (!currentEditEntry) {
+      // Only reset if this is a new entry (no editEntry) AND we haven't already populated form data
+      if (!currentEditEntry && !formData.title && !formData.provider) {
         console.log('🔄 AddCMEScreen: Screen focused, resetting for new entry');
         setFormData({
           title: '',
@@ -105,8 +105,10 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
           notes: '',
         });
         setErrors({});
+      } else {
+        console.log('🔄 AddCMEScreen: Screen focused, skipping reset (editing or form has data)');
       }
-    }, [route.params?.editEntry])
+    }, [route.params?.editEntry, formData.title, formData.provider])
   );
 
   // Validation
