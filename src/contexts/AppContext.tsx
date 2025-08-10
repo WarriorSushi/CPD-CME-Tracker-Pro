@@ -84,10 +84,34 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Error state
   const [error, setError] = useState<string | null>(null);
   
+  // Cached user data to reduce database calls
+  const [cachedUserData, setCachedUserData] = useState<{ user: User | null; timestamp: number } | null>(null);
+  const USER_CACHE_DURATION = 5000; // 5 seconds
+  
   // Clear error function
   const clearError = useCallback(() => {
     setError(null);
   }, []);
+  
+  // Optimized getCurrentUser with caching
+  const getCachedCurrentUser = useCallback(async (): Promise<User | null> => {
+    const now = Date.now();
+    
+    // Return cached data if it's fresh
+    if (cachedUserData && (now - cachedUserData.timestamp) < USER_CACHE_DURATION) {
+      console.log('💾 AppContext: Using cached user data');
+      return cachedUserData.user;
+    }
+    
+    console.log('🔄 AppContext: Fetching fresh user data (cache miss/expired)');
+    const userResult = await databaseOperations.user.getCurrentUser();
+    const userData = userResult.success ? userResult.data : null;
+    
+    // Cache the result
+    setCachedUserData({ user: userData, timestamp: now });
+    
+    return userData;
+  }, [cachedUserData]);
 
   // Calculate progress based on current data and user's requirement period
   const calculateProgress = (user: User, totalCredits: number): Progress => {
@@ -169,8 +193,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       const userResult = await databaseOperations.user.getCurrentUser();
       const userData = userResult.success ? userResult.data : null;
       
+      console.log('📊 AppContext.refreshCMEData: User data:', userData);
+      
       if (!userData) {
         console.log('⚠️ AppContext: No user data, skipping CME refresh');
+        // Still try to load all entries without date filtering
+        const allEntriesResult = await databaseOperations.cme.getAllEntries();
+        console.log('📊 AppContext: All entries (fallback):', allEntriesResult);
+        if (allEntriesResult.success && allEntriesResult.data) {
+          setRecentCMEEntries(allEntriesResult.data.slice(0, 10));
+          const totalCredits = allEntriesResult.data.reduce((sum, entry) => sum + entry.creditsEarned, 0);
+          setTotalCredits(totalCredits);
+        }
         return;
       }
       
@@ -193,9 +227,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         endDate = `${currentYear + periodYears}-01-01`;
       }
       
+      console.log('📅 AppContext.refreshCMEData: Using date range:', { startDate, endDate });
+      
       // Load recent entries (last 10) and total credits in parallel
-      const [recentEntriesResult, creditsResult] = await Promise.all([
+      const [recentEntriesResult, creditsResult, allEntriesResult] = await Promise.all([
         databaseOperations.cme.getEntriesInDateRange(startDate, endDate).then(result => {
+          console.log('📊 AppContext: Entries in date range result:', result);
           if (result.success && result.data) {
             // Limit to most recent 10 entries for performance
             return { success: true, data: result.data.slice(0, 10) };
@@ -203,11 +240,26 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           return result;
         }),
         databaseOperations.cme.getTotalCreditsInRange(startDate, endDate),
+        // Also get ALL entries for debugging
+        databaseOperations.cme.getAllEntries().then(result => {
+          console.log('📊 AppContext: ALL entries in DB:', result);
+          return result;
+        })
       ]);
       
       if (recentEntriesResult.success) {
+        console.log('📋 AppContext: Setting recent entries:', recentEntriesResult.data);
         setRecentCMEEntries(recentEntriesResult.data || []);
+        
+        // If no entries in date range but there are entries in DB, warn about date filtering
+        if ((!recentEntriesResult.data || recentEntriesResult.data.length === 0) && 
+            allEntriesResult.success && allEntriesResult.data && allEntriesResult.data.length > 0) {
+          console.log('⚠️ AppContext: No entries in date range but entries exist in DB - possible date filtering issue');
+          console.log('📅 AppContext: Date range used:', { startDate, endDate });
+          console.log('📋 AppContext: All entries dates:', allEntriesResult.data.map(e => ({ id: e.id, title: e.title, date: e.dateAttended })));
+        }
       } else {
+        console.error('💥 AppContext: Failed to load recent entries:', recentEntriesResult.error);
         setError('Failed to load recent CME entries. Please try again.');
       }
       

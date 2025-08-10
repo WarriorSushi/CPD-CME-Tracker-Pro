@@ -2,8 +2,7 @@
 // This is maintained for backward compatibility during migration
 // TODO: Replace all imports of this with the new theme system
 
-import { tokens } from '../theme/tokens';
-import { getColor } from '../theme';
+import { tokens, getColor } from '../theme/tokens';
 
 export const theme = {
   colors: {

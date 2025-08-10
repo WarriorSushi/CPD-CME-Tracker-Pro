@@ -9,44 +9,62 @@ import {
   DatabaseOperationResult 
 } from '../../types';
 import { setupDatabase } from './schema';
+import { dbMutex } from '../../utils/AsyncMutex';
+import { 
+  closeDatabaseSafe, 
+  deleteDatabaseSafe, 
+  forceCleanupHandles, 
+  testDatabaseHealthSafe,
+  getFirstSafe,
+  getAllSafe,
+  runSafe,
+  runInTransaction
+} from '../../utils/DatabaseUtils';
 
 // Database instance with proper singleton pattern
 let dbInstance: SQLite.SQLiteDatabase | null = null;
 let dbInitPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
-// Force clean database migration with proper cleanup
+// Health check throttling to reduce log spam
+let lastHealthCheck: { result: boolean; timestamp: number } | null = null;
+const HEALTH_CHECK_THROTTLE = 2000; // 2 seconds
+
+// Force clean database migration with proper cleanup (with mutex protection)
 const forceCleanMigration = async (): Promise<SQLite.SQLiteDatabase> => {
-  console.log('🧹 Force migration: Starting clean database migration...');
-  
-  try {
-    // Create fresh database with simple initialization
-    const db = await SQLite.openDatabaseAsync('cme_tracker.db');
-    await db.execAsync('PRAGMA foreign_keys = ON;');
+  return dbMutex.runDatabaseInit('forceCleanMigration', async () => {
+    console.log('🧹 Force migration: Starting clean database migration...');
     
-    // Create tables directly without migration system
-    console.log('🏗️ Force migration: Creating fresh tables...');
-    await createSimpleTables(db);
-    
-    // Test the new database before returning
-    const isHealthy = await testDatabaseHealth(db);
-    if (!isHealthy) {
-      await safeCloseDatabase(db);
-      throw new Error('Newly created database failed health check');
+    try {
+      // Create fresh database with simple initialization
+      const db = await SQLite.openDatabaseAsync('cme_tracker.db');
+      await db.execAsync('PRAGMA foreign_keys = ON;');
+      
+      // Create tables directly without migration system
+      console.log('🏗️ Force migration: Creating fresh tables...');
+      await createSimpleTables(db);
+      
+      // Test the new database before returning
+      const isHealthy = await testDatabaseHealthSafe(db);
+      if (!isHealthy) {
+        await closeDatabaseSafe(db);
+        throw new Error('Newly created database failed health check');
+      }
+      
+      console.log('✅ Force migration: Created and verified fresh database');
+      return db;
+    } catch (error) {
+      console.error('💥 Force migration: Error during clean migration:', error);
+      throw error;
     }
-    
-    console.log('✅ Force migration: Created and verified fresh database');
-    return db;
-  } catch (error) {
-    console.error('💥 Force migration: Error during clean migration:', error);
-    throw error;
-  }
+  });
 };
 
-// Simple table creation without migration complexity
+// Simple table creation without migration complexity (uses transaction wrapper)
 const createSimpleTables = async (db: SQLite.SQLiteDatabase): Promise<void> => {
-  await db.execAsync('BEGIN TRANSACTION;');
-  
-  try {
+  await runInTransaction(db, async () => {
+    console.log('🏗️ createSimpleTables: Creating tables within transaction...');
+    
+    try {
     // Users table without country column
     await db.execAsync(`
       CREATE TABLE users (
@@ -135,174 +153,166 @@ const createSimpleTables = async (db: SQLite.SQLiteDatabase): Promise<void> => {
       ('auto_scan_enabled', 'true');
     `);
 
-    await db.execAsync('COMMIT;');
-    console.log('✅ Simple tables created successfully');
-  } catch (error) {
-    await db.execAsync('ROLLBACK;');
-    throw error;
-  }
-};
-
-// Test if database instance is healthy
-const testDatabaseHealth = async (db: SQLite.SQLiteDatabase): Promise<boolean> => {
-  try {
-    // Simple test query to verify database is functional
-    await db.getFirstAsync('SELECT 1 as test');
-    return true;
-  } catch (error) {
-    console.log('🩺 testDatabaseHealth: Database health check failed:', error);
-    return false;
-  }
-};
-
-// Safely close database with error handling
-const safeCloseDatabase = async (db: SQLite.SQLiteDatabase): Promise<void> => {
-  try {
-    await db.closeAsync();
-    console.log('🔒 safeCloseDatabase: Database closed successfully');
-  } catch (error) {
-    console.log('⚠️ safeCloseDatabase: Error closing database (may already be closed):', error);
-  }
-};
-
-// Force close and delete database with proper cleanup
-const forceCleanupDatabase = async (): Promise<void> => {
-  console.log('🧹 forceCleanupDatabase: Starting database cleanup...');
-  
-  // First, try to close the existing instance if it exists
-  if (dbInstance) {
-    console.log('🔒 forceCleanupDatabase: Closing existing database instance...');
-    await safeCloseDatabase(dbInstance);
-    dbInstance = null;
-  }
-  
-  // Try to delete the database file with multiple attempts
-  let attempts = 0;
-  const maxAttempts = 3;
-  
-  while (attempts < maxAttempts) {
-    try {
-      console.log(`🗑️ forceCleanupDatabase: Delete attempt ${attempts + 1}/${maxAttempts}`);
-      await SQLite.deleteDatabaseAsync('cme_tracker.db');
-      console.log('✅ forceCleanupDatabase: Database file deleted successfully');
-      break;
+      console.log('✅ Simple tables created successfully within transaction');
     } catch (error) {
-      attempts++;
-      console.log(`💥 forceCleanupDatabase: Delete attempt ${attempts} failed:`, error);
-      
-      if (attempts >= maxAttempts) {
-        console.log('⚠️ forceCleanupDatabase: All delete attempts failed, proceeding anyway...');
-        break;
-      }
-      
-      // Wait a bit before retrying
-      await new Promise(resolve => setTimeout(resolve, 200 * attempts));
-    }
-  }
-};
-
-// Get database instance with robust health checking
-const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
-  // If instance exists, test its health before returning it
-  if (dbInstance) {
-    console.log('🩺 getDatabase: Testing cached database health...');
-    const isHealthy = await testDatabaseHealth(dbInstance);
-    
-    if (isHealthy) {
-      console.log('✅ getDatabase: Cached database is healthy, returning it');
-      return dbInstance;
-    } else {
-      console.log('💀 getDatabase: Cached database is corrupted, cleaning up...');
-      await safeCloseDatabase(dbInstance);
-      dbInstance = null;
-      // Continue to create new instance
-    }
-  }
-  
-  // If initialization is in progress, wait for it
-  if (dbInitPromise) {
-    console.log('⏳ getDatabase: Waiting for existing database initialization...');
-    try {
-      const db = await dbInitPromise;
-      // Test the initialized database before returning
-      const isHealthy = await testDatabaseHealth(db);
-      if (!isHealthy) {
-        console.log('💀 getDatabase: Newly initialized database is unhealthy, forcing cleanup...');
-        dbInitPromise = null;
-        throw new Error('Database initialization produced unhealthy instance');
-      }
-      return db;
-    } catch (error) {
-      console.error('💥 getDatabase: Waiting for initialization failed:', error);
-      dbInitPromise = null;
-      // Continue to create new instance
-    }
-  }
-  
-  // Start new database initialization
-  console.log('🔄 getDatabase: Starting fresh database initialization...');
-  
-  dbInitPromise = (async () => {
-    try {
-      // Check if we need to force clean migration
-      let needsCleanMigration = false;
-      
-      try {
-        // Try to open existing database to check its state
-        const testDb = await SQLite.openDatabaseAsync('cme_tracker.db');
-        
-        try {
-          // Test if database is functional
-          await testDb.getFirstAsync('SELECT 1 as test');
-          
-          // Check if users table exists with country column
-          const tableInfo = await testDb.getFirstAsync(`
-            SELECT sql FROM sqlite_master WHERE type='table' AND name='users'
-          `);
-          
-          if (tableInfo && tableInfo.sql && tableInfo.sql.includes('country TEXT NOT NULL')) {
-            console.log('⚠️ getDatabase: Found problematic country column, needs clean migration');
-            needsCleanMigration = true;
-          }
-          
-          await safeCloseDatabase(testDb);
-        } catch (testError) {
-          console.log('💀 getDatabase: Database test failed, needs clean migration:', testError);
-          await safeCloseDatabase(testDb);
-          needsCleanMigration = true;
-        }
-      } catch (openError) {
-        console.log('🆕 getDatabase: Database doesn\'t exist or can\'t be opened, creating new...');
-        needsCleanMigration = false; // Just create normally
-      }
-      
-      let db: SQLite.SQLiteDatabase;
-      
-      if (needsCleanMigration) {
-        console.log('🧹 getDatabase: Performing clean migration...');
-        await forceCleanupDatabase();
-        db = await forceCleanMigration();
-      } else {
-        console.log('📊 getDatabase: Using normal setup...');
-        db = await setupDatabase();
-      }
-      
-      // Final health check before caching
-      const isHealthy = await testDatabaseHealth(db);
-      if (!isHealthy) {
-        await safeCloseDatabase(db);
-        throw new Error('Database created but failed health check');
-      }
-      
-      console.log('✅ getDatabase: Database instance created and verified healthy');
-      return db;
-      
-    } catch (error) {
-      console.error('💥 getDatabase: Database initialization failed:', error);
+      console.error('💥 createSimpleTables: Error creating tables:', error);
       throw error;
     }
-  })();
+  });
+};
+
+// Test if database instance is healthy (lightweight, no mutex to avoid conflicts, throttled)
+const testDatabaseHealth = async (db: SQLite.SQLiteDatabase): Promise<boolean> => {
+  const now = Date.now();
   
+  // Return cached result if recent
+  if (lastHealthCheck && (now - lastHealthCheck.timestamp) < HEALTH_CHECK_THROTTLE) {
+    console.log('📆 testDatabaseHealth: Using throttled cached result:', lastHealthCheck.result);
+    return lastHealthCheck.result;
+  }
+  
+  console.log('🩺 testDatabaseHealth: Running fresh health check...');
+  const result = await testDatabaseHealthSafe(db);
+  
+  // Cache the result
+  lastHealthCheck = { result, timestamp: now };
+  
+  return result;
+};
+
+// Safely close database with error handling (lightweight, no mutex to avoid conflicts)
+const safeCloseDatabase = async (db: SQLite.SQLiteDatabase): Promise<void> => {
+  await closeDatabaseSafe(db);
+};
+
+// Force close and delete database with proper cleanup (with mutex protection)
+const forceCleanupDatabase = async (): Promise<void> => {
+  return dbMutex.runDatabaseCleanup('forceCleanupDatabase', async () => {
+    console.log('🧹 forceCleanupDatabase: Starting database cleanup...');
+    
+    // First, try to close the existing instance if it exists
+    if (dbInstance) {
+      console.log('🔒 forceCleanupDatabase: Closing existing database instance...');
+      await forceCleanupHandles(dbInstance);
+      dbInstance = null;
+    }
+    
+    // Clear any pending promises
+    dbInitPromise = null;
+    
+    // Try to delete the database file with proper handle cleanup
+    try {
+      await deleteDatabaseSafe('cme_tracker.db', dbInstance || undefined);
+    } catch (error) {
+      console.warn('⚠️ forceCleanupDatabase: Delete failed, but continuing:', error);
+    }
+  });
+};
+
+// Get database instance with robust health checking (NO MUTEX - prevents deadlock)
+const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
+    // If instance exists, test its health before returning it (with throttling)
+    if (dbInstance) {
+      console.log('🩺 getDatabase: Testing cached database health...');
+      const isHealthy = await testDatabaseHealth(dbInstance); // Uses throttled version
+      
+      if (isHealthy) {
+        console.log('✅ getDatabase: Cached database is healthy, returning it');
+        return dbInstance;
+      } else {
+        console.log('💀 getDatabase: Cached database is corrupted, cleaning up...');
+        await closeDatabaseSafe(dbInstance);
+        dbInstance = null;
+        dbInitPromise = null;
+        lastHealthCheck = null; // Clear health check cache
+        // Continue to create new instance
+      }
+    }
+    
+    // If initialization is in progress, wait for it
+    if (dbInitPromise) {
+      console.log('⏳ getDatabase: Waiting for existing database initialization...');
+      try {
+        const db = await dbInitPromise;
+        // Test the initialized database before returning
+        const isHealthy = await testDatabaseHealthSafe(db);
+        if (!isHealthy) {
+          console.log('💀 getDatabase: Newly initialized database is unhealthy, forcing cleanup...');
+          dbInitPromise = null;
+          throw new Error('Database initialization produced unhealthy instance');
+        }
+        return db;
+      } catch (error) {
+        console.error('💥 getDatabase: Waiting for initialization failed:', error);
+        dbInitPromise = null;
+        // Continue to create new instance
+      }
+    }
+    
+    // Start new database initialization
+    console.log('🔄 getDatabase: Starting fresh database initialization...');
+    
+    dbInitPromise = (async () => {
+      try {
+        // Check if we need to force clean migration
+        let needsCleanMigration = false;
+        
+        try {
+          // Try to open existing database to check its state
+          const testDb = await SQLite.openDatabaseAsync('cme_tracker.db');
+          
+          try {
+            // Test if database is functional using safe method
+            await getFirstSafe(testDb, 'SELECT 1 as test');
+            
+            // Check if users table exists with country column
+            const tableInfo = await getFirstSafe(testDb, `
+              SELECT sql FROM sqlite_master WHERE type='table' AND name='users'
+            `);
+            
+            if (tableInfo && tableInfo.sql && tableInfo.sql.includes('country TEXT NOT NULL')) {
+              console.log('⚠️ getDatabase: Found problematic country column, needs clean migration');
+              needsCleanMigration = true;
+            }
+            
+            await closeDatabaseSafe(testDb);
+          } catch (testError) {
+            console.log('💀 getDatabase: Database test failed, needs clean migration:', testError);
+            await closeDatabaseSafe(testDb);
+            needsCleanMigration = true;
+          }
+        } catch (openError) {
+          console.log('🆕 getDatabase: Database doesn\'t exist or can\'t be opened, creating new...');
+          needsCleanMigration = false; // Just create normally
+        }
+        
+        let db: SQLite.SQLiteDatabase;
+        
+        if (needsCleanMigration) {
+          console.log('🧹 getDatabase: Performing clean migration...');
+          await forceCleanupDatabase();
+          db = await forceCleanMigration();
+        } else {
+          console.log('📊 getDatabase: Using normal setup...');
+          db = await setupDatabase();
+        }
+        
+        // Final health check before caching
+        const isHealthy = await testDatabaseHealthSafe(db);
+        if (!isHealthy) {
+          await closeDatabaseSafe(db);
+          throw new Error('Database created but failed health check');
+        }
+        
+        console.log('✅ getDatabase: Database instance created and verified healthy');
+        return db;
+        
+      } catch (error) {
+        console.error('💥 getDatabase: Database initialization failed:', error);
+        throw error;
+      }
+    })();
+    
   try {
     dbInstance = await dbInitPromise;
     return dbInstance;
@@ -315,20 +325,22 @@ const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
   }
 };
 
-// Reset database instance (for complete app reset)
+// Reset database instance (for complete app reset) with mutex protection
 export const resetDatabaseInstance = async (): Promise<void> => {
-  console.log('🔄 resetDatabaseInstance: Starting database instance reset...');
-  
-  // Safely close existing database
-  if (dbInstance) {
-    await safeCloseDatabase(dbInstance);
-  }
-  
-  // Clear references
-  dbInstance = null;
-  dbInitPromise = null;
-  
-  console.log('✅ resetDatabaseInstance: Database instance reset - will be recreated on next access');
+  return dbMutex.runDatabaseCleanup('resetDatabaseInstance', async () => {
+    console.log('🔄 resetDatabaseInstance: Starting database instance reset...');
+    
+    // Safely close existing database
+    if (dbInstance) {
+      await closeDatabaseSafe(dbInstance);
+    }
+    
+    // Clear references
+    dbInstance = null;
+    dbInitPromise = null;
+    
+    console.log('✅ resetDatabaseInstance: Database instance reset - will be recreated on next access');
+  });
 };
 
 // User operations
@@ -336,24 +348,27 @@ export const userOperations = {
   // Get current user (for now, we only support single user)
   getCurrentUser: async (): Promise<DatabaseOperationResult<User>> => {
     try {
-      const db = await getDatabase();
-      const user = await db.getFirstAsync<any>(`
-        SELECT 
-          id,
-          profession,
-          credit_system as creditSystem,
-          annual_requirement as annualRequirement,
-          requirement_period as requirementPeriod,
-          cycle_start_date as cycleStartDate,
-          cycle_end_date as cycleEndDate,
-          created_at as createdAt
-        FROM users WHERE id = 1
-      `);
+      const db = await getDatabase(); // Get DB first, then acquire mutex
       
-      return {
-        success: true,
-        data: user || undefined,
-      };
+      return dbMutex.runDatabaseRead('getCurrentUser', async () => {
+        const user = await getFirstSafe<any>(db, `
+          SELECT 
+            id,
+            profession,
+            credit_system as creditSystem,
+            annual_requirement as annualRequirement,
+            requirement_period as requirementPeriod,
+            cycle_start_date as cycleStartDate,
+            cycle_end_date as cycleEndDate,
+            created_at as createdAt
+          FROM users WHERE id = 1
+        `);
+        
+        return {
+          success: true,
+          data: user || undefined,
+        };
+      });
     } catch (error) {
       return {
         success: false,
@@ -366,100 +381,103 @@ export const userOperations = {
   updateUser: async (userData: Partial<User>): Promise<DatabaseOperationResult> => {
     try {
       console.log('💾 DB Operations: updateUser called with:', userData);
-      const db = await getDatabase();
+      const db = await getDatabase(); // Get DB first, then acquire mutex
       
-      // First, check if user exists
-      const existingUser = await db.getFirstAsync<any>('SELECT id FROM users WHERE id = 1');
-      
-      if (!existingUser) {
-        console.log('⚠️ DB Operations: No user found, creating user with provided data only...');
-        // Create user with only the fields that were actually provided
-        const createFields = ['id'];
-        const createPlaceholders = ['1']; // User ID is always 1
-        const createValues: any[] = [];
+      return dbMutex.runDatabaseWrite('updateUser', async () => {
+        
+        // First, check if user exists
+        const existingUser = await getFirstSafe<any>(db, 'SELECT id FROM users WHERE id = 1');
+        
+        if (!existingUser) {
+          console.log('⚠️ DB Operations: No user found, creating user with provided data only...');
+          // Create user with only the fields that were actually provided
+          const createFields = ['id'];
+          const createPlaceholders = ['1']; // User ID is always 1
+          const createValues: any[] = [];
+          
+          if (userData.profession) {
+            createFields.push('profession');
+            createPlaceholders.push('?');
+            createValues.push(userData.profession);
+          }
+          if (userData.creditSystem) {
+            createFields.push('credit_system');
+            createPlaceholders.push('?');
+            createValues.push(userData.creditSystem);
+          }
+          if (userData.annualRequirement) {
+            createFields.push('annual_requirement');
+            createPlaceholders.push('?');
+            createValues.push(userData.annualRequirement);
+          }
+          if (userData.requirementPeriod) {
+            createFields.push('requirement_period');
+            createPlaceholders.push('?');
+            createValues.push(userData.requirementPeriod);
+          }
+          if (userData.cycleStartDate) {
+            createFields.push('cycle_start_date');
+            createPlaceholders.push('?');
+            createValues.push(userData.cycleStartDate);
+          }
+          if (userData.cycleEndDate) {
+            createFields.push('cycle_end_date');
+            createPlaceholders.push('?');
+            createValues.push(userData.cycleEndDate);
+          }
+          
+          await runSafe(db, `
+            INSERT INTO users (${createFields.join(', ')})
+            VALUES (${createPlaceholders.join(', ')})
+          `, createValues);
+          console.log('✅ DB Operations: User created with provided fields only');
+          return { success: true };
+        }
+        
+        const fields = [];
+        const values = [];
         
         if (userData.profession) {
-          createFields.push('profession');
-          createPlaceholders.push('?');
-          createValues.push(userData.profession);
+          fields.push('profession = ?');
+          values.push(userData.profession);
         }
         if (userData.creditSystem) {
-          createFields.push('credit_system');
-          createPlaceholders.push('?');
-          createValues.push(userData.creditSystem);
+          console.log('🎯 DB Operations: Adding creditSystem to update:', userData.creditSystem);
+          fields.push('credit_system = ?');
+          values.push(userData.creditSystem);
         }
         if (userData.annualRequirement) {
-          createFields.push('annual_requirement');
-          createPlaceholders.push('?');
-          createValues.push(userData.annualRequirement);
+          fields.push('annual_requirement = ?');
+          values.push(userData.annualRequirement);
         }
         if (userData.requirementPeriod) {
-          createFields.push('requirement_period');
-          createPlaceholders.push('?');
-          createValues.push(userData.requirementPeriod);
+          fields.push('requirement_period = ?');
+          values.push(userData.requirementPeriod);
         }
         if (userData.cycleStartDate) {
-          createFields.push('cycle_start_date');
-          createPlaceholders.push('?');
-          createValues.push(userData.cycleStartDate);
+          fields.push('cycle_start_date = ?');
+          values.push(userData.cycleStartDate);
         }
         if (userData.cycleEndDate) {
-          createFields.push('cycle_end_date');
-          createPlaceholders.push('?');
-          createValues.push(userData.cycleEndDate);
+          fields.push('cycle_end_date = ?');
+          values.push(userData.cycleEndDate);
         }
+
+        if (fields.length === 0) {
+          return { success: true };
+        }
+
+        values.push(1); // user ID
+
+        const query = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
+        console.log('📝 DB Operations: Executing query:', query);
+        console.log('📝 DB Operations: With values:', values);
         
-        await db.runAsync(`
-          INSERT INTO users (${createFields.join(', ')})
-          VALUES (${createPlaceholders.join(', ')})
-        `, createValues);
-        console.log('✅ DB Operations: User created with provided fields only');
+        const result = await runSafe(db, query, values);
+        console.log('✅ DB Operations: Update result:', result);
+
         return { success: true };
-      }
-      
-      const fields = [];
-      const values = [];
-      
-      if (userData.profession) {
-        fields.push('profession = ?');
-        values.push(userData.profession);
-      }
-      if (userData.creditSystem) {
-        console.log('🎯 DB Operations: Adding creditSystem to update:', userData.creditSystem);
-        fields.push('credit_system = ?');
-        values.push(userData.creditSystem);
-      }
-      if (userData.annualRequirement) {
-        fields.push('annual_requirement = ?');
-        values.push(userData.annualRequirement);
-      }
-      if (userData.requirementPeriod) {
-        fields.push('requirement_period = ?');
-        values.push(userData.requirementPeriod);
-      }
-      if (userData.cycleStartDate) {
-        fields.push('cycle_start_date = ?');
-        values.push(userData.cycleStartDate);
-      }
-      if (userData.cycleEndDate) {
-        fields.push('cycle_end_date = ?');
-        values.push(userData.cycleEndDate);
-      }
-
-      if (fields.length === 0) {
-        return { success: true };
-      }
-
-      values.push(1); // user ID
-
-      const query = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
-      console.log('📝 DB Operations: Executing query:', query);
-      console.log('📝 DB Operations: With values:', values);
-      
-      const result = await db.runAsync(query, values);
-      console.log('✅ DB Operations: Update result:', result);
-
-      return { success: true };
+      });
     } catch (error) {
       return {
         success: false,
@@ -474,39 +492,42 @@ export const cmeOperations = {
   // Get all CME entries
   getAllEntries: async (year?: number): Promise<DatabaseOperationResult<CMEEntry[]>> => {
     try {
-      const db = await getDatabase();
+      const db = await getDatabase(); // Get DB first, then acquire mutex
       
-      let query = `
-        SELECT 
-          id,
-          title,
-          provider,
-          date_attended as dateAttended,
-          credits_earned as creditsEarned,
-          category,
-          notes,
-          certificate_path as certificatePath,
-          created_at as createdAt,
-          updated_at as updatedAt
-        FROM cme_entries 
-        WHERE user_id = 1
-      `;
-      
-      const params = [];
-      
-      if (year) {
-        query += ` AND strftime('%Y', date_attended) = ?`;
-        params.push(year.toString());
-      }
-      
-      query += ' ORDER BY date_attended DESC';
-      
-      const entries = await db.getAllAsync<CMEEntry>(query, params);
-      
-      return {
-        success: true,
-        data: entries,
-      };
+      return dbMutex.runDatabaseRead('getAllEntries', async () => {
+        
+        let query = `
+          SELECT 
+            id,
+            title,
+            provider,
+            date_attended as dateAttended,
+            credits_earned as creditsEarned,
+            category,
+            notes,
+            certificate_path as certificatePath,
+            created_at as createdAt,
+            updated_at as updatedAt
+          FROM cme_entries 
+          WHERE user_id = 1
+        `;
+        
+        const params = [];
+        
+        if (year) {
+          query += ` AND strftime('%Y', date_attended) = ?`;
+          params.push(year.toString());
+        }
+        
+        query += ' ORDER BY date_attended DESC';
+        
+        const entries = await getAllSafe<CMEEntry>(db, query, params);
+        
+        return {
+          success: true,
+          data: entries,
+        };
+      });
     } catch (error) {
       return {
         success: false,
@@ -548,60 +569,63 @@ export const cmeOperations = {
     }
   },
 
-  // Add new CME entry - simplified with robust database layer
+  // Add new CME entry - with mutex protection to prevent Android NPEs
   addEntry: async (entry: Omit<CMEEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<DatabaseOperationResult<number>> => {
     try {
       console.log('🗃️ cmeOperations.addEntry: Starting database operation...');
       
-      // Get healthy database instance (handles all corruption automatically)
+      // Get healthy database instance first (handles all corruption automatically)
       const db = await getDatabase();
       console.log('🗃️ cmeOperations.addEntry: Healthy database connection established');
       
-      // Ensure user exists
-      console.log('👤 cmeOperations.addEntry: Checking if user exists...');
-      const userCheck = await db.getFirstAsync('SELECT id FROM users WHERE id = 1');
-      console.log('👤 cmeOperations.addEntry: User check result:', userCheck);
-      
-      if (!userCheck) {
-        console.log('⚠️ cmeOperations.addEntry: User with ID 1 does not exist, creating default user...');
-        await db.runAsync(`
-          INSERT OR IGNORE INTO users (id, profession, credit_system, annual_requirement, requirement_period)
-          VALUES (1, 'Healthcare Professional', 'Credits', 50, 1)
-        `);
-        console.log('✅ cmeOperations.addEntry: Default user created');
-      }
-      
-      console.log('📝 cmeOperations.addEntry: Preparing to insert CME entry with data:', {
-        title: entry.title,
-        provider: entry.provider,
-        dateAttended: entry.dateAttended,
-        creditsEarned: entry.creditsEarned,
-        category: entry.category,
-        notes: entry.notes || null,
-        certificatePath: entry.certificatePath || null,
+      return dbMutex.runDatabaseWrite('addEntry', async () => {
+        
+        // Ensure user exists
+        console.log('👤 cmeOperations.addEntry: Checking if user exists...');
+        const userCheck = await getFirstSafe<any>(db, 'SELECT id FROM users WHERE id = 1');
+        console.log('👤 cmeOperations.addEntry: User check result:', userCheck);
+        
+        if (!userCheck) {
+          console.log('⚠️ cmeOperations.addEntry: User with ID 1 does not exist, creating default user...');
+          await runSafe(db, `
+            INSERT OR IGNORE INTO users (id, profession, credit_system, annual_requirement, requirement_period)
+            VALUES (1, 'Healthcare Professional', 'Credits', 50, 1)
+          `);
+          console.log('✅ cmeOperations.addEntry: Default user created');
+        }
+        
+        console.log('📝 cmeOperations.addEntry: Preparing to insert CME entry with data:', {
+          title: entry.title,
+          provider: entry.provider,
+          dateAttended: entry.dateAttended,
+          creditsEarned: entry.creditsEarned,
+          category: entry.category,
+          notes: entry.notes || null,
+          certificatePath: entry.certificatePath || null,
+        });
+        
+        const result = await runSafe(db, `
+          INSERT INTO cme_entries (
+            title, provider, date_attended, credits_earned, 
+            category, notes, certificate_path, user_id
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+        `, [
+          entry.title,
+          entry.provider,
+          entry.dateAttended,
+          entry.creditsEarned,
+          entry.category,
+          entry.notes || null,
+          entry.certificatePath || null,
+        ]);
+        
+        console.log('✅ cmeOperations.addEntry: Insert successful, lastInsertRowId:', result.lastInsertRowId);
+        
+        return {
+          success: true,
+          data: result.lastInsertRowId,
+        };
       });
-      
-      const result = await db.runAsync(`
-        INSERT INTO cme_entries (
-          title, provider, date_attended, credits_earned, 
-          category, notes, certificate_path, user_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, 1)
-      `, [
-        entry.title,
-        entry.provider,
-        entry.dateAttended,
-        entry.creditsEarned,
-        entry.category,
-        entry.notes || null,
-        entry.certificatePath || null,
-      ]);
-      
-      console.log('✅ cmeOperations.addEntry: Insert successful, lastInsertRowId:', result.lastInsertRowId);
-      
-      return {
-        success: true,
-        data: result.lastInsertRowId,
-      };
     } catch (error) {
       console.error('💥 cmeOperations.addEntry: Database error occurred:', error);
       return {
@@ -613,108 +637,112 @@ export const cmeOperations = {
 
   // Update CME entry
   updateEntry: async (id: number, entry: Partial<CMEEntry>): Promise<DatabaseOperationResult> => {
-    try {
-      console.log('✏️ cmeOperations.updateEntry: Starting update for ID:', id);
-      console.log('📝 cmeOperations.updateEntry: Update data:', entry);
-      
-      const db = await getDatabase();
-      
-      const fields = [];
-      const values = [];
-      
-      if (entry.title) {
-        fields.push('title = ?');
-        values.push(entry.title);
-      }
-      if (entry.provider) {
-        fields.push('provider = ?');
-        values.push(entry.provider);
-      }
-      if (entry.dateAttended) {
-        fields.push('date_attended = ?');
-        values.push(entry.dateAttended);
-      }
-      if (entry.creditsEarned !== undefined) {
-        fields.push('credits_earned = ?');
-        values.push(entry.creditsEarned);
-      }
-      if (entry.category) {
-        fields.push('category = ?');
-        values.push(entry.category);
-      }
-      if (entry.notes !== undefined) {
-        fields.push('notes = ?');
-        values.push(entry.notes);
-      }
-      if (entry.certificatePath !== undefined) {
-        fields.push('certificate_path = ?');
-        values.push(entry.certificatePath);
-      }
+    return dbMutex.runDatabaseWrite('updateEntry', async () => {
+      try {
+        console.log('✏️ cmeOperations.updateEntry: Starting update for ID:', id);
+        console.log('📝 cmeOperations.updateEntry: Update data:', entry);
+        
+        const db = await getDatabase();
+        
+        const fields = [];
+        const values = [];
+        
+        if (entry.title) {
+          fields.push('title = ?');
+          values.push(entry.title);
+        }
+        if (entry.provider) {
+          fields.push('provider = ?');
+          values.push(entry.provider);
+        }
+        if (entry.dateAttended) {
+          fields.push('date_attended = ?');
+          values.push(entry.dateAttended);
+        }
+        if (entry.creditsEarned !== undefined) {
+          fields.push('credits_earned = ?');
+          values.push(entry.creditsEarned);
+        }
+        if (entry.category) {
+          fields.push('category = ?');
+          values.push(entry.category);
+        }
+        if (entry.notes !== undefined) {
+          fields.push('notes = ?');
+          values.push(entry.notes);
+        }
+        if (entry.certificatePath !== undefined) {
+          fields.push('certificate_path = ?');
+          values.push(entry.certificatePath);
+        }
 
-      if (fields.length === 0) {
-        console.log('⚠️ cmeOperations.updateEntry: No fields to update');
+        if (fields.length === 0) {
+          console.log('⚠️ cmeOperations.updateEntry: No fields to update');
+          return { success: true };
+        }
+
+        values.push(id);
+
+        const query = `UPDATE cme_entries SET ${fields.join(', ')} WHERE id = ? AND user_id = 1`;
+        console.log('📝 cmeOperations.updateEntry: Executing query:', query);
+        console.log('📝 cmeOperations.updateEntry: With values:', values);
+        
+        const result = await runSafe(db, query, values);
+        console.log('✅ cmeOperations.updateEntry: Update result:', result);
+
         return { success: true };
+      } catch (error) {
+        console.error('💥 cmeOperations.updateEntry: Database error occurred:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to update CME entry',
+        };
       }
-
-      values.push(id);
-
-      const query = `UPDATE cme_entries SET ${fields.join(', ')} WHERE id = ? AND user_id = 1`;
-      console.log('📝 cmeOperations.updateEntry: Executing query:', query);
-      console.log('📝 cmeOperations.updateEntry: With values:', values);
-      
-      const result = await db.runAsync(query, values);
-      console.log('✅ cmeOperations.updateEntry: Update result:', result);
-
-      return { success: true };
-    } catch (error) {
-      console.error('💥 cmeOperations.updateEntry: Database error occurred:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to update CME entry',
-      };
-    }
+    });
   },
 
   // Delete CME entry
   deleteEntry: async (id: number): Promise<DatabaseOperationResult> => {
-    try {
-      console.log('🗑️ cmeOperations.deleteEntry: Starting delete for ID:', id);
-      
-      const db = await getDatabase();
-      
-      // First check if entry exists
-      const existingEntry = await db.getFirstAsync(
-        'SELECT id, title FROM cme_entries WHERE id = ? AND user_id = 1', 
-        [id]
-      );
-      console.log('🔍 cmeOperations.deleteEntry: Existing entry check:', existingEntry);
-      
-      if (!existingEntry) {
-        console.log('⚠️ cmeOperations.deleteEntry: Entry not found');
-        return { 
-          success: false, 
-          error: 'Entry not found' 
+    return dbMutex.runDatabaseWrite('deleteEntry', async () => {
+      try {
+        console.log('🗑️ cmeOperations.deleteEntry: Starting delete for ID:', id);
+        
+        const db = await getDatabase();
+        
+        // First check if entry exists
+        const existingEntry = await getFirstSafe<any>(db,
+          'SELECT id, title FROM cme_entries WHERE id = ? AND user_id = 1', 
+          [id]
+        );
+        console.log('🔍 cmeOperations.deleteEntry: Existing entry check:', existingEntry);
+        
+        if (!existingEntry) {
+          console.log('⚠️ cmeOperations.deleteEntry: Entry not found');
+          return { 
+            success: false, 
+            error: 'Entry not found' 
+          };
+        }
+        
+        const result = await runSafe(db, 'DELETE FROM cme_entries WHERE id = ? AND user_id = 1', [id]);
+        console.log('✅ cmeOperations.deleteEntry: Delete result:', result);
+        
+        // Verify deletion
+        const verifyDeleted = await getFirstSafe<any>(db,
+          'SELECT id FROM cme_entries WHERE id = ? AND user_id = 1', 
+          [id]
+        );
+        console.log('🔍 cmeOperations.deleteEntry: Verify deleted:', verifyDeleted);
+        
+        return { success: true };
+      } catch (error) {
+        console.error('💥 cmeOperations.deleteEntry: Database error occurred:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to delete CME entry',
         };
       }
-      
-      const result = await db.runAsync('DELETE FROM cme_entries WHERE id = ? AND user_id = 1', [id]);
-      console.log('✅ cmeOperations.deleteEntry: Delete result:', result);
-      
-      // Verify deletion
-      const verifyDeleted = await db.getFirstAsync(
-        'SELECT id FROM cme_entries WHERE id = ? AND user_id = 1', 
-        [id]
-      );
-      console.log('🔍 cmeOperations.deleteEntry: Verify deleted:', verifyDeleted);
-      
-      return { success: true };
-    } catch (error) {
-      console.error('💥 cmeOperations.deleteEntry: Database error occurred:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to delete CME entry',
-      };
-    }
+    });
   },
 
   // Get total credits for current year
@@ -1059,12 +1087,9 @@ export const settingsOperations = {
 
   // Set setting
   setSetting: async (key: string, value: string): Promise<DatabaseOperationResult> => {
-    let retryCount = 0;
-    const maxRetries = 3;
-    
-    while (retryCount < maxRetries) {
+    return dbMutex.runDatabaseWrite('setSetting', async () => {
       try {
-        console.log(`⚙️ settingsOperations.setSetting: Attempt ${retryCount + 1} - Starting with key:`, key, 'value:', value);
+        console.log(`⚙️ settingsOperations.setSetting: Starting with key:`, key, 'value:', value);
         const db = await getDatabase();
         console.log('⚙️ settingsOperations.setSetting: Database connection established');
         
@@ -1078,76 +1103,69 @@ export const settingsOperations = {
         `);
         console.log('✅ settingsOperations.setSetting: Table ensured to exist');
         
-        // Use execAsync for more reliable execution
-        await db.execAsync(`
+        // Use safe prepared statement execution
+        await runSafe(db, `
           INSERT OR REPLACE INTO app_settings (key, value) 
-          VALUES ('${key}', '${value}')
-        `);
+          VALUES (?, ?)
+        `, [key, value]);
         
         console.log('✅ settingsOperations.setSetting: Setting saved successfully');
         return { success: true };
         
       } catch (error) {
-        retryCount++;
-        console.error(`💥 settingsOperations.setSetting: Attempt ${retryCount} failed:`, error);
-        
-        if (retryCount >= maxRetries) {
-          console.error('💥 settingsOperations.setSetting: Max retries reached, giving up');
-          return {
-            success: false,
-            error: error instanceof Error ? error.message : 'Failed to set setting after retries',
-          };
-        }
-        
-        // Wait a bit before retrying
-        console.log(`⏳ settingsOperations.setSetting: Waiting before retry ${retryCount + 1}...`);
-        await new Promise(resolve => setTimeout(resolve, 100 * retryCount));
+        console.error('💥 settingsOperations.setSetting: Error occurred:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to set setting',
+        };
       }
-    }
-    
-    return { success: false, error: 'Unexpected error in setSetting' };
+    });
   },
 
   // Complete app reset - wipe all data and reset database
   resetAllData: async (): Promise<DatabaseOperationResult> => {
-    try {
-      console.log('🧹 settingsOperations.resetAllData: Starting complete app reset...');
-      const db = await getDatabase();
-      console.log('🧹 settingsOperations.resetAllData: Database connection established');
-      
-      // Delete all data from all tables
-      await db.runAsync('DELETE FROM cme_entries');
-      console.log('✅ settingsOperations.resetAllData: CME entries cleared');
-      
-      await db.runAsync('DELETE FROM certificates');
-      console.log('✅ settingsOperations.resetAllData: Certificates cleared');
-      
-      await db.runAsync('DELETE FROM license_renewals');
-      console.log('✅ settingsOperations.resetAllData: License renewals cleared');
-      
-      await db.runAsync('DELETE FROM users');
-      console.log('✅ settingsOperations.resetAllData: Users cleared');
-      
-      await db.runAsync('DELETE FROM app_settings');
-      console.log('✅ settingsOperations.resetAllData: App settings cleared');
-      
-      // Reset database version to 0 to force recreation of tables and data
-      console.log('🔄 settingsOperations.resetAllData: Resetting database version...');
-      await db.execAsync('PRAGMA user_version = 0');
-      
-      // Reset the database instance so it gets recreated properly on next access
-      console.log('🔄 settingsOperations.resetAllData: Resetting database instance...');
-      await resetDatabaseInstance();
-      
-      console.log('🎉 settingsOperations.resetAllData: Complete app reset successful');
-      return { success: true };
-    } catch (error) {
-      console.error('💥 settingsOperations.resetAllData: Error occurred:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to reset app data',
-      };
-    }
+    return dbMutex.runDatabaseCleanup('resetAllData', async () => {
+      try {
+        console.log('🧹 settingsOperations.resetAllData: Starting complete app reset...');
+        const db = await getDatabase();
+        console.log('🧹 settingsOperations.resetAllData: Database connection established');
+        
+        // Delete all data from all tables using transaction
+        await runInTransaction(db, async () => {
+          await runSafe(db, 'DELETE FROM cme_entries');
+          console.log('✅ settingsOperations.resetAllData: CME entries cleared');
+          
+          await runSafe(db, 'DELETE FROM certificates');
+          console.log('✅ settingsOperations.resetAllData: Certificates cleared');
+          
+          await runSafe(db, 'DELETE FROM license_renewals');
+          console.log('✅ settingsOperations.resetAllData: License renewals cleared');
+          
+          await runSafe(db, 'DELETE FROM users');
+          console.log('✅ settingsOperations.resetAllData: Users cleared');
+          
+          await runSafe(db, 'DELETE FROM app_settings');
+          console.log('✅ settingsOperations.resetAllData: App settings cleared');
+        });
+        
+        // Reset database version to 0 to force recreation of tables and data
+        console.log('🔄 settingsOperations.resetAllData: Resetting database version...');
+        await db.execAsync('PRAGMA user_version = 0');
+        
+        // Reset the database instance so it gets recreated properly on next access
+        console.log('🔄 settingsOperations.resetAllData: Resetting database instance...');
+        await resetDatabaseInstance();
+        
+        console.log('🎉 settingsOperations.resetAllData: Complete app reset successful');
+        return { success: true };
+      } catch (error) {
+        console.error('💥 settingsOperations.resetAllData: Error occurred:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to reset app data',
+        };
+      }
+    });
   },
 
   // Get all settings

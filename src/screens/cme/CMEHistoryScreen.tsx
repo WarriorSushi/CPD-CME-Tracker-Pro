@@ -26,6 +26,8 @@ interface Props {
 }
 
 export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
+  console.log('📚 CMEHistoryScreen: Component rendering/mounting');
+  
   const insets = useSafeAreaInsets();
   const { 
     recentCMEEntries,
@@ -35,6 +37,12 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
     loadAllCMEEntries,
     user 
   } = useAppContext();
+  
+  console.log('📊 CMEHistoryScreen: Current state:', {
+    entriesCount: recentCMEEntries.length,
+    isLoading: isLoadingCME,
+    hasUser: !!user
+  });
 
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);

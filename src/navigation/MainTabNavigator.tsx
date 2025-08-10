@@ -16,7 +16,7 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 // Custom Tab Button Component for pressed column effect
 const CustomTabButton: React.FC<{
   children: React.ReactNode;
-  onPress?: () => void;
+  onPress?: (event?: any) => void;
   accessibilityState?: { selected?: boolean };
 }> = ({ children, onPress, accessibilityState }) => {
   const focused = accessibilityState?.selected;
@@ -27,7 +27,10 @@ const CustomTabButton: React.FC<{
         styles.tabColumn,
         focused && styles.tabColumnPressed
       ]}
-      onPress={onPress}
+      onPress={(e) => {
+        console.log('🖱️ MainTabNavigator: Tab button pressed');
+        onPress?.(e);
+      }}
       activeOpacity={0.7}
     >
       {children}
@@ -89,6 +92,11 @@ export const MainTabNavigator: React.FC = () => {
           tabBarIcon: ({ color }) => (
             <Text style={[styles.icon, { color }]}>📚</Text>
           ),
+        }}
+        listeners={{
+          tabPress: (e) => {
+            console.log('📚 MainTabNavigator: History tab pressed!');
+          },
         }}
       />
       <Tab.Screen

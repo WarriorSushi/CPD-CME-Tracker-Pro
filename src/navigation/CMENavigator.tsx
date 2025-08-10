@@ -9,8 +9,11 @@ import { AddCMEScreen } from '../screens/cme/AddCMEScreen';
 const Stack = createStackNavigator<CMEStackParamList>();
 
 export const CMENavigator: React.FC = () => {
+  console.log('🏗️ CMENavigator: Rendering CME stack navigator with initial route CMEHistory');
+  
   return (
     <Stack.Navigator
+      initialRouteName="CMEHistory"
       screenOptions={{
         headerShown: false,
       }}

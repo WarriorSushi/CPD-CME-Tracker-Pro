@@ -67,18 +67,19 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
         
         // Restore data without country column
         for (const user of existingUsers) {
+          const userData = user as any; // Type assertion for migration data
           await db.runAsync(`
             INSERT INTO users (id, profession, credit_system, annual_requirement, requirement_period, cycle_start_date, cycle_end_date, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
           `, [
-            user.id,
-            user.profession,
-            user.credit_system,
-            user.annual_requirement || null,
-            user.requirement_period || 1,
-            user.cycle_start_date || null,
-            user.cycle_end_date || null,
-            user.created_at
+            userData.id,
+            userData.profession,
+            userData.credit_system,
+            userData.annual_requirement || null,
+            userData.requirement_period || 1,
+            userData.cycle_start_date || null,
+            userData.cycle_end_date || null,
+            userData.created_at
           ]);
         }
         

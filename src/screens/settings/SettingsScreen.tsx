@@ -30,7 +30,6 @@ export const SettingsScreen: React.FC = () => {
   const { 
     user, 
     licenses, 
-    cmeEntries,
     isLoadingLicenses,
     refreshLicenses,
     refreshUserData,
@@ -341,7 +340,7 @@ export const SettingsScreen: React.FC = () => {
                 {user?.profession || 'Healthcare Professional'}
               </Text>
               <Text style={styles.profileRole}>
-                {user?.country || 'Location not set'}
+                {user?.profession || 'Profession not set'}
               </Text>
             </View>
           </View>

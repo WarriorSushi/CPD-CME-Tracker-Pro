@@ -127,3 +127,8 @@ export type RadiusToken = keyof typeof tokens.radius;
 export type SpaceToken = keyof typeof tokens.space;
 export type FontSizeToken = keyof typeof tokens.fontSize;
 export type FontWeightToken = keyof typeof tokens.fontWeight;
+
+// Simple color getter function (for non-React contexts)
+export const getColor = (colorName: ColorToken): string => {
+  return tokens.color[colorName];
+};

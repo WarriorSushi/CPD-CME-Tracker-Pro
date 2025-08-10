@@ -231,7 +231,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.addEntrySection}>
           <Button
             title="+ Add New Entry"
-            onPress={() => navigation.navigate('CME', { screen: 'AddCME', params: { editEntry: undefined } })}
+            onPress={() => (navigation as any).navigate('CME', { screen: 'AddCME', params: { editEntry: undefined } })}
             style={styles.addEntryButton}
           />
         </View>
@@ -242,7 +242,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.quickActionsGrid}>
             <TouchableOpacity 
               style={styles.quickActionItem}
-              onPress={() => navigation.navigate('CME', { screen: 'AddCME', params: { editEntry: undefined } })}
+              onPress={() => (navigation as any).navigate('CME', { screen: 'AddCME', params: { editEntry: undefined } })}
             >
               <Text style={styles.quickActionIcon}>📚</Text>
               <Text style={styles.quickActionText}>Add Entry</Text>
@@ -256,7 +256,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.quickActionItem}
-              onPress={() => navigation.navigate('CME', { screen: 'CMEHistory' })}
+              onPress={() => (navigation as any).navigate('CME', { screen: 'CMEHistory' })}
             >
               <Text style={styles.quickActionIcon}>📊</Text>
               <Text style={styles.quickActionText}>History</Text>
@@ -725,7 +725,7 @@ const styles = StyleSheet.create({
 
   // Error handling styles
   errorText: {
-    fontSize: theme.typography.fontSize.md,
+    fontSize: theme.typography.fontSize.base,
     color: theme.colors.error,
     textAlign: 'center',
     marginBottom: theme.spacing[4],

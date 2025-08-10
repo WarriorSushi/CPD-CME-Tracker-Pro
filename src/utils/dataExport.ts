@@ -123,8 +123,7 @@ Generated: ${new Date().toLocaleDateString()}
 
 PROFILE INFORMATION
 ==================
-Name: ${user.profession}
-Country: ${user.country}
+Profession: ${user.profession}
 Credit System: ${user.creditSystem}
 Annual Requirement: ${user.annualRequirement} ${creditPlural}
 
