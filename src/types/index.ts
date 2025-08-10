@@ -73,7 +73,17 @@ export type Profession =
 export type RootStackParamList = {
   Onboarding: undefined;
   Dashboard: undefined;
-  AddCME: { editEntry?: CMEEntry };
+  AddCME: { 
+    editEntry?: CMEEntry; 
+    ocrData?: {
+      title?: string;
+      provider?: string;
+      date?: string;
+      credits?: string;
+      category?: string;
+      certificatePath?: string;
+    };
+  };
   CMEHistory: undefined;
   CMEDetails: { entryId: number };
   CertificateVault: undefined;

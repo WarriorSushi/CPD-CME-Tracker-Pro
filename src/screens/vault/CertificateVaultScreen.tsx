@@ -8,7 +8,8 @@ import {
   RefreshControl,
   Alert,
   Image,
-  Dimensions
+  Dimensions,
+  Modal
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -23,6 +24,8 @@ import { useAppContext } from '../../contexts/AppContext';
 import { Certificate } from '../../types';
 import { SUPPORTED_FILE_TYPES, MAX_FILE_SIZES, FILE_PATHS } from '../../constants';
 import { OCRService } from '../../services/ocrService';
+import { DocumentEdgeDetectionService } from '../../services/documentEdgeDetection';
+import { ThumbnailService } from '../../services/thumbnailService';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - theme.spacing[5] * 3) / 2;
@@ -132,15 +135,33 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         await FileSystem.makeDirectoryAsync(certificatesDir, { intermediates: true });
       }
 
+      // Step 1: Document edge detection and enhancement
+      console.log('🔍 Starting document edge detection...');
+      let processedImageUri = imageAsset.uri;
+      
+      try {
+        const edgeDetectionResult = await DocumentEdgeDetectionService.detectAndCropDocument(imageAsset.uri);
+        processedImageUri = edgeDetectionResult.croppedImageUri;
+        console.log('✅ Document edge detection completed, confidence:', edgeDetectionResult.confidence);
+      } catch (edgeError) {
+        console.warn('⚠️ Edge detection failed, using original image:', edgeError);
+        // Fallback to basic image enhancement
+        try {
+          processedImageUri = await DocumentEdgeDetectionService.enhanceImageForOCR(imageAsset.uri);
+        } catch (enhanceError) {
+          console.warn('⚠️ Image enhancement also failed, using original:', enhanceError);
+        }
+      }
+
       // Generate unique filename
       const timestamp = Date.now();
       const extension = imageAsset.uri.split('.').pop() || 'jpg';
       const newFileName = `scanned_certificate_${timestamp}.${extension}`;
       const newFilePath = `${certificatesDir}${newFileName}`;
 
-      // Copy image to app documents
+      // Copy processed image to app documents
       await FileSystem.copyAsync({
-        from: imageAsset.uri,
+        from: processedImageUri,
         to: newFilePath,
       });
 
@@ -148,10 +169,10 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
       const fileInfo = await FileSystem.getInfoAsync(newFilePath);
       console.log('📁 Certificate saved to:', newFilePath);
 
-      // Perform OCR text extraction
+      // Step 2: Perform OCR text extraction on the processed image
       console.log('🔍 Starting OCR processing...');
       try {
-        const ocrResult = await OCRService.extractText(imageAsset.uri);
+        const ocrResult = await OCRService.extractText(processedImageUri);
         console.log('✅ OCR completed successfully');
         
         // Store OCR result and show modal
@@ -168,8 +189,17 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         Alert.alert('Certificate Saved', 'Certificate saved successfully! OCR text extraction failed, but you can still view the image.');
       }
 
-      // TODO: Generate thumbnail
-      // TODO: Save to database with OCR data
+      // Step 3: Generate thumbnail
+      console.log('📸 Generating thumbnail...');
+      try {
+        const thumbnailResult = await ThumbnailService.generateThumbnail(processedImageUri, newFileName);
+        console.log('✅ Thumbnail generated successfully:', thumbnailResult.thumbnailUri);
+      } catch (thumbnailError) {
+        console.warn('⚠️ Thumbnail generation failed:', thumbnailError);
+        // Continue without thumbnail - not critical for functionality
+      }
+
+      // TODO: Save to database with OCR data and thumbnail path
 
       await refreshCertificates();
 
@@ -258,12 +288,30 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         to: newFilePath,
       });
 
+      // Generate thumbnail for the uploaded file
+      console.log('📸 Generating thumbnail for uploaded file...');
+      let thumbnailPath = null;
+      try {
+        if (isImageType) {
+          const thumbnailResult = await ThumbnailService.generateThumbnail(file.uri, file.name);
+          thumbnailPath = thumbnailResult.thumbnailUri;
+          console.log('✅ Thumbnail generated for uploaded image');
+        } else {
+          const thumbnailResult = await ThumbnailService.generatePDFThumbnail(file.uri, file.name);
+          thumbnailPath = thumbnailResult.thumbnailUri;
+          console.log('✅ PDF thumbnail generated for uploaded document');
+        }
+      } catch (thumbnailError) {
+        console.warn('⚠️ Thumbnail generation failed for uploaded file:', thumbnailError);
+      }
+
       // Add certificate to database
       const certificateData = {
         fileName: file.name,
         filePath: newFilePath,
         fileSize: file.size || 0,
         mimeType: file.mimeType || 'application/pdf',
+        thumbnailPath,
       };
 
       // For now, we'll skip the database integration and just show success

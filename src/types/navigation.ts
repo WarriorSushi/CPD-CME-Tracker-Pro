@@ -23,7 +23,17 @@ export type MainTabParamList = {
 
 export type CMEStackParamList = {
   CMEHistory: undefined;
-  AddCME: { editEntry?: any };
+  AddCME: { 
+    editEntry?: any;
+    ocrData?: {
+      title?: string;
+      provider?: string;
+      date?: string;
+      credits?: string;
+      category?: string;
+      certificatePath?: string;
+    };
+  };
   CMEDetails: { entryId: number };
 };
 

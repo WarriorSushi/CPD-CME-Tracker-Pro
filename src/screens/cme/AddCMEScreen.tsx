@@ -53,16 +53,34 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
   const { user, addCMEEntry, updateCMEEntry } = useAppContext();
   
   const editEntry = route.params?.editEntry;
+  const ocrData = route.params?.ocrData;
   const isEditing = !!editEntry;
   
   console.log('🔧 AddCMEScreen: Mode:', isEditing ? 'EDITING' : 'ADDING');
+  console.log('📄 AddCMEScreen: OCR Data received:', ocrData);
+
+  // Helper function to parse date from OCR
+  const parseOCRDate = (dateString?: string): Date => {
+    if (!dateString) return new Date();
+    
+    try {
+      const parsed = new Date(dateString);
+      if (!isNaN(parsed.getTime())) {
+        return parsed;
+      }
+    } catch (error) {
+      console.warn('Failed to parse OCR date:', dateString);
+    }
+    
+    return new Date();
+  };
   
   const [formData, setFormData] = useState<FormData>({
-    title: editEntry?.title || '',
-    provider: editEntry?.provider || '',
-    dateAttended: editEntry ? new Date(editEntry.dateAttended) : new Date(),
-    creditsEarned: editEntry?.creditsEarned?.toString() || '',
-    category: editEntry?.category || CME_CATEGORIES[0],
+    title: editEntry?.title || ocrData?.title || '',
+    provider: editEntry?.provider || ocrData?.provider || '',
+    dateAttended: editEntry ? new Date(editEntry.dateAttended) : parseOCRDate(ocrData?.date),
+    creditsEarned: editEntry?.creditsEarned?.toString() || ocrData?.credits || '',
+    category: editEntry?.category || ocrData?.category || CME_CATEGORIES[0],
     notes: editEntry?.notes || '',
   });
 
@@ -72,21 +90,25 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
   // Reset form when screen comes into focus or params change
   useEffect(() => {
     const currentEditEntry = route.params?.editEntry;
+    const currentOcrData = route.params?.ocrData;
     
     console.log('🔄 AddCMEScreen: Resetting form with editEntry:', currentEditEntry);
+    console.log('🔄 AddCMEScreen: Resetting form with ocrData:', currentOcrData);
     
     setFormData({
-      title: currentEditEntry?.title || '',
-      provider: currentEditEntry?.provider || '',
-      dateAttended: currentEditEntry ? new Date(currentEditEntry.dateAttended) : new Date(),
-      creditsEarned: currentEditEntry?.creditsEarned?.toString() || '',
-      category: currentEditEntry?.category || CME_CATEGORIES[0],
+      title: currentEditEntry?.title || currentOcrData?.title || '',
+      provider: currentEditEntry?.provider || currentOcrData?.provider || '',
+      dateAttended: currentEditEntry 
+        ? new Date(currentEditEntry.dateAttended) 
+        : parseOCRDate(currentOcrData?.date),
+      creditsEarned: currentEditEntry?.creditsEarned?.toString() || currentOcrData?.credits || '',
+      category: currentEditEntry?.category || currentOcrData?.category || CME_CATEGORIES[0],
       notes: currentEditEntry?.notes || '',
     });
     
     // Clear any errors when resetting
     setErrors({});
-  }, [route.params?.editEntry, route.params]);
+  }, [route.params?.editEntry, route.params?.ocrData]);
 
   // Additional reset when screen gets focus (ensures clean slate for new entries)
   useFocusEffect(
