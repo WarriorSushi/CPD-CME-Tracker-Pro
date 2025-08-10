@@ -1,5 +1,5 @@
 import * as FileSystem from 'expo-file-system';
-import { ImageManipulator } from 'expo-image-manipulator';
+import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { FILE_PATHS } from '../constants';
 
 export interface ThumbnailResult {
@@ -37,20 +37,19 @@ export class ThumbnailService {
       const thumbnailFileName = `thumb_${timestamp}.${extension}`;
       const thumbnailPath = `${thumbnailsDir}${thumbnailFileName}`;
 
-      // Create thumbnail using ImageManipulator
-      const thumbnail = await ImageManipulator.manipulateAsync(
+      // Create thumbnail using manipulateAsync
+      const thumbnail = await manipulateAsync(
         originalImageUri,
         [
           {
             resize: {
               width: this.THUMBNAIL_SIZE,
-              height: this.THUMBNAIL_SIZE,
             },
           },
         ],
         {
           compress: this.THUMBNAIL_QUALITY,
-          format: ImageManipulator.SaveFormat.JPEG,
+          format: SaveFormat.JPEG,
         }
       );
 
@@ -104,19 +103,18 @@ export class ThumbnailService {
       const thumbnailPath = `${thumbnailsDir}${thumbnailFileName}`;
 
       // Create a simple colored rectangle as PDF placeholder thumbnail
-      const placeholderThumbnail = await ImageManipulator.manipulateAsync(
+      const placeholderThumbnail = await manipulateAsync(
         'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAI9mRwJcgAAAABJRU5ErkJggg==', // 1x1 transparent pixel
         [
           {
             resize: {
               width: this.THUMBNAIL_SIZE,
-              height: this.THUMBNAIL_SIZE,
             },
           },
         ],
         {
           compress: this.THUMBNAIL_QUALITY,
-          format: ImageManipulator.SaveFormat.JPEG,
+          format: SaveFormat.JPEG,
         }
       );
 
