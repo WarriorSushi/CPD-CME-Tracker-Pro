@@ -71,8 +71,9 @@ export const SettingsScreen: React.FC = () => {
             console.log('🔄 User confirmed reset onboarding');
             const success = await resetOnboarding();
             if (success) {
-              console.log('✅ Onboarding reset successful');
-              Alert.alert('Success', 'Onboarding has been reset. You will be redirected to the welcome screen.');
+              console.log('✅ Onboarding reset successful - app should automatically navigate to onboarding');
+              // Don't show alert - let the automatic navigation to onboarding happen
+              // The AppNavigator will automatically switch to OnboardingNavigator when isOnboardingComplete becomes false
             } else {
               console.log('❌ Onboarding reset failed');
               Alert.alert('Error', 'Failed to reset onboarding. Please try again.');
@@ -112,8 +113,9 @@ export const SettingsScreen: React.FC = () => {
                     console.log('🧹 User confirmed complete app reset');
                     const success = await resetCompleteApp();
                     if (success) {
-                      console.log('✅ Complete app reset successful');
-                      Alert.alert('Complete Reset Successful', 'All app data has been deleted. The app will now restart.');
+                      console.log('✅ Complete app reset successful - app should automatically navigate to onboarding');
+                      // Don't show alert - let the automatic navigation to onboarding happen
+                      // The AppNavigator will automatically switch to OnboardingNavigator when isOnboardingComplete becomes false
                     } else {
                       console.log('❌ Complete app reset failed');
                       Alert.alert('Error', 'Failed to reset app completely. Please try again.');

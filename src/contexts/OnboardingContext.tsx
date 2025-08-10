@@ -94,8 +94,8 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
       if (result.success) {
         console.log('✅ resetOnboarding: Setting isOnboardingComplete to false');
         setIsOnboardingComplete(false);
-        // Force re-check to ensure consistency
-        await checkOnboardingStatus();
+        setIsLoading(false);
+        console.log('🧭 resetOnboarding: Navigation should now switch to OnboardingNavigator');
       }
       
       return result.success;
@@ -103,7 +103,7 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
       console.error('💥 Error resetting onboarding:', error);
       return false;
     }
-  }, [checkOnboardingStatus]);
+  }, []);
 
   const resetCompleteApp = useCallback(async () => {
     try {
@@ -115,6 +115,7 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
         console.log('✅ resetCompleteApp: All data cleared, setting isOnboardingComplete to false');
         setIsOnboardingComplete(false);
         setIsLoading(false);
+        console.log('🧭 resetCompleteApp: Navigation should now switch to OnboardingNavigator');
       }
       
       return result.success;
