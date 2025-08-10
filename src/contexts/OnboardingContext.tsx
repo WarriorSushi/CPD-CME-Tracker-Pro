@@ -85,22 +85,24 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
   const resetOnboarding = useCallback(async () => {
     try {
       console.log('🔄 resetOnboarding: Starting reset process...');
+      
+      // Immediately set states to ensure navigation happens
+      setIsOnboardingComplete(false);
+      setIsLoading(false);
+      console.log('🧭 resetOnboarding: Immediately set navigation states');
+      
       const result = await settingsOperations.setSetting(
         STORAGE_KEYS.ONBOARDING_COMPLETED, 
         'false'
       );
       console.log('📝 resetOnboarding: Database setSetting result:', result);
       
-      if (result.success) {
-        console.log('✅ resetOnboarding: Setting isOnboardingComplete to false');
-        setIsOnboardingComplete(false);
-        setIsLoading(false);
-        console.log('🧭 resetOnboarding: Navigation should now switch to OnboardingNavigator');
-      }
-      
       return result.success;
     } catch (error) {
       console.error('💥 Error resetting onboarding:', error);
+      // Even if DB fails, allow navigation to onboarding
+      setIsOnboardingComplete(false);
+      setIsLoading(false);
       return false;
     }
   }, []);
@@ -108,19 +110,21 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
   const resetCompleteApp = useCallback(async () => {
     try {
       console.log('🧹 resetCompleteApp: Starting complete app reset...');
+      
+      // Immediately set states to ensure navigation happens
+      setIsOnboardingComplete(false);
+      setIsLoading(false);
+      console.log('🧭 resetCompleteApp: Immediately set navigation states');
+      
       const result = await settingsOperations.resetAllData();
       console.log('📝 resetCompleteApp: Database resetAllData result:', result);
-      
-      if (result.success) {
-        console.log('✅ resetCompleteApp: All data cleared, setting isOnboardingComplete to false');
-        setIsOnboardingComplete(false);
-        setIsLoading(false);
-        console.log('🧭 resetCompleteApp: Navigation should now switch to OnboardingNavigator');
-      }
       
       return result.success;
     } catch (error) {
       console.error('💥 Error resetting complete app:', error);
+      // Even if DB fails, allow navigation to onboarding
+      setIsOnboardingComplete(false);
+      setIsLoading(false);
       return false;
     }
   }, []);

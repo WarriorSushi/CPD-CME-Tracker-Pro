@@ -17,8 +17,12 @@ export const AppNavigator: React.FC = () => {
 
   console.log('🎯 Rendering:', isOnboardingComplete ? 'MainTabNavigator' : 'OnboardingNavigator');
 
+  // Use key prop to force NavigationContainer remount when onboarding status changes
+  // This ensures navigation state is completely reset when switching between navigators
+  const navigationKey = isOnboardingComplete ? 'main' : 'onboarding';
+
   return (
-    <NavigationContainer>
+    <NavigationContainer key={navigationKey}>
       {isOnboardingComplete ? (
         <MainTabNavigator />
       ) : (
