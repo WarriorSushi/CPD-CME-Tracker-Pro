@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Card, ModernDatePicker, ProgressIndicator } from '../../components';
+import { Button, Card, DatePicker, ProgressIndicator } from '../../components';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { userOperations } from '../../services/database';
@@ -218,7 +218,7 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
         {/* Custom Date Picker */}
         {selectedOption === -1 && (
           <View style={styles.datePickerContainer}>
-            <ModernDatePicker
+            <DatePicker
               value={customDate || new Date(new Date().setFullYear(new Date().getFullYear() - 1))}
               onDateChange={handleDatePickerChange}
               maximumDate={new Date()}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView } from 'react-native';
 import { theme } from '../../constants/theme';
 
 interface DatePickerProps {
@@ -21,6 +21,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [tempDate, setTempDate] = useState(value);
+  const [currentMonth, setCurrentMonth] = useState(value.getMonth());
+  const [currentYear, setCurrentYear] = useState(value.getFullYear());
 
   const formatDate = (date: Date): string => {
     return date.toLocaleDateString('en-US', {
@@ -37,14 +39,21 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
   const handleCancel = () => {
     setTempDate(value);
+    setCurrentMonth(value.getMonth());
+    setCurrentYear(value.getFullYear());
     setShowModal(false);
   };
 
-  // Simple date input for web/expo
+  // Simple date input button
   const renderDateInput = () => (
     <TouchableOpacity
       style={[styles.dateButton, style]}
-      onPress={() => setShowModal(true)}
+      onPress={() => {
+        setTempDate(value);
+        setCurrentMonth(value.getMonth());
+        setCurrentYear(value.getFullYear());
+        setShowModal(true);
+      }}
     >
       <Text style={styles.dateButtonText}>
         {formatDate(value)}
@@ -53,111 +62,185 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     </TouchableOpacity>
   );
 
-  const renderSimpleDatePicker = () => {
-    const currentYear = new Date().getFullYear();
-    const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
-    const months = [
+  // Get calendar grid data
+  const getCalendarData = () => {
+    const monthNames = [
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
-    const daysInMonth = new Date(tempDate.getFullYear(), tempDate.getMonth() + 1, 0).getDate();
-    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    const startingDayOfWeek = firstDay.getDay(); // 0 = Sunday
+    const daysInMonth = lastDay.getDate();
+
+    // Create array of all days to show (including padding from previous/next month)
+    const days = [];
+
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(null);
+    }
+
+    // Add all days of the current month
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push(day);
+    }
+
+    return {
+      monthName: monthNames[currentMonth],
+      year: currentYear,
+      dayNames,
+      days,
+      daysInMonth
+    };
+  };
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    if (direction === 'prev') {
+      if (currentMonth === 0) {
+        setCurrentMonth(11);
+        setCurrentYear(currentYear - 1);
+      } else {
+        setCurrentMonth(currentMonth - 1);
+      }
+    } else {
+      if (currentMonth === 11) {
+        setCurrentMonth(0);
+        setCurrentYear(currentYear + 1);
+      } else {
+        setCurrentMonth(currentMonth + 1);
+      }
+    }
+  };
+
+  const selectDate = (day: number) => {
+    const newDate = new Date(currentYear, currentMonth, day);
+    
+    // Check if date is within allowed range
+    if (maximumDate && newDate > maximumDate) return;
+    if (minimumDate && newDate < minimumDate) return;
+    
+    setTempDate(newDate);
+  };
+
+  const isDateDisabled = (day: number) => {
+    const date = new Date(currentYear, currentMonth, day);
+    if (maximumDate && date > maximumDate) return true;
+    if (minimumDate && date < minimumDate) return true;
+    return false;
+  };
+
+  const isSelectedDate = (day: number) => {
+    return (
+      tempDate.getDate() === day &&
+      tempDate.getMonth() === currentMonth &&
+      tempDate.getFullYear() === currentYear
+    );
+  };
+
+  const isToday = (day: number) => {
+    const today = new Date();
+    return (
+      today.getDate() === day &&
+      today.getMonth() === currentMonth &&
+      today.getFullYear() === currentYear
+    );
+  };
+
+  const renderCompactCalendar = () => {
+    const { monthName, year, dayNames, days } = getCalendarData();
 
     return (
       <Modal
         visible={showModal}
         transparent
-        animationType="slide"
+        animationType="fade"
         onRequestClose={handleCancel}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select Date</Text>
-            
-            <View style={styles.dateSelectors}>
-              {/* Month Selector */}
-              <View style={styles.selectorColumn}>
-                <Text style={styles.selectorLabel}>Month</Text>
-                <View style={styles.selectorButtons}>
-                  {months.map((month, index) => (
-                    <TouchableOpacity
-                      key={month}
-                      style={[
-                        styles.selectorButton,
-                        tempDate.getMonth() === index && styles.selectedButton
-                      ]}
-                      onPress={() => setTempDate(new Date(tempDate.getFullYear(), index, tempDate.getDate()))}
-                    >
-                      <Text style={[
-                        styles.selectorButtonText,
-                        tempDate.getMonth() === index && styles.selectedButtonText
-                      ]}>
-                        {month.slice(0, 3)}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
+          <View style={styles.calendarModal}>
+            {/* Header */}
+            <View style={styles.calendarHeader}>
+              <TouchableOpacity 
+                style={styles.navButton} 
+                onPress={() => navigateMonth('prev')}
+              >
+                <Text style={styles.navButtonText}>‹</Text>
+              </TouchableOpacity>
+              
+              <View style={styles.monthYearContainer}>
+                <Text style={styles.monthText}>{monthName}</Text>
+                <Text style={styles.yearText}>{year}</Text>
               </View>
-
-              {/* Day Selector */}
-              <View style={styles.selectorColumn}>
-                <Text style={styles.selectorLabel}>Day</Text>
-                <View style={styles.selectorButtons}>
-                  {days.map((day) => (
-                    <TouchableOpacity
-                      key={day}
-                      style={[
-                        styles.selectorButton,
-                        tempDate.getDate() === day && styles.selectedButton
-                      ]}
-                      onPress={() => setTempDate(new Date(tempDate.getFullYear(), tempDate.getMonth(), day))}
-                    >
-                      <Text style={[
-                        styles.selectorButtonText,
-                        tempDate.getDate() === day && styles.selectedButtonText
-                      ]}>
-                        {day}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-
-              {/* Year Selector */}
-              <View style={styles.selectorColumn}>
-                <Text style={styles.selectorLabel}>Year</Text>
-                <View style={styles.selectorButtons}>
-                  {years.map((year) => (
-                    <TouchableOpacity
-                      key={year}
-                      style={[
-                        styles.selectorButton,
-                        tempDate.getFullYear() === year && styles.selectedButton
-                      ]}
-                      onPress={() => setTempDate(new Date(year, tempDate.getMonth(), tempDate.getDate()))}
-                    >
-                      <Text style={[
-                        styles.selectorButtonText,
-                        tempDate.getFullYear() === year && styles.selectedButtonText
-                      ]}>
-                        {year}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
+              
+              <TouchableOpacity 
+                style={styles.navButton} 
+                onPress={() => navigateMonth('next')}
+              >
+                <Text style={styles.navButtonText}>›</Text>
+              </TouchableOpacity>
             </View>
 
-            <Text style={styles.selectedDateText}>
-              Selected: {formatDate(tempDate)}
-            </Text>
+            {/* Day names header */}
+            <View style={styles.dayNamesRow}>
+              {dayNames.map((dayName) => (
+                <View key={dayName} style={styles.dayNameCell}>
+                  <Text style={styles.dayNameText}>{dayName}</Text>
+                </View>
+              ))}
+            </View>
 
-            <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+            {/* Calendar grid */}
+            <View style={styles.calendarGrid}>
+              {days.map((day, index) => {
+                if (day === null) {
+                  return <View key={`empty-${index}`} style={styles.dayCell} />;
+                }
+
+                const disabled = isDateDisabled(day);
+                const selected = isSelectedDate(day);
+                const today = isToday(day);
+
+                return (
+                  <TouchableOpacity
+                    key={day}
+                    style={[
+                      styles.dayCell,
+                      selected && styles.selectedDayCell,
+                      today && !selected && styles.todayDayCell,
+                      disabled && styles.disabledDayCell,
+                    ]}
+                    onPress={() => !disabled && selectDate(day)}
+                    disabled={disabled}
+                  >
+                    <Text style={[
+                      styles.dayText,
+                      selected && styles.selectedDayText,
+                      today && !selected && styles.todayDayText,
+                      disabled && styles.disabledDayText,
+                    ]}>
+                      {day}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {/* Selected date display */}
+            <View style={styles.selectedDateContainer}>
+              <Text style={styles.selectedDateLabel}>Selected:</Text>
+              <Text style={styles.selectedDateValue}>{formatDate(tempDate)}</Text>
+            </View>
+
+            {/* Action buttons */}
+            <View style={styles.calendarActions}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel}>
+                <Text style={styles.cancelBtnText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
-                <Text style={styles.confirmButtonText}>Confirm</Text>
+              <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
+                <Text style={styles.confirmBtnText}>Confirm</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -169,12 +252,13 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   return (
     <View>
       {renderDateInput()}
-      {renderSimpleDatePicker()}
+      {renderCompactCalendar()}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  // Date input button
   dateButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -194,87 +278,158 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   
-  // Modal styles
+  // Modal overlay
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: theme.spacing[4],
   },
-  modalContent: {
+  
+  // Calendar modal container
+  calendarModal: {
     backgroundColor: theme.colors.background,
     borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing[5],
-    width: '90%',
-    maxWidth: 400,
+    padding: theme.spacing[4],
+    width: '100%',
+    maxWidth: 340,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  modalTitle: {
+  
+  // Calendar header with navigation
+  calendarHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: theme.spacing[3],
+    paddingBottom: theme.spacing[3],
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border.light,
+  },
+  navButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    backgroundColor: theme.colors.gray.light,
+  },
+  navButtonText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: theme.colors.primary,
+  },
+  monthYearContainer: {
+    alignItems: 'center',
+  },
+  monthText: {
     fontSize: theme.typography.fontSize.lg,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
-    textAlign: 'center',
-    marginBottom: theme.spacing[4],
+  },
+  yearText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    marginTop: 2,
   },
   
-  // Date selectors
-  dateSelectors: {
+  // Day names header
+  dayNamesRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    marginBottom: theme.spacing[2],
+    paddingBottom: theme.spacing[2],
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border.light,
+  },
+  dayNameCell: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: theme.spacing[1],
+  },
+  dayNameText: {
+    fontSize: theme.typography.fontSize.xs,
+    fontWeight: theme.typography.fontWeight.medium,
+    color: theme.colors.text.secondary,
+  },
+  
+  // Calendar grid
+  calendarGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     marginBottom: theme.spacing[4],
   },
-  selectorColumn: {
-    flex: 1,
-    marginHorizontal: theme.spacing[1],
-  },
-  selectorLabel: {
-    fontSize: theme.typography.fontSize.sm,
-    fontWeight: theme.typography.fontWeight.medium,
-    color: theme.colors.text.primary,
-    textAlign: 'center',
-    marginBottom: theme.spacing[2],
-  },
-  selectorButtons: {
-    maxHeight: 150,
-  },
-  selectorButton: {
-    paddingVertical: theme.spacing[2],
-    paddingHorizontal: theme.spacing[2],
-    borderRadius: theme.borderRadius.sm,
-    marginBottom: theme.spacing[1],
-    backgroundColor: theme.colors.gray.light,
+  dayCell: {
+    width: '14.28%', // 7 days per week
+    aspectRatio: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 4,
   },
-  selectedButton: {
-    backgroundColor: theme.colors.primary,
-  },
-  selectorButtonText: {
-    fontSize: theme.typography.fontSize.sm,
+  dayText: {
+    fontSize: theme.typography.fontSize.base,
     color: theme.colors.text.primary,
-  },
-  selectedButtonText: {
-    color: theme.colors.background,
     fontWeight: theme.typography.fontWeight.medium,
+  },
+  
+  // Day cell states
+  selectedDayCell: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: 20,
+  },
+  selectedDayText: {
+    color: theme.colors.background,
+    fontWeight: theme.typography.fontWeight.bold,
+  },
+  todayDayCell: {
+    backgroundColor: theme.colors.gray.light,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
+  },
+  todayDayText: {
+    color: theme.colors.primary,
+    fontWeight: theme.typography.fontWeight.bold,
+  },
+  disabledDayCell: {
+    opacity: 0.3,
+  },
+  disabledDayText: {
+    color: theme.colors.text.secondary,
   },
   
   // Selected date display
-  selectedDateText: {
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.medium,
-    color: theme.colors.text.primary,
-    textAlign: 'center',
+  selectedDateContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: theme.spacing[4],
     padding: theme.spacing[3],
     backgroundColor: theme.colors.gray.light,
     borderRadius: theme.borderRadius.md,
   },
+  selectedDateLabel: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    marginRight: theme.spacing[2],
+  },
+  selectedDateValue: {
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+  },
   
-  // Modal actions
-  modalActions: {
+  // Action buttons
+  calendarActions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     gap: theme.spacing[3],
   },
-  cancelButton: {
+  cancelBtn: {
     flex: 1,
     paddingVertical: theme.spacing[3],
     paddingHorizontal: theme.spacing[4],
@@ -284,11 +439,12 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
     alignItems: 'center',
   },
-  cancelButtonText: {
+  cancelBtnText: {
     fontSize: theme.typography.fontSize.base,
     color: theme.colors.text.secondary,
+    fontWeight: theme.typography.fontWeight.medium,
   },
-  confirmButton: {
+  confirmBtn: {
     flex: 1,
     paddingVertical: theme.spacing[3],
     paddingHorizontal: theme.spacing[4],
@@ -296,9 +452,9 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
     alignItems: 'center',
   },
-  confirmButtonText: {
+  confirmBtnText: {
     fontSize: theme.typography.fontSize.base,
     color: theme.colors.background,
-    fontWeight: theme.typography.fontWeight.medium,
+    fontWeight: theme.typography.fontWeight.bold,
   },
 });
