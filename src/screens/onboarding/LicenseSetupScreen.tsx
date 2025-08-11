@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card, ProgressIndicator } from '../../components';
+import { FloatingLicenseModal } from '../../components/onboarding/FloatingLicenseModal';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { getColor } from '../../theme';
@@ -19,9 +20,16 @@ export const LicenseSetupScreen: React.FC<Props> = ({ navigation }) => {
   const [showLicenseForm, setShowLicenseForm] = useState(false);
 
   const handleAddLicenses = () => {
-    // TODO: In a real implementation, this would show a license entry form
-    // For now, we'll go to SetupComplete but note that they wanted to add licenses
-    console.log('User chose to add licenses - would show license form here');
+    console.log('User chose to add licenses - showing floating modal');
+    setShowLicenseForm(true);
+  };
+
+  const handleLicenseModalClose = () => {
+    setShowLicenseForm(false);
+  };
+
+  const handleLicenseModalSuccess = () => {
+    console.log('License added successfully - navigating to SetupComplete');
     navigation.navigate('SetupComplete');
   };
 
@@ -115,6 +123,13 @@ export const LicenseSetupScreen: React.FC<Props> = ({ navigation }) => {
           style={styles.backButton}
         />
       </View>
+      
+      {/* Floating License Modal */}
+      <FloatingLicenseModal
+        visible={showLicenseForm}
+        onClose={handleLicenseModalClose}
+        onSuccess={handleLicenseModalSuccess}
+      />
     </View>
   );
 };

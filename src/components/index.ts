@@ -3,6 +3,9 @@ export * from './common';
 export * from './charts';
 export { CertificateViewer } from './CertificateViewer';
 
+// Onboarding components
+export { FloatingLicenseModal } from './onboarding/FloatingLicenseModal';
+
 // Component categories
 export * as CommonComponents from './common';
 export * as ChartComponents from './charts';
