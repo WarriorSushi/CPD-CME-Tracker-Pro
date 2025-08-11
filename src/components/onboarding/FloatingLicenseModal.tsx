@@ -9,8 +9,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   Modal,
+  Dimensions,
 } from 'react-native';
-import { Card, Button, Input, LoadingSpinner } from '../';
+import { Card } from '../common/Card';
+import { Button } from '../common/Button';
+import { Input } from '../common/Input';
+import { LoadingSpinner } from '../common/LoadingSpinner';
 import { ModernDatePicker } from '../common/ModernDatePicker';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
@@ -27,6 +31,7 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  console.log('DEBUG: FloatingLicenseModal render, visible =', visible);
   const { addLicense } = useAppContext();
   
   // Form state
@@ -96,329 +101,77 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
 
   const handleClose = () => {
     if (isSubmitting) return; // Prevent closing while submitting
-    console.log('FloatingLicenseModal: handleClose called');
     onClose();
   };
 
-  // Debug logging for modal visibility
-  React.useEffect(() => {
-    console.log('FloatingLicenseModal: visible prop changed to', visible);
-    if (visible) {
-      console.log('FloatingLicenseModal: Modal should now be VISIBLE');
-      console.log('FloatingLicenseModal: Current form state:', {
-        licenseType,
-        issuingAuthority,
-        licenseNumber,
-        expirationDate: expirationDate?.toDateString(),
-        isFormValid,
-        isSubmitting
-      });
-    } else {
-      console.log('FloatingLicenseModal: Modal should now be HIDDEN');
-    }
-  }, [visible, licenseType, issuingAuthority, licenseNumber, expirationDate, isFormValid, isSubmitting]);
-
-  console.log('FloatingLicenseModal: About to render Modal with visible =', visible);
-
+  console.log('DEBUG: About to render Modal with visible =', visible);
+  
+  if (!visible) {
+    console.log('DEBUG: Modal not visible, returning null');
+    return null;
+  }
+  
+  console.log('DEBUG: Modal is visible, rendering...');
+  
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+  const modalWidth = 300;
+  const modalHeight = 400;
+  const modalLeft = (screenWidth - modalWidth) / 2;
+  const modalTop = (screenHeight - modalHeight) / 2;
+  
+  console.log('DEBUG: Screen dimensions:', screenWidth, 'x', screenHeight);
+  console.log('DEBUG: Modal position:', modalLeft, ',', modalTop);
+  
   return (
     <Modal
       visible={visible}
       transparent
       animationType="fade"
+      presentationStyle="overFullScreen"
       onRequestClose={handleClose}
-      onShow={() => console.log('FloatingLicenseModal: Modal onShow callback triggered')}
-      onDismiss={() => console.log('FloatingLicenseModal: Modal onDismiss callback triggered')}
+      onShow={() => console.log('DEBUG: Modal onShow triggered')}
+      onDismiss={() => console.log('DEBUG: Modal onDismiss triggered')}
     >
-      {console.log('FloatingLicenseModal: Inside Modal component, rendering overlay')}
-      <View style={styles.modalOverlay}>
-        {console.log('FloatingLicenseModal: Inside modalOverlay, rendering container')}
-        <KeyboardAvoidingView 
-          style={styles.modalContainer}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-          {/* Header */}
-          {console.log('FloatingLicenseModal: Rendering header')}
-          <View style={styles.header}>
-            <TouchableOpacity 
-              style={styles.closeButton} 
-              onPress={handleClose}
-              disabled={isSubmitting}
-            >
-              <Text style={styles.closeButtonText}>×</Text>
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Add License</Text>
-            <View style={styles.headerSpacer} />
-          </View>
-
-          <ScrollView 
-            style={styles.scrollView}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
+      {console.log('DEBUG: Inside Modal component')}
+      <View style={{
+        width: screenWidth,
+        height: screenHeight,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      }}>
+        {console.log('DEBUG: Inside overlay View')}
+        <View style={{
+          position: 'absolute',
+          left: modalLeft,
+          top: modalTop,
+          width: modalWidth,
+          height: modalHeight,
+          backgroundColor: 'white',
+          borderRadius: 16,
+          padding: 20,
+          borderWidth: 5,
+          borderColor: 'red',
+        }}>
+          {console.log('DEBUG: Inside card View')}
+          {/* TEMP: Sanity check - remove after testing */}
+          <View style={{height: 200, backgroundColor: 'tomato', width: '100%'}} />
+          
+          {/* Simple test content instead of complex form */}
+          <View style={{height: 50, backgroundColor: 'blue', width: '100%', marginTop: 10}} />
+          
+          <TouchableOpacity 
+            style={{
+              height: 40,
+              backgroundColor: 'green',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginTop: 10,
+            }}
+            onPress={handleClose}
           >
-            <Card style={styles.formCard}>
-              <View style={styles.formHeader}>
-                <Text style={styles.formTitle}>License Information</Text>
-                <Text style={styles.formSubtitle}>Add your professional license for renewal tracking</Text>
-              </View>
-
-              <View style={styles.formFields}>
-                {/* License Type */}
-                <View style={styles.fieldContainer}>
-                  <Text style={styles.fieldLabel}>License Type *</Text>
-                  <Input
-                    value={licenseType}
-                    onChangeText={setLicenseType}
-                    placeholder="e.g., Medical License, RN License, PharmD"
-                    style={styles.input}
-                    autoCapitalize="words"
-                    returnKeyType="next"
-                  />
-                </View>
-
-                {/* Issuing Authority */}
-                <View style={styles.fieldContainer}>
-                  <Text style={styles.fieldLabel}>Issuing Authority *</Text>
-                  <Input
-                    value={issuingAuthority}
-                    onChangeText={setIssuingAuthority}
-                    placeholder="e.g., State Medical Board, College of Physicians"
-                    style={styles.input}
-                    autoCapitalize="words"
-                    returnKeyType="next"
-                  />
-                </View>
-
-                {/* License Number (Optional) */}
-                <View style={styles.fieldContainer}>
-                  <Text style={styles.fieldLabel}>License Number (Optional)</Text>
-                  <Input
-                    value={licenseNumber}
-                    onChangeText={setLicenseNumber}
-                    placeholder="Enter license number if available"
-                    style={styles.input}
-                    autoCapitalize="characters"
-                    returnKeyType="done"
-                  />
-                </View>
-
-                {/* Expiration Date */}
-                <View style={styles.fieldContainer}>
-                  <Text style={styles.fieldLabel}>Expiration Date *</Text>
-                  <ModernDatePicker
-                    value={expirationDate}
-                    onDateChange={setExpirationDate}
-                    minimumDate={new Date()} // Can't expire in the past
-                    maximumDate={new Date(new Date().setFullYear(new Date().getFullYear() + 50))} // Allow up to 50 years in future
-                    style={styles.dateButton}
-                  />
-                </View>
-              </View>
-
-              {/* Form Actions */}
-              <View style={styles.formActions}>
-                <Button
-                  title="Cancel"
-                  onPress={handleClose}
-                  variant="outline"
-                  style={styles.button}
-                  disabled={isSubmitting}
-                />
-                
-                <Button
-                  title={isSubmitting ? 'Adding...' : 'Add License'}
-                  onPress={handleSubmit}
-                  disabled={!isFormValid || isSubmitting}
-                  variant="primary"
-                  style={styles.button}
-                />
-              </View>
-
-              {isSubmitting && (
-                <View style={styles.loadingContainer}>
-                  <LoadingSpinner size={20} />
-                  <Text style={styles.loadingText}>Adding license...</Text>
-                </View>
-              )}
-            </Card>
-
-            {/* Info Card */}
-            <Card style={styles.infoCard}>
-              <View style={styles.infoHeader}>
-                <Text style={styles.infoIcon}>💡</Text>
-                <Text style={styles.infoTitle}>Quick Setup</Text>
-              </View>
-              <Text style={styles.infoText}>
-                Adding your license now helps you track renewal deadlines and stay compliant. 
-                You can always add more licenses later from the Settings screen.
-              </Text>
-            </Card>
-
-            {/* Bottom spacer */}
-            <View style={styles.bottomSpacer} />
-          </ScrollView>
-
-        </KeyboardAvoidingView>
+            <Text style={{color: 'white', fontSize: 16}}>CLOSE TEST</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  modalOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContainer: {
-    position: 'absolute',
-    top: '10%',
-    left: '5%',
-    right: '5%',
-    maxHeight: '80%',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    borderWidth: 5, // DEBUG: Thick red border to see modal position
-    borderColor: '#ff0000', // DEBUG: Red border to see modal position
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-  },
-
-  // Header
-  header: {
-    backgroundColor: '#003087',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  closeButton: {
-    paddingVertical: theme.spacing[1],
-    paddingHorizontal: theme.spacing[2],
-  },
-  closeButtonText: {
-    color: theme.colors.background,
-    fontSize: 28,
-    fontWeight: theme.typography.fontWeight.bold,
-    lineHeight: 28,
-  },
-  headerTitle: {
-    color: theme.colors.background,
-    fontSize: theme.typography.fontSize.xl,
-    fontWeight: theme.typography.fontWeight.bold,
-  },
-  headerSpacer: {
-    width: 40, // Balance the header
-  },
-
-  // Content
-  scrollView: {
-    flex: 1,
-  },
-  formCard: {
-    margin: theme.spacing[4],
-    padding: theme.spacing[4],
-  },
-  formHeader: {
-    marginBottom: theme.spacing[6],
-  },
-  formTitle: {
-    fontSize: theme.typography.fontSize.xl,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing[2],
-  },
-  formSubtitle: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text.secondary,
-    lineHeight: 20,
-  },
-
-  // Form Fields
-  formFields: {
-    marginBottom: theme.spacing[6],
-  },
-  fieldContainer: {
-    marginBottom: theme.spacing[5],
-  },
-  fieldLabel: {
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.medium,
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing[2],
-  },
-  input: {
-    // Input styling handled by component
-  },
-
-  // Date Button
-  dateButton: {
-    // Date button styling handled by ModernDatePicker
-  },
-
-  // Form Actions
-  formActions: {
-    flexDirection: 'row',
-    gap: theme.spacing[3],
-  },
-  button: {
-    flex: 1,
-    minHeight: 48,
-  },
-
-  // Loading
-  loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: theme.spacing[4],
-    paddingTop: theme.spacing[4],
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border.light,
-  },
-  loadingText: {
-    marginLeft: theme.spacing[2],
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text.secondary,
-  },
-
-  // Info Card
-  infoCard: {
-    marginHorizontal: theme.spacing[4],
-    marginBottom: theme.spacing[4],
-    padding: theme.spacing[4],
-    backgroundColor: '#f0f7ff',
-    borderLeftWidth: 4,
-    borderLeftColor: theme.colors.primary,
-  },
-  infoHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: theme.spacing[2],
-  },
-  infoIcon: {
-    fontSize: 20,
-    marginRight: theme.spacing[2],
-  },
-  infoTitle: {
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.primary,
-  },
-  infoText: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text.secondary,
-    lineHeight: 20,
-  },
-
-  // Bottom Spacer
-  bottomSpacer: {
-    height: 20,
-  },
-});

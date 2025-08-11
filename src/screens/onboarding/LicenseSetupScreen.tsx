@@ -20,10 +20,9 @@ export const LicenseSetupScreen: React.FC<Props> = ({ navigation }) => {
   const [showLicenseForm, setShowLicenseForm] = useState(false);
 
   const handleAddLicenses = () => {
-    console.log('User chose to add licenses - showing floating modal');
-    console.log('Current showLicenseForm state:', showLicenseForm);
+    console.log('DEBUG: handleAddLicenses clicked, current state:', showLicenseForm);
     setShowLicenseForm(true);
-    console.log('Set showLicenseForm to true');
+    console.log('DEBUG: setShowLicenseForm(true) called');
   };
 
   const handleLicenseModalClose = () => {
@@ -31,7 +30,6 @@ export const LicenseSetupScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleLicenseModalSuccess = () => {
-    console.log('License added successfully - navigating to SetupComplete');
     navigation.navigate('SetupComplete');
   };
 
@@ -46,94 +44,96 @@ export const LicenseSetupScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      <View style={styles.content}>
-        <ProgressIndicator currentStep={5} totalSteps={5} />
-        
-        <View style={styles.header}>
-          <Text style={styles.title}>License Management</Text>
-          <Text style={styles.subtitle}>Stay on top of your license renewals</Text>
+    <>
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <View style={styles.content}>
+          <ProgressIndicator currentStep={5} totalSteps={5} />
           
-          {/* Privacy-friendly guidance */}
-          <View style={styles.privacyTip}>
-            <Text style={styles.privacyIcon}>🔒</Text>
-            <View style={styles.privacyTextContainer}>
-              <Text style={styles.privacyText}>
-                <Text style={styles.privacyBold}>Pro tip:</Text> Just use license types like "RN License" or "Medical License" instead of license numbers. 
-                This keeps your information private while still tracking renewals!
-              </Text>
+          <View style={styles.header}>
+            <Text style={styles.title}>License Management</Text>
+            <Text style={styles.subtitle}>Stay on top of your license renewals</Text>
+            
+            {/* Privacy-friendly guidance */}
+            <View style={styles.privacyTip}>
+              <Text style={styles.privacyIcon}>🔒</Text>
+              <View style={styles.privacyTextContainer}>
+                <Text style={styles.privacyText}>
+                  <Text style={styles.privacyBold}>Pro tip:</Text> Just use license types like "RN License" or "Medical License" instead of license numbers. 
+                  This keeps your information private while still tracking renewals!
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.optionsContainer}>
+            <TouchableOpacity 
+              style={styles.modernOption}
+              onPress={handleAddLicenses}
+            >
+              <View style={styles.optionLeft}>
+                <View style={styles.iconContainer}>
+                  <Text style={styles.optionIcon}>🏅</Text>
+                </View>
+                <View style={styles.optionContent}>
+                  <Text style={styles.optionTitle}>Add My Licenses</Text>
+                  <Text style={styles.optionDescription}>Set up renewal tracking</Text>
+                </View>
+              </View>
+              <Text style={styles.arrow}>›</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.modernOption}
+              onPress={handleSkipForNow}
+            >
+              <View style={styles.optionLeft}>
+                <View style={styles.iconContainer}>
+                  <Text style={styles.optionIcon}>⏭️</Text>
+                </View>
+                <View style={styles.optionContent}>
+                  <Text style={styles.optionTitle}>Skip for Now</Text>
+                  <Text style={styles.optionDescription}>Add later in settings</Text>
+                </View>
+              </View>
+              <Text style={styles.arrow}>›</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.benefitsList}>
+            <Text style={styles.benefitsTitle}>Why track licenses?</Text>
+            <View style={styles.benefitItem}>
+              <Text style={styles.benefitIcon}>•</Text>
+              <Text style={styles.benefitText}>Automatic renewal reminders</Text>
+            </View>
+            <View style={styles.benefitItem}>
+              <Text style={styles.benefitIcon}>•</Text>
+              <Text style={styles.benefitText}>Track CE requirements per license</Text>
+            </View>
+            <View style={styles.benefitItem}>
+              <Text style={styles.benefitIcon}>•</Text>
+              <Text style={styles.benefitText}>Never miss critical deadlines</Text>
             </View>
           </View>
         </View>
-
-        <View style={styles.optionsContainer}>
-          <TouchableOpacity 
-            style={styles.modernOption}
-            onPress={handleAddLicenses}
-          >
-            <View style={styles.optionLeft}>
-              <View style={styles.iconContainer}>
-                <Text style={styles.optionIcon}>🏅</Text>
-              </View>
-              <View style={styles.optionContent}>
-                <Text style={styles.optionTitle}>Add My Licenses</Text>
-                <Text style={styles.optionDescription}>Set up renewal tracking</Text>
-              </View>
-            </View>
-            <Text style={styles.arrow}>›</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.modernOption}
-            onPress={handleSkipForNow}
-          >
-            <View style={styles.optionLeft}>
-              <View style={styles.iconContainer}>
-                <Text style={styles.optionIcon}>⏭️</Text>
-              </View>
-              <View style={styles.optionContent}>
-                <Text style={styles.optionTitle}>Skip for Now</Text>
-                <Text style={styles.optionDescription}>Add later in settings</Text>
-              </View>
-            </View>
-            <Text style={styles.arrow}>›</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.benefitsList}>
-          <Text style={styles.benefitsTitle}>Why track licenses?</Text>
-          <View style={styles.benefitItem}>
-            <Text style={styles.benefitIcon}>•</Text>
-            <Text style={styles.benefitText}>Automatic renewal reminders</Text>
-          </View>
-          <View style={styles.benefitItem}>
-            <Text style={styles.benefitIcon}>•</Text>
-            <Text style={styles.benefitText}>Track CE requirements per license</Text>
-          </View>
-          <View style={styles.benefitItem}>
-            <Text style={styles.benefitIcon}>•</Text>
-            <Text style={styles.benefitText}>Never miss critical deadlines</Text>
-          </View>
+        
+        <View style={styles.actions}>
+          <Button
+            title="Back"
+            variant="outline"
+            onPress={handleBack}
+            style={styles.backButton}
+          />
         </View>
       </View>
       
-      <View style={styles.actions}>
-        <Button
-          title="Back"
-          variant="outline"
-          onPress={handleBack}
-          style={styles.backButton}
-        />
-      </View>
-      
-      {/* Floating License Modal */}
-      {console.log('LicenseSetupScreen: Rendering FloatingLicenseModal with visible =', showLicenseForm)}
+      {/* Floating License Modal - MOVED OUTSIDE main container */}
+      {console.log('DEBUG: Rendering FloatingLicenseModal, visible =', showLicenseForm)}
       <FloatingLicenseModal
         visible={showLicenseForm}
         onClose={handleLicenseModalClose}
         onSuccess={handleLicenseModalSuccess}
       />
-    </View>
+    </>
   );
 };
 
