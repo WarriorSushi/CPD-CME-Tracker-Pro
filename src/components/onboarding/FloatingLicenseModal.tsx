@@ -104,23 +104,15 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
     onClose();
   };
 
-  console.log('DEBUG: About to render Modal with visible =', visible);
-  
   if (!visible) {
-    console.log('DEBUG: Modal not visible, returning null');
     return null;
   }
   
-  console.log('DEBUG: Modal is visible, rendering...');
-  
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-  const modalWidth = 300;
-  const modalHeight = 400;
+  const modalWidth = Math.min(screenWidth * 0.92, 520); // Responsive width, max 520px
+  const modalHeight = Math.min(screenHeight * 0.78, 550); // More compact height, max 550px  
   const modalLeft = (screenWidth - modalWidth) / 2;
   const modalTop = (screenHeight - modalHeight) / 2;
-  
-  console.log('DEBUG: Screen dimensions:', screenWidth, 'x', screenHeight);
-  console.log('DEBUG: Modal position:', modalLeft, ',', modalTop);
   
   return (
     <Modal
@@ -129,49 +121,298 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
       animationType="fade"
       presentationStyle="overFullScreen"
       onRequestClose={handleClose}
-      onShow={() => console.log('DEBUG: Modal onShow triggered')}
-      onDismiss={() => console.log('DEBUG: Modal onDismiss triggered')}
     >
-      {console.log('DEBUG: Inside Modal component')}
-      <View style={{
-        width: screenWidth,
-        height: screenHeight,
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-      }}>
-        {console.log('DEBUG: Inside overlay View')}
-        <View style={{
-          position: 'absolute',
-          left: modalLeft,
-          top: modalTop,
-          width: modalWidth,
-          height: modalHeight,
-          backgroundColor: 'white',
-          borderRadius: 16,
-          padding: 20,
-          borderWidth: 5,
-          borderColor: 'red',
-        }}>
-          {console.log('DEBUG: Inside card View')}
-          {/* TEMP: Sanity check - remove after testing */}
-          <View style={{height: 200, backgroundColor: 'tomato', width: '100%'}} />
-          
-          {/* Simple test content instead of complex form */}
-          <View style={{height: 50, backgroundColor: 'blue', width: '100%', marginTop: 10}} />
-          
-          <TouchableOpacity 
-            style={{
-              height: 40,
-              backgroundColor: 'green',
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginTop: 10,
-            }}
-            onPress={handleClose}
+      <TouchableOpacity 
+        style={{
+          width: screenWidth,
+          height: screenHeight,
+          backgroundColor: 'rgba(0, 0, 0, 0.45)',
+        }}
+        activeOpacity={1}
+        onPress={handleClose}
+      >
+        <TouchableOpacity
+          style={{
+            position: 'absolute',
+            left: modalLeft,
+            top: modalTop,
+            width: modalWidth,
+            height: modalHeight,
+            backgroundColor: '#f8f9fa',
+            borderRadius: 16,
+            padding: 20,
+            elevation: 12,
+            shadowColor: '#000',
+            shadowOpacity: 0.25,
+            shadowRadius: 12,
+            shadowOffset: { width: 0, height: 8 },
+            overflow: 'hidden',
+          }}
+          activeOpacity={1}
+          onPress={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity 
+              style={styles.closeButton} 
+              onPress={handleClose}
+              disabled={isSubmitting}
+            >
+              <Text style={styles.closeButtonText}>×</Text>
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Add License</Text>
+            <View style={styles.headerSpacer} />
+          </View>
+
+          <ScrollView 
+            style={styles.scrollView}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
           >
-            <Text style={{color: 'white', fontSize: 16}}>CLOSE TEST</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+            <Card style={styles.formCard}>
+              <View style={styles.formHeader}>
+                <Text style={styles.formTitle}>License Information</Text>
+                <Text style={styles.formSubtitle}>Add your professional license for renewal tracking</Text>
+              </View>
+
+              <View style={styles.formFields}>
+                {/* License Type */}
+                <View style={styles.fieldContainer}>
+                  <Text style={styles.fieldLabel}>License Type *</Text>
+                  <Input
+                    value={licenseType}
+                    onChangeText={setLicenseType}
+                    placeholder="e.g., Medical License, RN License, PharmD"
+                    style={styles.input}
+                    autoCapitalize="words"
+                    returnKeyType="next"
+                  />
+                </View>
+
+                {/* Issuing Authority */}
+                <View style={styles.fieldContainer}>
+                  <Text style={styles.fieldLabel}>Issuing Authority *</Text>
+                  <Input
+                    value={issuingAuthority}
+                    onChangeText={setIssuingAuthority}
+                    placeholder="e.g., State Medical Board, College of Physicians"
+                    style={styles.input}
+                    autoCapitalize="words"
+                    returnKeyType="next"
+                  />
+                </View>
+
+                {/* License Number (Optional) */}
+                <View style={styles.fieldContainer}>
+                  <Text style={styles.fieldLabel}>License Number (Optional)</Text>
+                  <Input
+                    value={licenseNumber}
+                    onChangeText={setLicenseNumber}
+                    placeholder="Enter license number if available"
+                    style={styles.input}
+                    autoCapitalize="characters"
+                    returnKeyType="done"
+                  />
+                </View>
+
+                {/* Expiration Date */}
+                <View style={styles.fieldContainer}>
+                  <Text style={styles.fieldLabel}>Expiration Date *</Text>
+                  <ModernDatePicker
+                    value={expirationDate}
+                    onDateChange={setExpirationDate}
+                    minimumDate={new Date()} // Can't expire in the past
+                    maximumDate={new Date(new Date().setFullYear(new Date().getFullYear() + 50))} // Allow up to 50 years in future
+                    style={styles.dateButton}
+                  />
+                </View>
+              </View>
+
+              {/* Form Actions */}
+              <View style={styles.formActions}>
+                <Button
+                  title="Cancel"
+                  onPress={handleClose}
+                  variant="outline"
+                  style={styles.button}
+                  disabled={isSubmitting}
+                />
+                
+                <Button
+                  title={isSubmitting ? 'Adding...' : 'Add License'}
+                  onPress={handleSubmit}
+                  disabled={!isFormValid || isSubmitting}
+                  variant="primary"
+                  style={styles.button}
+                />
+              </View>
+
+              {isSubmitting && (
+                <View style={styles.loadingContainer}>
+                  <LoadingSpinner size={20} />
+                  <Text style={styles.loadingText}>Adding license...</Text>
+                </View>
+              )}
+            </Card>
+
+            {/* Info Card */}
+            <Card style={styles.infoCard}>
+              <View style={styles.infoHeader}>
+                <Text style={styles.infoIcon}>💡</Text>
+                <Text style={styles.infoTitle}>Quick Setup</Text>
+              </View>
+              <Text style={styles.infoText}>
+                Adding your license now helps you track renewal deadlines and stay compliant. 
+                You can always add more licenses later from the Settings screen.
+              </Text>
+            </Card>
+
+            {/* Bottom spacer */}
+            <View style={styles.bottomSpacer} />
+          </ScrollView>
+        </TouchableOpacity>
+      </TouchableOpacity>
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  // Header
+  header: {
+    backgroundColor: '#003087',
+    paddingHorizontal: 16,
+    paddingVertical: 12, // Reduced padding
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginLeft: -20,
+    marginRight: -20,
+    marginTop: -20,
+    marginBottom: 16, // Reduced margin
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  closeButton: {
+    paddingVertical: theme.spacing[1],
+    paddingHorizontal: theme.spacing[2],
+  },
+  closeButtonText: {
+    color: theme.colors.background,
+    fontSize: 28,
+    fontWeight: theme.typography.fontWeight.bold,
+    lineHeight: 28,
+  },
+  headerTitle: {
+    color: theme.colors.background,
+    fontSize: theme.typography.fontSize.xl,
+    fontWeight: theme.typography.fontWeight.bold,
+  },
+  headerSpacer: {
+    width: 40, // Balance the header
+  },
+
+  // Content
+  scrollView: {
+    flex: 1,
+  },
+  formCard: {
+    margin: theme.spacing[2],
+    padding: theme.spacing[3], // Reduced padding
+  },
+  formHeader: {
+    marginBottom: theme.spacing[4], // Reduced margin
+  },
+  formTitle: {
+    fontSize: theme.typography.fontSize.xl,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[2],
+  },
+  formSubtitle: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    lineHeight: 20,
+  },
+
+  // Form Fields
+  formFields: {
+    marginBottom: theme.spacing[4], // Reduced margin
+  },
+  fieldContainer: {
+    marginBottom: theme.spacing[3], // Reduced margin between fields
+  },
+  fieldLabel: {
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.medium,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[2],
+  },
+  input: {
+    // Input styling handled by component
+  },
+
+  // Date Button
+  dateButton: {
+    // Date button styling handled by ModernDatePicker
+  },
+
+  // Form Actions
+  formActions: {
+    flexDirection: 'row',
+    gap: theme.spacing[3],
+  },
+  button: {
+    flex: 1,
+    minHeight: 48,
+  },
+
+  // Loading
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: theme.spacing[4],
+    paddingTop: theme.spacing[4],
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border.light,
+  },
+  loadingText: {
+    marginLeft: theme.spacing[2],
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+  },
+
+  // Info Card - Made smaller
+  infoCard: {
+    marginHorizontal: theme.spacing[2],
+    marginBottom: theme.spacing[3],
+    padding: theme.spacing[3], // Reduced padding
+    backgroundColor: '#f0f7ff',
+    borderLeftWidth: 4,
+    borderLeftColor: theme.colors.primary,
+  },
+  infoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing[2],
+  },
+  infoIcon: {
+    fontSize: 20,
+    marginRight: theme.spacing[2],
+  },
+  infoTitle: {
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.primary,
+  },
+  infoText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    lineHeight: 20,
+  },
+
+  // Bottom Spacer
+  bottomSpacer: {
+    height: 10, // Reduced bottom spacer
+  },
+});

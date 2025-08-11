@@ -20,9 +20,7 @@ export const LicenseSetupScreen: React.FC<Props> = ({ navigation }) => {
   const [showLicenseForm, setShowLicenseForm] = useState(false);
 
   const handleAddLicenses = () => {
-    console.log('DEBUG: handleAddLicenses clicked, current state:', showLicenseForm);
     setShowLicenseForm(true);
-    console.log('DEBUG: setShowLicenseForm(true) called');
   };
 
   const handleLicenseModalClose = () => {
@@ -127,7 +125,6 @@ export const LicenseSetupScreen: React.FC<Props> = ({ navigation }) => {
       </View>
       
       {/* Floating License Modal - MOVED OUTSIDE main container */}
-      {console.log('DEBUG: Rendering FloatingLicenseModal, visible =', showLicenseForm)}
       <FloatingLicenseModal
         visible={showLicenseForm}
         onClose={handleLicenseModalClose}
