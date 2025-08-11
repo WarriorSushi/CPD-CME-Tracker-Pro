@@ -95,6 +95,19 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [cameraPermission, setCameraPermission] = useState<boolean | null>(null);
   const [isUploadingCertificate, setIsUploadingCertificate] = useState(false);
+  
+  // Button pressing states for visual feedback
+  const [pressedButtons, setPressedButtons] = useState<{
+    camera: boolean;
+    gallery: boolean;
+    vault: boolean;
+    remove: boolean;
+  }>({
+    camera: false,
+    gallery: false,
+    vault: false,
+    remove: false,
+  });
 
   // Reset form when screen comes into focus or params change
   useEffect(() => {
@@ -290,6 +303,20 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
     checkCameraPermissions();
   }, []);
 
+  // Button pressing effect handlers
+  const handlePressIn = (buttonType: keyof typeof pressedButtons) => {
+    setPressedButtons(prev => ({ ...prev, [buttonType]: true }));
+  };
+
+  const handlePressOut = (buttonType: keyof typeof pressedButtons) => {
+    setPressedButtons(prev => ({ ...prev, [buttonType]: false }));
+  };
+
+  // Get pressed button style
+  const getPressedButtonStyle = (buttonType: keyof typeof pressedButtons) => {
+    return pressedButtons[buttonType] ? styles.buttonPressed : {};
+  };
+
   // Validation
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -483,66 +510,71 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
               style={styles.notesInput}
             />
           </View>
-        </Card>
 
-        {/* Certificate Section */}
-        <Card style={styles.certificateCard}>
-          <Text style={styles.sectionTitle}>📄 Certificate (Optional)</Text>
-          <Text style={styles.sectionSubtitle}>
-            Attach a certificate or photo for this CME activity
-          </Text>
-
-          {formData.certificatePath ? (
-            // Show certificate preview
-            <View style={styles.certificatePreview}>
-              <Image 
-                source={{ uri: formData.certificatePath }}
-                style={styles.certificateImage}
-                resizeMode="cover"
-              />
-              <View style={styles.certificateActions}>
+          {/* Row 5: Certificate (Optional) - Merged into main form */}
+          <View style={styles.fieldContainer}>
+            <Text style={styles.label}>📄 Certificate (Optional)</Text>
+            
+            {formData.certificatePath ? (
+              // Show certificate preview - compact
+              <View style={styles.certificatePreviewCompact}>
+                <Image 
+                  source={{ uri: formData.certificatePath }}
+                  style={styles.certificateImageCompact}
+                  resizeMode="cover"
+                />
                 <TouchableOpacity 
-                  style={styles.removeCertButton}
+                  style={[styles.removeCertButtonCompact, getPressedButtonStyle('remove')]}
                   onPress={handleRemoveCertificate}
+                  onPressIn={() => handlePressIn('remove')}
+                  onPressOut={() => handlePressOut('remove')}
+                  activeOpacity={1}
                 >
-                  <Text style={styles.removeCertButtonText}>🗑️ Remove</Text>
+                  <Text style={styles.removeCertButtonTextCompact}>🗑️ Remove</Text>
                 </TouchableOpacity>
               </View>
-            </View>
-          ) : (
-            // Show upload options
-            <View style={styles.certificateUploadSection}>
-              <View style={styles.uploadButtonsRow}>
+            ) : (
+              // Show tiny upload buttons with pressing effect
+              <View style={styles.certificateUploadCompact}>
                 <TouchableOpacity 
-                  style={[styles.uploadButton, styles.cameraButton]}
+                  style={[styles.uploadButtonTiny, styles.cameraButtonTiny, getPressedButtonStyle('camera')]}
                   onPress={handleTakePhoto}
+                  onPressIn={() => handlePressIn('camera')}
+                  onPressOut={() => handlePressOut('camera')}
                   disabled={isUploadingCertificate}
+                  activeOpacity={1}
                 >
-                  <Text style={styles.uploadButtonIcon}>📷</Text>
-                  <Text style={styles.uploadButtonText}>Take Photo</Text>
-                  {isUploadingCertificate && <LoadingSpinner size={16} />}
+                  <Text style={styles.uploadButtonIconTiny}>📷</Text>
+                  <Text style={styles.uploadButtonTextTiny}>Take</Text>
+                  {isUploadingCertificate && <LoadingSpinner size={10} />}
                 </TouchableOpacity>
                 
                 <TouchableOpacity 
-                  style={[styles.uploadButton, styles.galleryButton]}
+                  style={[styles.uploadButtonTiny, styles.galleryButtonTiny, getPressedButtonStyle('gallery')]}
                   onPress={handleChooseFromGallery}
+                  onPressIn={() => handlePressIn('gallery')}
+                  onPressOut={() => handlePressOut('gallery')}
                   disabled={isUploadingCertificate}
+                  activeOpacity={1}
                 >
-                  <Text style={styles.uploadButtonIcon}>🖼️</Text>
-                  <Text style={styles.uploadButtonText}>Gallery</Text>
+                  <Text style={styles.uploadButtonIconTiny}>🖼️</Text>
+                  <Text style={styles.uploadButtonTextTiny}>Gallery</Text>
                 </TouchableOpacity>
                 
                 <TouchableOpacity 
-                  style={[styles.uploadButton, styles.vaultButton]}
+                  style={[styles.uploadButtonTiny, styles.vaultButtonTiny, getPressedButtonStyle('vault')]}
                   onPress={handleChooseFromVault}
+                  onPressIn={() => handlePressIn('vault')}
+                  onPressOut={() => handlePressOut('vault')}
                   disabled={isUploadingCertificate}
+                  activeOpacity={1}
                 >
-                  <Text style={styles.uploadButtonIcon}>📁</Text>
-                  <Text style={styles.uploadButtonText}>From Vault</Text>
+                  <Text style={styles.uploadButtonIconTiny}>📁</Text>
+                  <Text style={styles.uploadButtonTextTiny}>Vault</Text>
                 </TouchableOpacity>
               </View>
-            </View>
-          )}
+            )}
+          </View>
         </Card>
 
         {/* Action Buttons */}
@@ -704,85 +736,94 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[4],
   },
 
-  // Certificate Section
-  certificateCard: {
-    marginBottom: theme.spacing[4],
-  },
-  sectionTitle: {
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing[2],
-  },
-  sectionSubtitle: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text.secondary,
-    marginBottom: theme.spacing[4],
-    lineHeight: 20,
-  },
-  certificateUploadSection: {
-    alignItems: 'center',
-  },
-  uploadButtonsRow: {
+  // Certificate Section - Compact merged into main form
+  certificateUploadCompact: {
     flexDirection: 'row',
-    gap: theme.spacing[3],
-    justifyContent: 'space-around',
-    width: '100%',
+    gap: theme.spacing[2],
+    justifyContent: 'flex-start',
+    marginTop: theme.spacing[1],
   },
-  uploadButton: {
-    flex: 1,
+  
+  // Tiny upload buttons with pressing effect
+  uploadButtonTiny: {
     alignItems: 'center',
-    paddingVertical: theme.spacing[4],
-    paddingHorizontal: theme.spacing[2],
-    borderRadius: theme.spacing[3],
+    justifyContent: 'center',
+    paddingVertical: theme.spacing[2],
+    paddingHorizontal: theme.spacing[3],
+    borderRadius: 5,
+    minWidth: 60,
+    // Button pressing effect - unpressed state (elevated)
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 5,
+    // Transform for pressing effect will be handled by TouchableOpacity
   },
-  cameraButton: {
+  
+  cameraButtonTiny: {
     backgroundColor: '#3b82f6',
   },
-  galleryButton: {
+  galleryButtonTiny: {
     backgroundColor: '#10b981',
   },
-  vaultButton: {
+  vaultButtonTiny: {
     backgroundColor: '#8b5cf6',
   },
-  uploadButtonIcon: {
-    fontSize: 20,
-    marginBottom: theme.spacing[1],
+  
+  uploadButtonIconTiny: {
+    fontSize: 14,
+    marginBottom: 2,
   },
-  uploadButtonText: {
-    fontSize: theme.typography.fontSize.xs,
+  uploadButtonTextTiny: {
+    fontSize: 10,
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.background,
     textAlign: 'center',
   },
-  certificatePreview: {
+
+  // Compact certificate preview
+  certificatePreviewCompact: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing[3],
+    marginTop: theme.spacing[2],
   },
-  certificateImage: {
-    width: '100%',
-    height: 150,
-    borderRadius: theme.spacing[3],
+  certificateImageCompact: {
+    width: 60,
+    height: 40,
+    borderRadius: 5,
     backgroundColor: theme.colors.gray.light,
   },
-  certificateActions: {
-    alignSelf: 'stretch',
-    alignItems: 'center',
-  },
-  removeCertButton: {
-    paddingVertical: theme.spacing[2],
-    paddingHorizontal: theme.spacing[4],
-    borderRadius: theme.spacing[2],
+  removeCertButtonCompact: {
+    paddingVertical: theme.spacing[1],
+    paddingHorizontal: theme.spacing[2],
+    borderRadius: 5,
     backgroundColor: '#ef4444',
+    // Button pressing effect
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 5,
   },
-  removeCertButtonText: {
-    fontSize: theme.typography.fontSize.sm,
+  removeCertButtonTextCompact: {
+    fontSize: 11,
     color: theme.colors.background,
     fontWeight: theme.typography.fontWeight.semibold,
+  },
+
+  // Button pressed state - removes shadow and adds inset effect
+  buttonPressed: {
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    elevation: 0,
+    // Inset border effect when pressed
+    borderTopWidth: 2,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: 'rgba(0,0,0,0.2)',
+    // Slight translate down for pressed feeling
+    transform: [{ translateY: 2 }],
   },
 });
