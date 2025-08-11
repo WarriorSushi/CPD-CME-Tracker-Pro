@@ -103,7 +103,22 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
   // Debug logging for modal visibility
   React.useEffect(() => {
     console.log('FloatingLicenseModal: visible prop changed to', visible);
-  }, [visible]);
+    if (visible) {
+      console.log('FloatingLicenseModal: Modal should now be VISIBLE');
+      console.log('FloatingLicenseModal: Current form state:', {
+        licenseType,
+        issuingAuthority,
+        licenseNumber,
+        expirationDate: expirationDate?.toDateString(),
+        isFormValid,
+        isSubmitting
+      });
+    } else {
+      console.log('FloatingLicenseModal: Modal should now be HIDDEN');
+    }
+  }, [visible, licenseType, issuingAuthority, licenseNumber, expirationDate, isFormValid, isSubmitting]);
+
+  console.log('FloatingLicenseModal: About to render Modal with visible =', visible);
 
   return (
     <Modal
@@ -111,13 +126,18 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
       transparent
       animationType="fade"
       onRequestClose={handleClose}
+      onShow={() => console.log('FloatingLicenseModal: Modal onShow callback triggered')}
+      onDismiss={() => console.log('FloatingLicenseModal: Modal onDismiss callback triggered')}
     >
+      {console.log('FloatingLicenseModal: Inside Modal component, rendering overlay')}
       <View style={styles.modalOverlay}>
+        {console.log('FloatingLicenseModal: Inside modalOverlay, rendering container')}
         <KeyboardAvoidingView 
           style={styles.modalContainer}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           {/* Header */}
+          {console.log('FloatingLicenseModal: Rendering header')}
           <View style={styles.header}>
             <TouchableOpacity 
               style={styles.closeButton} 
@@ -254,7 +274,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     backgroundColor: '#f8f9fa',
     borderRadius: 12,
-    borderWidth: 2,
+    borderWidth: 5, // DEBUG: Thick red border to see modal position
     borderColor: '#ff0000', // DEBUG: Red border to see modal position
     width: '90%',
     maxWidth: 450,
