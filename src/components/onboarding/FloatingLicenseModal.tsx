@@ -99,10 +99,11 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
     }
   }, [licenseType, issuingAuthority, licenseNumber, expirationDate, isFormValid, addLicense, onClose, onSuccess]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (isSubmitting) return; // Prevent closing while submitting
+    console.log('DEBUG: handleClose called in modal');
     onClose();
-  };
+  }, [isSubmitting, onClose]);
 
   if (!visible) {
     return null;
@@ -110,12 +111,13 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
   
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
   const modalWidth = Math.min(screenWidth * 0.92, 520); // Responsive width, max 520px
-  const modalHeight = Math.min(screenHeight * 0.78, 550); // More compact height, max 550px  
+  const modalHeight = Math.min(screenHeight * 0.88, 700); // Back to original size, max 700px  
   const modalLeft = (screenWidth - modalWidth) / 2;
   const modalTop = (screenHeight - modalHeight) / 2;
   
   return (
     <Modal
+      key={visible ? 'modal-open' : 'modal-closed'}
       visible={visible}
       transparent
       animationType="fade"
@@ -129,7 +131,11 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
           backgroundColor: 'rgba(0, 0, 0, 0.45)',
         }}
         activeOpacity={1}
-        onPress={handleClose}
+        onPress={(e) => {
+          e.preventDefault();
+          console.log('DEBUG: Overlay touched, closing modal');
+          handleClose();
+        }}
       >
         <TouchableOpacity
           style={{
@@ -320,13 +326,13 @@ const styles = StyleSheet.create({
     padding: theme.spacing[3], // Reduced padding
   },
   formHeader: {
-    marginBottom: theme.spacing[4], // Reduced margin
+    marginBottom: theme.spacing[3], // More compact
   },
   formTitle: {
-    fontSize: theme.typography.fontSize.xl,
+    fontSize: theme.typography.fontSize.lg, // Smaller title
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
-    marginBottom: theme.spacing[2],
+    marginBottom: theme.spacing[1], // Less margin
   },
   formSubtitle: {
     fontSize: theme.typography.fontSize.sm,
@@ -336,16 +342,16 @@ const styles = StyleSheet.create({
 
   // Form Fields
   formFields: {
-    marginBottom: theme.spacing[4], // Reduced margin
+    marginBottom: theme.spacing[3], // More compact
   },
   fieldContainer: {
-    marginBottom: theme.spacing[3], // Reduced margin between fields
+    marginBottom: theme.spacing[2], // Much tighter spacing between fields
   },
   fieldLabel: {
-    fontSize: theme.typography.fontSize.base,
+    fontSize: theme.typography.fontSize.sm, // Smaller labels
     fontWeight: theme.typography.fontWeight.medium,
     color: theme.colors.text.primary,
-    marginBottom: theme.spacing[2],
+    marginBottom: theme.spacing[1], // Less space between label and input
   },
   input: {
     // Input styling handled by component
@@ -371,8 +377,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: theme.spacing[4],
-    paddingTop: theme.spacing[4],
+    marginTop: theme.spacing[2], // Less space above loading
+    paddingTop: theme.spacing[2],
     borderTopWidth: 1,
     borderTopColor: theme.colors.border.light,
   },
@@ -382,33 +388,33 @@ const styles = StyleSheet.create({
     color: theme.colors.text.secondary,
   },
 
-  // Info Card - Made smaller
+  // Info Card - Made much smaller
   infoCard: {
     marginHorizontal: theme.spacing[2],
-    marginBottom: theme.spacing[3],
-    padding: theme.spacing[3], // Reduced padding
+    marginBottom: theme.spacing[2], // Less bottom margin
+    padding: theme.spacing[2], // Much smaller padding
     backgroundColor: '#f0f7ff',
-    borderLeftWidth: 4,
+    borderLeftWidth: 3, // Thinner border
     borderLeftColor: theme.colors.primary,
   },
   infoHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: theme.spacing[2],
+    marginBottom: theme.spacing[1], // Less space below header
   },
   infoIcon: {
-    fontSize: 20,
-    marginRight: theme.spacing[2],
+    fontSize: 16, // Smaller icon
+    marginRight: theme.spacing[1], // Less margin
   },
   infoTitle: {
-    fontSize: theme.typography.fontSize.base,
+    fontSize: theme.typography.fontSize.sm, // Smaller title
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.primary,
   },
   infoText: {
-    fontSize: theme.typography.fontSize.sm,
+    fontSize: theme.typography.fontSize.xs, // Much smaller text
     color: theme.colors.text.secondary,
-    lineHeight: 20,
+    lineHeight: 16, // Tighter line height
   },
 
   // Bottom Spacer

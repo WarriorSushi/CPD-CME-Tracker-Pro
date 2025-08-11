@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -19,13 +19,19 @@ export const LicenseSetupScreen: React.FC<Props> = ({ navigation }) => {
   const [skipForNow, setSkipForNow] = useState(false);
   const [showLicenseForm, setShowLicenseForm] = useState(false);
 
-  const handleAddLicenses = () => {
-    setShowLicenseForm(true);
-  };
+  const handleAddLicenses = useCallback(() => {
+    console.log('DEBUG: handleAddLicenses called, current state:', showLicenseForm);
+    // Small delay to ensure stable state
+    setTimeout(() => {
+      setShowLicenseForm(true);
+      console.log('DEBUG: setShowLicenseForm(true) called after timeout');
+    }, 100);
+  }, [showLicenseForm]);
 
-  const handleLicenseModalClose = () => {
+  const handleLicenseModalClose = useCallback(() => {
+    console.log('DEBUG: handleLicenseModalClose called');
     setShowLicenseForm(false);
-  };
+  }, []);
 
   const handleLicenseModalSuccess = () => {
     navigation.navigate('SetupComplete');
