@@ -96,8 +96,14 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
 
   const handleClose = () => {
     if (isSubmitting) return; // Prevent closing while submitting
+    console.log('FloatingLicenseModal: handleClose called');
     onClose();
   };
+
+  // Debug logging for modal visibility
+  React.useEffect(() => {
+    console.log('FloatingLicenseModal: visible prop changed to', visible);
+  }, [visible]);
 
   return (
     <Modal
@@ -105,12 +111,13 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
       transparent
       animationType="slide"
       onRequestClose={handleClose}
+      statusBarTranslucent
     >
-      <View style={styles.modalOverlay}>
-        <KeyboardAvoidingView 
-          style={styles.modalContainer}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
+      <KeyboardAvoidingView 
+        style={styles.modalOverlay}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <View style={styles.modalContainer}>
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity 
@@ -231,8 +238,8 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
             <View style={styles.bottomSpacer} />
           </ScrollView>
 
-        </KeyboardAvoidingView>
-      </View>
+        </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
@@ -243,14 +250,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 16,
   },
   modalContainer: {
-    width: '95%',
+    width: '100%',
     maxWidth: 500,
     maxHeight: '90%',
     backgroundColor: '#f8f9fa',
     borderRadius: theme.spacing[3],
     overflow: 'hidden',
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
 
   // Header

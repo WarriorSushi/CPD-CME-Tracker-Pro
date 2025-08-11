@@ -321,13 +321,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       setIsLoadingCME(false);
     }
   }, [clearError]); // Remove user dependency to prevent unnecessary re-runs
-  
-  // Force refresh CME data (for manual refreshes)
-  const forceRefreshCMEData = useCallback(async (): Promise<void> => {
-    lastEntriesRefreshRef.current = 0; // Force staleness
-    await refreshCMEData();
-  }, [forceRefreshCMEData]);
-
   // Lazy load all CME entries when needed (e.g., for CME history screen)
   const loadAllCMEEntries = useCallback(async (): Promise<CMEEntry[]> => {
     try {
@@ -412,7 +405,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Force refresh CME data (bypass staleness check)
   const forceRefreshCMEData = useCallback(async (): Promise<void> => {
     await refreshCMEData(true);
-  }, [forceRefreshCMEData]);
+  }, [refreshCMEData]);
 
   // CME Actions
   const addCMEEntry = useCallback(async (entry: Omit<CMEEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<boolean> => {
