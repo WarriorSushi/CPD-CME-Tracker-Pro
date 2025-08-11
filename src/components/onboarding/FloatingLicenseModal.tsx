@@ -111,13 +111,13 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
       transparent
       animationType="slide"
       onRequestClose={handleClose}
-      statusBarTranslucent
     >
       <KeyboardAvoidingView 
-        style={styles.modalOverlay}
+        style={styles.keyboardAvoidingView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.modalContainer}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity 
@@ -238,6 +238,7 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
             <View style={styles.bottomSpacer} />
           </ScrollView>
 
+          </View>
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -245,6 +246,9 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
 };
 
 const styles = StyleSheet.create({
+  keyboardAvoidingView: {
+    flex: 1,
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -253,7 +257,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   modalContainer: {
-    width: '100%',
+    width: '95%',
     maxWidth: 500,
     maxHeight: '90%',
     backgroundColor: '#f8f9fa',
