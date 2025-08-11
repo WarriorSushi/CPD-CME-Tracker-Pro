@@ -31,6 +31,7 @@ export type MainTabParamList = {
       certificatePath?: string;
     };
   };
+  AddLicense: undefined;
 };
 
 export type TabParamList = {
@@ -53,6 +54,7 @@ export type VaultStackParamList = {
 
 export type SettingsStackParamList = {
   Settings: undefined;
+  AddLicense: undefined;
   LicenseManagement: undefined;
   DataExport: undefined;
   About: undefined;

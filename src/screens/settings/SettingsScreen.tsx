@@ -10,12 +10,16 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import { CompositeNavigationProp } from '@react-navigation/native';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 import { Card, Button, LoadingSpinner } from '../../components';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { useOnboardingContext } from '../../contexts/OnboardingContext';
 import { LicenseRenewal } from '../../types';
+import { MainTabParamList, TabParamList } from '../../types/navigation';
 import { APP_CONFIG } from '../../constants';
 import { getCreditUnit } from '../../utils/creditTerminology';
 import { 
@@ -25,7 +29,16 @@ import {
   createBackup 
 } from '../../utils/dataExport';
 
-export const SettingsScreen: React.FC = () => {
+type SettingsScreenNavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<TabParamList, 'Settings'>,
+  StackNavigationProp<MainTabParamList>
+>;
+
+interface Props {
+  navigation: SettingsScreenNavigationProp;
+}
+
+export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { 
     user, 
@@ -386,7 +399,7 @@ export const SettingsScreen: React.FC = () => {
             <TouchableOpacity
               style={styles.addLicenseButton}
               onPress={() => {
-                Alert.alert('Add License', 'License management will be available in a future update.');
+                navigation.navigate('AddLicense');
               }}
             >
               <Text style={styles.addLicenseText}>+ Add License</Text>

@@ -12,6 +12,7 @@ import { CMENavigator } from './CMENavigator';
 import { CertificateVaultScreen } from '../screens/vault/CertificateVaultScreen';
 import { SettingsScreen } from '../screens/settings/SettingsScreen';
 import { AddCMEScreen } from '../screens/cme/AddCMEScreen';
+import { AddLicenseScreen } from '../screens/settings/AddLicenseScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createStackNavigator<MainTabParamList>();
@@ -143,6 +144,14 @@ export const MainTabNavigator: React.FC = () => {
       <Stack.Screen
         name="AddCME"
         component={AddCMEScreen}
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="AddLicense"
+        component={AddLicenseScreen}
         options={{
           presentation: 'modal',
           headerShown: false,
