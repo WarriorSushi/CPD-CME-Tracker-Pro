@@ -109,15 +109,14 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType="fade"
       onRequestClose={handleClose}
     >
-      <KeyboardAvoidingView 
-        style={styles.keyboardAvoidingView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
+      <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView 
+          style={styles.modalContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity 
@@ -238,43 +237,40 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
             <View style={styles.bottomSpacer} />
           </ScrollView>
 
-          </View>
-        </View>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </View>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  keyboardAvoidingView: {
-    flex: 1,
-  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
+    padding: 20,
   },
   modalContainer: {
-    width: '95%',
-    maxWidth: 500,
-    maxHeight: '90%',
     backgroundColor: '#f8f9fa',
-    borderRadius: theme.spacing[3],
-    overflow: 'hidden',
-    elevation: 10,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#ff0000', // DEBUG: Red border to see modal position
+    width: '90%',
+    maxWidth: 450,
+    maxHeight: '85%',
+    elevation: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
   },
 
   // Header
   header: {
     backgroundColor: '#003087',
-    paddingHorizontal: theme.spacing[4],
-    paddingVertical: theme.spacing[4],
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
