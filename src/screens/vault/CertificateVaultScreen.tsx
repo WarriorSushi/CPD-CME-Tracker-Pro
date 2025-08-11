@@ -36,7 +36,6 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { certificates, isLoadingCertificates, refreshCertificates } = useAppContext();
   
-  const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [cameraPermission, setCameraPermission] = useState<boolean | null>(null);
@@ -170,11 +169,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  // Filter certificates based on search
-  const filteredCertificates = certificates.filter(cert => 
-    !searchQuery || 
-    cert.fileName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // No filtering needed since search is removed
 
 
   const handleUploadCertificate = async () => {
@@ -286,19 +281,46 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
           style: 'destructive',
           onPress: async () => {
             try {
+              console.log('🗑️ Deleting certificate:', certificate.id, certificate.fileName);
+              
+              // Delete from database first
+              const deleteResult = await databaseOperations.certificates.deleteCertificate(certificate.id);
+              
+              if (!deleteResult.success) {
+                console.error('❌ Failed to delete certificate from database:', deleteResult.error);
+                Alert.alert('Error', 'Failed to delete certificate from database.');
+                return;
+              }
+              
+              console.log('✅ Certificate deleted from database successfully');
+
               // Delete file from filesystem
-              const fileInfo = await FileSystem.getInfoAsync(certificate.filePath);
-              if (fileInfo.exists) {
-                await FileSystem.deleteAsync(certificate.filePath);
+              try {
+                const fileInfo = await FileSystem.getInfoAsync(certificate.filePath);
+                if (fileInfo.exists) {
+                  await FileSystem.deleteAsync(certificate.filePath);
+                  console.log('🗂️ Certificate file deleted from filesystem');
+                }
+                
+                // Also delete thumbnail if it exists
+                if (certificate.thumbnailPath) {
+                  const thumbnailInfo = await FileSystem.getInfoAsync(certificate.thumbnailPath);
+                  if (thumbnailInfo.exists) {
+                    await FileSystem.deleteAsync(certificate.thumbnailPath);
+                    console.log('🖼️ Certificate thumbnail deleted');
+                  }
+                }
+              } catch (fileError) {
+                console.warn('⚠️ Error deleting certificate files:', fileError);
+                // Continue even if file deletion fails - database record is already deleted
               }
 
-              // TODO: Delete from database using context
-              // await deleteCertificate(certificate.id);
-
-              Alert.alert('Success', 'Certificate deleted successfully!');
+              // Refresh the certificates list
               await refreshCertificates();
+              Alert.alert('Success', 'Certificate deleted successfully!');
+              
             } catch (error) {
-              console.error('Error deleting certificate:', error);
+              console.error('💥 Error deleting certificate:', error);
               Alert.alert('Error', 'Failed to delete certificate.');
             }
           },
@@ -338,19 +360,14 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
       <Text style={styles.emptyIcon}>🏆</Text>
       <Text style={styles.emptyTitle}>No certificates yet</Text>
       <Text style={styles.emptySubtitle}>
-        {searchQuery 
-          ? 'No certificates match your search'
-          : 'Upload your first certificate to get started'
-        }
+        Upload your first certificate to get started
       </Text>
-      {!searchQuery && (
-        <Button
-          title="Upload Certificate"
-          onPress={handleUploadCertificate}
-          style={styles.emptyButton}
-          loading={isUploading}
-        />
-      )}
+      <Button
+        title="Upload Certificate"
+        onPress={handleUploadCertificate}
+        style={styles.emptyButton}
+        loading={isUploading}
+      />
     </View>
   );
 
@@ -433,80 +450,46 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Scanning Section */}
-      <View style={styles.scanningSection}>
-        <Card style={styles.scanningCard}>
-          <Text style={styles.scanningTitle}>📸 Add New Certificate</Text>
-          <Text style={styles.scanningSubtitle}>
-            Take a photo or choose from gallery to add certificates to your vault
-          </Text>
+      {/* Prominent Add Section */}
+      <View style={styles.prominentAddSection}>
+        <Text style={styles.addSectionTitle}>📎 Add Certificate</Text>
+        <View style={styles.addButtonsRow}>
+          <TouchableOpacity 
+            style={[styles.addButton, styles.cameraButton]}
+            onPress={handleCameraPress}
+            disabled={isScanning}
+          >
+            <Text style={styles.addButtonIcon}>📷</Text>
+            <Text style={styles.addButtonText}>Camera</Text>
+            {isScanning && <LoadingSpinner size={12} />}
+          </TouchableOpacity>
           
-          <View style={styles.scanningActions}>
-            <TouchableOpacity 
-              style={[styles.scanButton, styles.cameraButton]}
-              onPress={handleCameraPress}
-              disabled={isScanning}
-            >
-              <Text style={styles.scanButtonIcon}>📷</Text>
-              <Text style={styles.scanButtonText}>Camera</Text>
-              {isScanning && <LoadingSpinner size={16} />}
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[styles.scanButton, styles.galleryButton]}
-              onPress={handleGalleryPress}
-              disabled={isScanning}
-            >
-              <Text style={styles.scanButtonIcon}>🖼️</Text>
-              <Text style={styles.scanButtonText}>Gallery</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[styles.scanButton, styles.uploadButton]}
-              onPress={handleUploadCertificate}
-              disabled={isUploading}
-            >
-              <Text style={styles.scanButtonIcon}>📁</Text>
-              <Text style={styles.scanButtonText}>Files</Text>
-              {isUploading && <LoadingSpinner size={16} />}
-            </TouchableOpacity>
-          </View>
-        </Card>
-      </View>
-
-      {/* Search and Stats */}
-      <View style={styles.controls}>
-        <Input
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder="Search certificates..."
-          style={styles.searchInput}
-        />
+          <TouchableOpacity 
+            style={[styles.addButton, styles.galleryButton]}
+            onPress={handleGalleryPress}
+            disabled={isScanning}
+          >
+            <Text style={styles.addButtonIcon}>🖼️</Text>
+            <Text style={styles.addButtonText}>Gallery</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.addButton, styles.uploadButton]}
+            onPress={handleUploadCertificate}
+            disabled={isUploading}
+          >
+            <Text style={styles.addButtonIcon}>📁</Text>
+            <Text style={styles.addButtonText}>Files</Text>
+            {isUploading && <LoadingSpinner size={12} />}
+          </TouchableOpacity>
+        </View>
         
-        <Card style={styles.statsCard}>
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{filteredCertificates.length}</Text>
-              <Text style={styles.statLabel}>
-                {searchQuery ? 'Found' : 'Certificates'}
-              </Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>
-                {(filteredCertificates.reduce((sum, cert) => sum + cert.fileSize, 0) / 1024 / 1024).toFixed(1)}
-              </Text>
-              <Text style={styles.statLabel}>MB Used</Text>
-            </View>
-            {searchQuery && (
-              <TouchableOpacity 
-                style={styles.clearSearchButton}
-                onPress={() => setSearchQuery('')}
-              >
-                <Text style={styles.clearSearchText}>Clear</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </Card>
+        {/* Tiny stats moved to bottom right */}
+        <View style={styles.tinyStats}>
+          <Text style={styles.tinyStatsText}>
+            {certificates.length} certificates • {(certificates.reduce((sum, cert) => sum + cert.fileSize, 0) / 1024 / 1024).toFixed(1)}MB used
+          </Text>
+        </View>
       </View>
 
       {/* Certificates Grid */}
@@ -517,7 +500,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         </View>
       ) : (
         <FlatList
-          data={filteredCertificates}
+          data={certificates}
           renderItem={renderCertificate}
           keyExtractor={(item) => item.id.toString()}
           numColumns={2}
@@ -547,11 +530,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing[5],
-    paddingVertical: theme.spacing[4],
+    paddingHorizontal: theme.spacing[4],
+    paddingVertical: theme.spacing[3],
     backgroundColor: '#1e3a8a',
-    borderBottomLeftRadius: theme.spacing[4],
-    borderBottomRightRadius: theme.spacing[4],
+    borderBottomLeftRadius: theme.spacing[3],
+    borderBottomRightRadius: theme.spacing[3],
   },
   title: {
     fontSize: theme.typography.fontSize.xl,
@@ -570,46 +553,43 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  // Scanning Section
-  scanningSection: {
-    paddingHorizontal: theme.spacing[5],
-    paddingTop: theme.spacing[4],
-  },
-  scanningCard: {
-    padding: theme.spacing[5],
-    backgroundColor: '#f8fafc',
+  // Prominent Add Section
+  prominentAddSection: {
+    marginHorizontal: theme.spacing[4],
+    marginVertical: theme.spacing[3],
+    padding: theme.spacing[4],
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.spacing[3],
     borderWidth: 2,
     borderColor: '#e2e8f0',
-    borderStyle: 'dashed',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
   },
-  scanningTitle: {
-    fontSize: theme.typography.fontSize.lg,
+  addSectionTitle: {
+    fontSize: theme.typography.fontSize.base,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
     textAlign: 'center',
-    marginBottom: theme.spacing[2],
+    marginBottom: theme.spacing[3],
   },
-  scanningSubtitle: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: theme.spacing[4],
-    lineHeight: 20,
-  },
-  scanningActions: {
+  addButtonsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     gap: theme.spacing[3],
+    marginBottom: theme.spacing[3],
   },
-  scanButton: {
+  addButton: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: theme.spacing[4],
-    paddingHorizontal: theme.spacing[3],
-    borderRadius: theme.spacing[3],
+    paddingVertical: theme.spacing[3],
+    paddingHorizontal: theme.spacing[2],
+    borderRadius: theme.spacing[2],
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 3,
   },
@@ -622,46 +602,24 @@ const styles = StyleSheet.create({
   uploadButton: {
     backgroundColor: '#8b5cf6',
   },
-  scanButtonIcon: {
-    fontSize: 24,
-    marginBottom: theme.spacing[2],
-  },
-  scanButtonText: {
-    fontSize: theme.typography.fontSize.sm,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.background,
-  },
-
-  // Controls
-  controls: {
-    padding: theme.spacing[5],
-    gap: theme.spacing[4],
-  },
-  searchInput: {
-    // Input styles applied by component
-  },
-  
-  // Stats
-  statsCard: {
-    paddingVertical: theme.spacing[3],
-  },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.primary,
+  addButtonIcon: {
+    fontSize: 20,
     marginBottom: theme.spacing[1],
   },
-  statLabel: {
+  addButtonText: {
     fontSize: theme.typography.fontSize.xs,
-    color: theme.colors.text.secondary,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.background,
     textAlign: 'center',
+  },
+  tinyStats: {
+    alignSelf: 'flex-end',
+  },
+  tinyStatsText: {
+    fontSize: 10,
+    color: theme.colors.text.secondary,
+    fontWeight: theme.typography.fontWeight.medium,
+    fontStyle: 'italic',
   },
 
   // Loading
@@ -680,7 +638,8 @@ const styles = StyleSheet.create({
   // Masonry List
   masonryList: {
     paddingHorizontal: theme.spacing[3],
-    paddingBottom: theme.spacing[8],
+    paddingTop: theme.spacing[2],
+    paddingBottom: theme.spacing[4],
   },
   masonryRow: {
     justifyContent: 'space-between',
@@ -804,18 +763,5 @@ const styles = StyleSheet.create({
     minWidth: 150,
   },
 
-  // Search and management styles
-  clearSearchButton: {
-    paddingVertical: theme.spacing[1],
-    paddingHorizontal: theme.spacing[3],
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.spacing[2],
-    marginLeft: theme.spacing[3],
-  },
-  clearSearchText: {
-    fontSize: theme.typography.fontSize.xs,
-    color: theme.colors.background,
-    fontWeight: theme.typography.fontWeight.semibold,
-  },
 
 });
