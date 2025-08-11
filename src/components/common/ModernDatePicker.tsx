@@ -14,7 +14,7 @@ interface ModernDatePickerProps {
 export const ModernDatePicker: React.FC<ModernDatePickerProps> = ({
   value,
   onDateChange,
-  maximumDate = new Date(),
+  maximumDate = new Date(new Date().setFullYear(new Date().getFullYear() + 50)),
   minimumDate = new Date(2015, 0, 1),
   style,
 }) => {

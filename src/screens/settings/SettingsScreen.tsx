@@ -43,6 +43,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
   const { 
     user, 
     licenses, 
+    recentCMEEntries,
     isLoadingLicenses,
     refreshLicenses,
     refreshUserData,
@@ -190,7 +191,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
           text: 'CME Entries',
           onPress: async () => {
             setIsExporting(true);
-            const success = await exportCMEToCSV(cmeEntries, user);
+            const success = await exportCMEToCSV(recentCMEEntries, user);
             setIsExporting(false);
             if (success) {
               Alert.alert('Success', 'CME entries exported successfully!');
@@ -203,7 +204,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
           text: 'Summary Report',
           onPress: async () => {
             setIsExporting(true);
-            const success = await generateSummaryReport(user, cmeEntries, licenses);
+            const success = await generateSummaryReport(user, recentCMEEntries, licenses);
             setIsExporting(false);
             if (success) {
               Alert.alert('Success', 'Summary report generated successfully!');
@@ -234,7 +235,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
           text: 'Create Backup',
           onPress: async () => {
             setIsExporting(true);
-            const success = await createBackup(user, cmeEntries, licenses);
+            const success = await createBackup(user, recentCMEEntries, licenses);
             setIsExporting(false);
             if (success) {
               Alert.alert('Success', 'Backup created successfully!');
@@ -312,6 +313,16 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
         </View>
 
         <View style={styles.licenseActions}>
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.remindButton]}
+            onPress={() => {
+              // TODO: Setup notification reminders for this license
+              Alert.alert('Reminder Setup', 'License reminder notifications will be available in a future update.');
+            }}
+          >
+            <Text style={styles.remindButtonText}>🔔 Remind Me</Text>
+          </TouchableOpacity>
+          
           <TouchableOpacity 
             style={[styles.actionButton, styles.editButton]}
             onPress={() => {
@@ -915,6 +926,14 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.sm,
     minWidth: 60,
     alignItems: 'center',
+  },
+  remindButton: {
+    backgroundColor: '#6c5ce7',
+  },
+  remindButtonText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.background,
+    fontWeight: theme.typography.fontWeight.medium,
   },
   editButton: {
     backgroundColor: '#00b894',

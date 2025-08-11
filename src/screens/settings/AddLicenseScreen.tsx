@@ -39,14 +39,13 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation }) => {
   const [licenseType, setLicenseType] = useState('');
   const [issuingAuthority, setIssuingAuthority] = useState('');
   const [licenseNumber, setLicenseNumber] = useState('');
-  const [expirationDate, setExpirationDate] = useState<Date | null>(null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [expirationDate, setExpirationDate] = useState<Date>(new Date(new Date().setFullYear(new Date().getFullYear() + 1))); // Default to 1 year from now
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form validation
   const isFormValid = licenseType.trim() !== '' && 
                      issuingAuthority.trim() !== '' && 
-                     expirationDate !== null;
+                     expirationDate instanceof Date;
 
   const handleSubmit = useCallback(async () => {
     if (!isFormValid) {
@@ -61,8 +60,8 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation }) => {
         licenseType: licenseType.trim(),
         issuingAuthority: issuingAuthority.trim(),
         licenseNumber: licenseNumber.trim() || undefined,
-        expirationDate: expirationDate!.toISOString().split('T')[0], // Convert to YYYY-MM-DD
-        renewalDate: null,
+        expirationDate: expirationDate.toISOString().split('T')[0], // Convert to YYYY-MM-DD
+        renewalDate: undefined,
         requiredCredits: 0, // Default to 0, can be edited later
         completedCredits: 0,
         status: 'active',
@@ -77,7 +76,7 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation }) => {
           [
             {
               text: 'OK',
-              onPress: () => navigation.navigate('Settings'),
+              onPress: () => navigation.goBack(),
             },
           ]
         );
@@ -91,15 +90,6 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation }) => {
       setIsSubmitting(false);
     }
   }, [licenseType, issuingAuthority, licenseNumber, expirationDate, isFormValid, addLicense, navigation]);
-
-  const formatDateDisplay = (date: Date | null) => {
-    if (!date) return 'Select expiration date *';
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
 
   return (
     <KeyboardAvoidingView 
@@ -172,21 +162,13 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation }) => {
             {/* Expiration Date */}
             <View style={styles.fieldContainer}>
               <Text style={styles.fieldLabel}>Expiration Date *</Text>
-              <TouchableOpacity
-                style={[
-                  styles.dateButton,
-                  !expirationDate && styles.dateButtonEmpty
-                ]}
-                onPress={() => setShowDatePicker(true)}
-              >
-                <Text style={[
-                  styles.dateButtonText,
-                  !expirationDate && styles.dateButtonTextEmpty
-                ]}>
-                  {formatDateDisplay(expirationDate)}
-                </Text>
-                <Text style={styles.dateButtonIcon}>📅</Text>
-              </TouchableOpacity>
+              <ModernDatePicker
+                value={expirationDate}
+                onDateChange={setExpirationDate}
+                minimumDate={new Date()} // Can't expire in the past
+                maximumDate={new Date(new Date().setFullYear(new Date().getFullYear() + 50))} // Allow up to 50 years in future
+                style={styles.dateButton}
+              />
             </View>
           </View>
 
@@ -195,16 +177,16 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation }) => {
             <Button
               title="Cancel"
               onPress={() => navigation.goBack()}
-              style={[styles.button, styles.cancelButton]}
-              textStyle={styles.cancelButtonText}
+              variant="outline"
+              style={styles.button}
             />
             
             <Button
               title={isSubmitting ? 'Adding...' : 'Add License'}
               onPress={handleSubmit}
               disabled={!isFormValid || isSubmitting}
-              style={[styles.button, styles.submitButton]}
-              textStyle={styles.submitButtonText}
+              variant="primary"
+              style={styles.button}
             />
           </View>
 
@@ -232,19 +214,6 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.bottomSpacer} />
       </ScrollView>
 
-      {/* Date Picker Modal */}
-      <ModernDatePicker
-        visible={showDatePicker}
-        date={expirationDate || new Date()}
-        onConfirm={(selectedDate) => {
-          setExpirationDate(selectedDate);
-          setShowDatePicker(false);
-        }}
-        onCancel={() => setShowDatePicker(false)}
-        minimumDate={new Date()} // Can't expire in the past
-        title="Select Expiration Date"
-        subtitle="Choose when this license expires"
-      />
     </KeyboardAvoidingView>
   );
 };
@@ -359,21 +328,6 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     minHeight: 48,
-  },
-  cancelButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: theme.colors.border.medium,
-  },
-  cancelButtonText: {
-    color: theme.colors.text.secondary,
-  },
-  submitButton: {
-    backgroundColor: theme.colors.primary,
-  },
-  submitButtonText: {
-    color: theme.colors.background,
-    fontWeight: theme.typography.fontWeight.semibold,
   },
 
   // Loading
