@@ -81,6 +81,7 @@ interface AppContextType {
   refreshCertificates: () => Promise<void>;
   refreshLicenses: () => Promise<void>;
   refreshAllData: () => Promise<void>;
+  forceRefreshCMEData: () => Promise<void>;
   
   // Lazy loading actions
   loadAllCMEEntries: () => Promise<CMEEntry[]>;
@@ -211,7 +212,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const refreshCMEData = useCallback(async (): Promise<void> => {
+  const refreshCMEData = useCallback(async (force: boolean = false): Promise<void> => {
     try {
       setIsLoadingCME(true);
       clearError();
@@ -263,7 +264,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       const now = Date.now();
       const isStale = (now - lastEntriesRefreshRef.current) > ENTRIES_STALENESS_TTL;
       
-      if (!isStale) {
+      if (!isStale && !force) {
         devLog('✅ AppContext: CME data is fresh, skipping refresh');
         return;
       }
@@ -325,7 +326,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const forceRefreshCMEData = useCallback(async (): Promise<void> => {
     lastEntriesRefreshRef.current = 0; // Force staleness
     await refreshCMEData();
-  }, [refreshCMEData]);
+  }, [forceRefreshCMEData]);
 
   // Lazy load all CME entries when needed (e.g., for CME history screen)
   const loadAllCMEEntries = useCallback(async (): Promise<CMEEntry[]> => {
@@ -408,6 +409,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     ]);
   }, [refreshUserData, refreshCMEData, refreshCertificates, refreshLicenses]);
 
+  // Force refresh CME data (bypass staleness check)
+  const forceRefreshCMEData = useCallback(async (): Promise<void> => {
+    await refreshCMEData(true);
+  }, [forceRefreshCMEData]);
+
   // CME Actions
   const addCMEEntry = useCallback(async (entry: Omit<CMEEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<boolean> => {
     try {
@@ -416,8 +422,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       console.log('🗃️ AppContext.addCMEEntry: Database result:', result);
       
       if (result.success) {
-        console.log('✅ AppContext.addCMEEntry: Success! Refreshing CME data...');
-        await refreshCMEData();
+        console.log('✅ AppContext.addCMEEntry: Success! Force refreshing CME data...');
+        await forceRefreshCMEData();
         return true;
       }
       console.log('❌ AppContext.addCMEEntry: Database operation failed');
@@ -426,13 +432,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       console.error('💥 AppContext.addCMEEntry: Exception occurred:', error);
       return false;
     }
-  }, [refreshCMEData]);
+  }, [forceRefreshCMEData]);
 
   const updateCMEEntry = useCallback(async (id: number, entry: Partial<CMEEntry>): Promise<boolean> => {
     try {
       const result = await databaseOperations.cme.updateEntry(id, entry);
       if (result.success) {
-        await refreshCMEData();
+        await forceRefreshCMEData();
         return true;
       }
       return false;
@@ -440,13 +446,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       console.error('Error updating CME entry:', error);
       return false;
     }
-  }, [refreshCMEData]);
+  }, [forceRefreshCMEData]);
 
   const deleteCMEEntry = useCallback(async (id: number): Promise<boolean> => {
     try {
       const result = await databaseOperations.cme.deleteEntry(id);
       if (result.success) {
-        await refreshCMEData();
+        await forceRefreshCMEData();
         return true;
       }
       return false;
@@ -454,7 +460,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       console.error('Error deleting CME entry:', error);
       return false;
     }
-  }, [refreshCMEData]);
+  }, [forceRefreshCMEData]);
 
   // License Actions
   const addLicense = useCallback(async (license: Omit<LicenseRenewal, 'id' | 'createdAt' | 'updatedAt'>): Promise<boolean> => {
