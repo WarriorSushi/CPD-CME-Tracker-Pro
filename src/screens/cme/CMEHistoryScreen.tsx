@@ -66,6 +66,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
           console.log('🔄 Refreshing all entries since showAllEntries is true...');
           try {
             const freshEntries = await loadAllCMEEntries();
+            // DATABASE already sorts entries correctly - do NOT sort again  
             setAllEntries(freshEntries);
           } catch (error) {
             console.error('Error refreshing all entries:', error);
@@ -83,6 +84,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
     // If showing all entries, refresh them too
     if (showAllEntries) {
       const freshEntries = await loadAllCMEEntries();
+      // DATABASE already sorts entries correctly - do NOT sort again
       setAllEntries(freshEntries);
     }
     setRefreshing(false);
@@ -95,6 +97,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
     setIsLoadingAll(true);
     try {
       const entries = await loadAllCMEEntries();
+      // DATABASE already sorts entries correctly - do NOT sort again
       setAllEntries(entries);
       setShowAllEntries(true);
     } catch (error) {
@@ -108,7 +111,11 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
   // Use appropriate entries based on whether we've loaded all
   const entriesToFilter = showAllEntries ? allEntries : recentCMEEntries;
   
-  // Filter entries based on search and year
+  // DATABASE already sorts entries by date_attended DESC (newest first)
+  console.log('🔍 CMEHistoryScreen: Entries from database (should be newest first):', 
+    entriesToFilter.map(e => ({ id: e.id, title: e.title, date: e.dateAttended })));
+  
+  // Filter entries based on search and year - DO NOT SORT (database already sorted correctly)
   const filteredEntries = entriesToFilter.filter(entry => {
     const matchesSearch = !searchQuery || 
       entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -120,6 +127,10 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
 
     return matchesSearch && matchesYear;
   });
+  
+  // Debug: log final filtered entries (should maintain database order)
+  console.log('✅ CMEHistoryScreen: Filtered entries (maintaining DB order):', 
+    filteredEntries.map(e => ({ id: e.id, title: e.title, date: e.dateAttended })));
   
   // Check if we need to show "Load More" button
   const canLoadMore = !showAllEntries && recentCMEEntries.length > 0;
@@ -135,7 +146,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
   const handleEditEntry = (entry: CMEEntry) => {
     try {
       console.log('✏️ Attempting to edit entry:', entry.id, entry.title);
-      navigation.navigate('AddCME', { editEntry: entry });
+      (navigation as any).navigate('AddCME', { editEntry: entry });
       console.log('✅ Navigation to AddCME screen initiated');
     } catch (error) {
       console.error('💥 Error navigating to edit screen:', error);
@@ -201,7 +212,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
       {!searchQuery && (
         <Button
           title="Add First Entry"
-          onPress={() => navigation.navigate('AddCME', {})}
+          onPress={() => (navigation as any).navigate('AddCME', {})}
           style={styles.emptyButton}
         />
       )}

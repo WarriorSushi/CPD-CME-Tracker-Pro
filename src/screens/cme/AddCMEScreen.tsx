@@ -20,14 +20,14 @@ import { Camera } from 'expo-camera';
 import { Button, Card, Input, LoadingSpinner, DatePicker } from '../../components';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
-import { CMEStackParamList } from '../../types/navigation';
+import { MainTabParamList } from '../../types/navigation';
 import { CME_CATEGORIES, FILE_PATHS } from '../../constants';
 import { CMEEntry } from '../../types';
 import { getCreditUnit } from '../../utils/creditTerminology';
 import { ThumbnailService } from '../../services/thumbnailService';
 
-type AddCMEScreenNavigationProp = StackNavigationProp<CMEStackParamList, 'AddCME'>;
-type AddCMEScreenRouteProp = RouteProp<CMEStackParamList, 'AddCME'>;
+type AddCMEScreenNavigationProp = StackNavigationProp<MainTabParamList, 'AddCME'>;
+type AddCMEScreenRouteProp = RouteProp<MainTabParamList, 'AddCME'>;
 
 interface Props {
   navigation: AddCMEScreenNavigationProp;
@@ -255,8 +255,14 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const handleChooseFromVault = () => {
-    // Navigate to certificate vault in selection mode
-    navigation.navigate('CertificateVault', { selectionMode: true });
+    // For now, just close modal and show alert to navigate manually
+    // TODO: Implement proper certificate selection from vault
+    navigation.goBack();
+    Alert.alert(
+      'Choose from Vault',
+      'Please navigate to the Vault tab to select a certificate, then return to add a new entry.',
+      [{ text: 'OK' }]
+    );
   };
 
   const handleRemoveCertificate = () => {
@@ -353,17 +359,9 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       console.log('📊 handleSubmit: Operation result:', success);
 
       if (success) {
-        console.log('🎉 handleSubmit: Success! Showing success alert');
-        Alert.alert(
-          'Success',
-          `CME entry ${isEditing ? 'updated' : 'added'} successfully!`,
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.goBack(),
-            },
-          ]
-        );
+        console.log('🎉 handleSubmit: Success! Navigating back to dashboard');
+        // Navigate back to close modal - this will automatically return to whatever screen called it
+        navigation.goBack();
       } else {
         console.log('💥 handleSubmit: Operation failed');
         Alert.alert(

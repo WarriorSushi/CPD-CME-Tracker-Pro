@@ -224,6 +224,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         const currentYear = new Date().getFullYear();
         startDate = `${currentYear}-01-01`;
         const periodYears = userData.requirementPeriod || 1;
+        // Since database query uses "date_attended < endDate" (exclusive),
+        // we need to use the first day of the next year to include all of the current year
         endDate = `${currentYear + periodYears}-01-01`;
       }
       
@@ -248,15 +250,25 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       ]);
       
       if (recentEntriesResult.success) {
-        console.log('📋 AppContext: Setting recent entries:', recentEntriesResult.data);
+        console.log('📋 AppContext: Setting recent entries FROM DATABASE:', recentEntriesResult.data);
+        // DATABASE already sorts with ORDER BY date_attended DESC - do NOT sort again
         setRecentCMEEntries(recentEntriesResult.data || []);
         
-        // If no entries in date range but there are entries in DB, warn about date filtering
+        // If no entries in date range but there are entries in DB, use all entries as fallback
         if ((!recentEntriesResult.data || recentEntriesResult.data.length === 0) && 
             allEntriesResult.success && allEntriesResult.data && allEntriesResult.data.length > 0) {
-          console.log('⚠️ AppContext: No entries in date range but entries exist in DB - possible date filtering issue');
+          console.log('⚠️ AppContext: No entries in date range but entries exist in DB - using all entries as fallback');
           console.log('📅 AppContext: Date range used:', { startDate, endDate });
           console.log('📋 AppContext: All entries dates:', allEntriesResult.data.map(e => ({ id: e.id, title: e.title, date: e.dateAttended })));
+          
+          // Use all entries as fallback (DATABASE already sorted by date DESC)
+          setRecentCMEEntries(allEntriesResult.data.slice(0, 10));
+          
+          // Calculate total credits from all entries
+          const totalCreditsFromAll = allEntriesResult.data.reduce((sum, entry) => sum + entry.creditsEarned, 0);
+          setTotalCredits(totalCreditsFromAll);
+          
+          console.log('✅ AppContext: Using all entries as fallback - set recent entries and total credits');
         }
       } else {
         console.error('💥 AppContext: Failed to load recent entries:', recentEntriesResult.error);
@@ -298,13 +310,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         endDateObj.setFullYear(endDateObj.getFullYear() + (userData.requirementPeriod || 1));
         endDate = endDateObj.toISOString().split('T')[0];
       } else {
+        // Fall back to current year if no cycle dates set  
         const currentYear = new Date().getFullYear();
         startDate = `${currentYear}-01-01`;
         const periodYears = userData.requirementPeriod || 1;
+        // Since database query uses "date_attended < endDate" (exclusive),
+        // we need to use the first day of the next year to include all of the current year
         endDate = `${currentYear + periodYears}-01-01`;
       }
       
       const result = await databaseOperations.cme.getEntriesInDateRange(startDate, endDate);
+      console.log('📋 AppContext.loadAllCMEEntries: Raw data from database:', result.data);
+      // DATABASE already sorts with ORDER BY date_attended DESC - do NOT sort again
       return result.success ? (result.data || []) : [];
     } catch (error) {
       console.error('Error loading all CME entries:', error);

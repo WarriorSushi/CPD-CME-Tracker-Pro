@@ -232,7 +232,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.addEntrySection}>
           <Button
             title="+ Add New Entry"
-            onPress={() => (navigation as any).navigate('CME', { screen: 'AddCME', params: { editEntry: undefined } })}
+            onPress={() => navigation.navigate('AddCME', { editEntry: undefined })}
             style={styles.addEntryButton}
           />
         </View>
@@ -243,7 +243,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.quickActionsGrid}>
             <TouchableOpacity 
               style={styles.quickActionItem}
-              onPress={() => (navigation as any).navigate('CME', { screen: 'AddCME', params: { editEntry: undefined } })}
+              onPress={() => navigation.navigate('AddCME', { editEntry: undefined })}
             >
               <Text style={styles.quickActionIcon}>📚</Text>
               <Text style={styles.quickActionText}>Add Entry</Text>

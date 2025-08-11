@@ -15,14 +15,11 @@ export type OnboardingStackParamList = {
 };
 
 export type MainTabParamList = {
+  Tabs: { screen?: keyof TabParamList } | undefined;
   Dashboard: undefined;
   CME: undefined;
   Vault: undefined;
   Settings: undefined;
-};
-
-export type CMEStackParamList = {
-  CMEHistory: undefined;
   AddCME: { 
     editEntry?: any;
     ocrData?: {
@@ -34,6 +31,17 @@ export type CMEStackParamList = {
       certificatePath?: string;
     };
   };
+};
+
+export type TabParamList = {
+  Dashboard: undefined;
+  CME: undefined;
+  Vault: undefined;
+  Settings: undefined;
+};
+
+export type CMEStackParamList = {
+  CMEHistory: undefined;
   CMEDetails: { entryId: number };
 };
 

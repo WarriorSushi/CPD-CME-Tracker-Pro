@@ -1,44 +1,23 @@
 import React from 'react';
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../constants/theme';
-import { MainTabParamList } from '../types/navigation';
+import { MainTabParamList, TabParamList } from '../types/navigation';
 
 // Import screens and navigators
 import { DashboardScreen } from '../screens/dashboard/DashboardScreen';
 import { CMENavigator } from './CMENavigator';
 import { CertificateVaultScreen } from '../screens/vault/CertificateVaultScreen';
 import { SettingsScreen } from '../screens/settings/SettingsScreen';
+import { AddCMEScreen } from '../screens/cme/AddCMEScreen';
 
-const Tab = createBottomTabNavigator<MainTabParamList>();
+const Tab = createBottomTabNavigator<TabParamList>();
+const Stack = createStackNavigator<MainTabParamList>();
 
-// Custom Tab Button Component for pressed column effect
-const CustomTabButton: React.FC<{
-  children: React.ReactNode;
-  onPress?: (event?: any) => void;
-  accessibilityState?: { selected?: boolean };
-}> = ({ children, onPress, accessibilityState }) => {
-  const focused = accessibilityState?.selected;
-  
-  return (
-    <TouchableOpacity
-      style={[
-        styles.tabColumn,
-        focused && styles.tabColumnPressed
-      ]}
-      onPress={(e) => {
-        console.log('🖱️ MainTabNavigator: Tab button pressed');
-        onPress?.(e);
-      }}
-      activeOpacity={0.7}
-    >
-      {children}
-    </TouchableOpacity>
-  );
-};
-
-export const MainTabNavigator: React.FC = () => {
+// Tab Navigator Component
+const TabNavigator: React.FC = () => {
   const insets = useSafeAreaInsets();
   
   return (
@@ -121,6 +100,55 @@ export const MainTabNavigator: React.FC = () => {
         }}
       />
     </Tab.Navigator>
+  );
+};
+
+// Custom Tab Button Component for pressed column effect
+const CustomTabButton: React.FC<{
+  children: React.ReactNode;
+  onPress?: (event?: any) => void;
+  accessibilityState?: { selected?: boolean };
+}> = ({ children, onPress, accessibilityState }) => {
+  const focused = accessibilityState?.selected;
+  
+  return (
+    <TouchableOpacity
+      style={[
+        styles.tabColumn,
+        focused && styles.tabColumnPressed
+      ]}
+      onPress={(e) => {
+        console.log('🖱️ MainTabNavigator: Tab button pressed');
+        onPress?.(e);
+      }}
+      activeOpacity={0.7}
+    >
+      {children}
+    </TouchableOpacity>
+  );
+};
+
+export const MainTabNavigator: React.FC = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen
+        name="Tabs"
+        component={TabNavigator}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="AddCME"
+        component={AddCMEScreen}
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+        }}
+      />
+    </Stack.Navigator>
   );
 };
 

@@ -519,9 +519,15 @@ export const cmeOperations = {
           params.push(year.toString());
         }
         
-        query += ' ORDER BY date_attended DESC';
+        query += ' ORDER BY date_attended DESC, id DESC';
         
         const entries = await getAllSafe<CMEEntry>(db, query, params);
+        
+        // DEBUG: Log entries as they come from database
+        console.log('🗃️ DATABASE getAllEntries result (should be newest first):');
+        entries.forEach((entry, index) => {
+          console.log(`  ${index + 1}. ${entry.title} - ${entry.dateAttended}`);
+        });
         
         return {
           success: true,
@@ -792,8 +798,14 @@ export const cmeOperations = {
         WHERE user_id = 1
         AND date_attended >= ?
         AND date_attended < ?
-        ORDER BY date_attended DESC
+        ORDER BY date_attended DESC, id DESC
       `, [startDate, endDate]);
+      
+      // DEBUG: Log entries as they come from database
+      console.log('🗃️ DATABASE getEntriesInDateRange result (should be newest first):');
+      entries.forEach((entry, index) => {
+        console.log(`  ${index + 1}. ${entry.title} - ${entry.dateAttended}`);
+      });
       
       return {
         success: true,
