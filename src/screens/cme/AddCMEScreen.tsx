@@ -25,6 +25,7 @@ import { CME_CATEGORIES, FILE_PATHS } from '../../constants';
 import { CMEEntry } from '../../types';
 import { getCreditUnit } from '../../utils/creditTerminology';
 import { ThumbnailService } from '../../services/thumbnailService';
+import { databaseOperations } from '../../services/database';
 
 type AddCMEScreenNavigationProp = StackNavigationProp<MainTabParamList, 'AddCME'>;
 type AddCMEScreenRouteProp = RouteProp<MainTabParamList, 'AddCME'>;
@@ -56,7 +57,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
   console.log('📄 AddCMEScreen: Route params:', route.params);
   
   const insets = useSafeAreaInsets();
-  const { user, addCMEEntry, updateCMEEntry } = useAppContext();
+  const { user, addCMEEntry, updateCMEEntry, refreshCertificates } = useAppContext();
   
   const editEntry = route.params?.editEntry;
   const ocrData = route.params?.ocrData;
@@ -247,10 +248,38 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       });
 
       // Generate thumbnail
+      let thumbnailPath: string | undefined;
       try {
-        await ThumbnailService.generateThumbnail(imageAsset.uri, newFileName);
+        thumbnailPath = await ThumbnailService.generateThumbnail(imageAsset.uri, newFileName);
       } catch (thumbnailError) {
         console.warn('⚠️ Thumbnail generation failed:', thumbnailError);
+      }
+
+      // Get file info for certificate vault storage
+      const fileInfo = await FileSystem.getInfoAsync(newFilePath);
+      const fileSize = fileInfo.exists ? fileInfo.size || 0 : 0;
+
+      // Automatically add certificate to vault
+      try {
+        const certificateData = {
+          filePath: newFilePath,
+          fileName: newFileName,
+          fileSize: fileSize,
+          mimeType: `image/${extension}`,
+          thumbnailPath: thumbnailPath,
+          cmeEntryId: null, // Will be set after CME entry is created
+        };
+
+        const addResult = await databaseOperations.certificates.addCertificate(certificateData);
+        if (addResult.success) {
+          console.log('✅ Certificate automatically added to vault with ID:', addResult.data);
+          // Refresh certificates in AppContext so vault shows the new certificate
+          await refreshCertificates();
+        } else {
+          console.warn('⚠️ Failed to add certificate to vault:', addResult.error);
+        }
+      } catch (certError) {
+        console.error('💥 Error adding certificate to vault:', certError);
       }
 
       // Update form data with certificate path
@@ -259,7 +288,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
         certificatePath: newFilePath,
       }));
 
-      Alert.alert('Success', 'Certificate added to CME entry!');
+      Alert.alert('Success', 'Certificate added to entry and saved to vault!');
 
     } catch (error) {
       console.error('💥 Error processing certificate:', error);
