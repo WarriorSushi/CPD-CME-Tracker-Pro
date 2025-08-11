@@ -34,7 +34,7 @@ interface Props {
 
 export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const { certificates, isLoadingCertificates, refreshCertificates } = useAppContext();
+  const { certificates, isLoadingCertificates, refreshCertificates, refreshCMEData } = useAppContext();
   
   const [refreshing, setRefreshing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -281,7 +281,30 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
           style: 'destructive',
           onPress: async () => {
             try {
-              // Delete from database first
+              // First, clear certificate path from any CME entries that reference this file
+              try {
+                // Use a workaround to clear certificate references
+                const allEntries = await databaseOperations.cme.getAllEntries();
+                if (allEntries.success && allEntries.data) {
+                  const entriesToUpdate = allEntries.data.filter(entry => 
+                    entry.certificatePath === certificate.filePath
+                  );
+                  
+                  for (const entry of entriesToUpdate) {
+                    await databaseOperations.cme.updateEntry(entry.id, { 
+                      certificatePath: undefined 
+                    });
+                  }
+                  
+                  if (entriesToUpdate.length > 0) {
+                    console.log(`✅ Cleared certificate references from ${entriesToUpdate.length} CME entries`);
+                  }
+                }
+              } catch (updateError) {
+                console.warn('⚠️ Could not clear certificate references from CME entries:', updateError);
+              }
+
+              // Delete from database
               const deleteResult = await databaseOperations.certificates.deleteCertificate(certificate.id);
               
               if (!deleteResult.success) {
@@ -297,14 +320,30 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
 
               // Also delete thumbnail if it exists
               if (certificate.thumbnailPath) {
-                const thumbnailInfo = await FileSystem.getInfoAsync(certificate.thumbnailPath);
-                if (thumbnailInfo.exists) {
-                  await FileSystem.deleteAsync(certificate.thumbnailPath);
+                try {
+                  // Handle both string paths and thumbnail result objects
+                  let thumbnailUri = certificate.thumbnailPath;
+                  if (typeof certificate.thumbnailPath === 'object' && certificate.thumbnailPath.thumbnailUri) {
+                    thumbnailUri = certificate.thumbnailPath.thumbnailUri;
+                  }
+                  
+                  const thumbnailInfo = await FileSystem.getInfoAsync(thumbnailUri);
+                  if (thumbnailInfo.exists) {
+                    await FileSystem.deleteAsync(thumbnailUri);
+                  }
+                } catch (thumbnailError) {
+                  console.warn('Warning: Could not delete thumbnail:', thumbnailError);
+                  // Continue with deletion even if thumbnail cleanup fails
                 }
               }
 
+              // Refresh both certificates and CME data to update all UIs
+              await Promise.all([
+                refreshCertificates(),
+                refreshCMEData() // Refresh CME data to remove thumbnails from entries
+              ]);
+              
               Alert.alert('Success', 'Certificate deleted successfully!');
-              await refreshCertificates();
             } catch (error) {
               console.error('Error deleting certificate:', error);
               Alert.alert('Error', 'Failed to delete certificate.');
