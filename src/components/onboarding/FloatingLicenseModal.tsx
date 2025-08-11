@@ -265,20 +265,23 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
 
 const styles = StyleSheet.create({
   modalOverlay: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
   },
   modalContainer: {
+    position: 'absolute',
+    top: '10%',
+    left: '5%',
+    right: '5%',
+    maxHeight: '80%',
     backgroundColor: '#f8f9fa',
     borderRadius: 12,
     borderWidth: 5, // DEBUG: Thick red border to see modal position
     borderColor: '#ff0000', // DEBUG: Red border to see modal position
-    width: '90%',
-    maxWidth: 450,
-    maxHeight: '85%',
     elevation: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
