@@ -281,46 +281,32 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
           style: 'destructive',
           onPress: async () => {
             try {
-              console.log('🗑️ Deleting certificate:', certificate.id, certificate.fileName);
-              
               // Delete from database first
               const deleteResult = await databaseOperations.certificates.deleteCertificate(certificate.id);
               
               if (!deleteResult.success) {
-                console.error('❌ Failed to delete certificate from database:', deleteResult.error);
                 Alert.alert('Error', 'Failed to delete certificate from database.');
                 return;
               }
-              
-              console.log('✅ Certificate deleted from database successfully');
 
               // Delete file from filesystem
-              try {
-                const fileInfo = await FileSystem.getInfoAsync(certificate.filePath);
-                if (fileInfo.exists) {
-                  await FileSystem.deleteAsync(certificate.filePath);
-                  console.log('🗂️ Certificate file deleted from filesystem');
-                }
-                
-                // Also delete thumbnail if it exists
-                if (certificate.thumbnailPath) {
-                  const thumbnailInfo = await FileSystem.getInfoAsync(certificate.thumbnailPath);
-                  if (thumbnailInfo.exists) {
-                    await FileSystem.deleteAsync(certificate.thumbnailPath);
-                    console.log('🖼️ Certificate thumbnail deleted');
-                  }
-                }
-              } catch (fileError) {
-                console.warn('⚠️ Error deleting certificate files:', fileError);
-                // Continue even if file deletion fails - database record is already deleted
+              const fileInfo = await FileSystem.getInfoAsync(certificate.filePath);
+              if (fileInfo.exists) {
+                await FileSystem.deleteAsync(certificate.filePath);
               }
 
-              // Refresh the certificates list
-              await refreshCertificates();
+              // Also delete thumbnail if it exists
+              if (certificate.thumbnailPath) {
+                const thumbnailInfo = await FileSystem.getInfoAsync(certificate.thumbnailPath);
+                if (thumbnailInfo.exists) {
+                  await FileSystem.deleteAsync(certificate.thumbnailPath);
+                }
+              }
+
               Alert.alert('Success', 'Certificate deleted successfully!');
-              
+              await refreshCertificates();
             } catch (error) {
-              console.error('💥 Error deleting certificate:', error);
+              console.error('Error deleting certificate:', error);
               Alert.alert('Error', 'Failed to delete certificate.');
             }
           },
@@ -487,7 +473,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         {/* Tiny stats moved to bottom right */}
         <View style={styles.tinyStats}>
           <Text style={styles.tinyStatsText}>
-            {certificates.length} certificates • {(certificates.reduce((sum, cert) => sum + cert.fileSize, 0) / 1024 / 1024).toFixed(1)}MB used
+            {certificates?.length || 0} certificates • {((certificates || []).reduce((sum, cert) => sum + cert.fileSize, 0) / 1024 / 1024).toFixed(1)}MB used
           </Text>
         </View>
       </View>
@@ -553,45 +539,45 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  // Prominent Add Section
+  // Compact Add Section
   prominentAddSection: {
-    marginHorizontal: theme.spacing[4],
-    marginVertical: theme.spacing[3],
-    padding: theme.spacing[4],
-    backgroundColor: theme.colors.background,
-    borderRadius: theme.spacing[3],
-    borderWidth: 2,
+    marginHorizontal: theme.spacing[3],
+    marginVertical: theme.spacing[2],
+    padding: theme.spacing[3],
+    backgroundColor: '#f8fafc',
+    borderRadius: theme.spacing[2],
+    borderWidth: 1,
     borderColor: '#e2e8f0',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   addSectionTitle: {
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.bold,
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.text.primary,
     textAlign: 'center',
-    marginBottom: theme.spacing[3],
+    marginBottom: theme.spacing[2],
   },
   addButtonsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    gap: theme.spacing[3],
-    marginBottom: theme.spacing[3],
+    gap: theme.spacing[2],
+    marginBottom: theme.spacing[2],
   },
   addButton: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: theme.spacing[3],
+    paddingVertical: theme.spacing[2],
     paddingHorizontal: theme.spacing[2],
     borderRadius: theme.spacing[2],
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   cameraButton: {
     backgroundColor: '#3b82f6',
@@ -603,11 +589,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#8b5cf6',
   },
   addButtonIcon: {
-    fontSize: 20,
-    marginBottom: theme.spacing[1],
+    fontSize: 16,
+    marginBottom: 2,
   },
   addButtonText: {
-    fontSize: theme.typography.fontSize.xs,
+    fontSize: 10,
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.background,
     textAlign: 'center',
