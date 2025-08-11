@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo, useRef } from 'react';
 import { 
   User, 
   CMEEntry, 
@@ -8,6 +8,40 @@ import {
   DatabaseOperationResult 
 } from '../types';
 import { databaseOperations } from '../services/database';
+
+// Development logging helper
+const isDevelopment = __DEV__;
+const devLog = (...args: any[]) => {
+  if (isDevelopment) {
+    console.log(...args);
+  }
+};
+
+// Batch state updates helper
+const useBatchedStateUpdates = () => {
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingUpdatesRef = useRef<(() => void)[]>([]);
+  
+  const batchUpdate = useCallback((update: () => void) => {
+    pendingUpdatesRef.current.push(update);
+    
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    timeoutRef.current = setTimeout(() => {
+      const updates = [...pendingUpdatesRef.current];
+      pendingUpdatesRef.current = [];
+      
+      // Execute all updates in a single batch
+      updates.forEach(update => update());
+      
+      timeoutRef.current = null;
+    }, 0); // Batch at next tick
+  }, []);
+  
+  return batchUpdate;
+};
 
 interface AppContextType {
   // User data
@@ -74,6 +108,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [licenses, setLicenses] = useState<LicenseRenewal[]>([]);
   
+  // Batched state updater
+  const batchUpdate = useBatchedStateUpdates();
+  
   // Enhanced loading states
   const [isInitializing, setIsInitializing] = useState(true);
   const [isLoadingUser, setIsLoadingUser] = useState(false);
@@ -99,11 +136,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     
     // Return cached data if it's fresh
     if (cachedUserData && (now - cachedUserData.timestamp) < USER_CACHE_DURATION) {
-      console.log('💾 AppContext: Using cached user data');
+      devLog('💾 AppContext: Using cached user data');
       return cachedUserData.user;
     }
     
-    console.log('🔄 AppContext: Fetching fresh user data (cache miss/expired)');
+    devLog('🔄 AppContext: Fetching fresh user data (cache miss/expired)');
     const userResult = await databaseOperations.user.getCurrentUser();
     const userData = userResult.success ? userResult.data : null;
     
@@ -169,12 +206,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const refreshUserData = useCallback(async (): Promise<void> => {
     try {
       setIsLoadingUser(true);
-      console.log('🔄 AppContext: Refreshing user data...');
+      devLog('🔄 AppContext: Refreshing user data...');
       const result = await databaseOperations.user.getCurrentUser();
-      console.log('📊 AppContext: User data result:', result);
       if (result.success && result.data) {
-        console.log('✅ AppContext: User data loaded:', result.data);
-        console.log('🎯 AppContext: Credit system from DB:', result.data?.creditSystem);
+        devLog('✅ AppContext: User data loaded:', result.data?.creditSystem);
         setUser(result.data);
       }
     } catch (error) {
@@ -189,17 +224,19 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       setIsLoadingCME(true);
       clearError();
       
-      // Get current user to determine cycle dates
-      const userResult = await databaseOperations.user.getCurrentUser();
-      const userData = userResult.success ? userResult.data : null;
+      // Use cached user data if available, avoid duplicate DB call
+      let userData = user;
+      if (!userData) {
+        const userResult = await databaseOperations.user.getCurrentUser();
+        userData = userResult.success ? userResult.data : null;
+      }
       
-      console.log('📊 AppContext.refreshCMEData: User data:', userData);
+      devLog('📊 AppContext.refreshCMEData: User data:', userData?.profession);
       
       if (!userData) {
-        console.log('⚠️ AppContext: No user data, skipping CME refresh');
+        devLog('⚠️ AppContext: No user data, skipping CME refresh');
         // Still try to load all entries without date filtering
         const allEntriesResult = await databaseOperations.cme.getAllEntries();
-        console.log('📊 AppContext: All entries (fallback):', allEntriesResult);
         if (allEntriesResult.success && allEntriesResult.data) {
           setRecentCMEEntries(allEntriesResult.data.slice(0, 10));
           const totalCredits = allEntriesResult.data.reduce((sum, entry) => sum + entry.creditsEarned, 0);
@@ -229,70 +266,67 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         endDate = `${currentYear + periodYears}-01-01`;
       }
       
-      console.log('📅 AppContext.refreshCMEData: Using date range:', { startDate, endDate });
+      devLog('📅 AppContext.refreshCMEData: Using date range:', { startDate, endDate });
       
-      // Load recent entries (last 10) and total credits in parallel
-      const [recentEntriesResult, creditsResult, allEntriesResult] = await Promise.all([
+      // Load recent entries and total credits (remove redundant getAllEntries call for performance) 
+      const [recentEntriesResult, creditsResult] = await Promise.all([
         databaseOperations.cme.getEntriesInDateRange(startDate, endDate).then(result => {
-          console.log('📊 AppContext: Entries in date range result:', result);
           if (result.success && result.data) {
             // Limit to most recent 10 entries for performance
             return { success: true, data: result.data.slice(0, 10) };
           }
           return result;
         }),
-        databaseOperations.cme.getTotalCreditsInRange(startDate, endDate),
-        // Also get ALL entries for debugging
-        databaseOperations.cme.getAllEntries().then(result => {
-          console.log('📊 AppContext: ALL entries in DB:', result);
-          return result;
-        })
+        databaseOperations.cme.getTotalCreditsInRange(startDate, endDate)
       ]);
       
-      if (recentEntriesResult.success) {
-        console.log('📋 AppContext: Setting recent entries FROM DATABASE:', recentEntriesResult.data);
-        // DATABASE already sorts with ORDER BY date_attended DESC - do NOT sort again
-        setRecentCMEEntries(recentEntriesResult.data || []);
-        
-        // If no entries in date range but there are entries in DB, use all entries as fallback
-        if ((!recentEntriesResult.data || recentEntriesResult.data.length === 0) && 
-            allEntriesResult.success && allEntriesResult.data && allEntriesResult.data.length > 0) {
-          console.log('⚠️ AppContext: No entries in date range but entries exist in DB - using all entries as fallback');
-          console.log('📅 AppContext: Date range used:', { startDate, endDate });
-          console.log('📋 AppContext: All entries dates:', allEntriesResult.data.map(e => ({ id: e.id, title: e.title, date: e.dateAttended })));
-          
-          // Use all entries as fallback (DATABASE already sorted by date DESC)
-          setRecentCMEEntries(allEntriesResult.data.slice(0, 10));
-          
-          // Calculate total credits from all entries
-          const totalCreditsFromAll = allEntriesResult.data.reduce((sum, entry) => sum + entry.creditsEarned, 0);
-          setTotalCredits(totalCreditsFromAll);
-          
-          console.log('✅ AppContext: Using all entries as fallback - set recent entries and total credits');
-        }
-      } else {
-        console.error('💥 AppContext: Failed to load recent entries:', recentEntriesResult.error);
-        setError('Failed to load recent CME entries. Please try again.');
+      // Only fetch ALL entries as fallback if no entries found in date range
+      let allEntriesResult = null;
+      if (!recentEntriesResult.success || !recentEntriesResult.data || recentEntriesResult.data.length === 0) {
+        allEntriesResult = await databaseOperations.cme.getAllEntries();
       }
       
-      if (creditsResult.success) {
-        setTotalCredits(creditsResult.data || 0);
-      } else {
-        setError('Failed to calculate total credits. Please try again.');
+      // Batch state updates to prevent multiple re-renders
+      const entriesData = recentEntriesResult.success ? (recentEntriesResult.data || []) : [];
+      const creditsData = creditsResult.success ? (creditsResult.data || 0) : 0;
+      
+      // Handle fallback to all entries if needed
+      let finalEntries = entriesData;
+      let finalCredits = creditsData;
+      
+      if ((!entriesData || entriesData.length === 0) && 
+          allEntriesResult && allEntriesResult.success && allEntriesResult.data && allEntriesResult.data.length > 0) {
+        finalEntries = allEntriesResult.data.slice(0, 10);
+        finalCredits = allEntriesResult.data.reduce((sum, entry) => sum + entry.creditsEarned, 0);
       }
+      
+      // Batch all state updates together
+      batchUpdate(() => {
+        setRecentCMEEntries(finalEntries);
+        setTotalCredits(finalCredits);
+        if (!recentEntriesResult.success) {
+          setError('Failed to load recent CME entries. Please try again.');
+        } else if (!creditsResult.success) {
+          setError('Failed to calculate total credits. Please try again.');
+        }
+      });
     } catch (error) {
       console.error('Error refreshing CME data:', error);
       setError('Unable to load CME data. Please check your connection and try again.');
     } finally {
       setIsLoadingCME(false);
     }
-  }, [clearError]);
+  }, [clearError, user]); // Add user dependency to avoid stale closure
 
   // Lazy load all CME entries when needed (e.g., for CME history screen)
   const loadAllCMEEntries = useCallback(async (): Promise<CMEEntry[]> => {
     try {
-      const userResult = await databaseOperations.user.getCurrentUser();
-      const userData = userResult.success ? userResult.data : null;
+      // Use cached user data to avoid redundant DB calls
+      let userData = user;
+      if (!userData) {
+        const userResult = await databaseOperations.user.getCurrentUser();
+        userData = userResult.success ? userResult.data : null;
+      }
       
       if (!userData) {
         return [];
@@ -488,7 +522,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       if (!mounted) return;
       
       try {
-        console.log('🚀 AppContext: Starting smart initial data load...');
+        devLog('🚀 AppContext: Starting smart initial data load...');
         setIsInitializing(true);
         
         // Load user first (essential for everything else)
@@ -502,22 +536,22 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           // Skip certificates and licenses initially - load on demand
         ]);
         
-        console.log('✅ AppContext: Essential data loaded quickly');
+        devLog('✅ AppContext: Essential data loaded quickly');
         
         // Load secondary data in background after a brief delay
         setTimeout(async () => {
           if (mounted) {
-            console.log('🔄 AppContext: Loading secondary data...');
+            devLog('🔄 AppContext: Loading secondary data...');
             await Promise.all([
               refreshCertificates(),
               refreshLicenses(),
             ]);
-            console.log('✅ AppContext: All data loaded');
+            devLog('✅ AppContext: All data loaded');
           }
         }, 100); // Short delay to prioritize UI responsiveness
         
       } catch (error) {
-        console.error('💥 AppContext: Error during initial load:', error);
+        console.error('💥 AppContext: Error during initial load:', error); // Keep error logs
         setError('Failed to load app data. Please restart the app.');
       } finally {
         if (mounted) {
@@ -531,7 +565,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     return () => {
       mounted = false;
     };
-  }, []); // No dependencies - run once on mount
+  }, []); // No dependencies - run once on mount (correct)
 
   const value = useMemo<AppContextType>(() => ({
     // Data

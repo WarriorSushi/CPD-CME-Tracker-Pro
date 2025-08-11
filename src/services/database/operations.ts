@@ -21,13 +21,22 @@ import {
   runInTransaction
 } from '../../utils/DatabaseUtils';
 
+// Development logging helper
+const isDevelopment = __DEV__;
+const devLog = (...args: any[]) => {
+  if (isDevelopment) {
+    console.log(...args);
+  }
+};
+
 // Database instance with proper singleton pattern
 let dbInstance: SQLite.SQLiteDatabase | null = null;
 let dbInitPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
-// Health check throttling to reduce log spam
+// Optimize health check throttling - reduce frequency and skip when not needed
 let lastHealthCheck: { result: boolean; timestamp: number } | null = null;
-const HEALTH_CHECK_THROTTLE = 2000; // 2 seconds
+const HEALTH_CHECK_THROTTLE = 10000; // 10 seconds - much less frequent
+let skipHealthCheckUntil = 0; // Skip health checks for a period after successful operations
 
 // Force clean database migration with proper cleanup (with mutex protection)
 const forceCleanMigration = async (): Promise<SQLite.SQLiteDatabase> => {
@@ -161,21 +170,27 @@ const createSimpleTables = async (db: SQLite.SQLiteDatabase): Promise<void> => {
   });
 };
 
-// Test if database instance is healthy (lightweight, no mutex to avoid conflicts, throttled)
+// Test if database instance is healthy (lightweight, no mutex to avoid conflicts, heavily optimized)
 const testDatabaseHealth = async (db: SQLite.SQLiteDatabase): Promise<boolean> => {
   const now = Date.now();
   
+  // Skip health check if we're in a "known good" period
+  if (skipHealthCheckUntil > now) {
+    return true;
+  }
+  
   // Return cached result if recent
   if (lastHealthCheck && (now - lastHealthCheck.timestamp) < HEALTH_CHECK_THROTTLE) {
-    console.log('📆 testDatabaseHealth: Using throttled cached result:', lastHealthCheck.result);
     return lastHealthCheck.result;
   }
   
-  console.log('🩺 testDatabaseHealth: Running fresh health check...');
   const result = await testDatabaseHealthSafe(db);
   
-  // Cache the result
+  // Cache the result and set skip period if healthy
   lastHealthCheck = { result, timestamp: now };
+  if (result) {
+    skipHealthCheckUntil = now + HEALTH_CHECK_THROTTLE;
+  }
   
   return result;
 };
@@ -209,22 +224,26 @@ const forceCleanupDatabase = async (): Promise<void> => {
   });
 };
 
-// Get database instance with robust health checking (NO MUTEX - prevents deadlock)
+// Get database instance with optimized health checking (NO MUTEX - prevents deadlock) 
 const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
-    // If instance exists, test its health before returning it (with throttling)
+    // If instance exists, skip health check most of the time for performance
     if (dbInstance) {
-      console.log('🩺 getDatabase: Testing cached database health...');
-      const isHealthy = await testDatabaseHealth(dbInstance); // Uses throttled version
+      const now = Date.now();
+      // Only test health occasionally or if we haven't tested recently
+      if (skipHealthCheckUntil > now || (lastHealthCheck && (now - lastHealthCheck.timestamp) < HEALTH_CHECK_THROTTLE)) {
+        return dbInstance;
+      }
+      
+      const isHealthy = await testDatabaseHealth(dbInstance);
       
       if (isHealthy) {
-        console.log('✅ getDatabase: Cached database is healthy, returning it');
         return dbInstance;
       } else {
-        console.log('💀 getDatabase: Cached database is corrupted, cleaning up...');
         await closeDatabaseSafe(dbInstance);
         dbInstance = null;
         dbInitPromise = null;
-        lastHealthCheck = null; // Clear health check cache
+        lastHealthCheck = null;
+        skipHealthCheckUntil = 0;
         // Continue to create new instance
       }
     }
@@ -523,11 +542,14 @@ export const cmeOperations = {
         
         const entries = await getAllSafe<CMEEntry>(db, query, params);
         
-        // DEBUG: Log entries as they come from database
-        console.log('🗃️ DATABASE getAllEntries result (should be newest first):');
-        entries.forEach((entry, index) => {
-          console.log(`  ${index + 1}. ${entry.title} - ${entry.dateAttended}`);
-        });
+        // DEBUG: Log entries as they come from database (dev only)
+        if (isDevelopment && entries.length > 0) {
+          devLog('🗃️ DATABASE getAllEntries result (should be newest first):');
+          entries.slice(0, 3).forEach((entry, index) => {
+            devLog(`  ${index + 1}. ${entry.title} - ${entry.dateAttended}`);
+          });
+          if (entries.length > 3) devLog(`  ... and ${entries.length - 3} more entries`);
+        }
         
         return {
           success: true,
@@ -578,11 +600,11 @@ export const cmeOperations = {
   // Add new CME entry - with mutex protection to prevent Android NPEs
   addEntry: async (entry: Omit<CMEEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<DatabaseOperationResult<number>> => {
     try {
-      console.log('🗃️ cmeOperations.addEntry: Starting database operation...');
+      devLog('🗃️ cmeOperations.addEntry: Starting database operation...');
       
       // Get healthy database instance first (handles all corruption automatically)
       const db = await getDatabase();
-      console.log('🗃️ cmeOperations.addEntry: Healthy database connection established');
+      devLog('🗃️ cmeOperations.addEntry: Healthy database connection established');
       
       return dbMutex.runDatabaseWrite('addEntry', async () => {
         
@@ -625,7 +647,7 @@ export const cmeOperations = {
           entry.certificatePath || null,
         ]);
         
-        console.log('✅ cmeOperations.addEntry: Insert successful, lastInsertRowId:', result.lastInsertRowId);
+        devLog('✅ cmeOperations.addEntry: Insert successful, lastInsertRowId:', result.lastInsertRowId);
         
         return {
           success: true,
@@ -801,11 +823,14 @@ export const cmeOperations = {
         ORDER BY date_attended DESC, id DESC
       `, [startDate, endDate]);
       
-      // DEBUG: Log entries as they come from database
-      console.log('🗃️ DATABASE getEntriesInDateRange result (should be newest first):');
-      entries.forEach((entry, index) => {
-        console.log(`  ${index + 1}. ${entry.title} - ${entry.dateAttended}`);
-      });
+      // DEBUG: Log entries as they come from database (dev only)
+      if (isDevelopment && entries.length > 0) {
+        devLog('🗃️ DATABASE getEntriesInDateRange result (should be newest first):');
+        entries.slice(0, 3).forEach((entry, index) => {
+          devLog(`  ${index + 1}. ${entry.title} - ${entry.dateAttended}`);
+        });
+        if (entries.length > 3) devLog(`  ... and ${entries.length - 3} more entries`);
+      }
       
       return {
         success: true,

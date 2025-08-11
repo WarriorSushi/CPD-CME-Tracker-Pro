@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -37,11 +37,17 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
   const [refreshing, setRefreshing] = React.useState(false);
   const [selectedCertificate, setSelectedCertificate] = React.useState<string | undefined>(undefined);
+  const lastRefreshRef = useRef<number>(0);
+  const REFRESH_DEBOUNCE_MS = 5000; // Only refresh if last refresh was more than 5 seconds ago
 
-  // Refresh data when screen comes into focus
+  // Debounced refresh data when screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      refreshAllData();
+      const now = Date.now();
+      if (now - lastRefreshRef.current > REFRESH_DEBOUNCE_MS) {
+        lastRefreshRef.current = now;
+        refreshAllData();
+      }
     }, [refreshAllData])
   );
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { 
   View, 
   Text, 
@@ -40,12 +40,18 @@ export const SettingsScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [showLicenseForm, setShowLicenseForm] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const lastRefreshRef = useRef<number>(0);
+  const REFRESH_DEBOUNCE_MS = 3000; // Debounce settings refresh to 3 seconds
 
-  // Refresh data when screen comes into focus
+  // Debounced refresh data when screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      refreshLicenses();
-      refreshUserData();
+      const now = Date.now();
+      if (now - lastRefreshRef.current > REFRESH_DEBOUNCE_MS) {
+        lastRefreshRef.current = now;
+        refreshLicenses();
+        refreshUserData();
+      }
     }, [refreshLicenses, refreshUserData])
   );
 

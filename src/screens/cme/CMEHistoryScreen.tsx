@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { 
   View, 
   Text, 
@@ -53,28 +53,32 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
   const [showAllEntries, setShowAllEntries] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState<string | undefined>(undefined);
 
-  // Refresh data when screen comes into focus (e.g., returning from edit)
+  const lastRefreshRef = useRef<number>(0);
+  const REFRESH_DEBOUNCE_MS = 3000; // Debounce CME data refresh to 3 seconds
+
+  // Debounced refresh data when screen comes into focus (e.g., returning from edit)
   useFocusEffect(
     useCallback(() => {
-      console.log('🔄 CME History screen focused, refreshing data...');
-      
-      const refreshAllData = async () => {
-        await refreshCMEData();
+      const now = Date.now();
+      if (now - lastRefreshRef.current > REFRESH_DEBOUNCE_MS) {
+        lastRefreshRef.current = now;
         
-        // If showing all entries, refresh them too
-        if (showAllEntries) {
-          console.log('🔄 Refreshing all entries since showAllEntries is true...');
-          try {
-            const freshEntries = await loadAllCMEEntries();
-            // DATABASE already sorts entries correctly - do NOT sort again  
-            setAllEntries(freshEntries);
-          } catch (error) {
-            console.error('Error refreshing all entries:', error);
+        const refreshAllData = async () => {
+          await refreshCMEData();
+          
+          // If showing all entries, refresh them too
+          if (showAllEntries) {
+            try {
+              const freshEntries = await loadAllCMEEntries();
+              setAllEntries(freshEntries);
+            } catch (error) {
+              console.error('Error refreshing all entries:', error);
+            }
           }
-        }
-      };
-      
-      refreshAllData();
+        };
+        
+        refreshAllData();
+      }
     }, [refreshCMEData, showAllEntries, loadAllCMEEntries])
   );
 
