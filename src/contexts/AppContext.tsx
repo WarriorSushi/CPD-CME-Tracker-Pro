@@ -8,6 +8,7 @@ import {
   DatabaseOperationResult 
 } from '../types';
 import { databaseOperations } from '../services/database';
+import { getUserCached, refreshUserCache, clearUserCache, getCachedUserSync } from '../services/database/userCache';
 
 // Development logging helper
 const isDevelopment = __DEV__;
@@ -16,6 +17,12 @@ const devLog = (...args: any[]) => {
     console.log(...args);
   }
 };
+
+// Remount detection for debugging
+if (isDevelopment) {
+  const remountCounter = (globalThis.__appContextMountCount = (globalThis.__appContextMountCount || 0) + 1);
+  devLog('🔄 AppContext: Provider mounting (count:', remountCounter, ')');
+}
 
 // Batch state updates helper
 const useBatchedStateUpdates = () => {
@@ -121,34 +128,19 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Error state
   const [error, setError] = useState<string | null>(null);
   
-  // Cached user data to reduce database calls
-  const [cachedUserData, setCachedUserData] = useState<{ user: User | null; timestamp: number } | null>(null);
-  const USER_CACHE_DURATION = 5000; // 5 seconds
+  // Staleness tracking for entries data
+  const lastEntriesRefreshRef = useRef<number>(0);
+  const ENTRIES_STALENESS_TTL = 60000; // 1 minute
   
   // Clear error function
   const clearError = useCallback(() => {
     setError(null);
   }, []);
   
-  // Optimized getCurrentUser with caching
-  const getCachedCurrentUser = useCallback(async (): Promise<User | null> => {
-    const now = Date.now();
-    
-    // Return cached data if it's fresh
-    if (cachedUserData && (now - cachedUserData.timestamp) < USER_CACHE_DURATION) {
-      devLog('💾 AppContext: Using cached user data');
-      return cachedUserData.user;
-    }
-    
-    devLog('🔄 AppContext: Fetching fresh user data (cache miss/expired)');
-    const userResult = await databaseOperations.user.getCurrentUser();
-    const userData = userResult.success ? userResult.data : null;
-    
-    // Cache the result
-    setCachedUserData({ user: userData, timestamp: now });
-    
-    return userData;
-  }, [cachedUserData]);
+  // Use singleton user cache instead of local caching
+  const getCurrentUserCached = useCallback(async (): Promise<User | null> => {
+    return getUserCached();
+  }, []);
 
   // Calculate progress based on current data and user's requirement period
   const calculateProgress = (user: User, totalCredits: number): Progress => {
@@ -207,10 +199,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     try {
       setIsLoadingUser(true);
       devLog('🔄 AppContext: Refreshing user data...');
-      const result = await databaseOperations.user.getCurrentUser();
-      if (result.success && result.data) {
-        devLog('✅ AppContext: User data loaded:', result.data?.creditSystem);
-        setUser(result.data);
+      const userData = await refreshUserCache(); // Use singleflight cache
+      if (userData) {
+        devLog('✅ AppContext: User data loaded:', userData?.creditSystem);
+        setUser(userData);
       }
     } catch (error) {
       console.error('💥 AppContext: Error refreshing user data:', error);
@@ -225,10 +217,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       clearError();
       
       // Use cached user data if available, avoid duplicate DB call
-      let userData = user;
+      let userData = user || getCachedUserSync();
       if (!userData) {
-        const userResult = await databaseOperations.user.getCurrentUser();
-        userData = userResult.success ? userResult.data : null;
+        userData = await getUserCached(); // Use singleflight cache
       }
       
       devLog('📊 AppContext.refreshCMEData: User data:', userData?.profession);
@@ -267,6 +258,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
       
       devLog('📅 AppContext.refreshCMEData: Using date range:', { startDate, endDate });
+      
+      // Check staleness to avoid redundant queries
+      const now = Date.now();
+      const isStale = (now - lastEntriesRefreshRef.current) > ENTRIES_STALENESS_TTL;
+      
+      if (!isStale) {
+        devLog('✅ AppContext: CME data is fresh, skipping refresh');
+        return;
+      }
+      
+      lastEntriesRefreshRef.current = now;
+      devLog('🔄 AppContext: CME data is stale, refreshing...');
       
       // Load recent entries and total credits (remove redundant getAllEntries call for performance) 
       const [recentEntriesResult, creditsResult] = await Promise.all([
@@ -316,16 +319,21 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     } finally {
       setIsLoadingCME(false);
     }
-  }, [clearError, user]); // Add user dependency to avoid stale closure
+  }, [clearError]); // Remove user dependency to prevent unnecessary re-runs
+  
+  // Force refresh CME data (for manual refreshes)
+  const forceRefreshCMEData = useCallback(async (): Promise<void> => {
+    lastEntriesRefreshRef.current = 0; // Force staleness
+    await refreshCMEData();
+  }, [refreshCMEData]);
 
   // Lazy load all CME entries when needed (e.g., for CME history screen)
   const loadAllCMEEntries = useCallback(async (): Promise<CMEEntry[]> => {
     try {
       // Use cached user data to avoid redundant DB calls
-      let userData = user;
+      let userData = user || getCachedUserSync();
       if (!userData) {
-        const userResult = await databaseOperations.user.getCurrentUser();
-        userData = userResult.success ? userResult.data : null;
+        userData = await getUserCached(); // Use singleflight cache
       }
       
       if (!userData) {
@@ -515,7 +523,17 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }, [user, totalCredits, isLoadingCME]);
 
   // Smart initial data loading - prioritize essential data
+  // Use ref to prevent double execution in React 18 StrictMode
+  const didInitialLoadRef = useRef(false);
+  
   useEffect(() => {
+    // Guard against double execution
+    if (didInitialLoadRef.current) {
+      devLog('⚠️ AppContext: Initial load already completed, skipping...');
+      return;
+    }
+    
+    didInitialLoadRef.current = true;
     let mounted = true;
     
     const loadEssentialData = async () => {
@@ -565,7 +583,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     return () => {
       mounted = false;
     };
-  }, []); // No dependencies - run once on mount (correct)
+  }, []); // No dependencies - run once on mount
 
   const value = useMemo<AppContextType>(() => ({
     // Data
@@ -592,6 +610,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     refreshCertificates,
     refreshLicenses,
     refreshAllData,
+    forceRefreshCMEData,
     
     // Lazy loading actions
     loadAllCMEEntries,
@@ -623,6 +642,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     refreshCertificates,
     refreshLicenses,
     refreshAllData,
+    forceRefreshCMEData,
     loadAllCMEEntries,
     clearError,
     addCMEEntry,
