@@ -23,6 +23,7 @@ import { useAppContext } from '../../contexts/AppContext';
 import { Certificate } from '../../types';
 import { SUPPORTED_FILE_TYPES, MAX_FILE_SIZES, FILE_PATHS } from '../../constants';
 import { ThumbnailService } from '../../services/thumbnailService';
+import { databaseOperations } from '../../services/database';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - theme.spacing[5] * 3) / 2;
@@ -223,7 +224,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         to: newFilePath,
       });
 
-      // Generate thumbnail for the uploaded file
+      // Generate thumbnail only for images
       console.log('📸 Generating thumbnail for uploaded file...');
       let thumbnailPath = null;
       try {
@@ -232,9 +233,8 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
           thumbnailPath = thumbnailResult.thumbnailUri;
           console.log('✅ Thumbnail generated for uploaded image');
         } else {
-          const thumbnailResult = await ThumbnailService.generatePDFThumbnail(file.uri, file.name);
-          thumbnailPath = thumbnailResult.thumbnailUri;
-          console.log('✅ PDF thumbnail generated for uploaded document');
+          // For documents, we'll just use document name and icon - no thumbnail needed
+          console.log('📄 Document type detected, using document tile (no thumbnail)');
         }
       } catch (thumbnailError) {
         console.warn('⚠️ Thumbnail generation failed for uploaded file:', thumbnailError);
@@ -247,13 +247,22 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         fileSize: file.size || 0,
         mimeType: file.mimeType || 'application/pdf',
         thumbnailPath,
+        cmeEntryId: null, // Not associated with any specific CME entry
       };
 
-      // For now, we'll skip the database integration and just show success
-      Alert.alert('Success', 'Certificate uploaded successfully!');
+      console.log('💾 Adding certificate to vault database:', certificateData);
       
-      // Refresh the list
-      await refreshCertificates();
+      const addResult = await databaseOperations.certificates.addCertificate(certificateData);
+      
+      if (addResult.success) {
+        console.log('✅ Certificate added to vault with ID:', addResult.data);
+        Alert.alert('Success', 'Certificate uploaded successfully!');
+        // Refresh the list
+        await refreshCertificates();
+      } else {
+        console.error('❌ Failed to add certificate to database:', addResult.error);
+        Alert.alert('Error', 'Failed to save certificate to vault. Please try again.');
+      }
 
     } catch (error) {
       console.error('Error uploading certificate:', error);
@@ -369,7 +378,9 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
             ) : (
               <View style={styles.masonryPdfPreview}>
                 <Text style={styles.masonryPdfIcon}>📄</Text>
-                <Text style={styles.masonryPdfLabel}>PDF</Text>
+                <Text style={styles.masonryPdfLabel}>
+                  {item.mimeType === 'application/pdf' ? 'PDF' : 'DOC'}
+                </Text>
               </View>
             )}
             

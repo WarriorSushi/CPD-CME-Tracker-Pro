@@ -15,13 +15,14 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
+import * as DocumentPicker from 'expo-document-picker';
 import { Camera } from 'expo-camera';
 
 import { Button, Card, Input, LoadingSpinner, DatePicker } from '../../components';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { MainTabParamList } from '../../types/navigation';
-import { CME_CATEGORIES, FILE_PATHS } from '../../constants';
+import { CME_CATEGORIES, FILE_PATHS, SUPPORTED_FILE_TYPES, MAX_FILE_SIZES } from '../../constants';
 import { CMEEntry } from '../../types';
 import { getCreditUnit } from '../../utils/creditTerminology';
 import { ThumbnailService } from '../../services/thumbnailService';
@@ -102,11 +103,13 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
     camera: boolean;
     gallery: boolean;
     vault: boolean;
+    files: boolean;
     remove: boolean;
   }>({
     camera: false,
     gallery: false,
     vault: false,
+    files: false,
     remove: false,
   });
 
@@ -305,6 +308,115 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       'Please navigate to the Vault tab to select a certificate, then return to add a new entry.',
       [{ text: 'OK' }]
     );
+  };
+
+  const handleChooseFiles = async () => {
+    try {
+      setIsUploadingCertificate(true);
+      const result = await DocumentPicker.getDocumentAsync({
+        type: SUPPORTED_FILE_TYPES.ALL,
+        copyToCacheDirectory: false,
+      });
+
+      if (!result.canceled) {
+        const file = result.assets[0];
+        
+        // Check file size
+        const isImageType = file.mimeType && SUPPORTED_FILE_TYPES.IMAGES.includes(file.mimeType as any);
+        const maxSize = isImageType ? MAX_FILE_SIZES.IMAGE : MAX_FILE_SIZES.DOCUMENT;
+        
+        if ((file.size || 0) > maxSize) {
+          Alert.alert(
+            'File Too Large',
+            `File size must be less than ${Math.round(maxSize / 1024 / 1024)}MB`
+          );
+          return;
+        }
+
+        await processDocument(file);
+      }
+    } catch (error) {
+      console.error('File picker error:', error);
+      Alert.alert('Error', 'Failed to open file picker. Please try again.');
+    } finally {
+      setIsUploadingCertificate(false);
+    }
+  };
+
+  const processDocument = async (file: any) => {
+    try {
+      console.log('📄 Processing document file:', file.name);
+      
+      // Create certificates directory if it doesn't exist
+      const certificatesDir = `${FileSystem.documentDirectory}${FILE_PATHS.CERTIFICATES}`;
+      const dirInfo = await FileSystem.getInfoAsync(certificatesDir);
+      
+      if (!dirInfo.exists) {
+        await FileSystem.makeDirectoryAsync(certificatesDir, { intermediates: true });
+      }
+
+      // Generate unique filename
+      const timestamp = Date.now();
+      const extension = file.name.split('.').pop() || 'pdf';
+      const newFileName = `cme_certificate_${timestamp}.${extension}`;
+      const newFilePath = `${certificatesDir}${newFileName}`;
+
+      // Copy file to app documents
+      await FileSystem.copyAsync({
+        from: file.uri,
+        to: newFilePath,
+      });
+
+      // Generate thumbnail only for images
+      let thumbnailPath: string | undefined;
+      try {
+        const isImageType = file.mimeType && SUPPORTED_FILE_TYPES.IMAGES.includes(file.mimeType as any);
+        if (isImageType) {
+          thumbnailPath = await ThumbnailService.generateThumbnail(file.uri, newFileName);
+          console.log('✅ Thumbnail generated for image file');
+        } else {
+          // For documents, we'll just use document name and icon - no thumbnail needed
+          console.log('📄 Document type detected, using document tile (no thumbnail)');
+        }
+      } catch (thumbnailError) {
+        console.warn('⚠️ Thumbnail generation failed:', thumbnailError);
+      }
+
+      // Automatically add certificate to vault
+      try {
+        const certificateData = {
+          filePath: newFilePath,
+          fileName: newFileName,
+          fileSize: file.size || 0,
+          mimeType: file.mimeType || 'application/pdf',
+          thumbnailPath: thumbnailPath,
+          cmeEntryId: null, // Will be set after CME entry is created
+        };
+
+        const addResult = await databaseOperations.certificates.addCertificate(certificateData);
+        if (addResult.success) {
+          console.log('✅ Document automatically added to vault with ID:', addResult.data);
+          // Refresh certificates in AppContext so vault shows the new certificate
+          await refreshCertificates();
+        } else {
+          console.warn('⚠️ Failed to add document to vault:', addResult.error);
+        }
+      } catch (certError) {
+        console.error('💥 Error adding document to vault:', certError);
+      }
+
+      // Update form data with certificate path
+      setFormData(prev => ({
+        ...prev,
+        certificatePath: newFilePath,
+      }));
+
+      Alert.alert('Success', 'Document added to entry and saved to vault!');
+
+    } catch (error) {
+      console.error('💥 Error processing document:', error);
+      Alert.alert('Error', 'Failed to process document. Please try again.');
+    }
   };
 
   const handleRemoveCertificate = () => {
@@ -601,6 +713,18 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
                   <Text style={styles.uploadButtonIconTiny}>📁</Text>
                   <Text style={styles.uploadButtonTextTiny}>Vault</Text>
                 </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[styles.uploadButtonTiny, styles.filesButtonTiny, getPressedButtonStyle('files')]}
+                  onPress={handleChooseFiles}
+                  onPressIn={() => handlePressIn('files')}
+                  onPressOut={() => handlePressOut('files')}
+                  disabled={isUploadingCertificate}
+                  activeOpacity={1}
+                >
+                  <Text style={styles.uploadButtonIconTiny}>📎</Text>
+                  <Text style={styles.uploadButtonTextTiny}>Files</Text>
+                </TouchableOpacity>
               </View>
             )}
           </View>
@@ -798,6 +922,9 @@ const styles = StyleSheet.create({
   },
   vaultButtonTiny: {
     backgroundColor: '#8b5cf6',
+  },
+  filesButtonTiny: {
+    backgroundColor: '#f59e0b',
   },
   
   uploadButtonIconTiny: {

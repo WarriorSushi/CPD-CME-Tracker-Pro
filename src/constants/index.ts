@@ -73,9 +73,26 @@ export const NOTIFICATION_INTERVALS = [90, 60, 30, 14, 7, 1] as const;
 
 // File type constants
 export const SUPPORTED_FILE_TYPES = {
-  IMAGES: ['image/jpeg', 'image/png', 'image/jpg'],
-  DOCUMENTS: ['application/pdf'],
-  ALL: ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'],
+  IMAGES: ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/heic', 'image/heif'],
+  DOCUMENTS: [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'text/plain',
+    'text/csv',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  ],
+  ALL: [
+    'image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/heic', 'image/heif',
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'text/plain',
+    'text/csv',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  ],
 } as const;
 
 // Maximum file sizes (in bytes)
