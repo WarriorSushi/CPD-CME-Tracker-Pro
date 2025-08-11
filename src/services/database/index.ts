@@ -16,5 +16,12 @@ export {
   licenseOperations,
   settingsOperations,
   userOperations,
-  resetDatabaseInstance,
 } from './operations';
+
+// Export database recovery functions
+export {
+  resetDatabaseForAppReset,
+  getDatabaseStatus,
+  recoverFromCorruption,
+  checkDatabaseHealth,
+} from './singleton';

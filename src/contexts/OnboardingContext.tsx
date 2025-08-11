@@ -111,15 +111,23 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
     try {
       console.log('🧹 resetCompleteApp: Starting complete app reset...');
       
-      // Immediately set states to ensure navigation happens
-      setIsOnboardingComplete(false);
-      setIsLoading(false);
-      console.log('🧭 resetCompleteApp: Immediately set navigation states');
-      
+      // First, complete the database reset BEFORE changing navigation
+      console.log('🗃️ resetCompleteApp: Resetting database first...');
       const result = await settingsOperations.resetAllData();
       console.log('📝 resetCompleteApp: Database resetAllData result:', result);
       
-      return result.success;
+      // Only after database reset is complete, change navigation states
+      if (result.success) {
+        console.log('🧭 resetCompleteApp: Database reset successful, changing navigation states');
+        setIsOnboardingComplete(false);
+        setIsLoading(false);
+        return true;
+      } else {
+        console.error('❌ resetCompleteApp: Database reset failed, but allowing navigation anyway');
+        setIsOnboardingComplete(false);
+        setIsLoading(false);
+        return false;
+      }
     } catch (error) {
       console.error('💥 Error resetting complete app:', error);
       // Even if DB fails, allow navigation to onboarding

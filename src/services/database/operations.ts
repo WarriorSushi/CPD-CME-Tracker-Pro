@@ -840,7 +840,8 @@ export const settingsOperations = {
         
         // Reset the database singleton
         devLog('🔄 settingsOperations.resetAllData: Resetting database instance...');
-        await resetDatabaseInstance();
+        const { resetDatabaseForAppReset } = await import('./singleton');
+        await resetDatabaseForAppReset();
         
         devLog('🎉 settingsOperations.resetAllData: Complete app reset successful');
         return { success: true };
