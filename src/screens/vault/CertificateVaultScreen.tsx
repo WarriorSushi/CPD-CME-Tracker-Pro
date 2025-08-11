@@ -79,8 +79,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
       setIsScanning(true);
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
+        allowsEditing: false,
         quality: 0.8,
         base64: false,
       });
@@ -101,8 +100,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
       setIsScanning(true);
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
+        allowsEditing: false,
         quality: 0.8,
         base64: false,
       });
@@ -466,7 +464,10 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Certificate Vault</Text>
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>Certificate Vault</Text>
+          <Text style={styles.headerSubtitle}>Store and manage your certificates securely</Text>
+        </View>
         <TouchableOpacity 
           style={styles.infoButton}
           onPress={() => Alert.alert('Certificate Vault', 'Take photos or upload your certificates to keep them organized and easily accessible.')}
@@ -556,15 +557,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: theme.spacing[4],
-    paddingVertical: theme.spacing[3],
+    paddingVertical: theme.spacing[4],
     backgroundColor: '#1e3a8a',
     borderBottomLeftRadius: theme.spacing[3],
     borderBottomRightRadius: theme.spacing[3],
   },
-  title: {
+  headerContent: {
+    flex: 1,
+  },
+  headerTitle: {
     fontSize: theme.typography.fontSize.xl,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.background,
+    marginBottom: 2,
+  },
+  headerSubtitle: {
+    fontSize: theme.typography.fontSize.sm,
+    color: 'rgba(255, 255, 255, 0.8)',
+    opacity: 0.9,
   },
   infoButton: {
     width: 32,

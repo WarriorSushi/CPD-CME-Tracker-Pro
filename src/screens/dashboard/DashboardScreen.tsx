@@ -287,7 +287,12 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 <View style={styles.activityContent}>
                   <TouchableOpacity 
                     style={styles.activityIcon}
-                    onPress={() => entry.certificatePath && setSelectedCertificate(entry.certificatePath)}
+                    onPress={() => {
+                      if (entry.certificatePath) {
+                        console.log('📄 Dashboard opening certificate:', entry.certificatePath);
+                        setSelectedCertificate(entry.certificatePath);
+                      }
+                    }}
                     disabled={!entry.certificatePath}
                   >
                     {entry.certificatePath ? (
@@ -401,10 +406,10 @@ const styles = StyleSheet.create({
   // Header
   header: {
     backgroundColor: '#003087', // HSL(215°, 100%, 26%)
-    paddingHorizontal: theme.spacing[5],
-    paddingVertical: theme.spacing[5],
-    borderBottomLeftRadius: theme.spacing[6],
-    borderBottomRightRadius: theme.spacing[6],
+    paddingHorizontal: theme.spacing[4],
+    paddingVertical: theme.spacing[4],
+    borderBottomLeftRadius: theme.spacing[3],
+    borderBottomRightRadius: theme.spacing[3],
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

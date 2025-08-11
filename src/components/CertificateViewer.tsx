@@ -67,11 +67,13 @@ export const CertificateViewer: React.FC<Props> = ({ visible, imageUri, onClose 
         </View>
 
         <View style={styles.imageContainer}>
-          <Image 
-            source={{ uri: imageUri }}
-            style={styles.image}
-            resizeMode="contain"
-          />
+          <View style={styles.imageWrapper}>
+            <Image 
+              source={{ uri: imageUri }}
+              style={styles.image}
+              resizeMode="contain"
+            />
+          </View>
         </View>
 
         <View style={styles.footer}>
@@ -118,11 +120,17 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing[4],
+    padding: theme.spacing[4],
   },
-  image: {
+  imageWrapper: {
     width: width - (theme.spacing[4] * 2),
     height: height * 0.7,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
   },
   footer: {
     paddingHorizontal: theme.spacing[4],

@@ -241,7 +241,10 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
         {item.certificatePath && (
           <TouchableOpacity 
             style={styles.certificateThumbnailContainer}
-            onPress={() => setSelectedCertificate(item.certificatePath)}
+            onPress={() => {
+              console.log('📄 Opening certificate:', item.certificatePath);
+              setSelectedCertificate(item.certificatePath);
+            }}
           >
             <Image 
               source={{ uri: item.certificatePath }}
@@ -312,7 +315,10 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Education History</Text>
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>Education History</Text>
+          <Text style={styles.headerSubtitle}>All your entries in one place</Text>
+        </View>
         <TouchableOpacity 
           style={styles.addButton}
           onPress={() => navigation.navigate('AddCME', {})}
@@ -422,11 +428,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing[5],
-    paddingVertical: theme.spacing[5],
+    paddingHorizontal: theme.spacing[4],
+    paddingVertical: theme.spacing[4],
     backgroundColor: '#1e3a8a', // Dark blue
-    borderBottomLeftRadius: theme.spacing[6],
-    borderBottomRightRadius: theme.spacing[6],
+    borderBottomLeftRadius: theme.spacing[3],
+    borderBottomRightRadius: theme.spacing[3],
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -436,10 +442,19 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 10,
   },
-  title: {
+  headerContent: {
+    flex: 1,
+  },
+  headerTitle: {
     fontSize: theme.typography.fontSize.xl,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.background,
+    marginBottom: 2,
+  },
+  headerSubtitle: {
+    fontSize: theme.typography.fontSize.sm,
+    color: 'rgba(255, 255, 255, 0.8)',
+    opacity: 0.9,
   },
   addButton: {
     backgroundColor: theme.colors.success,
@@ -472,18 +487,18 @@ const styles = StyleSheet.create({
     color: theme.colors.background,
   },
 
-  // Controls
+  // Controls - More compact
   controls: {
-    padding: theme.spacing[5],
-    gap: theme.spacing[4],
+    padding: theme.spacing[3],
+    gap: theme.spacing[2],
   },
   searchInput: {
     // Input styles applied by component
   },
   
-  // Stats
+  // Stats - More compact
   statsCard: {
-    paddingVertical: theme.spacing[3],
+    paddingVertical: theme.spacing[2],
   },
   statsRow: {
     flexDirection: 'row',
@@ -493,10 +508,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statValue: {
-    fontSize: theme.typography.fontSize.lg,
+    fontSize: theme.typography.fontSize.base,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.primary,
-    marginBottom: theme.spacing[1],
+    marginBottom: 2,
   },
   statLabel: {
     fontSize: theme.typography.fontSize.xs,
@@ -521,8 +536,8 @@ const styles = StyleSheet.create({
     gap: theme.spacing[2],
   },
   yearButton: {
-    paddingHorizontal: theme.spacing[3],
-    paddingVertical: theme.spacing[2],
+    paddingHorizontal: theme.spacing[2],
+    paddingVertical: theme.spacing[1],
     borderRadius: theme.borderRadius.md,
     backgroundColor: theme.colors.gray.light,
     borderWidth: 1,
@@ -626,17 +641,17 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing[3],
   },
   actionButton: {
-    paddingHorizontal: theme.spacing[3],
-    paddingVertical: theme.spacing[2],
-    borderRadius: theme.borderRadius.sm,
-    minWidth: 60,
+    paddingHorizontal: theme.spacing[2],
+    paddingVertical: theme.spacing[1],
+    borderRadius: 5,
+    minWidth: 50,
     alignItems: 'center',
   },
   editButton: {
     backgroundColor: theme.colors.primary,
   },
   editButtonText: {
-    fontSize: theme.typography.fontSize.sm,
+    fontSize: theme.typography.fontSize.xs,
     color: theme.colors.background,
     fontWeight: theme.typography.fontWeight.medium,
   },
@@ -646,7 +661,7 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.error,
   },
   deleteButtonText: {
-    fontSize: theme.typography.fontSize.sm,
+    fontSize: theme.typography.fontSize.xs,
     color: theme.colors.error,
     fontWeight: theme.typography.fontWeight.medium,
   },

@@ -523,10 +523,10 @@ const styles = StyleSheet.create({
   // Beautiful Header
   header: {
     backgroundColor: '#003087', // HSL(215°, 100%, 26%)
-    paddingHorizontal: theme.spacing[5],
-    paddingVertical: theme.spacing[5],
-    borderBottomLeftRadius: theme.spacing[6],
-    borderBottomRightRadius: theme.spacing[6],
+    paddingHorizontal: theme.spacing[4],
+    paddingVertical: theme.spacing[4],
+    borderBottomLeftRadius: theme.spacing[3],
+    borderBottomRightRadius: theme.spacing[3],
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -540,11 +540,11 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.xl,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.background,
-    marginBottom: theme.spacing[1],
+    marginBottom: 2,
   },
   headerSubtitle: {
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.background + '90',
+    fontSize: theme.typography.fontSize.sm,
+    color: 'rgba(255, 255, 255, 0.8)',
     opacity: 0.9,
   },
   
