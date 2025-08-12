@@ -326,8 +326,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
           <TouchableOpacity 
             style={[styles.actionButton, styles.editButton]}
             onPress={() => {
-              // TODO: Navigate to edit license screen
-              Alert.alert('Edit License', 'License editing will be available in a future update.');
+              navigation.navigate('AddLicense', { editLicense: license });
             }}
           >
             <Text style={styles.editButtonText}>Edit</Text>

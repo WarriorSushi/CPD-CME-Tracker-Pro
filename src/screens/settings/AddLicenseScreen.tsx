@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import { useAppContext } from '../../contexts/AppContext';
 import { LicenseRenewal } from '../../types';
 
 type RootStackParamList = {
-  AddLicense: undefined;
+  AddLicense: { editLicense?: LicenseRenewal };
   Settings: undefined;
 };
 
@@ -31,16 +31,30 @@ interface Props {
   route: AddLicenseScreenRouteProp;
 }
 
-export const AddLicenseScreen: React.FC<Props> = ({ navigation }) => {
+export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
-  const { addLicense } = useAppContext();
+  const { addLicense, updateLicense } = useAppContext();
+  const editLicense = route.params?.editLicense;
+  const isEditing = !!editLicense;
   
-  // Form state
-  const [licenseType, setLicenseType] = useState('');
-  const [issuingAuthority, setIssuingAuthority] = useState('');
-  const [licenseNumber, setLicenseNumber] = useState('');
-  const [expirationDate, setExpirationDate] = useState<Date>(new Date(new Date().setFullYear(new Date().getFullYear() + 1))); // Default to 1 year from now
+  // Form state - initialized with edit data if editing
+  const [licenseType, setLicenseType] = useState(editLicense?.licenseType || '');
+  const [issuingAuthority, setIssuingAuthority] = useState(editLicense?.issuingAuthority || '');
+  const [licenseNumber, setLicenseNumber] = useState(editLicense?.licenseNumber || '');
+  const [expirationDate, setExpirationDate] = useState<Date>(
+    editLicense ? new Date(editLicense.expirationDate) : new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Update form when editLicense changes (shouldn't happen but good practice)
+  useEffect(() => {
+    if (editLicense) {
+      setLicenseType(editLicense.licenseType);
+      setIssuingAuthority(editLicense.issuingAuthority);
+      setLicenseNumber(editLicense.licenseNumber || '');
+      setExpirationDate(new Date(editLicense.expirationDate));
+    }
+  }, [editLicense]);
 
   // Form validation
   const isFormValid = licenseType.trim() !== '' && 
@@ -56,40 +70,68 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation }) => {
     setIsSubmitting(true);
 
     try {
-      const licenseData: Omit<LicenseRenewal, 'id' | 'createdAt' | 'updatedAt'> = {
-        licenseType: licenseType.trim(),
-        issuingAuthority: issuingAuthority.trim(),
-        licenseNumber: licenseNumber.trim() || undefined,
-        expirationDate: expirationDate.toISOString().split('T')[0], // Convert to YYYY-MM-DD
-        renewalDate: undefined,
-        requiredCredits: 0, // Default to 0, can be edited later
-        completedCredits: 0,
-        status: 'active',
-      };
+      if (isEditing && editLicense) {
+        // Update existing license
+        const updateData: Partial<LicenseRenewal> = {
+          licenseType: licenseType.trim(),
+          issuingAuthority: issuingAuthority.trim(),
+          licenseNumber: licenseNumber.trim() || undefined,
+          expirationDate: expirationDate.toISOString().split('T')[0], // Convert to YYYY-MM-DD
+        };
 
-      const success = await addLicense(licenseData);
+        const success = await updateLicense(editLicense.id, updateData);
 
-      if (success) {
-        Alert.alert(
-          'Success',
-          'License added successfully!',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.goBack(),
-            },
-          ]
-        );
+        if (success) {
+          Alert.alert(
+            'Success',
+            'License updated successfully!',
+            [
+              {
+                text: 'OK',
+                onPress: () => navigation.goBack(),
+              },
+            ]
+          );
+        } else {
+          Alert.alert('Error', 'Failed to update license. Please try again.');
+        }
       } else {
-        Alert.alert('Error', 'Failed to add license. Please try again.');
+        // Add new license
+        const licenseData: Omit<LicenseRenewal, 'id' | 'createdAt' | 'updatedAt'> = {
+          licenseType: licenseType.trim(),
+          issuingAuthority: issuingAuthority.trim(),
+          licenseNumber: licenseNumber.trim() || undefined,
+          expirationDate: expirationDate.toISOString().split('T')[0], // Convert to YYYY-MM-DD
+          renewalDate: undefined,
+          requiredCredits: 0, // Default to 0, can be edited later
+          completedCredits: 0,
+          status: 'active',
+        };
+
+        const success = await addLicense(licenseData);
+
+        if (success) {
+          Alert.alert(
+            'Success',
+            'License added successfully!',
+            [
+              {
+                text: 'OK',
+                onPress: () => navigation.goBack(),
+              },
+            ]
+          );
+        } else {
+          Alert.alert('Error', 'Failed to add license. Please try again.');
+        }
       }
     } catch (error) {
-      console.error('Error adding license:', error);
+      console.error(`Error ${isEditing ? 'updating' : 'adding'} license:`, error);
       Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
-  }, [licenseType, issuingAuthority, licenseNumber, expirationDate, isFormValid, addLicense, navigation]);
+  }, [licenseType, issuingAuthority, licenseNumber, expirationDate, isFormValid, isEditing, editLicense, addLicense, updateLicense, navigation]);
 
   return (
     <KeyboardAvoidingView 
@@ -104,7 +146,7 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation }) => {
         >
           <Text style={styles.backButtonText}>← Back</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add License</Text>
+        <Text style={styles.headerTitle}>{isEditing ? 'Edit License' : 'Add License'}</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -116,7 +158,9 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation }) => {
         <Card style={styles.formCard}>
           <View style={styles.formHeader}>
             <Text style={styles.formTitle}>License Information</Text>
-            <Text style={styles.formSubtitle}>Add your professional license details for renewal tracking</Text>
+            <Text style={styles.formSubtitle}>
+              {isEditing ? 'Update your license information and renewal dates' : 'Add your professional license details for renewal tracking'}
+            </Text>
           </View>
 
           <View style={styles.formFields}>
@@ -182,7 +226,7 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation }) => {
             />
             
             <Button
-              title={isSubmitting ? 'Adding...' : 'Add License'}
+              title={isSubmitting ? (isEditing ? 'Updating...' : 'Adding...') : (isEditing ? 'Update License' : 'Add License')}
               onPress={handleSubmit}
               disabled={!isFormValid || isSubmitting}
               variant="primary"
@@ -193,7 +237,7 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation }) => {
           {isSubmitting && (
             <View style={styles.loadingContainer}>
               <LoadingSpinner size={20} />
-              <Text style={styles.loadingText}>Adding license...</Text>
+              <Text style={styles.loadingText}>{isEditing ? 'Updating license...' : 'Adding license...'}</Text>
             </View>
           )}
         </Card>

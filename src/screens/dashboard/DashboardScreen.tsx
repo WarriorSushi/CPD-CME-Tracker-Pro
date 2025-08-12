@@ -368,6 +368,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                     <View style={styles.statusCard}>
                       <Text style={styles.statusCardNumber}>{upcoming}</Text>
                       <Text style={styles.statusCardLabel}>Expiring Soon</Text>
+                      <Text style={styles.statusCardSubLabel}>(within 90 days)</Text>
                       <View style={[styles.statusCardDot, { backgroundColor: theme.colors.warning }]} />
                     </View>
                     
@@ -447,7 +448,10 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                     <View style={styles.licenseCardActions}>
                       <TouchableOpacity 
                         style={styles.licenseActionButton}
-                        onPress={() => navigation.navigate('Settings')}
+                        onPress={() => {
+                          // Navigate directly to AddLicense screen with edit data
+                          (navigation as any).navigate('AddLicense', { editLicense: license });
+                        }}
                       >
                         <Text style={styles.licenseActionText}>📝 Edit</Text>
                       </TouchableOpacity>
@@ -489,6 +493,13 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                         </View>
                       </View>
                     )}
+
+                    {/* Renewal Instructions */}
+                    <View style={styles.licenseRenewalInstructions}>
+                      <Text style={styles.renewalInstructionsText}>
+                        💡 Already renewed? Tap "Edit" and update the expiration date.
+                      </Text>
+                    </View>
                   </Card>
                 );
               });
@@ -883,6 +894,13 @@ const styles = StyleSheet.create({
     color: theme.colors.text.secondary,
     textAlign: 'center',
   },
+  statusCardSubLabel: {
+    fontSize: theme.typography.fontSize.xs - 2,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+    opacity: 0.8,
+    marginTop: 2,
+  },
   statusCardDot: {
     position: 'absolute',
     top: theme.spacing[2],
@@ -1001,6 +1019,22 @@ const styles = StyleSheet.create({
   licenseProgressFill: {
     height: '100%',
     borderRadius: 3,
+  },
+
+  // License Renewal Instructions
+  licenseRenewalInstructions: {
+    backgroundColor: '#f0f7ff',
+    borderRadius: theme.spacing[2],
+    padding: theme.spacing[2],
+    marginTop: theme.spacing[3],
+    borderLeftWidth: 3,
+    borderLeftColor: theme.colors.primary,
+  },
+  renewalInstructionsText: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.secondary,
+    lineHeight: 16,
+    textAlign: 'center',
   },
 
   // Add License Button
