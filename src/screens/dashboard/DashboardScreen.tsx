@@ -333,10 +333,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         )}
 
         {/* Enhanced License Management Section */}
-        {(() => {
-          console.log('🔍 Dashboard: Licenses data:', licenses?.length || 0, licenses);
-          return licenses && licenses.length > 0;
-        })() && (
+        {licenses && licenses.length > 0 && (
           <View style={styles.licenseSection}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>License Status</Text>
@@ -348,33 +345,46 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             {/* License Status Summary */}
             <View style={styles.licenseStatusSummary}>
               {(() => {
+                // Helper function for robust date parsing
+                const parseDate = (dateString: string): Date => {
+                  const parsed = new Date(dateString);
+                  if (isNaN(parsed.getTime())) {
+                    console.error('🚨 Invalid date string:', dateString);
+                    return new Date();
+                  }
+                  return parsed;
+                };
+
+                // Helper function to calculate days between dates
+                const calculateDaysUntil = (expirationDateString: string): number => {
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  
+                  const expDate = parseDate(expirationDateString);
+                  expDate.setHours(0, 0, 0, 0);
+                  
+                  const msPerDay = 1000 * 60 * 60 * 24;
+                  const diffMs = expDate.getTime() - today.getTime();
+                  return Math.ceil(diffMs / msPerDay);
+                };
+                
                 // Reset time to beginning of day for accurate date comparison
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 
-                console.log('🔍 Dashboard: Calculating license expiration status');
-                console.log('🔍 Dashboard: Today date:', today.toISOString().split('T')[0]);
-                console.log('🔍 Dashboard: Total licenses:', licenses?.length || 0);
                 
                 const upcoming = licenses.filter(l => {
-                  const expDate = new Date(l.expirationDate);
-                  expDate.setHours(0, 0, 0, 0);
-                  const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                  
-                  console.log(`🔍 License: ${l.licenseType} - Expires: ${l.expirationDate} - Days until: ${daysUntil}`);
-                  
-                  return daysUntil <= 90 && daysUntil > 0;
+                  const daysUntil = calculateDaysUntil(l.expirationDate);
+                  return daysUntil <= 180 && daysUntil > 0; // Show licenses expiring within 6 months
                 }).length;
                 
                 const expired = licenses.filter(l => {
-                  const expDate = new Date(l.expirationDate);
-                  expDate.setHours(0, 0, 0, 0);
-                  return expDate < today;
+                  const daysUntil = calculateDaysUntil(l.expirationDate);
+                  return daysUntil < 0;
                 }).length;
                 
                 const active = licenses.length - expired;
                 
-                console.log('🔍 Dashboard: Summary - Active:', active, 'Upcoming:', upcoming, 'Expired:', expired);
 
                 return (
                   <View style={styles.statusSummaryCards}>
@@ -387,7 +397,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                     <View style={styles.statusCard}>
                       <Text style={styles.statusCardNumber}>{upcoming}</Text>
                       <Text style={styles.statusCardLabel}>Expiring Soon</Text>
-                      <Text style={styles.statusCardSubLabel}>(within 90 days)</Text>
+                      <Text style={styles.statusCardSubLabel}>(within 6 months)</Text>
                       <View style={[styles.statusCardDot, { backgroundColor: theme.colors.warning }]} />
                     </View>
                     
@@ -405,18 +415,29 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             
             {/* License Cards */}
             {(() => {
-              // Use consistent date calculation with summary
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
+              // Helper function to calculate days (same as summary section)
+              const calculateDaysUntil = (expirationDateString: string): number => {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                const expDate = new Date(expirationDateString);
+                if (isNaN(expDate.getTime())) {
+                  console.error('🚨 Invalid date string:', expirationDateString);
+                  return 0;
+                }
+                expDate.setHours(0, 0, 0, 0);
+                
+                const msPerDay = 1000 * 60 * 60 * 24;
+                const diffMs = expDate.getTime() - today.getTime();
+                return Math.ceil(diffMs / msPerDay);
+              };
               
               const prioritizedLicenses = licenses
                 .map(license => {
-                  const expDate = new Date(license.expirationDate);
-                  expDate.setHours(0, 0, 0, 0);
-                  const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                  const daysUntil = calculateDaysUntil(license.expirationDate);
                   return { ...license, daysUntil };
                 })
-                .filter(license => license.daysUntil <= 120) // Show licenses expiring within 4 months
+                .filter(license => license.daysUntil <= 365) // Show licenses expiring within 1 year
                 .sort((a, b) => a.daysUntil - b.daysUntil)
                 .slice(0, 3); // Show top 3 most urgent
 
