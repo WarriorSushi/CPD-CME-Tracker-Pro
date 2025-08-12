@@ -332,17 +332,20 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         )}
 
-        {/* Enhanced License Management Section */}
+        {/* License Management Section */}
         {licenses && licenses.length > 0 && (
           <View style={styles.licenseSection}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>License Status</Text>
+              <Text style={styles.sectionTitle}>Your Licenses</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
                 <Text style={styles.viewAllText}>Manage All</Text>
               </TouchableOpacity>
             </View>
             
-            {/* License Status Summary */}
+            <Text style={styles.sectionSubtitle}>
+              View and manage all your professional licenses here. Tap Edit to update expiration dates after renewal.
+            </Text>
+            
             <View style={styles.licenseStatusSummary}>
               {(() => {
                 // Helper function for robust date parsing
@@ -1102,6 +1105,55 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.base,
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.background,
+  },
+
+  // Section Subtitle
+  sectionSubtitle: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    lineHeight: 18,
+    marginBottom: theme.spacing[4],
+    paddingHorizontal: theme.spacing[1],
+  },
+
+  // Reminders Section
+  remindersSection: {
+    paddingHorizontal: theme.spacing[4],
+    marginBottom: theme.spacing[4],
+  },
+  addReminderButton: {
+    backgroundColor: theme.colors.secondary || '#6c5ce7',
+    paddingVertical: theme.spacing[2],
+    paddingHorizontal: theme.spacing[3],
+    borderRadius: theme.spacing[2],
+  },
+  addReminderText: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.medium,
+    color: theme.colors.background,
+  },
+  remindersPlaceholder: {
+    padding: theme.spacing[6],
+    alignItems: 'center',
+  },
+  remindersPlaceholderContent: {
+    alignItems: 'center',
+  },
+  remindersPlaceholderIcon: {
+    fontSize: 40,
+    marginBottom: theme.spacing[3],
+  },
+  remindersPlaceholderTitle: {
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[2],
+  },
+  remindersPlaceholderSubtitle: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: 20,
   },
 
   // No Licenses Section
