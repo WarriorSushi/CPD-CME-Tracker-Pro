@@ -1,5 +1,5 @@
 import React, { useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Dimensions, Image, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -332,51 +332,196 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         )}
 
-        {/* Upcoming Renewals */}
-        {upcomingRenewals.length > 0 && (
-          <View style={styles.renewalsSection}>
+        {/* Enhanced License Management Section */}
+        {licenses && licenses.length > 0 && (
+          <View style={styles.licenseSection}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>License Renewals</Text>
+              <Text style={styles.sectionTitle}>License Status</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
-                <Text style={styles.viewAllText}>Manage</Text>
+                <Text style={styles.viewAllText}>Manage All</Text>
               </TouchableOpacity>
             </View>
             
-            {upcomingRenewals.map((license) => {
-              const daysUntilExpiry = Math.ceil(
-                (new Date(license.expirationDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-              );
-              const isUrgent = daysUntilExpiry <= 30;
-              
-              return (
-                <Card key={license.id} style={styles.renewalItem}>
-                  <View style={styles.renewalContent}>
-                    <View style={styles.renewalIcon}>
-                      <Text style={styles.renewalEmoji}>📋</Text>
+            {/* License Status Summary */}
+            <View style={styles.licenseStatusSummary}>
+              {(() => {
+                const today = new Date();
+                const upcoming = licenses.filter(l => {
+                  const expDate = new Date(l.expirationDate);
+                  const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                  return daysUntil <= 90 && daysUntil > 0;
+                }).length;
+                const expired = licenses.filter(l => {
+                  const expDate = new Date(l.expirationDate);
+                  return expDate < today;
+                }).length;
+                const active = licenses.length - expired;
+
+                return (
+                  <View style={styles.statusSummaryCards}>
+                    <View style={styles.statusCard}>
+                      <Text style={styles.statusCardNumber}>{active}</Text>
+                      <Text style={styles.statusCardLabel}>Active</Text>
+                      <View style={[styles.statusCardDot, { backgroundColor: theme.colors.success }]} />
                     </View>
-                    <View style={styles.renewalDetails}>
-                      <Text style={styles.renewalTitle} numberOfLines={1}>
-                        {license.licenseType}
-                      </Text>
-                      <Text style={styles.renewalAuthority} numberOfLines={1}>
-                        {license.issuingAuthority}
-                      </Text>
+                    
+                    <View style={styles.statusCard}>
+                      <Text style={styles.statusCardNumber}>{upcoming}</Text>
+                      <Text style={styles.statusCardLabel}>Expiring Soon</Text>
+                      <View style={[styles.statusCardDot, { backgroundColor: theme.colors.warning }]} />
                     </View>
-                    <View style={[
-                      styles.renewalBadge, 
-                      isUrgent && styles.renewalBadgeUrgent
-                    ]}>
-                      <Text style={[
-                        styles.renewalDays,
-                        isUrgent && styles.renewalDaysUrgent
-                      ]}>
-                        {daysUntilExpiry}d
-                      </Text>
-                    </View>
+                    
+                    {expired > 0 && (
+                      <View style={styles.statusCard}>
+                        <Text style={styles.statusCardNumber}>{expired}</Text>
+                        <Text style={styles.statusCardLabel}>Expired</Text>
+                        <View style={[styles.statusCardDot, { backgroundColor: theme.colors.error }]} />
+                      </View>
+                    )}
                   </View>
-                </Card>
-              );
-            })}
+                );
+              })()}
+            </View>
+            
+            {/* License Cards */}
+            {(() => {
+              const today = new Date();
+              const prioritizedLicenses = licenses
+                .map(license => {
+                  const expDate = new Date(license.expirationDate);
+                  const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                  return { ...license, daysUntil };
+                })
+                .filter(license => license.daysUntil <= 120) // Show licenses expiring within 4 months
+                .sort((a, b) => a.daysUntil - b.daysUntil)
+                .slice(0, 3); // Show top 3 most urgent
+
+              return prioritizedLicenses.map((license) => {
+                const { daysUntil } = license;
+                let statusColor = theme.colors.success;
+                let statusText = 'Active';
+                let statusIcon = '✅';
+
+                if (daysUntil < 0) {
+                  statusColor = theme.colors.error;
+                  statusText = 'Expired';
+                  statusIcon = '🚨';
+                } else if (daysUntil <= 30) {
+                  statusColor = theme.colors.error;
+                  statusText = `${daysUntil} days left`;
+                  statusIcon = '⚠️';
+                } else if (daysUntil <= 90) {
+                  statusColor = theme.colors.warning;
+                  statusText = `${daysUntil} days left`;
+                  statusIcon = '⏰';
+                } else {
+                  statusText = `${daysUntil} days left`;
+                }
+
+                return (
+                  <Card key={license.id} style={styles.licenseCard}>
+                    <View style={styles.licenseCardHeader}>
+                      <View style={styles.licenseCardMain}>
+                        <View style={[styles.licenseIcon, { backgroundColor: statusColor + '20' }]}>
+                          <Text style={styles.licenseIconText}>{statusIcon}</Text>
+                        </View>
+                        <View style={styles.licenseInfo}>
+                          <Text style={styles.licenseCardTitle} numberOfLines={1}>
+                            {license.licenseType}
+                          </Text>
+                          <Text style={styles.licenseCardAuthority} numberOfLines={1}>
+                            {license.issuingAuthority}
+                          </Text>
+                          <Text style={styles.licenseCardExpiry}>
+                            Expires: {new Date(license.expirationDate).toLocaleDateString()}
+                          </Text>
+                        </View>
+                      </View>
+                      
+                      <View style={[styles.licenseStatusBadge, { backgroundColor: statusColor }]}>
+                        <Text style={styles.licenseStatusText}>{statusText}</Text>
+                      </View>
+                    </View>
+
+                    {/* Quick Actions */}
+                    <View style={styles.licenseCardActions}>
+                      <TouchableOpacity 
+                        style={styles.licenseActionButton}
+                        onPress={() => navigation.navigate('Settings')}
+                      >
+                        <Text style={styles.licenseActionText}>📝 Edit</Text>
+                      </TouchableOpacity>
+                      
+                      <TouchableOpacity 
+                        style={styles.licenseActionButton}
+                        onPress={() => {
+                          // TODO: Setup reminder - for now show alert
+                          Alert.alert(
+                            'Set Reminder',
+                            `Would you like to set renewal reminders for ${license.licenseType}?\n\nRecommended reminder schedule:\n• 90 days before\n• 60 days before\n• 30 days before\n• 14 days before\n• 7 days before\n• 1 day before`,
+                            [
+                              { text: 'Later', style: 'cancel' },
+                              { text: 'Set Reminders', onPress: () => {} }
+                            ]
+                          );
+                        }}
+                      >
+                        <Text style={styles.licenseActionText}>🔔 Remind</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    {/* Progress indicator if credits are tracked */}
+                    {license.requiredCredits > 0 && (
+                      <View style={styles.licenseProgress}>
+                        <Text style={styles.licenseProgressText}>
+                          Credits: {license.completedCredits}/{license.requiredCredits} {user?.creditSystem ? getCreditUnit(user.creditSystem) : ''}
+                        </Text>
+                        <View style={styles.licenseProgressBar}>
+                          <View 
+                            style={[
+                              styles.licenseProgressFill,
+                              { 
+                                width: `${Math.min((license.completedCredits / license.requiredCredits) * 100, 100)}%`,
+                                backgroundColor: license.completedCredits >= license.requiredCredits ? theme.colors.success : theme.colors.primary
+                              }
+                            ]}
+                          />
+                        </View>
+                      </View>
+                    )}
+                  </Card>
+                );
+              });
+            })()}
+            
+            {/* Quick Add License Button */}
+            <TouchableOpacity 
+              style={styles.addLicenseButton}
+              onPress={() => navigation.navigate('Settings', { screen: 'AddLicense' })}
+            >
+              <Text style={styles.addLicenseText}>+ Add New License</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Show Add License Prompt if no licenses */}
+        {(!licenses || licenses.length === 0) && (
+          <View style={styles.noLicensesSection}>
+            <Card style={styles.noLicensesCard}>
+              <View style={styles.noLicensesContent}>
+                <Text style={styles.noLicensesIcon}>🏥</Text>
+                <Text style={styles.noLicensesTitle}>Track Your Licenses</Text>
+                <Text style={styles.noLicensesSubtitle}>
+                  Add your professional licenses to track renewal deadlines and never miss a renewal date.
+                </Text>
+                <TouchableOpacity 
+                  style={styles.noLicensesButton}
+                  onPress={() => navigation.navigate('Settings', { screen: 'AddLicense' })}
+                >
+                  <Text style={styles.noLicensesButtonText}>Add Your First License</Text>
+                </TouchableOpacity>
+              </View>
+            </Card>
           </View>
         )}
 
@@ -623,7 +768,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing[4],
     marginBottom: theme.spacing[4],
   },
-  renewalsSection: {
+  licenseSection: {
     paddingHorizontal: theme.spacing[4],
     marginBottom: theme.spacing[4],
   },
@@ -700,57 +845,225 @@ const styles = StyleSheet.create({
     color: theme.colors.text.secondary,
   },
 
-  // Renewal Items
-  renewalItem: {
-    padding: theme.spacing[3],
-    marginBottom: theme.spacing[2],
+  // Enhanced License Section Styles
+  licenseStatusSummary: {
+    marginBottom: theme.spacing[4],
   },
-  renewalContent: {
+  statusSummaryCards: {
     flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: theme.spacing[2],
   },
-  renewalIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: theme.colors.warning + '20', // Light warning background
+  statusCard: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.spacing[3],
+    padding: theme.spacing[3],
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
+    position: 'relative',
+  },
+  statusCardNumber: {
+    fontSize: theme.typography.fontSize.xl,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[1],
+  },
+  statusCardLabel: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+  },
+  statusCardDot: {
+    position: 'absolute',
+    top: theme.spacing[2],
+    right: theme.spacing[2],
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+
+  // License Card Styles
+  licenseCard: {
+    padding: theme.spacing[4],
+    marginBottom: theme.spacing[3],
+    backgroundColor: theme.colors.background,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  licenseCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: theme.spacing[3],
+  },
+  licenseCardMain: {
+    flexDirection: 'row',
+    flex: 1,
+    marginRight: theme.spacing[3],
+  },
+  licenseIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: theme.spacing[3],
   },
-  renewalEmoji: {
-    fontSize: 16,
+  licenseIconText: {
+    fontSize: 20,
   },
-  renewalDetails: {
+  licenseInfo: {
     flex: 1,
   },
-  renewalTitle: {
-    fontSize: theme.typography.fontSize.sm,
-    fontWeight: theme.typography.fontWeight.medium,
+  licenseCardTitle: {
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.text.primary,
     marginBottom: theme.spacing[1],
   },
-  renewalAuthority: {
+  licenseCardAuthority: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    marginBottom: theme.spacing[1],
+  },
+  licenseCardExpiry: {
     fontSize: theme.typography.fontSize.xs,
     color: theme.colors.text.secondary,
   },
-  renewalBadge: {
-    paddingHorizontal: theme.spacing[2],
+  licenseStatusBadge: {
+    paddingHorizontal: theme.spacing[3],
     paddingVertical: theme.spacing[1],
-    backgroundColor: theme.colors.warning,
-    borderRadius: theme.borderRadius.sm,
-    minWidth: 40,
+    borderRadius: theme.spacing[3],
+    minWidth: 80,
     alignItems: 'center',
   },
-  renewalBadgeUrgent: {
-    backgroundColor: theme.colors.error,
-  },
-  renewalDays: {
+  licenseStatusText: {
     fontSize: theme.typography.fontSize.xs,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.background,
   },
-  renewalDaysUrgent: {
+
+  // License Actions
+  licenseCardActions: {
+    flexDirection: 'row',
+    gap: theme.spacing[2],
+    marginBottom: theme.spacing[3],
+  },
+  licenseActionButton: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+    paddingVertical: theme.spacing[2],
+    paddingHorizontal: theme.spacing[3],
+    borderRadius: theme.spacing[2],
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
+  },
+  licenseActionText: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.medium,
+    color: theme.colors.text.primary,
+  },
+
+  // License Progress
+  licenseProgress: {
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border.light,
+    paddingTop: theme.spacing[3],
+  },
+  licenseProgressText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[2],
+  },
+  licenseProgressBar: {
+    height: 6,
+    backgroundColor: theme.colors.gray.light,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  licenseProgressFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+
+  // Add License Button
+  addLicenseButton: {
+    backgroundColor: theme.colors.primary,
+    paddingVertical: theme.spacing[3],
+    paddingHorizontal: theme.spacing[4],
+    borderRadius: theme.spacing[3],
+    alignItems: 'center',
+    marginTop: theme.spacing[2],
+    shadowColor: theme.colors.primary,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  addLicenseText: {
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.background,
+  },
+
+  // No Licenses Section
+  noLicensesSection: {
+    paddingHorizontal: theme.spacing[4],
+    marginBottom: theme.spacing[4],
+  },
+  noLicensesCard: {
+    padding: theme.spacing[6],
+  },
+  noLicensesContent: {
+    alignItems: 'center',
+  },
+  noLicensesIcon: {
+    fontSize: 48,
+    marginBottom: theme.spacing[3],
+  },
+  noLicensesTitle: {
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[2],
+    textAlign: 'center',
+  },
+  noLicensesSubtitle: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: theme.spacing[4],
+  },
+  noLicensesButton: {
+    backgroundColor: theme.colors.primary,
+    paddingVertical: theme.spacing[3],
+    paddingHorizontal: theme.spacing[5],
+    borderRadius: theme.spacing[3],
+  },
+  noLicensesButtonText: {
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.background,
   },
 
