@@ -333,7 +333,10 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         )}
 
         {/* Enhanced License Management Section */}
-        {licenses && licenses.length > 0 && (
+        {(() => {
+          console.log('🔍 Dashboard: Licenses data:', licenses?.length || 0, licenses);
+          return licenses && licenses.length > 0;
+        })() && (
           <View style={styles.licenseSection}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>License Status</Text>
@@ -345,17 +348,33 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             {/* License Status Summary */}
             <View style={styles.licenseStatusSummary}>
               {(() => {
+                // Reset time to beginning of day for accurate date comparison
                 const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                console.log('🔍 Dashboard: Calculating license expiration status');
+                console.log('🔍 Dashboard: Today date:', today.toISOString().split('T')[0]);
+                console.log('🔍 Dashboard: Total licenses:', licenses?.length || 0);
+                
                 const upcoming = licenses.filter(l => {
                   const expDate = new Date(l.expirationDate);
+                  expDate.setHours(0, 0, 0, 0);
                   const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                  
+                  console.log(`🔍 License: ${l.licenseType} - Expires: ${l.expirationDate} - Days until: ${daysUntil}`);
+                  
                   return daysUntil <= 90 && daysUntil > 0;
                 }).length;
+                
                 const expired = licenses.filter(l => {
                   const expDate = new Date(l.expirationDate);
+                  expDate.setHours(0, 0, 0, 0);
                   return expDate < today;
                 }).length;
+                
                 const active = licenses.length - expired;
+                
+                console.log('🔍 Dashboard: Summary - Active:', active, 'Upcoming:', upcoming, 'Expired:', expired);
 
                 return (
                   <View style={styles.statusSummaryCards}>
@@ -386,10 +405,14 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             
             {/* License Cards */}
             {(() => {
+              // Use consistent date calculation with summary
               const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              
               const prioritizedLicenses = licenses
                 .map(license => {
                   const expDate = new Date(license.expirationDate);
+                  expDate.setHours(0, 0, 0, 0);
                   const daysUntil = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
                   return { ...license, daysUntil };
                 })
