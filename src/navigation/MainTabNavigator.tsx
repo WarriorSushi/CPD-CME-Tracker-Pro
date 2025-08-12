@@ -13,6 +13,7 @@ import { CertificateVaultScreen } from '../screens/vault/CertificateVaultScreen'
 import { SettingsScreen } from '../screens/settings/SettingsScreen';
 import { AddCMEScreen } from '../screens/cme/AddCMEScreen';
 import { AddLicenseScreen } from '../screens/settings/AddLicenseScreen';
+import { AddReminderScreen } from '../screens/dashboard/AddReminderScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createStackNavigator<MainTabParamList>();
@@ -152,6 +153,14 @@ export const MainTabNavigator: React.FC = () => {
       <Stack.Screen
         name="AddLicense"
         component={AddLicenseScreen}
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="AddReminder"
+        component={AddReminderScreen}
         options={{
           presentation: 'modal',
           headerShown: false,

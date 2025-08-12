@@ -158,6 +158,19 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
       );
     `);
 
+    // CME event reminders table
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS cme_event_reminders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        event_name TEXT NOT NULL,
+        event_date DATE NOT NULL,
+        user_id INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+      );
+    `);
+
     // App settings table
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS app_settings (
@@ -190,6 +203,14 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
     `);
 
     await db.execAsync(`
+      CREATE INDEX IF NOT EXISTS idx_cme_event_reminders_event_date ON cme_event_reminders (event_date);
+    `);
+
+    await db.execAsync(`
+      CREATE INDEX IF NOT EXISTS idx_cme_event_reminders_user_id ON cme_event_reminders (user_id);
+    `);
+
+    await db.execAsync(`
       CREATE INDEX IF NOT EXISTS idx_app_settings_key ON app_settings (key);
     `);
 
@@ -218,6 +239,15 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
       FOR EACH ROW
       BEGIN
         UPDATE license_renewals SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+      END;
+    `);
+
+    await db.execAsync(`
+      CREATE TRIGGER IF NOT EXISTS update_cme_event_reminders_timestamp 
+      AFTER UPDATE ON cme_event_reminders
+      FOR EACH ROW
+      BEGIN
+        UPDATE cme_event_reminders SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
       END;
     `);
 
@@ -291,6 +321,45 @@ export const migrateDatabase = async (
       }
       
       console.log('✅ Migration 0 -> 1 completed successfully');
+    }
+
+    // Migration from version 1 to 2 - add CME event reminders table
+    if (currentVersion < 2 && targetVersion >= 2) {
+      console.log('🔄 Running migration 1 -> 2: Adding CME event reminders table...');
+      
+      // Create the CME event reminders table
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS cme_event_reminders (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          event_name TEXT NOT NULL,
+          event_date DATE NOT NULL,
+          user_id INTEGER DEFAULT 1,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        );
+      `);
+
+      // Create indexes for the new table
+      await db.execAsync(`
+        CREATE INDEX IF NOT EXISTS idx_cme_event_reminders_event_date ON cme_event_reminders (event_date);
+      `);
+
+      await db.execAsync(`
+        CREATE INDEX IF NOT EXISTS idx_cme_event_reminders_user_id ON cme_event_reminders (user_id);
+      `);
+
+      // Create trigger for automatic updated_at timestamp
+      await db.execAsync(`
+        CREATE TRIGGER IF NOT EXISTS update_cme_event_reminders_timestamp 
+        AFTER UPDATE ON cme_event_reminders
+        FOR EACH ROW
+        BEGIN
+          UPDATE cme_event_reminders SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+        END;
+      `);
+
+      console.log('✅ Migration 1 -> 2 completed successfully');
     }
   } catch (error) {
     console.error('💥 Migration failed:', error);

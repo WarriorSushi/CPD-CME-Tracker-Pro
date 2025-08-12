@@ -25,10 +25,12 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     currentYearProgress,
     recentCMEEntries,
     licenses,
+    eventReminders,
     isInitializing,
     isLoadingUser,
     isLoadingCME,
     isLoadingLicenses,
+    isLoadingReminders,
     error,
     refreshAllData,
     clearError,
@@ -332,93 +334,119 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         )}
 
-        {/* License Management Section */}
-        {licenses && licenses.length > 0 && (
-          <View style={styles.licenseSection}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Your Licenses</Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
-                <Text style={styles.viewAllText}>Manage All</Text>
-              </TouchableOpacity>
-            </View>
-            
+        {/* CME Event Reminders Section */}
+        <View style={styles.sectionContainer}>
+          <Card style={styles.sectionCard}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardHeaderTitle}>CME Event Reminders</Text>
+            <Button
+              title="+ Add Reminder"
+              onPress={() => (navigation as any).navigate('AddReminder')}
+              variant="primary"
+              size="small"
+              style={styles.headerButton}
+            />
+          </View>
+          
+          <View style={styles.cardContent}>
             <Text style={styles.sectionSubtitle}>
-              View and manage all your professional licenses here. Tap Edit to update expiration dates after renewal.
+              Set reminders for upcoming CME events, conferences, and workshops so you never miss important learning opportunities.
             </Text>
-            
-            <View style={styles.licenseStatusSummary}>
-              {(() => {
-                // Helper function for robust date parsing
-                const parseDate = (dateString: string): Date => {
-                  const parsed = new Date(dateString);
-                  if (isNaN(parsed.getTime())) {
-                    console.error('🚨 Invalid date string:', dateString);
-                    return new Date();
-                  }
-                  return parsed;
-                };
-
-                // Helper function to calculate days between dates
-                const calculateDaysUntil = (expirationDateString: string): number => {
-                  const today = new Date();
-                  today.setHours(0, 0, 0, 0);
-                  
-                  const expDate = parseDate(expirationDateString);
-                  expDate.setHours(0, 0, 0, 0);
-                  
-                  const msPerDay = 1000 * 60 * 60 * 24;
-                  const diffMs = expDate.getTime() - today.getTime();
-                  return Math.ceil(diffMs / msPerDay);
-                };
-                
-                // Reset time to beginning of day for accurate date comparison
+          
+          {/* Reminders List or Placeholder */}
+          {eventReminders && eventReminders.length > 0 ? (
+            <View style={styles.remindersList}>
+              {eventReminders.map((reminder) => {
+                const eventDate = new Date(reminder.eventDate);
                 const today = new Date();
-                today.setHours(0, 0, 0, 0);
+                const daysUntil = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
                 
-                
-                const upcoming = licenses.filter(l => {
-                  const daysUntil = calculateDaysUntil(l.expirationDate);
-                  return daysUntil <= 180 && daysUntil > 0; // Show licenses expiring within 6 months
-                }).length;
-                
-                const expired = licenses.filter(l => {
-                  const daysUntil = calculateDaysUntil(l.expirationDate);
-                  return daysUntil < 0;
-                }).length;
-                
-                const active = licenses.length - expired;
-                
+                let statusColor = theme.colors.primary;
+                let statusText = 'Upcoming';
+                let statusIcon = '📅';
+
+                if (daysUntil < 0) {
+                  statusColor = theme.colors.gray.medium;
+                  statusText = 'Past';
+                  statusIcon = '📋';
+                } else if (daysUntil === 0) {
+                  statusColor = theme.colors.error;
+                  statusText = 'Today';
+                  statusIcon = '🔥';
+                } else if (daysUntil <= 7) {
+                  statusColor = theme.colors.warning;
+                  statusText = `${daysUntil} days`;
+                  statusIcon = '⏰';
+                } else {
+                  statusText = `${daysUntil} days`;
+                }
 
                 return (
-                  <View style={styles.statusSummaryCards}>
-                    <View style={styles.statusCard}>
-                      <Text style={styles.statusCardNumber}>{active}</Text>
-                      <Text style={styles.statusCardLabel}>Active</Text>
-                      <View style={[styles.statusCardDot, { backgroundColor: theme.colors.success }]} />
-                    </View>
-                    
-                    <View style={styles.statusCard}>
-                      <Text style={styles.statusCardNumber}>{upcoming}</Text>
-                      <Text style={styles.statusCardLabel}>Expiring Soon</Text>
-                      <Text style={styles.statusCardSubLabel}>(within 6 months)</Text>
-                      <View style={[styles.statusCardDot, { backgroundColor: theme.colors.warning }]} />
-                    </View>
-                    
-                    {expired > 0 && (
-                      <View style={styles.statusCard}>
-                        <Text style={styles.statusCardNumber}>{expired}</Text>
-                        <Text style={styles.statusCardLabel}>Expired</Text>
-                        <View style={[styles.statusCardDot, { backgroundColor: theme.colors.error }]} />
+                  <Card key={reminder.id} style={styles.reminderCard}>
+                    <View style={styles.reminderCardHeader}>
+                      <View style={styles.reminderCardMain}>
+                        <View style={[styles.reminderIcon, { backgroundColor: statusColor + '20' }]}>
+                          <Text style={styles.reminderIconText}>{statusIcon}</Text>
+                        </View>
+                        <View style={styles.reminderInfo}>
+                          <Text style={styles.reminderCardTitle} numberOfLines={1}>
+                            {reminder.eventName}
+                          </Text>
+                          <Text style={styles.reminderCardDate}>
+                            {eventDate.toLocaleDateString()}
+                          </Text>
+                        </View>
                       </View>
-                    )}
-                  </View>
+                      
+                      <View style={[styles.reminderStatusBadge, { backgroundColor: statusColor }]}>
+                        <Text style={styles.reminderStatusText}>{statusText}</Text>
+                      </View>
+                    </View>
+                  </Card>
                 );
-              })()}
+              })}
+            </View>
+          ) : (
+            <Card style={styles.remindersPlaceholder}>
+              <View style={styles.remindersPlaceholderContent}>
+                <Text style={styles.remindersPlaceholderIcon}>📅</Text>
+                <Text style={styles.remindersPlaceholderTitle}>No Reminders Set</Text>
+                <Text style={styles.remindersPlaceholderSubtitle}>
+                  Tap the + button above to add reminders for upcoming CME events
+                </Text>
+              </View>
+            </Card>
+          )}
+          
+          </View>
+          </Card>
+        </View>
+
+        {/* License Management Section */}
+        {licenses && licenses.length > 0 && (
+          <View style={styles.sectionContainer}>
+            <Card style={styles.sectionCard}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardHeaderTitle}>Your Licenses</Text>
+              <Button
+                title="+ Add License"
+                onPress={() => navigation.navigate('Settings', { screen: 'AddLicense' })}
+                variant="primary"
+                size="small"
+                style={styles.headerButton}
+              />
             </View>
             
-            {/* License Cards */}
+            <View style={styles.cardContent}>
+              <Text style={styles.sectionSubtitle}>
+                View and manage all your professional licenses here. Tap Edit to update expiration dates after renewal.
+              </Text>
+            
+            {/* Removed confusing status summary - user requested complete removal */}
+            
+            {/* All License Cards - Show all licenses */}
             {(() => {
-              // Helper function to calculate days (same as summary section)
+              // Helper function to calculate days between dates
               const calculateDaysUntil = (expirationDateString: string): number => {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
@@ -435,16 +463,15 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 return Math.ceil(diffMs / msPerDay);
               };
               
-              const prioritizedLicenses = licenses
+              // Show ALL licenses, sorted by expiration date (most urgent first)
+              const allLicenses = licenses
                 .map(license => {
                   const daysUntil = calculateDaysUntil(license.expirationDate);
                   return { ...license, daysUntil };
                 })
-                .filter(license => license.daysUntil <= 365) // Show licenses expiring within 1 year
-                .sort((a, b) => a.daysUntil - b.daysUntil)
-                .slice(0, 3); // Show top 3 most urgent
+                .sort((a, b) => a.daysUntil - b.daysUntil);
 
-              return prioritizedLicenses.map((license) => {
+              return allLicenses.map((license) => {
                 const { daysUntil } = license;
                 let statusColor = theme.colors.success;
                 let statusText = 'Active';
@@ -552,13 +579,8 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
               });
             })()}
             
-            {/* Quick Add License Button */}
-            <TouchableOpacity 
-              style={styles.addLicenseButton}
-              onPress={() => navigation.navigate('Settings', { screen: 'AddLicense' })}
-            >
-              <Text style={styles.addLicenseText}>+ Add New License</Text>
-            </TouchableOpacity>
+            </View>
+            </Card>
           </View>
         )}
 
@@ -572,12 +594,11 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.noLicensesSubtitle}>
                   Add your professional licenses to track renewal deadlines and never miss a renewal date.
                 </Text>
-                <TouchableOpacity 
-                  style={styles.noLicensesButton}
+                <Button
+                  title="Add Your First License"
                   onPress={() => navigation.navigate('Settings', { screen: 'AddLicense' })}
-                >
-                  <Text style={styles.noLicensesButtonText}>Add Your First License</Text>
-                </TouchableOpacity>
+                  style={styles.addEntryButton}
+                />
               </View>
             </Card>
           </View>
@@ -593,6 +614,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         imageUri={selectedCertificate}
         onClose={() => setSelectedCertificate(undefined)}
       />
+
     </View>
   );
 };
@@ -777,7 +799,7 @@ const styles = StyleSheet.create({
   // Add Entry Section
   addEntrySection: {
     paddingHorizontal: theme.spacing[4],
-    marginBottom: theme.spacing[4],
+    marginBottom: theme.spacing[6],
   },
   addEntryButton: {
     // Custom styling for the button if needed
@@ -786,7 +808,7 @@ const styles = StyleSheet.create({
   // Quick Actions
   quickActionsSection: {
     paddingHorizontal: theme.spacing[4],
-    marginBottom: theme.spacing[4],
+    marginBottom: theme.spacing[6],
   },
   quickActionsGrid: {
     flexDirection: 'row',
@@ -823,10 +845,6 @@ const styles = StyleSheet.create({
 
   // Sections with headers
   recentSection: {
-    paddingHorizontal: theme.spacing[4],
-    marginBottom: theme.spacing[4],
-  },
-  licenseSection: {
     paddingHorizontal: theme.spacing[4],
     marginBottom: theme.spacing[4],
   },
@@ -903,63 +921,11 @@ const styles = StyleSheet.create({
     color: theme.colors.text.secondary,
   },
 
-  // Enhanced License Section Styles
-  licenseStatusSummary: {
-    marginBottom: theme.spacing[4],
-  },
-  statusSummaryCards: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: theme.spacing[2],
-  },
-  statusCard: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-    borderRadius: theme.spacing[3],
-    padding: theme.spacing[3],
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: theme.colors.border.light,
-    position: 'relative',
-  },
-  statusCardNumber: {
-    fontSize: theme.typography.fontSize.xl,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing[1],
-  },
-  statusCardLabel: {
-    fontSize: theme.typography.fontSize.xs,
-    color: theme.colors.text.secondary,
-    textAlign: 'center',
-  },
-  statusCardSubLabel: {
-    fontSize: theme.typography.fontSize.xs - 2,
-    color: theme.colors.text.secondary,
-    textAlign: 'center',
-    opacity: 0.8,
-    marginTop: 2,
-  },
-  statusCardDot: {
-    position: 'absolute',
-    top: theme.spacing[2],
-    right: theme.spacing[2],
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
+  // Enhanced License Section Styles - removed old status summary styles
 
   // License Card Styles
   licenseCard: {
-    padding: theme.spacing[4],
+    padding: theme.spacing[3],
     marginBottom: theme.spacing[3],
     backgroundColor: theme.colors.background,
     shadowColor: '#000',
@@ -967,8 +933,8 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
     elevation: 4,
   },
   licenseCardHeader: {
@@ -1085,27 +1051,6 @@ const styles = StyleSheet.create({
   },
 
   // Add License Button
-  addLicenseButton: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: theme.spacing[3],
-    paddingHorizontal: theme.spacing[4],
-    borderRadius: theme.spacing[3],
-    alignItems: 'center',
-    marginTop: theme.spacing[2],
-    shadowColor: theme.colors.primary,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  addLicenseText: {
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.background,
-  },
 
   // Section Subtitle
   sectionSubtitle: {
@@ -1114,6 +1059,48 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginBottom: theme.spacing[4],
     paddingHorizontal: theme.spacing[1],
+  },
+
+  // Section Container and Card Styles
+  sectionContainer: {
+    paddingHorizontal: theme.spacing[4],
+    marginBottom: theme.spacing[6],
+  },
+  sectionCard: {
+    padding: 0,
+    borderRadius: theme.spacing[3],
+    overflow: 'hidden',
+    backgroundColor: theme.colors.background,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  cardHeader: {
+    backgroundColor: '#f8f9ff',
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border.light,
+    paddingVertical: theme.spacing[4],
+    paddingHorizontal: theme.spacing[4],
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardHeaderTitle: {
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
+  },
+  headerButton: {
+    minHeight: 32,
+    paddingHorizontal: theme.spacing[2],
+  },
+  cardContent: {
+    padding: theme.spacing[4],
   },
 
   // Reminders Section
@@ -1155,6 +1142,68 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
   },
+  remindersList: {
+    marginTop: theme.spacing[3],
+    gap: theme.spacing[3],
+  },
+  reminderCard: {
+    padding: theme.spacing[3],
+    marginBottom: theme.spacing[3],
+    backgroundColor: theme.colors.background,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 4,
+    borderRadius: theme.spacing[3],
+  },
+  reminderCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  reminderCardMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  reminderIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: theme.spacing[3],
+  },
+  reminderIconText: {
+    fontSize: 16,
+  },
+  reminderInfo: {
+    flex: 1,
+  },
+  reminderCardTitle: {
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[1],
+  },
+  reminderCardDate: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+  },
+  reminderStatusBadge: {
+    paddingHorizontal: theme.spacing[2],
+    paddingVertical: theme.spacing[1],
+    borderRadius: theme.spacing[2],
+  },
+  reminderStatusText: {
+    fontSize: theme.typography.fontSize.xs,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.background,
+  },
 
   // No Licenses Section
   noLicensesSection: {
@@ -1185,16 +1234,34 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: theme.spacing[4],
   },
-  noLicensesButton: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: theme.spacing[3],
-    paddingHorizontal: theme.spacing[5],
-    borderRadius: theme.spacing[3],
+
+  // CME Event Reminders Section
+  remindersPlaceholder: {
+    marginTop: theme.spacing[3],
+    padding: theme.spacing[6],
+    backgroundColor: '#f8f9fa',
+    borderWidth: 2,
+    borderColor: '#e9ecef',
+    borderStyle: 'dashed',
   },
-  noLicensesButtonText: {
+  remindersPlaceholderContent: {
+    alignItems: 'center',
+  },
+  remindersPlaceholderIcon: {
+    fontSize: 40,
+    marginBottom: theme.spacing[3],
+  },
+  remindersPlaceholderTitle: {
     fontSize: theme.typography.fontSize.base,
     fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.background,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[2],
+  },
+  remindersPlaceholderSubtitle: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: 20,
   },
 
   // Error handling styles

@@ -32,6 +32,7 @@ export type MainTabParamList = {
     };
   };
   AddLicense: undefined;
+  AddReminder: undefined;
 };
 
 export type TabParamList = {

@@ -4,6 +4,7 @@ import {
   CMEEntry, 
   Certificate, 
   LicenseRenewal, 
+  CMEEventReminder,
   Progress,
   DatabaseOperationResult 
 } from '../types';
@@ -65,12 +66,16 @@ interface AppContextType {
   // Licenses
   licenses: LicenseRenewal[];
   
+  // Event Reminders
+  eventReminders: CMEEventReminder[];
+  
   // Enhanced loading states
   isInitializing: boolean; // First-time app setup
   isLoadingUser: boolean;
   isLoadingCME: boolean;
   isLoadingCertificates: boolean;
   isLoadingLicenses: boolean;
+  isLoadingReminders: boolean;
   
   // Error states
   error: string | null;
@@ -80,6 +85,7 @@ interface AppContextType {
   refreshCMEData: () => Promise<void>;
   refreshCertificates: () => Promise<void>;
   refreshLicenses: () => Promise<void>;
+  refreshReminders: () => Promise<void>;
   refreshAllData: () => Promise<void>;
   forceRefreshCMEData: () => Promise<void>;
   
@@ -96,6 +102,11 @@ interface AppContextType {
   addLicense: (license: Omit<LicenseRenewal, 'id' | 'createdAt' | 'updatedAt'>) => Promise<boolean>;
   updateLicense: (id: number, license: Partial<LicenseRenewal>) => Promise<boolean>;
   deleteLicense: (id: number) => Promise<boolean>;
+  
+  // Event Reminder actions
+  addEventReminder: (reminder: Omit<CMEEventReminder, 'id' | 'createdAt' | 'updatedAt'>) => Promise<boolean>;
+  updateEventReminder: (id: number, reminder: Partial<CMEEventReminder>) => Promise<boolean>;
+  deleteEventReminder: (id: number) => Promise<boolean>;
   
   // User actions
   updateUser: (userData: Partial<User>) => Promise<boolean>;
@@ -115,6 +126,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [currentYearProgress, setCurrentYearProgress] = useState<Progress | null>(null);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [licenses, setLicenses] = useState<LicenseRenewal[]>([]);
+  const [eventReminders, setEventReminders] = useState<CMEEventReminder[]>([]);
   
   // Batched state updater
   const batchUpdate = useBatchedStateUpdates();
@@ -125,6 +137,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [isLoadingCME, setIsLoadingCME] = useState(false);
   const [isLoadingCertificates, setIsLoadingCertificates] = useState(false);
   const [isLoadingLicenses, setIsLoadingLicenses] = useState(false);
+  const [isLoadingReminders, setIsLoadingReminders] = useState(false);
   
   // Error state
   const [error, setError] = useState<string | null>(null);
@@ -393,14 +406,29 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   }, []);
 
+  const refreshReminders = useCallback(async (): Promise<void> => {
+    try {
+      setIsLoadingReminders(true);
+      const result = await databaseOperations.eventReminders.getAllReminders();
+      if (result.success) {
+        setEventReminders(result.data || []);
+      }
+    } catch (error) {
+      console.error('Error refreshing reminders:', error);
+    } finally {
+      setIsLoadingReminders(false);
+    }
+  }, []);
+
   const refreshAllData = useCallback(async (): Promise<void> => {
     await Promise.all([
       refreshUserData(),
       refreshCMEData(),
       refreshCertificates(),
       refreshLicenses(),
+      refreshReminders(),
     ]);
-  }, [refreshUserData, refreshCMEData, refreshCertificates, refreshLicenses]);
+  }, [refreshUserData, refreshCMEData, refreshCertificates, refreshLicenses, refreshReminders]);
 
   // Force refresh CME data (bypass staleness check)
   const forceRefreshCMEData = useCallback(async (): Promise<void> => {
@@ -498,6 +526,49 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   }, [refreshLicenses]);
 
+  // Event Reminder Actions
+  const addEventReminder = useCallback(async (reminder: Omit<CMEEventReminder, 'id' | 'createdAt' | 'updatedAt'>): Promise<boolean> => {
+    try {
+      const result = await databaseOperations.eventReminders.addReminder(reminder);
+      if (result.success) {
+        await refreshReminders();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error adding event reminder:', error);
+      return false;
+    }
+  }, [refreshReminders]);
+
+  const updateEventReminder = useCallback(async (id: number, reminder: Partial<CMEEventReminder>): Promise<boolean> => {
+    try {
+      const result = await databaseOperations.eventReminders.updateReminder(id, reminder);
+      if (result.success) {
+        await refreshReminders();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error updating event reminder:', error);
+      return false;
+    }
+  }, [refreshReminders]);
+
+  const deleteEventReminder = useCallback(async (id: number): Promise<boolean> => {
+    try {
+      const result = await databaseOperations.eventReminders.deleteReminder(id);
+      if (result.success) {
+        await refreshReminders();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error deleting event reminder:', error);
+      return false;
+    }
+  }, [refreshReminders]);
+
   // User Actions
   const updateUser = useCallback(async (userData: Partial<User>): Promise<boolean> => {
     try {
@@ -563,6 +634,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
               refreshCertificates(),
               refreshLicenses(),
             ]);
+            
+            // Load reminders separately to avoid blocking
+            setTimeout(async () => {
+              if (mounted) {
+                await refreshReminders();
+              }
+            }, 500);
             devLog('✅ AppContext: All data loaded');
           }
         }, 100); // Short delay to prioritize UI responsiveness
@@ -592,6 +670,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     currentYearProgress,
     certificates,
     licenses,
+    eventReminders,
     
     // Enhanced loading states
     isInitializing,
@@ -599,6 +678,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     isLoadingCME,
     isLoadingCertificates,
     isLoadingLicenses,
+    isLoadingReminders,
     
     // Error state
     error,
@@ -608,6 +688,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     refreshCMEData,
     refreshCertificates,
     refreshLicenses,
+    refreshReminders,
     refreshAllData,
     forceRefreshCMEData,
     
@@ -622,6 +703,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     addLicense,
     updateLicense,
     deleteLicense,
+    addEventReminder,
+    updateEventReminder,
+    deleteEventReminder,
     updateUser,
   }), [
     user,
@@ -630,16 +714,19 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     currentYearProgress,
     certificates,
     licenses,
+    eventReminders,
     isInitializing,
     isLoadingUser,
     isLoadingCME,
     isLoadingCertificates,
     isLoadingLicenses,
+    isLoadingReminders,
     error,
     refreshUserData,
     refreshCMEData,
     refreshCertificates,
     refreshLicenses,
+    refreshReminders,
     refreshAllData,
     forceRefreshCMEData,
     loadAllCMEEntries,
@@ -650,6 +737,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     addLicense,
     updateLicense,
     deleteLicense,
+    addEventReminder,
+    updateEventReminder,
+    deleteEventReminder,
     updateUser,
   ]);
 

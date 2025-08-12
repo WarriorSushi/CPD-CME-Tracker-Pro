@@ -4,6 +4,7 @@ import {
   CMEEntry, 
   Certificate, 
   LicenseRenewal, 
+  CMEEventReminder,
   User,
   DatabaseOperationResult 
 } from '../../types';
@@ -827,6 +828,9 @@ export const settingsOperations = {
           await runSafe(db, 'DELETE FROM license_renewals');
           devLog('✅ settingsOperations.resetAllData: License renewals cleared');
           
+          await runSafe(db, 'DELETE FROM cme_event_reminders');
+          devLog('✅ settingsOperations.resetAllData: Event reminders cleared');
+          
           await runSafe(db, 'DELETE FROM users');
           devLog('✅ settingsOperations.resetAllData: Users cleared');
           
@@ -882,11 +886,215 @@ export const settingsOperations = {
   },
 };
 
+// Event Reminder operations
+export const eventReminderOperations = {
+  // Ensure the reminders table exists (manual migration helper)
+  ensureTableExists: async (): Promise<DatabaseOperationResult> => {
+    try {
+      devLog('📅 eventReminderOperations.ensureTableExists: Checking/creating table...');
+      const db = await getDatabase();
+      
+      // Create the table if it doesn't exist
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS cme_event_reminders (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          event_name TEXT NOT NULL,
+          event_date DATE NOT NULL,
+          user_id INTEGER DEFAULT 1,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        );
+      `);
+
+      // Create indexes
+      await db.execAsync(`
+        CREATE INDEX IF NOT EXISTS idx_cme_event_reminders_event_date ON cme_event_reminders (event_date);
+      `);
+
+      await db.execAsync(`
+        CREATE INDEX IF NOT EXISTS idx_cme_event_reminders_user_id ON cme_event_reminders (user_id);
+      `);
+
+      // Create trigger
+      await db.execAsync(`
+        CREATE TRIGGER IF NOT EXISTS update_cme_event_reminders_timestamp 
+        AFTER UPDATE ON cme_event_reminders
+        FOR EACH ROW
+        BEGIN
+          UPDATE cme_event_reminders SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+        END;
+      `);
+
+      devLog('✅ eventReminderOperations.ensureTableExists: Table ensured');
+      return { success: true };
+      
+    } catch (error) {
+      console.error('💥 eventReminderOperations.ensureTableExists: Error occurred:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to ensure table exists',
+      };
+    }
+  },
+
+  // Get all event reminders for the current user
+  getAllReminders: async (): Promise<DatabaseOperationResult<CMEEventReminder[]>> => {
+    try {
+      devLog('📅 eventReminderOperations.getAllReminders: Fetching reminders...');
+      
+      // First ensure table exists (outside mutex to avoid blocking)
+      await eventReminderOperations.ensureTableExists();
+      
+      return dbMutex.runDatabaseRead('getAllReminders', async () => {
+        try {
+          const db = await getDatabase();
+          
+          const reminders = await getAllSafe<any>(db, `
+            SELECT 
+              id,
+              event_name as eventName,
+              event_date as eventDate,
+              created_at as createdAt,
+              updated_at as updatedAt
+            FROM cme_event_reminders
+            WHERE user_id = 1
+            ORDER BY event_date ASC
+          `);
+          
+          devLog(`✅ eventReminderOperations.getAllReminders: Found ${reminders.length} reminders`);
+          return {
+            success: true,
+            data: reminders as CMEEventReminder[],
+          };
+          
+        } catch (error) {
+          console.error('💥 eventReminderOperations.getAllReminders: Error occurred:', error);
+          return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Failed to fetch event reminders',
+          };
+        }
+      });
+      
+    } catch (error) {
+      console.error('💥 eventReminderOperations.getAllReminders: Outer error occurred:', error);
+      // Return empty array if table creation fails
+      return {
+        success: true,
+        data: [],
+      };
+    }
+  },
+
+  // Add a new event reminder
+  addReminder: async (reminder: Omit<CMEEventReminder, 'id' | 'createdAt' | 'updatedAt'>): Promise<DatabaseOperationResult<number>> => {
+    return dbMutex.runDatabaseWrite('addReminder', async () => {
+      try {
+        devLog('📅 eventReminderOperations.addReminder: Adding reminder...', reminder);
+        const db = await getDatabase();
+        
+        
+        const result = await runSafe(db, `
+          INSERT INTO cme_event_reminders (event_name, event_date, user_id)
+          VALUES (?, ?, 1)
+        `, [reminder.eventName, reminder.eventDate]);
+        
+        const newId = result.lastInsertRowId as number;
+        devLog(`✅ eventReminderOperations.addReminder: Reminder added with ID ${newId}`);
+        
+        return {
+          success: true,
+          data: newId,
+        };
+        
+      } catch (error) {
+        console.error('💥 eventReminderOperations.addReminder: Error occurred:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to add event reminder',
+        };
+      }
+    });
+  },
+
+  // Update an event reminder
+  updateReminder: async (id: number, updates: Partial<CMEEventReminder>): Promise<DatabaseOperationResult> => {
+    return dbMutex.runDatabaseWrite('updateReminder', async () => {
+      try {
+        devLog(`📅 eventReminderOperations.updateReminder: Updating reminder ${id}...`, updates);
+        const db = await getDatabase();
+        
+        const setParts = [];
+        const values = [];
+        
+        if (updates.eventName !== undefined) {
+          setParts.push('event_name = ?');
+          values.push(updates.eventName);
+        }
+        if (updates.eventDate !== undefined) {
+          setParts.push('event_date = ?');
+          values.push(updates.eventDate);
+        }
+        
+        if (setParts.length === 0) {
+          devLog('⚠️ eventReminderOperations.updateReminder: No fields to update');
+          return { success: true };
+        }
+        
+        values.push(id);
+        
+        await runSafe(db, `
+          UPDATE cme_event_reminders 
+          SET ${setParts.join(', ')}, updated_at = CURRENT_TIMESTAMP
+          WHERE id = ? AND user_id = 1
+        `, values);
+        
+        devLog(`✅ eventReminderOperations.updateReminder: Reminder ${id} updated successfully`);
+        return { success: true };
+        
+      } catch (error) {
+        console.error('💥 eventReminderOperations.updateReminder: Error occurred:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to update event reminder',
+        };
+      }
+    });
+  },
+
+  // Delete an event reminder
+  deleteReminder: async (id: number): Promise<DatabaseOperationResult> => {
+    return dbMutex.runDatabaseWrite('deleteReminder', async () => {
+      try {
+        devLog(`📅 eventReminderOperations.deleteReminder: Deleting reminder ${id}...`);
+        const db = await getDatabase();
+        
+        await runSafe(db, `
+          DELETE FROM cme_event_reminders 
+          WHERE id = ? AND user_id = 1
+        `, [id]);
+        
+        devLog(`✅ eventReminderOperations.deleteReminder: Reminder ${id} deleted successfully`);
+        return { success: true };
+        
+      } catch (error) {
+        console.error('💥 eventReminderOperations.deleteReminder: Error occurred:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to delete event reminder',
+        };
+      }
+    });
+  },
+};
+
 // Export all operations
 export const databaseOperations = {
   user: userOperations,
   cme: cmeOperations,
   certificates: certificateOperations,
   licenses: licenseOperations,
+  eventReminders: eventReminderOperations,
   settings: settingsOperations,
 };

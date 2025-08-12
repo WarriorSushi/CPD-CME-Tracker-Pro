@@ -49,6 +49,14 @@ export interface LicenseRenewal {
   updatedAt: string;
 }
 
+export interface CMEEventReminder {
+  id: number;
+  eventName: string;
+  eventDate: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AppSetting {
   id: number;
   key: string;
