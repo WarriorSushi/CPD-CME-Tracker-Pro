@@ -321,27 +321,19 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
         showBackButton={false}
       />
 
-      {/* Add Entry Button */}
-      <View style={styles.addButtonContainer}>
-        <Button
-          title="Add Entry"
-          onPress={() => navigation.navigate('AddCME', {})}
-          variant="primary"
-          size="medium"
-          style={styles.addEntryButton}
-        />
-      </View>
-
       {/* Search and Stats */}
       <View style={styles.controls}>
+        {/* 1. Search bar */}
         <Input
           value={searchQuery}
           onChangeText={setSearchQuery}
           placeholder="Search entries..."
           style={styles.searchInput}
+          inputStyle={styles.searchInputField}
         />
         
-        <Card style={styles.statsCard}>
+        {/* 2. Information bar with stats */}
+        <View style={styles.statsCard}>
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{filteredEntries.length}</Text>
@@ -360,7 +352,18 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
               </View>
             )}
           </View>
-        </Card>
+        </View>
+
+        {/* 3. Add Entry Button */}
+        <View style={styles.addButtonContainer}>
+          <Button
+            title="Add Entry"
+            onPress={() => navigation.navigate('AddCME', {})}
+            variant="primary"
+            size="medium"
+            style={styles.addEntryButton}
+          />
+        </View>
 
         {/* Year Filter */}
         {availableYears.length > 1 && (
@@ -493,11 +496,24 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     // Input styles applied by component
+    marginBottom: theme.spacing[2],
+  },
+  searchInputField: {
+    height: 40, // Reduced height from default
+    paddingVertical: theme.spacing[2],
   },
   
   // Stats - More compact
   statsCard: {
-    paddingVertical: theme.spacing[2],
+    paddingVertical: theme.spacing[2], // Reduced from spacing[3]
+    paddingHorizontal: theme.spacing[3], // Reduced from spacing[4]
+    backgroundColor: '#374151', // Charcoal background
+    borderRadius: theme.spacing[2], // Reduced border radius
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   statsRow: {
     flexDirection: 'row',
@@ -507,14 +523,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statValue: {
-    fontSize: theme.typography.fontSize.base,
+    fontSize: theme.typography.fontSize.sm, // Reduced from base
     fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.primary,
-    marginBottom: 2,
+    color: '#93c5fd', // Light blue color
+    marginBottom: 1, // Reduced margin
   },
   statLabel: {
-    fontSize: theme.typography.fontSize.xs,
-    color: theme.colors.text.secondary,
+    fontSize: 10, // Further reduced from xs
+    color: '#bfdbfe', // Very light blue color
     textAlign: 'center',
   },
 
@@ -729,14 +745,13 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
 
-  // Add Entry Button Section
+  // Add Entry Button Section (now inside controls)
   addButtonContainer: {
-    paddingHorizontal: theme.spacing[4],
-    paddingTop: theme.spacing[3],
-    paddingBottom: theme.spacing[1], // Further reduced bottom padding
-    backgroundColor: '#FFF7EC', // Section background
+    marginTop: theme.spacing[3], // Space from stats card
+    alignItems: 'center', // Center the button
   },
   addEntryButton: {
-    width: '100%',
+    width: '70%', // Reduced width to match dashboard style
+    maxWidth: 300, // Maximum width constraint
   },
 });

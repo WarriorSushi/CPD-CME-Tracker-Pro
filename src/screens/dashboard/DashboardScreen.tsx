@@ -158,131 +158,86 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        {/* Enhanced Progress Section */}
-        <View style={styles.progressSection}>
-          <LinearGradient
-            colors={['#FBFBF9', '#FEFEFE']} // Current card color to lighter
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={[styles.progressCard, styles.cardGradient]}
-          >
-            <View style={styles.progressHeader}>
-              <View style={styles.progressTitleContainer}>
-                <Text style={styles.progressMainTitle}>Your Progress</Text>
-                <Text style={styles.progressSubtitle}>
-                  {user?.requirementPeriod && user.requirementPeriod > 1 
-                    ? `${user.requirementPeriod}-Year Cycle` 
-                    : 'Annual Goal'
-                  }
-                </Text>
-              </View>
+        {/* Upper Section - Your Progress + Add Entry Button */}
+        <View style={styles.upperSection}>
+          <View style={styles.progressHeader}>
+            <View style={styles.progressTitleContainer}>
+              <Text style={styles.progressMainTitle}>Your Progress</Text>
+              <Text style={styles.progressSubtitle}>
+                {user?.requirementPeriod && user.requirementPeriod > 1 
+                  ? `${user.requirementPeriod}-Year Cycle` 
+                  : 'Annual Goal'
+                }
+              </Text>
             </View>
+          </View>
 
-            <View style={styles.progressMainContent}>
-              <View style={styles.progressCircleContainer}>
-                <SimpleProgressRing 
-                  progress={currentYearProgress ? currentYearProgress.percentage / 100 : 0} 
-                  size={140}
-                  color={currentYearProgress ? getProgressColor(currentYearProgress.status) : theme.colors.gray.medium}
-                  backgroundColor={theme.colors.gray.light + '60'}
-                  strokeWidth={10}
-                  duration={2000}
-                />
-              </View>
-
-              <View style={styles.progressStats}>
-                <View style={styles.progressStatItem}>
-                  <Text style={styles.progressStatValue}>
-                    {currentYearProgress?.totalCompleted?.toFixed(1) || '0'}
-                  </Text>
-                  <Text style={styles.progressStatLabel}>{user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits'} Earned</Text>
-                </View>
-                
-                <View style={styles.progressStatDivider} />
-                
-                <View style={styles.progressStatItem}>
-                  <Text style={styles.progressStatValue}>
-                    {currentYearProgress?.totalRequired || user?.annualRequirement || 0}
-                  </Text>
-                  <Text style={styles.progressStatLabel}>Goal
-                  </Text>
-                </View>
-                
-                <View style={styles.progressStatDivider} />
-                
-                <View style={styles.progressStatItem}>
-                  <Text style={styles.progressStatValue}>
-                    {Math.max(
-                      (currentYearProgress?.totalRequired || 0) - (currentYearProgress?.totalCompleted || 0), 
-                      0
-                    ).toFixed(1)}
-                  </Text>
-                  <Text style={styles.progressStatLabel}>Remaining</Text>
-                </View>
-              </View>
+          <View style={styles.progressMainContent}>
+            {/* Days remaining moved to left of circle */}
+            <View style={styles.progressTimeInfoLeft}>
+              <Text style={styles.progressTimeValue}>
+                {currentYearProgress?.remainingDays || 0}
+              </Text>
+              <Text style={styles.progressTimeLabel}>
+                days remaining in cycle
+              </Text>
             </View>
-
-            <View style={styles.progressFooter}>
-              <View style={styles.progressTimeInfo}>
-                <Text style={styles.progressTimeValue}>
-                  {currentYearProgress?.remainingDays || 0}
-                </Text>
-                <Text style={styles.progressTimeLabel}>
-                  days remaining in cycle
-                </Text>
-              </View>
-              <View style={[styles.progressStatusIndicator, { backgroundColor: currentYearProgress ? getProgressColor(currentYearProgress.status) : theme.colors.gray.medium }]}>
-                <Text style={styles.progressStatusText}>
-                  {currentYearProgress?.status === 'completed' && 'Complete!'}
-                  {currentYearProgress?.status === 'on_track' && 'On Track'}
-                  {currentYearProgress?.status === 'behind' && 'Keep Going'}
-                  {currentYearProgress?.status === 'overdue' && 'Action Needed'}
-                  {!currentYearProgress && 'Getting Started'}
-                </Text>
-              </View>
-            </View>
-          </LinearGradient>
-        </View>
-
-        {/* Quick Actions */}
-        <View style={styles.quickActionsSection}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <View style={styles.quickActionsGrid}>
-            <TouchableOpacity 
-              style={styles.quickActionItem}
-              onPress={() => navigation.navigate('AddCME', { editEntry: undefined })}
-            >
-              <Text style={styles.quickActionIcon}>📚</Text>
-              <Text style={styles.quickActionText}>Add Entry</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.quickActionItem}
-              onPress={() => navigation.navigate('Vault')}
-            >
-              <Text style={styles.quickActionIcon}>🏆</Text>
-              <Text style={styles.quickActionText}>Certificates</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.quickActionItem}
-              onPress={() => (navigation as any).navigate('CME', { screen: 'CMEHistory' })}
-            >
-              <Text style={styles.quickActionIcon}>📊</Text>
-              <Text style={styles.quickActionText}>History</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.quickActionItem}
-              onPress={() => navigation.navigate('Settings')}
-            >
-              <SvgIcon 
-                name="settings" 
-                size={24} 
-                color={theme.colors.text.primary} 
-                accessibilityLabel="Settings"
+            
+            <View style={styles.progressCircleContainer}>
+              <SimpleProgressRing 
+                progress={currentYearProgress ? currentYearProgress.percentage / 100 : 0} 
+                size={140}
+                color={currentYearProgress ? getProgressColor(currentYearProgress.status) : theme.colors.gray.medium}
+                backgroundColor={theme.colors.gray.light + '60'}
+                strokeWidth={10}
+                duration={2000}
               />
-              <Text style={styles.quickActionText}>Settings</Text>
-            </TouchableOpacity>
+            </View>
+
+            <View style={styles.progressStats}>
+              <View style={styles.progressStatItem}>
+                <Text style={styles.progressStatValue}>
+                  {currentYearProgress?.totalCompleted?.toFixed(1) || '0'}
+                </Text>
+                <Text style={styles.progressStatLabel}>{user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits'} Earned</Text>
+              </View>
+              
+              <View style={styles.progressStatDivider} />
+              
+              <View style={styles.progressStatItem}>
+                <Text style={styles.progressStatValue}>
+                  {currentYearProgress?.totalRequired || user?.annualRequirement || 0}
+                </Text>
+                <Text style={styles.progressStatLabel}>Goal
+                </Text>
+              </View>
+              
+              <View style={styles.progressStatDivider} />
+              
+              <View style={styles.progressStatItem}>
+                <Text style={styles.progressStatValue}>
+                  {Math.max(
+                    (currentYearProgress?.totalRequired || 0) - (currentYearProgress?.totalCompleted || 0), 
+                    0
+                  ).toFixed(1)}
+                </Text>
+                <Text style={styles.progressStatLabel}>Remaining</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Add Entry Button - now part of upper section */}
+          <View style={styles.addEntryInUpperSection}>
+            <Button
+              title="+ Add New Entry"
+              onPress={() => (navigation.getParent() as any).navigate('AddCME', { editEntry: undefined })}
+              style={styles.addEntryButton}
+            />
           </View>
         </View>
+
+        {/* Dividing Line */}
+        <View style={styles.dividerLine} />
 
         {/* CME Event Reminders Section */}
         <View style={styles.sectionContainer}>
@@ -725,26 +680,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF5EE',
   },
 
-  // Enhanced Progress Section
-  progressSection: {
-    paddingHorizontal: theme.spacing[4],
+  // Upper Section (Your Progress + Add Entry)
+  upperSection: {
+    backgroundColor: '#FFFFFF', // Pure white background
+    paddingHorizontal: theme.spacing[5],
     paddingTop: theme.spacing[3],
-    backgroundColor: '#FFF7EC', // Section background
-  },
-  progressCard: {
-    paddingVertical: theme.spacing[2],
-    paddingHorizontal: theme.spacing[3],
-    marginBottom: theme.spacing[2],
-    // backgroundColor removed - using LinearGradient
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 4,
-    borderRadius: theme.spacing[3],
+    paddingBottom: theme.spacing[6], // Increased padding below
   },
   progressHeader: {
     marginBottom: theme.spacing[3],
@@ -771,6 +712,8 @@ const styles = StyleSheet.create({
   },
   progressCircleContainer: {
     marginBottom: theme.spacing[3],
+    position: 'relative', // Allow positioning of status indicator
+    alignItems: 'center',
   },
   progressStats: {
     flexDirection: 'row',
@@ -801,25 +744,29 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.spacing[2],
   },
   progressFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'center', // Center the remaining days info
     paddingTop: theme.spacing[3],
     borderTopWidth: 1,
     borderTopColor: theme.colors.border.light,
   },
   progressTimeInfo: {
-    flex: 1,
+    alignItems: 'center', // Center align the time info
+  },
+  progressTimeInfoLeft: {
+    alignItems: 'center',
+    marginRight: theme.spacing[4],
   },
   progressTimeValue: {
     fontSize: theme.typography.fontSize.lg,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
+    textAlign: 'center',
   },
   progressTimeLabel: {
     fontSize: theme.typography.fontSize.xs,
     color: theme.colors.text.secondary,
     marginTop: theme.spacing[1],
+    textAlign: 'center',
   },
   progressStatusIndicator: {
     paddingHorizontal: theme.spacing[4],
@@ -830,6 +777,14 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.sm,
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.background,
+  },
+  
+  // Status Indicator beside circle
+  statusIndicatorBesideCircle: {
+    position: 'absolute',
+    top: -10, // Position it at top right of circle
+    right: -20,
+    minWidth: 80, // Ensure consistent width
   },
 
   // Card gradient common styles
@@ -852,15 +807,27 @@ const styles = StyleSheet.create({
     color: theme.colors.text.primary,
   },
 
-  // Add Entry Section
-  addEntrySection: {
-    paddingHorizontal: theme.spacing[4],
-    marginBottom: theme.spacing[6],
-    backgroundColor: '#FFF7EC', // Section background
-    paddingVertical: theme.spacing[3],
+  // Add Entry Button within Upper Section
+  addEntryInUpperSection: {
+    marginTop: theme.spacing[4],
+    marginBottom: theme.spacing[5], // Increased padding below button
+    alignItems: 'center',
   },
   addEntryButton: {
-    // Custom styling for the button if needed
+    width: '100%', // Full width
+  },
+  
+  // Dividing Line
+  dividerLine: {
+    height: 1, // 1 pixel wide
+    backgroundColor: '#374151', // Charcoal color
+    marginHorizontal: 0, // Full width line
+    marginBottom: theme.spacing[8], // Increased padding below the line
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
   },
 
   // Quick Actions
@@ -905,7 +872,7 @@ const styles = StyleSheet.create({
 
   // Sections with headers
   recentSection: {
-    paddingHorizontal: theme.spacing[4],
+    paddingHorizontal: theme.spacing[5], // Increased padding from spacing[4]
     marginBottom: theme.spacing[4],
     backgroundColor: '#FFF7EC', // Section background
     paddingVertical: theme.spacing[3],
@@ -1130,10 +1097,10 @@ const styles = StyleSheet.create({
 
   // Section Container and Card Styles
   sectionContainer: {
-    paddingHorizontal: theme.spacing[4],
-    marginBottom: theme.spacing[6],
+    paddingHorizontal: theme.spacing[5], // Increased padding from spacing[3]
+    marginBottom: theme.spacing[4], // Reduced from [6]
     backgroundColor: '#FFF7EC', // Section background
-    paddingVertical: theme.spacing[3],
+    paddingVertical: theme.spacing[2], // Reduced from [3]
   },
   sectionCard: {
     padding: 0,
@@ -1278,7 +1245,7 @@ const styles = StyleSheet.create({
 
   // No Licenses Section
   noLicensesSection: {
-    paddingHorizontal: theme.spacing[4],
+    paddingHorizontal: theme.spacing[5], // Increased padding from spacing[4]
     marginBottom: theme.spacing[4],
   },
   noLicensesCard: {

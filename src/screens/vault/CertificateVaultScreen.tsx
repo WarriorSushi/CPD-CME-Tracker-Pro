@@ -400,9 +400,10 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
   const renderCertificate = ({ item, index }: { item: Certificate; index: number }) => {
     const isImage = SUPPORTED_FILE_TYPES.IMAGES.includes(item.mimeType as any);
     
-    // Pinterest-style dynamic heights
-    const cardHeight = 200 + (Math.abs(Math.sin(index * 1.2)) * 100); // Random height between 200-300
-    const imageHeight = cardHeight * 0.7;
+    // Improved masonry heights with better distribution
+    const heightVariations = [200, 240, 280, 320, 180, 260, 300, 220];
+    const cardHeight = heightVariations[index % heightVariations.length];
+    const imageHeight = cardHeight * 0.75; // Slightly more space for image
     
     return (
       <TouchableOpacity 
@@ -478,35 +479,49 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
       {/* Prominent Add Section */}
       <View style={styles.prominentAddSection}>
         <View style={styles.addSectionTitleContainer}>
-          <SvgIcon name="vault" size={20} color={theme.colors.primary} />
           <Text style={styles.addSectionTitle}>Add Certificate</Text>
         </View>
         <View style={styles.addButtonsRow}>
           <TouchableOpacity 
-            style={[styles.addButton, styles.cameraButton]}
+            style={[styles.addButton]}
             onPress={handleCameraPress}
             disabled={isScanning}
           >
-            <Text style={styles.addButtonIcon}>📷</Text>
+            <SvgIcon 
+              name="camera" 
+              size={16} 
+              color="#FFFFFF" 
+              style={styles.addButtonIconSvg}
+            />
             <Text style={styles.addButtonText}>Camera</Text>
             {isScanning && <LoadingSpinner size={12} />}
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={[styles.addButton, styles.galleryButton]}
+            style={[styles.addButton]}
             onPress={handleGalleryPress}
             disabled={isScanning}
           >
-            <Text style={styles.addButtonIcon}>🖼️</Text>
+            <SvgIcon 
+              name="gallery" 
+              size={16} 
+              color="#FFFFFF" 
+              style={styles.addButtonIconSvg}
+            />
             <Text style={styles.addButtonText}>Gallery</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={[styles.addButton, styles.uploadButton]}
+            style={[styles.addButton]}
             onPress={handleUploadCertificate}
             disabled={isUploading}
           >
-            <Text style={styles.addButtonIcon}>📁</Text>
+            <SvgIcon 
+              name="files" 
+              size={16} 
+              color="#FFFFFF" 
+              style={styles.addButtonIconSvg}
+            />
             <Text style={styles.addButtonText}>Files</Text>
             {isUploading && <LoadingSpinner size={12} />}
           </TouchableOpacity>
@@ -534,12 +549,12 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
           numColumns={2}
           contentContainerStyle={styles.masonryList}
           showsVerticalScrollIndicator={false}
+          key={certificates?.length || 0} // Force re-render for masonry
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
           ListEmptyComponent={renderEmptyState}
           columnWrapperStyle={styles.masonryRow}
-          ItemSeparatorComponent={() => <View style={styles.masonyVerticalSpacer} />}
         />
       )}
 
@@ -567,21 +582,20 @@ const styles = StyleSheet.create({
 
   // Compact Add Section
   prominentAddSection: {
-    marginHorizontal: theme.spacing[3],
+    marginHorizontal: theme.spacing[4],
     marginVertical: theme.spacing[2],
     padding: theme.spacing[3],
-    backgroundColor: '#FFF7EC', // Section background
-    borderRadius: theme.spacing[2],
+    backgroundColor: '#FFFFFF', // Clean white card background
+    borderRadius: theme.spacing[3],
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#e5e7eb',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
   },
   addSectionTitleContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: theme.spacing[2],
@@ -590,7 +604,6 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.sm,
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.text.primary,
-    marginLeft: theme.spacing[2],
   },
   addButtonsRow: {
     flexDirection: 'row',
@@ -601,30 +614,24 @@ const styles = StyleSheet.create({
   addButton: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: theme.spacing[2],
+    paddingVertical: theme.spacing[2], // Reduced from spacing[3]
     paddingHorizontal: theme.spacing[2],
     borderRadius: theme.spacing[2],
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    backgroundColor: '#1f2937', // Charcoal/black background
+    // Pressable button effect with subtle shadow
+    shadowColor: '#6b7280',
+    shadowOffset: { width: 0, height: 2 }, // Reduced shadow
+    shadowOpacity: 0.15, // Reduced opacity
+    shadowRadius: 3, // Reduced radius
+    elevation: 3, // Reduced elevation
+    // Remove problematic bottom border that was causing clipping
+    marginBottom: 2, // Add small margin instead
   },
-  cameraButton: {
-    backgroundColor: '#3b82f6',
-  },
-  galleryButton: {
-    backgroundColor: '#10b981',
-  },
-  uploadButton: {
-    backgroundColor: '#8b5cf6',
-  },
-  addButtonIcon: {
-    fontSize: 16,
-    marginBottom: 2,
+  addButtonIconSvg: {
+    marginBottom: 4, // Reduced margin
   },
   addButtonText: {
-    fontSize: 10,
+    fontSize: 9, // Reduced font size
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.background,
     textAlign: 'center',
@@ -654,30 +661,32 @@ const styles = StyleSheet.create({
 
   // Masonry List
   masonryList: {
-    paddingHorizontal: theme.spacing[3],
+    paddingHorizontal: theme.spacing[2], // Reduced padding for tighter layout
     paddingTop: theme.spacing[2],
     paddingBottom: theme.spacing[4],
   },
   masonryRow: {
     justifyContent: 'space-between',
-    paddingHorizontal: theme.spacing[2],
+    paddingHorizontal: theme.spacing[1], // Reduced padding
   },
   masonyVerticalSpacer: {
-    height: theme.spacing[3],
+    height: theme.spacing[2], // Reduced spacing between rows
   },
 
   // Masonry Certificate Cards
   masonryCard: {
-    width: (width - theme.spacing[3] * 2 - theme.spacing[2] * 2 - theme.spacing[3]) / 2,
-    marginBottom: theme.spacing[3],
+    width: (width - theme.spacing[2] * 2 - theme.spacing[1] * 2 - theme.spacing[2]) / 2, // Adjusted width calculation
+    marginBottom: theme.spacing[2], // Reduced bottom margin
+    marginHorizontal: theme.spacing[1], // Added horizontal margin for better spacing
   },
   masonryContent: {
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 4,
+    borderRadius: theme.spacing[3], // Consistent border radius
   },
   masonryPreview: {
     position: 'relative',

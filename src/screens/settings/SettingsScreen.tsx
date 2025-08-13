@@ -359,63 +359,20 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
         }
       >
         {/* User Profile Card */}
-        <Card style={styles.profileCard}>
-          <View style={styles.profileHeader}>
-            <View style={styles.profileAvatar}>
-              <Text style={styles.avatarText}>
-                {user?.profession?.charAt(0) || 'U'}
-              </Text>
-            </View>
-            <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>
-                {user?.profession || 'Healthcare Professional'}
-              </Text>
-              <Text style={styles.profileRole}>
-                {user?.profession || 'Profession not set'}
-              </Text>
-            </View>
-          </View>
-          
-          {user ? (
-            <View style={styles.profileStats}>
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{user.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits'}</Text>
-                <Text style={styles.statLabel}>System</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{user.annualRequirement || 0}</Text>
-                <Text style={styles.statLabel}>Annual Goal</Text>
-              </View>
-            </View>
-          ) : (
-            <LoadingSpinner size={20} />
-          )}
-          
-          <TouchableOpacity
-            style={styles.editProfileButton}
-            onPress={() => {
-              Alert.alert('Edit Profile', 'Profile editing will be available in a future update.');
-            }}
-          >
-            <Text style={styles.editProfileText}>✏️ Edit Profile</Text>
-          </TouchableOpacity>
-        </Card>
-
-        {/* Your Licenses Section */}
-        {licenses && licenses.length > 0 && (
-          <View style={styles.sectionContainer}>
-            <View style={styles.sectionCard}>
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionCard}>
             <LinearGradient
               colors={['#36454F', '#000000']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.cardHeader}
             >
-              <Text style={styles.cardHeaderTitle}>Your Licenses</Text>
+              <Text style={styles.cardHeaderTitle}>Profile</Text>
               <Button
-                title="+ Add License"
-                onPress={() => (navigation.getParent() as any).navigate('AddLicense')}
+                title="Edit"
+                onPress={() => {
+                  Alert.alert('Edit Profile', 'Profile editing will be available in a future update.');
+                }}
                 variant="primary"
                 size="small"
                 style={styles.headerButton}
@@ -428,212 +385,193 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
               end={{ x: 1, y: 1 }}
               style={styles.cardContent}
             >
-              <Text style={styles.sectionSubtitle}>
-                View and manage all your professional licenses here. Tap Edit to update expiration dates after renewal.
-              </Text>
-            
-            {(() => {
-              const calculateDaysUntil = (expirationDateString: string): number => {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                
-                const expDate = new Date(expirationDateString);
-                if (isNaN(expDate.getTime())) {
-                  console.error('🚨 Invalid date string:', expirationDateString);
-                  return 0;
-                }
-                expDate.setHours(0, 0, 0, 0);
-                
-                const msPerDay = 1000 * 60 * 60 * 24;
-                const diffMs = expDate.getTime() - today.getTime();
-                return Math.ceil(diffMs / msPerDay);
-              };
-              
-              const allLicenses = licenses
-                .map(license => {
-                  const daysUntil = calculateDaysUntil(license.expirationDate);
-                  return { ...license, daysUntil };
-                })
-                .sort((a, b) => a.daysUntil - b.daysUntil);
-
-              return allLicenses.map((license) => {
-                const { daysUntil } = license;
-                let statusColor = theme.colors.success;
-                let statusText = 'Active';
-                let statusIcon = <SvgIcon name="tickWithCircle" size={20} />;
-
-                if (daysUntil < 0) {
-                  statusColor = theme.colors.error;
-                  statusText = 'Expired';
-                  statusIcon = <Text style={{ fontSize: 16 }}>🚨</Text>;
-                } else if (daysUntil <= 30) {
-                  statusColor = theme.colors.error;
-                  statusText = `${daysUntil} days left`;
-                  statusIcon = <Text style={{ fontSize: 16 }}>⚠️</Text>;
-                } else if (daysUntil <= 90) {
-                  statusColor = theme.colors.warning;
-                  statusText = `${daysUntil} days left`;
-                  statusIcon = <Text style={{ fontSize: 16 }}>🗓️</Text>;
-                }
-
-                return (
-                  <Card key={license.id} variant="entry" style={styles.licenseCardNew}>
-                    <View style={styles.licenseHeader}>
-                      <View style={styles.licenseMainInfo}>
-                        <View style={styles.licenseIconContainer}>
-                          {statusIcon}
-                        </View>
-                        <View style={styles.licenseDetails}>
-                          <Text style={styles.licenseType}>{license.licenseType}</Text>
-                          <Text style={styles.licenseAuthority}>{license.issuingAuthority}</Text>
-                          {license.licenseNumber && (
-                            <Text style={styles.licenseNumber}>#{license.licenseNumber}</Text>
-                          )}
-                        </View>
-                      </View>
-                      
-                      <View style={styles.licenseStatusContainer}>
-                        <View style={[styles.licenseStatusBadge, { backgroundColor: statusColor }]}>
-                          <Text style={styles.licenseStatusText}>{statusText}</Text>
-                        </View>
-                        <Text style={styles.licenseExpiration}>
-                          Expires {new Date(license.expirationDate).toLocaleDateString()}
-                        </Text>
-                      </View>
-                    </View>
-
-                    <View style={styles.licenseActions}>
-                      <TouchableOpacity
-                        style={styles.editLicenseButton}
-                        onPress={() => {
-                          (navigation.getParent() as any).navigate('AddLicense', { editLicense: license });
-                        }}
-                      >
-                        <Text style={styles.editLicenseText}>Edit</Text>
-                      </TouchableOpacity>
-                    </View>
-
-                    <View style={styles.licenseRenewalInstructions}>
-                      <Text style={styles.renewalInstructionsText}>
-                        💡 Already renewed? Tap "Edit" and update the expiration date.
-                      </Text>
-                    </View>
-                  </Card>
-                );
-              });
-            })()}
-            
-            </LinearGradient>
-            </View>
-          </View>
-        )}
-
-        {(!licenses || licenses.length === 0) && (
-          <View style={styles.noLicensesSection}>
-            <Card style={styles.noLicensesCard}>
-              <View style={styles.noLicensesContent}>
-                <Text style={styles.noLicensesIcon}>📋</Text>
-                <Text style={styles.noLicensesTitle}>No Licenses Added</Text>
-                <Text style={styles.noLicensesSubtitle}>
-                  Add your professional licenses to track renewal deadlines and stay compliant.
-                </Text>
-                <Button
-                  title="Add Your First License"
-                  onPress={() => (navigation.getParent() as any).navigate('AddLicense')}
-                  style={styles.addEntryButton}
-                />
+              <View style={styles.profileHeader}>
+                <View style={styles.profileIconWrapper}>
+                  <SvgIcon name="profile" size={36} color="#1e40af" />
+                </View>
+                <View style={styles.profileInfo}>
+                  <Text style={styles.profileName}>
+                    {user?.profession || 'Healthcare Professional'}
+                  </Text>
+                  <Text style={styles.profileRole}>
+                    {user?.profession || 'Profession not set'}
+                  </Text>
+                </View>
               </View>
-            </Card>
+              
+              {user ? (
+                <View style={styles.profileStats}>
+                  <View style={styles.statItem}>
+                    <Text style={styles.statValue}>{user.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits'}</Text>
+                    <Text style={styles.statLabel}>System</Text>
+                  </View>
+                  <View style={styles.statDivider} />
+                  <View style={styles.statItem}>
+                    <Text style={styles.statValue}>{user.annualRequirement || 0}</Text>
+                    <Text style={styles.statLabel}>Annual Goal</Text>
+                  </View>
+                </View>
+              ) : (
+                <LoadingSpinner size={20} />
+              )}
+            </LinearGradient>
           </View>
-        )}
+        </View>
+
 
         {/* Data Management Section */}
-        <Card style={styles.modernSection}>
-          <Text style={styles.modernSectionTitle}>💾 Data Management</Text>
-          
-          <View style={styles.modernButtonGrid}>
-            <TouchableOpacity
-              style={styles.modernActionButton}
-              onPress={handleExportData}
-              disabled={isExporting}
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionCard}>
+            <LinearGradient
+              colors={['#36454F', '#000000']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.cardHeader}
             >
-              <Text style={styles.modernActionIcon}>📤</Text>
-              <Text style={styles.modernActionText}>Export Data</Text>
-              <Text style={styles.modernActionSubtext}>CSV & Reports</Text>
-            </TouchableOpacity>
+              <Text style={styles.cardHeaderTitle}>Data Management</Text>
+            </LinearGradient>
             
-            <TouchableOpacity
-              style={styles.modernActionButton}
-              onPress={handleCreateBackup}
-              disabled={isExporting}
+            <LinearGradient
+              colors={['#FBFBF9', '#FEFEFE']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.cardContent}
             >
-              <Text style={styles.modernActionIcon}>💾</Text>
-              <Text style={styles.modernActionText}>Create Backup</Text>
-              <Text style={styles.modernActionSubtext}>Full Backup</Text>
-            </TouchableOpacity>
+              <View style={styles.modernButtonGrid}>
+                <TouchableOpacity
+                  style={styles.modernActionButton}
+                  onPress={handleExportData}
+                  disabled={isExporting}
+                >
+                  <SvgIcon name="export" size={28} color="#1e40af" />
+                  <Text style={styles.modernActionText}>Export Data</Text>
+                  <Text style={styles.modernActionSubtext}>CSV & Reports</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={styles.modernActionButton}
+                  onPress={handleCreateBackup}
+                  disabled={isExporting}
+                >
+                  <SvgIcon name="backup" size={28} color="#1e40af" />
+                  <Text style={styles.modernActionText}>Create Backup</Text>
+                  <Text style={styles.modernActionSubtext}>Full Backup</Text>
+                </TouchableOpacity>
+              </View>
+            </LinearGradient>
           </View>
-        </Card>
+        </View>
 
         {/* App Settings Section */}
-        <Card style={styles.modernSection}>
-          <Text style={styles.modernSectionTitle}>⚙️ App Settings</Text>
-          
-          <View style={styles.settingsGrid}>
-            <View style={styles.modernSettingItem}>
-              <View style={styles.settingIcon}>
-                <Text style={styles.settingIconText}>🔔</Text>
-              </View>
-              <View style={styles.settingDetails}>
-                <Text style={styles.modernSettingLabel}>Notifications</Text>
-                <Text style={styles.modernSettingValue}>Enabled</Text>
-              </View>
-            </View>
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionCard}>
+            <LinearGradient
+              colors={['#36454F', '#000000']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.cardHeader}
+            >
+              <Text style={styles.cardHeaderTitle}>App Settings</Text>
+            </LinearGradient>
             
-            <View style={styles.modernSettingItem}>
-              <View style={styles.settingIcon}>
-                <Text style={styles.settingIconText}>🌙</Text>
+            <LinearGradient
+              colors={['#FBFBF9', '#FEFEFE']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.cardContent}
+            >
+              <View style={styles.settingsGrid}>
+                <View style={styles.modernSettingItem}>
+                  <View style={styles.settingIconWrapper}>
+                    <SvgIcon name="bell" size={22} color="#1e40af" />
+                  </View>
+                  <View style={styles.settingDetails}>
+                    <Text style={styles.modernSettingLabel}>Notifications</Text>
+                    <Text style={styles.modernSettingValue}>Enabled</Text>
+                  </View>
+                </View>
+                
+                <View style={styles.modernSettingItem}>
+                  <View style={styles.settingIconWrapper}>
+                    <SvgIcon name="theme" size={22} color="#1e40af" />
+                  </View>
+                  <View style={styles.settingDetails}>
+                    <Text style={styles.modernSettingLabel}>Theme</Text>
+                    <Text style={styles.modernSettingValue}>Light</Text>
+                  </View>
+                </View>
+                
+                <View style={styles.modernSettingItem}>
+                  <View style={styles.settingIconWrapper}>
+                    <SvgIcon name="sync" size={22} color="#1e40af" />
+                  </View>
+                  <View style={styles.settingDetails}>
+                    <Text style={styles.modernSettingLabel}>Auto Backup</Text>
+                    <Text style={styles.modernSettingValue}>Disabled</Text>
+                  </View>
+                </View>
               </View>
-              <View style={styles.settingDetails}>
-                <Text style={styles.modernSettingLabel}>Theme</Text>
-                <Text style={styles.modernSettingValue}>Light</Text>
-              </View>
-            </View>
-            
-            <View style={styles.modernSettingItem}>
-              <View style={styles.settingIcon}>
-                <Text style={styles.settingIconText}>🔄</Text>
-              </View>
-              <View style={styles.settingDetails}>
-                <Text style={styles.modernSettingLabel}>Auto Backup</Text>
-                <Text style={styles.modernSettingValue}>Disabled</Text>
-              </View>
-            </View>
+            </LinearGradient>
           </View>
-        </Card>
+        </View>
 
         {/* About Section */}
-        <Card style={styles.modernSection}>
-          <Text style={styles.modernSectionTitle}>ℹ️ About</Text>
-          
-          <View style={styles.modernAboutInfo}>
-            <View style={styles.appIconContainer}>
-              <Text style={styles.appIcon}>🏥</Text>
-            </View>
-            <Text style={styles.appName}>{APP_CONFIG.NAME}</Text>
-            <Text style={styles.appVersion}>Version {APP_CONFIG.VERSION}</Text>
-            <Text style={styles.appDescription}>
-              Your personal CME tracking companion. Track continuing education, 
-              manage certificates, and stay compliant with renewal requirements.
-            </Text>
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionCard}>
+            <LinearGradient
+              colors={['#36454F', '#000000']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.cardHeader}
+            >
+              <Text style={styles.cardHeaderTitle}>About</Text>
+            </LinearGradient>
+            
+            <LinearGradient
+              colors={['#FBFBF9', '#FEFEFE']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.cardContent}
+            >
+              <View style={styles.modernAboutInfo}>
+                <View style={styles.aboutIconWrapper}>
+                  <SvgIcon name="medical" size={36} color="#1e40af" />
+                </View>
+                <Text style={styles.appName}>{APP_CONFIG.NAME}</Text>
+                <Text style={styles.appVersion}>Version {APP_CONFIG.VERSION}</Text>
+                <Text style={styles.appDescription}>
+                  Your personal CME tracking companion. Track continuing education, 
+                  manage certificates, and stay compliant with renewal requirements.
+                </Text>
+              </View>
+            </LinearGradient>
           </View>
-        </Card>
+        </View>
 
         {/* Danger Zone Section */}
-        <Card style={styles.dangerZone}>
-          <Text style={styles.dangerTitle}>⚠️ Danger Zone</Text>
-          <Text style={styles.dangerSubtitle}>
-            These actions are irreversible. Please proceed with caution.
-          </Text>
+        <View style={styles.sectionContainer}>
+          <View style={[styles.sectionCard, styles.dangerCard]}>
+            <LinearGradient
+              colors={['#dc2626', '#991b1b']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.cardHeader}
+            >
+              <View style={styles.dangerHeaderContent}>
+                <SvgIcon name="warning" size={24} color="#ffffff" />
+                <Text style={styles.cardHeaderTitle}>Danger Zone</Text>
+              </View>
+            </LinearGradient>
+            
+            <LinearGradient
+              colors={['#fef2f2', '#fecaca']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.cardContent}
+            >
+              <Text style={styles.dangerSubtitle}>
+                These actions are irreversible. Please proceed with caution.
+              </Text>
           
           <View style={styles.dangerActions}>
             <TouchableOpacity
@@ -647,10 +585,12 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
               style={styles.dangerButtonPrimary}
               onPress={handleResetCompleteApp}
             >
-              <Text style={styles.dangerButtonPrimaryText}>🗑️ Reset App</Text>
+              <Text style={styles.dangerButtonPrimaryText}>Reset App</Text>
             </TouchableOpacity>
           </View>
-        </Card>
+          </LinearGradient>
+        </View>
+      </View>
 
         {/* Bottom spacing */}
         <View style={styles.bottomSpacing} />
@@ -855,18 +795,21 @@ const styles = StyleSheet.create({
   },
   modernActionButton: {
     flex: 1,
-    backgroundColor: '#74b9ff',
-    padding: theme.spacing[4],
-    borderRadius: theme.spacing[3],
+    backgroundColor: '#f8fafc',
+    padding: theme.spacing[3], // Reduced padding
+    borderRadius: theme.spacing[2],
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    marginHorizontal: theme.spacing[1],
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 1,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 2,
+    elevation: 1,
   },
   modernActionIcon: {
     fontSize: 24,
@@ -875,13 +818,14 @@ const styles = StyleSheet.create({
   modernActionText: {
     fontSize: theme.typography.fontSize.base,
     fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.background,
+    color: '#1f2937', // Dark gray for better contrast
     marginBottom: theme.spacing[1],
+    textAlign: 'center',
   },
   modernActionSubtext: {
     fontSize: theme.typography.fontSize.xs,
-    color: theme.colors.background,
-    opacity: 0.8,
+    color: '#6b7280', // Medium gray for good contrast
+    textAlign: 'center',
   },
 
   // Settings Grid
@@ -912,13 +856,14 @@ const styles = StyleSheet.create({
   },
   modernSettingLabel: {
     fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.medium,
-    color: theme.colors.text.primary,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: '#1f2937', // Dark gray for better contrast
     marginBottom: theme.spacing[1],
   },
   modernSettingValue: {
     fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text.secondary,
+    color: '#6b7280', // Medium gray for good contrast
+    fontWeight: theme.typography.fontWeight.medium,
   },
 
   // Modern About Section
@@ -1142,10 +1087,10 @@ const styles = StyleSheet.create({
 
   // New License Section Styles (from dashboard)
   sectionContainer: {
-    paddingHorizontal: theme.spacing[4],
-    marginBottom: theme.spacing[6],
+    paddingHorizontal: theme.spacing[2], // Reduced from [4]
+    marginBottom: theme.spacing[4], // Reduced from [6]
     backgroundColor: '#FFF7EC',
-    paddingVertical: theme.spacing[3],
+    paddingVertical: theme.spacing[2], // Reduced from [3]
   },
   sectionCard: {
     padding: 0,
@@ -1166,8 +1111,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing[4],
-    paddingVertical: theme.spacing[4],
+    paddingHorizontal: theme.spacing[3], // Reduced from [4]
+    paddingVertical: theme.spacing[3], // Reduced from [4]
   },
   cardHeaderTitle: {
     fontSize: theme.typography.fontSize.lg,
@@ -1178,7 +1123,7 @@ const styles = StyleSheet.create({
     minWidth: 100,
   },
   cardContent: {
-    padding: theme.spacing[4],
+    padding: theme.spacing[3], // Reduced from [4]
   },
   sectionSubtitle: {
     fontSize: theme.typography.fontSize.sm,
@@ -1300,5 +1245,40 @@ const styles = StyleSheet.create({
   },
   addEntryButton: {
     minWidth: 200,
+  },
+  
+  // Redesigned Settings styles
+  dangerCard: {
+    borderColor: '#dc2626',
+  },
+  dangerHeaderContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing[2],
+  },
+  modernActionIcon: {
+    // Removed since using SvgIcon now
+  },
+  profileIconNew: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: theme.colors.primary + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: theme.spacing[3],
+  },
+  
+  // Icon wrappers for proper spacing
+  settingIconWrapper: {
+    marginRight: theme.spacing[3],
+    marginLeft: theme.spacing[1],
+  },
+  aboutIconWrapper: {
+    marginBottom: theme.spacing[3],
+  },
+  profileIconWrapper: {
+    marginRight: theme.spacing[3],
+    marginTop: theme.spacing[1],
   },
 });

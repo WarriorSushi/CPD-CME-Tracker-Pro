@@ -26,11 +26,12 @@ const TabNavigator: React.FC = () => {
   
   return (
     <Tab.Navigator
-      screenOptions={{
+      screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
-          borderTopWidth: 0,
+          borderTopWidth: 1,
+          borderTopColor: '#e5e7eb',
           elevation: 20,
           shadowColor: '#000000',
           shadowOffset: { width: 0, height: -4 },
@@ -51,21 +52,27 @@ const TabNavigator: React.FC = () => {
           marginBottom: 0,
           marginTop: 8,
         },
-        tabBarActiveTintColor: '#003087',
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarActiveTintColor: '#003087', // Blue color from top bar
+        tabBarInactiveTintColor: '#374151', // Charcoal color
         tabBarLabelPosition: 'below-icon',
-        tabBarButton: (props) => <CustomTabButton {...props} />,
-      }}
+        tabBarButton: (props) => (
+          <TouchableOpacity
+            {...props}
+            style={[props.style, { flex: 1 }]}
+            activeOpacity={1.0} // Remove press effect
+          />
+        ),
+      })}
     >
       <Tab.Screen
         name="Dashboard"
         component={DashboardScreen}
         options={{
           tabBarLabel: 'Dashboard',
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color, focused }) => (
             <SvgIcon 
               name="dashboard" 
-              size={20} 
+              size={focused ? 26 : 20} 
               color={color}
               accessibilityLabel="Dashboard"
             />
@@ -77,10 +84,10 @@ const TabNavigator: React.FC = () => {
         component={CMENavigator}
         options={{
           tabBarLabel: 'History',
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color, focused }) => (
             <SvgIcon 
               name="history" 
-              size={20} 
+              size={focused ? 26 : 20} 
               color={color}
               accessibilityLabel="History"
             />
@@ -98,10 +105,10 @@ const TabNavigator: React.FC = () => {
         component={CertificateVaultScreen}
         options={{
           tabBarLabel: 'Vault',
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color, focused }) => (
             <SvgIcon 
               name="vault" 
-              size={20} 
+              size={focused ? 26 : 20} 
               color={color}
               accessibilityLabel="Vault"
             />
@@ -113,10 +120,10 @@ const TabNavigator: React.FC = () => {
         component={SettingsScreen}
         options={{
           tabBarLabel: 'Settings',
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color, focused }) => (
             <SvgIcon 
               name="settings" 
-              size={20} 
+              size={focused ? 26 : 20} 
               color={color}
               accessibilityLabel="Settings"
             />
@@ -127,30 +134,6 @@ const TabNavigator: React.FC = () => {
   );
 };
 
-// Custom Tab Button Component for pressed column effect
-const CustomTabButton: React.FC<{
-  children: React.ReactNode;
-  onPress?: (event?: any) => void;
-  accessibilityState?: { selected?: boolean };
-}> = ({ children, onPress, accessibilityState }) => {
-  const focused = accessibilityState?.selected;
-  
-  return (
-    <TouchableOpacity
-      style={[
-        styles.tabColumn,
-        focused && styles.tabColumnPressed
-      ]}
-      onPress={(e) => {
-        console.log('🖱️ MainTabNavigator: Tab button pressed');
-        onPress?.(e);
-      }}
-      activeOpacity={0.7}
-    >
-      {children}
-    </TouchableOpacity>
-  );
-};
 
 export const MainTabNavigator: React.FC = () => {
   return (
@@ -200,21 +183,3 @@ export const MainTabNavigator: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  tabColumn: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-  },
-  tabColumnPressed: {
-    backgroundColor: '#F8F9FF',
-    borderTopWidth: 3,
-    borderTopColor: '#003087',
-    shadowColor: '#003087',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-});
