@@ -19,11 +19,11 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import * as Sharing from 'expo-sharing';
 import { theme } from '../../constants/theme';
-import { CMEStackParamList } from '../../types/navigation';
+import { MainTabParamList } from '../../types/navigation';
 import { StandardHeader } from '../../components';
 
-type CertificateViewerScreenNavigationProp = StackNavigationProp<CMEStackParamList, 'CertificateViewer'>;
-type CertificateViewerScreenRouteProp = RouteProp<CMEStackParamList, 'CertificateViewer'>;
+type CertificateViewerScreenNavigationProp = StackNavigationProp<MainTabParamList, 'CertificateViewer'>;
+type CertificateViewerScreenRouteProp = RouteProp<MainTabParamList, 'CertificateViewer'>;
 
 interface Props {
   navigation: CertificateViewerScreenNavigationProp;
@@ -79,7 +79,17 @@ export const CertificateViewerScreen: React.FC<Props> = ({ navigation, route }) 
   };
 
   const handleClose = () => {
-    navigation.goBack();
+    // Ensure we go back to the previous screen in the CME stack
+    console.log('CertificateViewer: Attempting to go back');
+    console.log('Can go back:', navigation.canGoBack());
+    
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      // Fallback: navigate to CMEHistory within the same stack
+      console.log('CertificateViewer: Fallback - navigating to CMEHistory');
+      navigation.navigate('CMEHistory');
+    }
   };
 
   return (

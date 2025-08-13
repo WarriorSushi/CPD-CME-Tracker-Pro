@@ -1,9 +1,10 @@
 import React, { useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Dimensions, Image, Alert } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { Card, Button, LoadingSpinner, CertificateViewer, SvgIcon, StandardHeader } from '../../components';
+import { Card, Button, LoadingSpinner, SvgIcon, StandardHeader } from '../../components';
 import { SimpleProgressRing } from '../../components/charts/SimpleProgressRing';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
@@ -38,7 +39,6 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
 
   const [refreshing, setRefreshing] = React.useState(false);
-  const [selectedCertificate, setSelectedCertificate] = React.useState<string | undefined>(undefined);
   const lastRefreshRef = useRef<number>(0);
   const REFRESH_DEBOUNCE_MS = 5000; // Only refresh if last refresh was more than 5 seconds ago
 
@@ -239,15 +239,6 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           </Card>
         </View>
 
-        {/* Add Entry Button */}
-        <View style={styles.addEntrySection}>
-          <Button
-            title="+ Add New Entry"
-            onPress={() => navigation.navigate('AddCME', { editEntry: undefined })}
-            style={styles.addEntryButton}
-          />
-        </View>
-
         {/* Quick Actions */}
         <View style={styles.quickActionsSection}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
@@ -288,64 +279,15 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Recent Activity */}
-        {recentEntries.length > 0 && (
-          <View style={styles.recentSection}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Recent Activity</Text>
-              <TouchableOpacity onPress={() => navigation.navigate('CME')}>
-                <Text style={styles.viewAllText}>View All</Text>
-              </TouchableOpacity>
-            </View>
-            
-            {recentEntries.map((entry, index) => (
-              <Card key={entry.id} variant="entry" style={styles.activityItem}>
-                <View style={styles.activityContent}>
-                  <TouchableOpacity 
-                    style={styles.activityIcon}
-                    onPress={() => {
-                      if (entry.certificatePath) {
-                        console.log('📄 Dashboard opening certificate:', entry.certificatePath);
-                        setSelectedCertificate(entry.certificatePath);
-                      }
-                    }}
-                    disabled={!entry.certificatePath}
-                  >
-                    {entry.certificatePath ? (
-                      <Image 
-                        source={{ uri: entry.certificatePath }}
-                        style={styles.certificateThumbnailDashboard}
-                        resizeMode="cover"
-                      />
-                    ) : (
-                      <Text style={styles.activityEmoji}>📖</Text>
-                    )}
-                  </TouchableOpacity>
-                  <View style={styles.activityDetails}>
-                    <Text style={styles.activityTitle} numberOfLines={1}>
-                      {entry.title}
-                    </Text>
-                    <Text style={styles.activityProvider} numberOfLines={1}>
-                      {entry.provider}
-                    </Text>
-                    <Text style={styles.activityDate}>
-                      {new Date(entry.dateAttended).toLocaleDateString()}
-                    </Text>
-                  </View>
-                  <View style={styles.activityCredits}>
-                    <Text style={styles.creditsValue}>{entry.creditsEarned}</Text>
-                    <Text style={styles.creditsUnit}>{user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits'}</Text>
-                  </View>
-                </View>
-              </Card>
-            ))}
-          </View>
-        )}
-
         {/* CME Event Reminders Section */}
         <View style={styles.sectionContainer}>
           <Card style={styles.sectionCard}>
-          <View style={styles.cardHeader}>
+          <LinearGradient
+            colors={['#36454F', '#000000']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.cardHeader}
+          >
             <Text style={styles.cardHeaderTitle}>CME Event Reminders</Text>
             <Button
               title="+ Add Reminder"
@@ -354,7 +296,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
               size="small"
               style={styles.headerButton}
             />
-          </View>
+          </LinearGradient>
           
           <View style={styles.cardContent}>
             <Text style={styles.sectionSubtitle}>
@@ -439,7 +381,12 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         {licenses && licenses.length > 0 && (
           <View style={styles.sectionContainer}>
             <Card style={styles.sectionCard}>
-            <View style={styles.cardHeader}>
+            <LinearGradient
+              colors={['#36454F', '#000000']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.cardHeader}
+            >
               <Text style={styles.cardHeaderTitle}>Your Licenses</Text>
               <Button
                 title="+ Add License"
@@ -448,7 +395,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 size="small"
                 style={styles.headerButton}
               />
-            </View>
+            </LinearGradient>
             
             <View style={styles.cardContent}>
               <Text style={styles.sectionSubtitle}>
@@ -630,16 +577,64 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         )}
 
+        {/* Recent Activity */}
+        {recentEntries.length > 0 && (
+          <View style={styles.recentSection}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Recent Activity</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('CME')}>
+                <Text style={styles.viewAllText}>View All</Text>
+              </TouchableOpacity>
+            </View>
+            
+            {recentEntries.map((entry, index) => (
+              <Card key={entry.id} variant="entry" style={styles.activityItem}>
+                <View style={styles.activityContent}>
+                  <TouchableOpacity 
+                    style={styles.activityIcon}
+                    onPress={() => {
+                      if (entry.certificatePath) {
+                        console.log('📄 Dashboard opening certificate:', entry.certificatePath);
+                        (navigation.getParent() as any).navigate('CertificateViewer', { imageUri: entry.certificatePath });
+                      }
+                    }}
+                    disabled={!entry.certificatePath}
+                  >
+                    {entry.certificatePath ? (
+                      <Image 
+                        source={{ uri: entry.certificatePath }}
+                        style={styles.certificateThumbnailDashboard}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <Text style={styles.activityEmoji}>📖</Text>
+                    )}
+                  </TouchableOpacity>
+                  <View style={styles.activityDetails}>
+                    <Text style={styles.activityTitle} numberOfLines={1}>
+                      {entry.title}
+                    </Text>
+                    <Text style={styles.activityProvider} numberOfLines={1}>
+                      {entry.provider}
+                    </Text>
+                    <Text style={styles.activityDate}>
+                      {new Date(entry.dateAttended).toLocaleDateString()}
+                    </Text>
+                  </View>
+                  <View style={styles.activityCredits}>
+                    <Text style={styles.creditsValue}>{entry.creditsEarned}</Text>
+                    <Text style={styles.creditsUnit}>{user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits'}</Text>
+                  </View>
+                </View>
+              </Card>
+            ))}
+          </View>
+        )}
+
         {/* Bottom spacer for tab bar */}
         <View style={styles.bottomSpacer} />
       </ScrollView>
 
-      {/* Certificate Viewer */}
-      <CertificateViewer
-        visible={!!selectedCertificate}
-        imageUri={selectedCertificate}
-        onClose={() => setSelectedCertificate(undefined)}
-      />
 
     </View>
   );
@@ -1121,7 +1116,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   cardHeader: {
-    backgroundColor: theme.colors.gray.medium, // Gray header background
+    backgroundColor: '#36454F', // Charcoal header background
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border.light,
     paddingVertical: theme.spacing[4],

@@ -373,11 +373,8 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         return;
       }
 
-      // Navigate to the certificate viewer screen in the CME stack
-      navigation.navigate('CME', { 
-        screen: 'CertificateViewer', 
-        params: { imageUri: certificate.filePath } 
-      });
+      // Navigate to the certificate viewer screen in the main stack
+      (navigation.getParent() as any).navigate('CertificateViewer', { imageUri: certificate.filePath });
     } catch (error) {
       console.error('Error viewing certificate:', error);
       Alert.alert('Error', 'Failed to view certificate.');

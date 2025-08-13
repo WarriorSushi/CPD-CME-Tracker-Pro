@@ -33,6 +33,7 @@ export type MainTabParamList = {
   };
   AddLicense: undefined;
   AddReminder: undefined;
+  CertificateViewer: { imageUri: string };
 };
 
 export type TabParamList = {
@@ -45,7 +46,6 @@ export type TabParamList = {
 export type CMEStackParamList = {
   CMEHistory: undefined;
   CMEDetails: { entryId: number };
-  CertificateViewer: { imageUri: string };
 };
 
 export type VaultStackParamList = {

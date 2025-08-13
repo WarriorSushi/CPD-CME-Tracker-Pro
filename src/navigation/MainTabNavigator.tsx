@@ -15,6 +15,7 @@ import { SettingsScreen } from '../screens/settings/SettingsScreen';
 import { AddCMEScreen } from '../screens/cme/AddCMEScreen';
 import { AddLicenseScreen } from '../screens/settings/AddLicenseScreen';
 import { AddReminderScreen } from '../screens/dashboard/AddReminderScreen';
+import { CertificateViewerScreen } from '../screens/cme/CertificateViewerScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createStackNavigator<MainTabParamList>();
@@ -182,6 +183,14 @@ export const MainTabNavigator: React.FC = () => {
       <Stack.Screen
         name="AddReminder"
         component={AddReminderScreen}
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="CertificateViewer"
+        component={CertificateViewerScreen}
         options={{
           presentation: 'modal',
           headerShown: false,

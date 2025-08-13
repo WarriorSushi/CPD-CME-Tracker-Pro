@@ -246,7 +246,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
             style={styles.certificateThumbnailContainer}
             onPress={() => {
               console.log('📄 Opening certificate:', item.certificatePath);
-              navigation.navigate('CertificateViewer', { imageUri: item.certificatePath });
+              (navigation.getParent() as any).navigate('CertificateViewer', { imageUri: item.certificatePath });
             }}
           >
             <Image 
