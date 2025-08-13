@@ -45,8 +45,8 @@ export const StandardHeader: React.FC<StandardHeaderProps> = ({
     <>
       <StatusBar 
         barStyle="light-content" 
-        backgroundColor="#003087"
-        translucent={false}
+        backgroundColor="transparent"
+        translucent={true}
       />
       <LinearGradient
         colors={['#003087', '#001a4d']} // Current blue to darker blue
@@ -124,6 +124,7 @@ export const StandardHeader: React.FC<StandardHeaderProps> = ({
             )
           )}
         </View>
+        </View>
       </LinearGradient>
     </>
   );
@@ -134,8 +135,8 @@ const styles = StyleSheet.create({
     // backgroundColor removed - using LinearGradient
     paddingHorizontal: theme.spacing[4],
     paddingBottom: theme.spacing[4],
-    borderBottomLeftRadius: theme.spacing[3],
-    borderBottomRightRadius: theme.spacing[3],
+    borderBottomLeftRadius: theme.spacing[5],
+    borderBottomRightRadius: theme.spacing[5],
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

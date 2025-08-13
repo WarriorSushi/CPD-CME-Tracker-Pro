@@ -8,13 +8,14 @@ import {
   RefreshControl,
   Alert
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { CompositeNavigationProp } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-import { Card, Button, LoadingSpinner, StandardHeader } from '../../components';
+import { Card, Button, LoadingSpinner, StandardHeader, SvgIcon } from '../../components';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { useOnboardingContext } from '../../contexts/OnboardingContext';
@@ -401,34 +402,150 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
           </TouchableOpacity>
         </Card>
 
-        {/* License Management Section */}
-        <Card style={styles.modernSection}>
-          <View style={styles.modernSectionHeader}>
-            <Text style={styles.modernSectionTitle}>🏥 License Management</Text>
-            <TouchableOpacity
-              style={styles.addLicenseButton}
-              onPress={() => {
-                navigation.navigate('AddLicense');
-              }}
+        {/* Your Licenses Section */}
+        {licenses && licenses.length > 0 && (
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionCard}>
+            <LinearGradient
+              colors={['#36454F', '#000000']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.cardHeader}
             >
-              <Text style={styles.addLicenseText}>+ Add License</Text>
-            </TouchableOpacity>
-          </View>
+              <Text style={styles.cardHeaderTitle}>Your Licenses</Text>
+              <Button
+                title="+ Add License"
+                onPress={() => (navigation.getParent() as any).navigate('AddLicense')}
+                variant="primary"
+                size="small"
+                style={styles.headerButton}
+              />
+            </LinearGradient>
+            
+            <LinearGradient
+              colors={['#FBFBF9', '#FEFEFE']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.cardContent}
+            >
+              <Text style={styles.sectionSubtitle}>
+                View and manage all your professional licenses here. Tap Edit to update expiration dates after renewal.
+              </Text>
+            
+            {(() => {
+              const calculateDaysUntil = (expirationDateString: string): number => {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                const expDate = new Date(expirationDateString);
+                if (isNaN(expDate.getTime())) {
+                  console.error('🚨 Invalid date string:', expirationDateString);
+                  return 0;
+                }
+                expDate.setHours(0, 0, 0, 0);
+                
+                const msPerDay = 1000 * 60 * 60 * 24;
+                const diffMs = expDate.getTime() - today.getTime();
+                return Math.ceil(diffMs / msPerDay);
+              };
+              
+              const allLicenses = licenses
+                .map(license => {
+                  const daysUntil = calculateDaysUntil(license.expirationDate);
+                  return { ...license, daysUntil };
+                })
+                .sort((a, b) => a.daysUntil - b.daysUntil);
 
-          {isLoadingLicenses ? (
-            <LoadingSpinner size={20} />
-          ) : licenses.length > 0 ? (
-            <View style={styles.licensesList}>
-              {licenses.map(renderLicenseCard)}
+              return allLicenses.map((license) => {
+                const { daysUntil } = license;
+                let statusColor = theme.colors.success;
+                let statusText = 'Active';
+                let statusIcon = <SvgIcon name="tickWithCircle" size={20} />;
+
+                if (daysUntil < 0) {
+                  statusColor = theme.colors.error;
+                  statusText = 'Expired';
+                  statusIcon = <Text style={{ fontSize: 16 }}>🚨</Text>;
+                } else if (daysUntil <= 30) {
+                  statusColor = theme.colors.error;
+                  statusText = `${daysUntil} days left`;
+                  statusIcon = <Text style={{ fontSize: 16 }}>⚠️</Text>;
+                } else if (daysUntil <= 90) {
+                  statusColor = theme.colors.warning;
+                  statusText = `${daysUntil} days left`;
+                  statusIcon = <Text style={{ fontSize: 16 }}>🗓️</Text>;
+                }
+
+                return (
+                  <Card key={license.id} variant="entry" style={styles.licenseCardNew}>
+                    <View style={styles.licenseHeader}>
+                      <View style={styles.licenseMainInfo}>
+                        <View style={styles.licenseIconContainer}>
+                          {statusIcon}
+                        </View>
+                        <View style={styles.licenseDetails}>
+                          <Text style={styles.licenseType}>{license.licenseType}</Text>
+                          <Text style={styles.licenseAuthority}>{license.issuingAuthority}</Text>
+                          {license.licenseNumber && (
+                            <Text style={styles.licenseNumber}>#{license.licenseNumber}</Text>
+                          )}
+                        </View>
+                      </View>
+                      
+                      <View style={styles.licenseStatusContainer}>
+                        <View style={[styles.licenseStatusBadge, { backgroundColor: statusColor }]}>
+                          <Text style={styles.licenseStatusText}>{statusText}</Text>
+                        </View>
+                        <Text style={styles.licenseExpiration}>
+                          Expires {new Date(license.expirationDate).toLocaleDateString()}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.licenseActions}>
+                      <TouchableOpacity
+                        style={styles.editLicenseButton}
+                        onPress={() => {
+                          (navigation.getParent() as any).navigate('AddLicense', { editLicense: license });
+                        }}
+                      >
+                        <Text style={styles.editLicenseText}>Edit</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.licenseRenewalInstructions}>
+                      <Text style={styles.renewalInstructionsText}>
+                        💡 Already renewed? Tap "Edit" and update the expiration date.
+                      </Text>
+                    </View>
+                  </Card>
+                );
+              });
+            })()}
+            
+            </LinearGradient>
             </View>
-          ) : (
-            <View style={styles.modernEmptyState}>
-              <Text style={styles.emptyIcon}>📋</Text>
-              <Text style={styles.emptyText}>No licenses added yet</Text>
-              <Text style={styles.emptySubtext}>Add your professional licenses to track renewal deadlines</Text>
-            </View>
-          )}
-        </Card>
+          </View>
+        )}
+
+        {(!licenses || licenses.length === 0) && (
+          <View style={styles.noLicensesSection}>
+            <Card style={styles.noLicensesCard}>
+              <View style={styles.noLicensesContent}>
+                <Text style={styles.noLicensesIcon}>📋</Text>
+                <Text style={styles.noLicensesTitle}>No Licenses Added</Text>
+                <Text style={styles.noLicensesSubtitle}>
+                  Add your professional licenses to track renewal deadlines and stay compliant.
+                </Text>
+                <Button
+                  title="Add Your First License"
+                  onPress={() => (navigation.getParent() as any).navigate('AddLicense')}
+                  style={styles.addEntryButton}
+                />
+              </View>
+            </Card>
+          </View>
+        )}
 
         {/* Data Management Section */}
         <Card style={styles.modernSection}>
@@ -1021,5 +1138,167 @@ const styles = StyleSheet.create({
   // Bottom spacing for tab bar
   bottomSpacing: {
     height: 100, // Ensure content is fully above bottom tab bar
+  },
+
+  // New License Section Styles (from dashboard)
+  sectionContainer: {
+    paddingHorizontal: theme.spacing[4],
+    marginBottom: theme.spacing[6],
+    backgroundColor: '#FFF7EC',
+    paddingVertical: theme.spacing[3],
+  },
+  sectionCard: {
+    padding: 0,
+    borderRadius: theme.spacing[3],
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#36454F',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: theme.spacing[4],
+    paddingVertical: theme.spacing[4],
+  },
+  cardHeaderTitle: {
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.background,
+  },
+  headerButton: {
+    minWidth: 100,
+  },
+  cardContent: {
+    padding: theme.spacing[4],
+  },
+  sectionSubtitle: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    lineHeight: 20,
+    marginBottom: theme.spacing[4],
+  },
+  licenseCardNew: {
+    marginBottom: theme.spacing[4],
+  },
+  licenseHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: theme.spacing[3],
+  },
+  licenseMainInfo: {
+    flexDirection: 'row',
+    flex: 1,
+  },
+  licenseIconContainer: {
+    marginRight: theme.spacing[3],
+    marginTop: theme.spacing[1],
+  },
+  licenseDetails: {
+    flex: 1,
+  },
+  licenseType: {
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[1],
+  },
+  licenseAuthority: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    marginBottom: theme.spacing[1],
+  },
+  licenseNumber: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.secondary,
+  },
+  licenseStatusContainer: {
+    alignItems: 'flex-end',
+  },
+  licenseStatusBadge: {
+    paddingHorizontal: theme.spacing[2],
+    paddingVertical: theme.spacing[1],
+    borderRadius: theme.borderRadius.sm,
+    marginBottom: theme.spacing[1],
+  },
+  licenseStatusText: {
+    fontSize: theme.typography.fontSize.xs,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.background,
+  },
+  licenseExpiration: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.secondary,
+  },
+  licenseActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: theme.spacing[2],
+  },
+  editLicenseButton: {
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: theme.spacing[3],
+    paddingVertical: theme.spacing[2],
+    borderRadius: theme.spacing[1],
+  },
+  editLicenseText: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.medium,
+    color: theme.colors.background,
+  },
+  licenseRenewalInstructions: {
+    backgroundColor: '#FFF7EC',
+    borderRadius: theme.spacing[2],
+    padding: theme.spacing[2],
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
+  },
+  renewalInstructionsText: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+  },
+  noLicensesSection: {
+    paddingHorizontal: theme.spacing[4],
+    marginBottom: theme.spacing[4],
+    backgroundColor: '#FFF7EC',
+    paddingVertical: theme.spacing[3],
+  },
+  noLicensesCard: {
+    alignItems: 'center',
+    padding: theme.spacing[6],
+  },
+  noLicensesContent: {
+    alignItems: 'center',
+  },
+  noLicensesIcon: {
+    fontSize: 48,
+    marginBottom: theme.spacing[3],
+  },
+  noLicensesTitle: {
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[2],
+    textAlign: 'center',
+  },
+  noLicensesSubtitle: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: theme.spacing[4],
+  },
+  addEntryButton: {
+    minWidth: 200,
   },
 });
