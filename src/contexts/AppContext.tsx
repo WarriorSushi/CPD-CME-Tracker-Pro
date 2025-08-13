@@ -110,6 +110,7 @@ interface AppContextType {
   
   // User actions
   updateUser: (userData: Partial<User>) => Promise<boolean>;
+  updateUserProfile: (userData: Partial<User>) => Promise<boolean>; // Alias for profile updates
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -707,6 +708,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     updateEventReminder,
     deleteEventReminder,
     updateUser,
+    updateUserProfile: updateUser, // Alias for profile updates
   }), [
     user,
     recentCMEEntries,

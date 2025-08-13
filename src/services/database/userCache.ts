@@ -40,11 +40,11 @@ export async function getUserCached(): Promise<User | null> {
       const userData = result.success ? result.data : null;
       
       // Cache the result
-      lastUser = userData;
+      lastUser = userData || null;
       lastUserAt = Date.now();
       
       devLog('✅ getUserCached: Fresh user data cached');
-      return userData;
+      return userData || null;
     } catch (error) {
       console.error('💥 getUserCached: Error fetching user:', error);
       return null;

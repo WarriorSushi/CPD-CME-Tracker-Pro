@@ -6,7 +6,8 @@ import {
   ScrollView, 
   TouchableOpacity,
   RefreshControl,
-  Alert
+  Alert,
+  Image
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -371,7 +372,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
               <Button
                 title="Edit"
                 onPress={() => {
-                  Alert.alert('Edit Profile', 'Profile editing will be available in a future update.');
+                  (navigation as any).navigate('ProfileEdit');
                 }}
                 variant="primary"
                 size="small"
@@ -386,15 +387,26 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
               style={styles.cardContent}
             >
               <View style={styles.profileHeader}>
-                <View style={styles.profileIconWrapper}>
-                  <SvgIcon name="profile" size={36} color="#1e40af" />
+                <View style={styles.profilePictureContainer}>
+                  {user?.profilePicturePath ? (
+                    <Image 
+                      source={{ uri: user.profilePicturePath }}
+                      style={styles.profilePicture}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={styles.profileIconWrapper}>
+                      <SvgIcon name="profile" size={36} color="#1e40af" />
+                    </View>
+                  )}
                 </View>
                 <View style={styles.profileInfo}>
                   <Text style={styles.profileName}>
-                    {user?.profession || 'Healthcare Professional'}
+                    {user?.profileName || user?.profession || 'Healthcare Professional'}
                   </Text>
                   <Text style={styles.profileRole}>
                     {user?.profession || 'Profession not set'}
+                    {user?.age && ` • ${user.age} years old`}
                   </Text>
                 </View>
               </View>
@@ -658,6 +670,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: theme.spacing[4],
+  },
+  profilePictureContainer: {
+    marginRight: theme.spacing[4],
+  },
+  profilePicture: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
+  },
+  profileIconWrapper: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: theme.colors.gray.light,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: theme.colors.border.light,
   },
   profileAvatar: {
     width: 60,

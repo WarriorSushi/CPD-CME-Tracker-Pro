@@ -148,7 +148,7 @@ export async function checkDatabaseHealth(): Promise<boolean> {
     }
     
     // Try basic operations
-    const testResult = await db.getFirstAsync('SELECT 1 as test');
+    const testResult = await db.getFirstAsync<{ test: number }>('SELECT 1 as test');
     if (!testResult || testResult.test !== 1) {
       devLog('⚠️ checkDatabaseHealth: Basic test query failed');
       return false;

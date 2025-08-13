@@ -143,7 +143,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <StandardHeader
-        title={`${getGreeting()}, ${user?.profession || 'Professional'}`}
+        title={`${getGreeting()}, ${user?.profileName || user?.profession || 'Professional'}`}
         showBackButton={false}
         rightIcon="profile"
         rightIconPress={() => navigation.navigate('Settings')}

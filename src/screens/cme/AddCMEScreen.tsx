@@ -247,7 +247,8 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       // Generate thumbnail
       let thumbnailPath: string | undefined;
       try {
-        thumbnailPath = await ThumbnailService.generateThumbnail(imageAsset.uri, newFileName);
+        const thumbnailResult = await ThumbnailService.generateThumbnail(imageAsset.uri, newFileName);
+        thumbnailPath = thumbnailResult.thumbnailUri;
       } catch (thumbnailError) {
         console.warn('⚠️ Thumbnail generation failed:', thumbnailError);
       }
@@ -264,7 +265,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
           fileSize: fileSize,
           mimeType: `image/${extension}`,
           thumbnailPath: thumbnailPath,
-          cmeEntryId: null, // Will be set after CME entry is created
+          cmeEntryId: undefined, // Will be set after CME entry is created
         };
 
         const addResult = await databaseOperations.certificates.addCertificate(certificateData);
@@ -356,7 +357,8 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       try {
         const isImageType = file.mimeType && SUPPORTED_FILE_TYPES.IMAGES.includes(file.mimeType as any);
         if (isImageType) {
-          thumbnailPath = await ThumbnailService.generateThumbnail(file.uri, newFileName);
+          const thumbnailResult = await ThumbnailService.generateThumbnail(file.uri, newFileName);
+          thumbnailPath = thumbnailResult.thumbnailUri;
           console.log('✅ Thumbnail generated for image file');
         } else {
           // For documents, we'll just use document name and icon - no thumbnail needed
@@ -374,7 +376,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
           fileSize: file.size || 0,
           mimeType: file.mimeType || 'application/pdf',
           thumbnailPath: thumbnailPath,
-          cmeEntryId: null, // Will be set after CME entry is created
+          cmeEntryId: undefined, // Will be set after CME entry is created
         };
 
         const addResult = await databaseOperations.certificates.addCertificate(certificateData);

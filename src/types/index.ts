@@ -8,6 +8,10 @@ export interface User {
   requirementPeriod: number; // Period in years (1, 2, 3, 5, etc.)
   cycleStartDate?: string; // When their current requirement cycle started
   cycleEndDate?: string; // When their current requirement cycle ends
+  // Profile information
+  profileName?: string; // User's display name
+  age?: number; // User's age
+  profilePicturePath?: string; // Path to profile picture
   createdAt: string;
 }
 

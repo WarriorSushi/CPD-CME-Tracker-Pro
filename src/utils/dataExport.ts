@@ -123,6 +123,8 @@ Generated: ${new Date().toLocaleDateString()}
 
 PROFILE INFORMATION
 ==================
+${user.profileName ? `Name: ${user.profileName}` : ''}
+${user.age ? `Age: ${user.age} years` : ''}
 Profession: ${user.profession}
 Credit System: ${user.creditSystem}
 Annual Requirement: ${user.annualRequirement} ${creditPlural}

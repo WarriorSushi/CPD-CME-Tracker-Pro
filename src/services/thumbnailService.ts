@@ -68,7 +68,7 @@ export class ThumbnailService {
         thumbnailUri: thumbnailPath,
         width: thumbnail.width,
         height: thumbnail.height,
-        fileSize: thumbnailInfo.size || 0,
+        fileSize: (thumbnailInfo as any).size || 0,
       };
 
     } catch (error) {
@@ -132,7 +132,7 @@ export class ThumbnailService {
         thumbnailUri: thumbnailPath,
         width: placeholderThumbnail.width,
         height: placeholderThumbnail.height,
-        fileSize: thumbnailInfo.size || 0,
+        fileSize: (thumbnailInfo as any).size || 0,
       };
 
     } catch (error) {
@@ -199,7 +199,7 @@ export class ThumbnailService {
       for (const file of files) {
         const filePath = `${thumbnailsDir}${file}`;
         const fileInfo = await FileSystem.getInfoAsync(filePath);
-        totalSize += fileInfo.size || 0;
+        totalSize += (fileInfo as any).size || 0;
       }
 
       return {

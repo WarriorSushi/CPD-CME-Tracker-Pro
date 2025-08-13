@@ -144,7 +144,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
 
       // Generate thumbnail
       console.log('📸 Generating thumbnail...');
-      let thumbnailPath = null;
+      let thumbnailPath: string | undefined = undefined;
       try {
         const thumbnailResult = await ThumbnailService.generateThumbnail(imageAsset.uri, newFileName);
         thumbnailPath = thumbnailResult.thumbnailUri;
@@ -157,10 +157,10 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
       const addResult = await databaseOperations.certificates.addCertificate({
         filePath: newFilePath,
         fileName: newFileName,
-        fileSize: fileInfo.size,
+        fileSize: (fileInfo as any).size || 0,
         mimeType: 'image/jpeg',
         thumbnailPath: thumbnailPath || undefined,
-        cmeEntryId: null // Standalone certificate, not linked to a CME entry
+        cmeEntryId: undefined // Standalone certificate, not linked to a CME entry
       });
 
       if (addResult.success && addResult.data) {
@@ -230,7 +230,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
 
       // Generate thumbnail only for images
       console.log('📸 Generating thumbnail for uploaded file...');
-      let thumbnailPath = null;
+      let thumbnailPath: string | undefined = undefined;
       try {
         if (isImageType) {
           const thumbnailResult = await ThumbnailService.generateThumbnail(file.uri, file.name);
@@ -251,7 +251,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         fileSize: file.size || 0,
         mimeType: file.mimeType || 'application/pdf',
         thumbnailPath,
-        cmeEntryId: null, // Not associated with any specific CME entry
+        cmeEntryId: undefined, // Not associated with any specific CME entry
       };
 
       console.log('💾 Adding certificate to vault database:', certificateData);

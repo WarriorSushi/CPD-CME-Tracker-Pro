@@ -38,18 +38,45 @@ export const userOperations = {
       const db = await getDatabase(); // Get DB from singleton
       
       return dbMutex.runDatabaseRead('getCurrentUser', async () => {
-        const user = await getFirstSafe<any>(db, `
-          SELECT 
-            id,
-            profession,
-            credit_system as creditSystem,
-            annual_requirement as annualRequirement,
-            requirement_period as requirementPeriod,
-            cycle_start_date as cycleStartDate,
-            cycle_end_date as cycleEndDate,
-            created_at as createdAt
-          FROM users WHERE id = 1
-        `);
+        // First check which columns exist to build safe query
+        const columns = await db.getAllAsync('PRAGMA table_info(users)');
+        const columnNames = columns.map((col: any) => col.name);
+        
+        const hasProfileColumns = columnNames.includes('profile_name') && columnNames.includes('age') && columnNames.includes('profile_picture_path');
+        
+        let query;
+        if (hasProfileColumns) {
+          query = `
+            SELECT 
+              id,
+              profession,
+              credit_system as creditSystem,
+              annual_requirement as annualRequirement,
+              requirement_period as requirementPeriod,
+              cycle_start_date as cycleStartDate,
+              cycle_end_date as cycleEndDate,
+              profile_name as profileName,
+              age,
+              profile_picture_path as profilePicturePath,
+              created_at as createdAt
+            FROM users WHERE id = 1
+          `;
+        } else {
+          query = `
+            SELECT 
+              id,
+              profession,
+              credit_system as creditSystem,
+              annual_requirement as annualRequirement,
+              requirement_period as requirementPeriod,
+              cycle_start_date as cycleStartDate,
+              cycle_end_date as cycleEndDate,
+              created_at as createdAt
+            FROM users WHERE id = 1
+          `;
+        }
+        
+        const user = await getFirstSafe<any>(db, query);
         
         return {
           success: true,
@@ -71,6 +98,10 @@ export const userOperations = {
       const db = await getDatabase();
       
       return dbMutex.runDatabaseWrite('updateUser', async () => {
+        // Check which columns exist to avoid SQL errors
+        const columns = await db.getAllAsync('PRAGMA table_info(users)');
+        const columnNames = columns.map((col: any) => col.name);
+        const hasProfileColumns = columnNames.includes('profile_name') && columnNames.includes('age') && columnNames.includes('profile_picture_path');
         
         // First, check if user exists
         const existingUser = await getFirstSafe<any>(db, 'SELECT id FROM users WHERE id = 1');
@@ -112,6 +143,21 @@ export const userOperations = {
             createPlaceholders.push('?');
             createValues.push(userData.cycleEndDate);
           }
+          if (hasProfileColumns && userData.profileName) {
+            createFields.push('profile_name');
+            createPlaceholders.push('?');
+            createValues.push(userData.profileName);
+          }
+          if (hasProfileColumns && userData.age !== undefined) {
+            createFields.push('age');
+            createPlaceholders.push('?');
+            createValues.push(userData.age);
+          }
+          if (hasProfileColumns && userData.profilePicturePath !== undefined) {
+            createFields.push('profile_picture_path');
+            createPlaceholders.push('?');
+            createValues.push(userData.profilePicturePath);
+          }
           
           await runSafe(db, `
             INSERT INTO users (${createFields.join(', ')})
@@ -148,6 +194,18 @@ export const userOperations = {
         if (userData.cycleEndDate) {
           fields.push('cycle_end_date = ?');
           values.push(userData.cycleEndDate);
+        }
+        if (hasProfileColumns && userData.profileName !== undefined) {
+          fields.push('profile_name = ?');
+          values.push(userData.profileName);
+        }
+        if (hasProfileColumns && userData.age !== undefined) {
+          fields.push('age = ?');
+          values.push(userData.age);
+        }
+        if (hasProfileColumns && userData.profilePicturePath !== undefined) {
+          fields.push('profile_picture_path = ?');
+          values.push(userData.profilePicturePath);
         }
 
         if (fields.length === 0) {

@@ -10,7 +10,7 @@ export class OCRService {
       console.log('🔍 OCRService: Starting text extraction from:', imageUri);
       
       const result = await extractTextFromImage(imageUri);
-      const extractedText = result.text || '';
+      const extractedText = (result as any).text || '';
       
       console.log('📄 OCRService: Extracted text length:', extractedText.length);
       console.log('📄 OCRService: Raw text preview:', extractedText.substring(0, 200));

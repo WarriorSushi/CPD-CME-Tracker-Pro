@@ -25,22 +25,42 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
     if (tableExists) {
       console.log('🔍 Migration: Checking if users table needs migration...');
       
-      // Check if country column exists (means we need migration)
-      const countryColumnExists = await db.getFirstAsync(`
-        PRAGMA table_info(users)
-      `).then(async () => {
-        const columns = await db.getAllAsync('PRAGMA table_info(users)');
-        return columns.some((col: any) => col.name === 'country');
+      // Check if we need migration (either country column exists or profile columns are missing)
+      const columns = await db.getAllAsync('PRAGMA table_info(users)');
+      const columnNames = columns.map((col: any) => col.name);
+      
+      const countryColumnExists = columnNames.includes('country');
+      const profileColumnsExist = columnNames.includes('profile_name') && columnNames.includes('age') && columnNames.includes('profile_picture_path');
+      
+      // Force migration if any profile column is missing - make this more explicit
+      const needsMigration = countryColumnExists || !profileColumnsExist;
+      
+      console.log('🔍 Migration check - Column names:', columnNames);
+      console.log('🔍 Migration check - Country exists:', countryColumnExists, 'Profile exists:', profileColumnsExist);
+      console.log('🔍 Migration check - Needs migration:', needsMigration);
+      console.log('🔍 Migration check - Specific profile columns missing:', {
+        profile_name: !columnNames.includes('profile_name'),
+        age: !columnNames.includes('age'),
+        profile_picture_path: !columnNames.includes('profile_picture_path')
       });
       
-      if (countryColumnExists) {
-        console.log('🔄 Migration: Country column found, recreating users table...');
+      // FORCE migration for now to ensure profile columns are added
+      if (needsMigration || !profileColumnsExist) {
+        console.log('🔄 Migration: Recreating users table...');
+        console.log('🔄 Migration reason - Country exists:', countryColumnExists, 'Profile missing:', !profileColumnsExist);
         
-        // Backup existing user data (exclude country)
+        // Backup existing user data - only select columns that exist
+        const selectColumns = ['id', 'profession', 'credit_system', 'annual_requirement', 
+                              'requirement_period', 'cycle_start_date', 'cycle_end_date'];
+        
+        // Add profile columns only if they exist
+        if (columnNames.includes('profile_name')) selectColumns.push('profile_name');
+        if (columnNames.includes('age')) selectColumns.push('age');
+        if (columnNames.includes('profile_picture_path')) selectColumns.push('profile_picture_path');
+        selectColumns.push('created_at');
+        
         const existingUsers = await db.getAllAsync(`
-          SELECT id, profession, credit_system, annual_requirement, 
-                 requirement_period, cycle_start_date, cycle_end_date, created_at
-          FROM users
+          SELECT ${selectColumns.join(', ')} FROM users
         `);
         
         console.log('📦 Migration: Backed up', existingUsers.length, 'user records');
@@ -59,6 +79,9 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
             requirement_period INTEGER DEFAULT 1,
             cycle_start_date DATE,
             cycle_end_date DATE,
+            profile_name TEXT,
+            age INTEGER,
+            profile_picture_path TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
           );
@@ -69,8 +92,8 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
         for (const user of existingUsers) {
           const userData = user as any; // Type assertion for migration data
           await db.runAsync(`
-            INSERT INTO users (id, profession, credit_system, annual_requirement, requirement_period, cycle_start_date, cycle_end_date, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO users (id, profession, credit_system, annual_requirement, requirement_period, cycle_start_date, cycle_end_date, profile_name, age, profile_picture_path, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `, [
             userData.id,
             userData.profession,
@@ -79,6 +102,9 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
             userData.requirement_period || 1,
             userData.cycle_start_date || null,
             userData.cycle_end_date || null,
+            userData.profile_name || null,
+            userData.age || null,
+            userData.profile_picture_path || null,
             userData.created_at
           ]);
         }
@@ -99,6 +125,9 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
           requirement_period INTEGER DEFAULT 1,
           cycle_start_date DATE,
           cycle_end_date DATE,
+          profile_name TEXT,
+          age INTEGER,
+          profile_picture_path TEXT,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );

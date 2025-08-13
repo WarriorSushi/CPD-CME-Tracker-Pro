@@ -16,6 +16,7 @@ import { AddCMEScreen } from '../screens/cme/AddCMEScreen';
 import { AddLicenseScreen } from '../screens/settings/AddLicenseScreen';
 import { AddReminderScreen } from '../screens/dashboard/AddReminderScreen';
 import { CertificateViewerScreen } from '../screens/cme/CertificateViewerScreen';
+import { ProfileEditScreen } from '../screens/settings/ProfileEditScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createStackNavigator<MainTabParamList>();
@@ -174,6 +175,14 @@ export const MainTabNavigator: React.FC = () => {
       <Stack.Screen
         name="CertificateViewer"
         component={CertificateViewerScreen}
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="ProfileEdit"
+        component={ProfileEditScreen}
         options={{
           presentation: 'modal',
           headerShown: false,
