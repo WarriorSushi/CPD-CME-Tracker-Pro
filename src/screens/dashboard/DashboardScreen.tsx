@@ -160,7 +160,12 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
       >
         {/* Enhanced Progress Section */}
         <View style={styles.progressSection}>
-          <Card style={styles.progressCard}>
+          <LinearGradient
+            colors={['#FBFBF9', '#FEFEFE']} // Current card color to lighter
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.progressCard, styles.cardGradient]}
+          >
             <View style={styles.progressHeader}>
               <View style={styles.progressTitleContainer}>
                 <Text style={styles.progressMainTitle}>Your Progress</Text>
@@ -236,7 +241,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 </Text>
               </View>
             </View>
-          </Card>
+          </LinearGradient>
         </View>
 
         {/* Quick Actions */}
@@ -281,7 +286,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* CME Event Reminders Section */}
         <View style={styles.sectionContainer}>
-          <Card style={styles.sectionCard}>
+          <View style={styles.sectionCard}>
           <LinearGradient
             colors={['#36454F', '#000000']}
             start={{ x: 0, y: 0 }}
@@ -298,7 +303,12 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             />
           </LinearGradient>
           
-          <View style={styles.cardContent}>
+          <LinearGradient
+            colors={['#FBFBF9', '#FEFEFE']} // Current card color to lighter
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.cardContent}
+          >
             <Text style={styles.sectionSubtitle}>
               Set reminders for upcoming CME events, conferences, and workshops so you never miss important learning opportunities.
             </Text>
@@ -373,14 +383,14 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             </Card>
           )}
           
+          </LinearGradient>
           </View>
-          </Card>
         </View>
 
         {/* License Management Section */}
         {licenses && licenses.length > 0 && (
           <View style={styles.sectionContainer}>
-            <Card style={styles.sectionCard}>
+            <View style={styles.sectionCard}>
             <LinearGradient
               colors={['#36454F', '#000000']}
               start={{ x: 0, y: 0 }}
@@ -390,14 +400,19 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
               <Text style={styles.cardHeaderTitle}>Your Licenses</Text>
               <Button
                 title="+ Add License"
-                onPress={() => navigation.navigate('Settings', { screen: 'AddLicense' })}
+                onPress={() => (navigation.getParent() as any).navigate('AddLicense')}
                 variant="primary"
                 size="small"
                 style={styles.headerButton}
               />
             </LinearGradient>
             
-            <View style={styles.cardContent}>
+            <LinearGradient
+              colors={['#FBFBF9', '#FEFEFE']} // Current card color to lighter
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.cardContent}
+            >
               <Text style={styles.sectionSubtitle}>
                 View and manage all your professional licenses here. Tap Edit to update expiration dates after renewal.
               </Text>
@@ -547,8 +562,8 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
               });
             })()}
             
+            </LinearGradient>
             </View>
-            </Card>
           </View>
         )}
 
@@ -569,7 +584,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 </Text>
                 <Button
                   title="Add Your First License"
-                  onPress={() => navigation.navigate('Settings', { screen: 'AddLicense' })}
+                  onPress={() => (navigation.getParent() as any).navigate('AddLicense')}
                   style={styles.addEntryButton}
                 />
               </View>
@@ -588,7 +603,13 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             </View>
             
             {recentEntries.map((entry, index) => (
-              <Card key={entry.id} variant="entry" style={styles.activityItem}>
+              <LinearGradient
+                key={entry.id}
+                colors={['#FFFFFF', '#FAFAFA']} // White to slightly lighter
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[styles.activityItem, styles.cardGradient]}
+              >
                 <View style={styles.activityContent}>
                   <TouchableOpacity 
                     style={styles.activityIcon}
@@ -626,7 +647,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                     <Text style={styles.creditsUnit}>{user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits'}</Text>
                   </View>
                 </View>
-              </Card>
+              </LinearGradient>
             ))}
           </View>
         )}
@@ -714,7 +735,7 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing[2],
     paddingHorizontal: theme.spacing[3],
     marginBottom: theme.spacing[2],
-    backgroundColor: theme.colors.card,
+    // backgroundColor removed - using LinearGradient
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -811,6 +832,19 @@ const styles = StyleSheet.create({
     color: theme.colors.background,
   },
 
+  // Card gradient common styles
+  cardGradient: {
+    borderRadius: theme.spacing[3],
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+
   // Section Title
   sectionTitle: {
     fontSize: theme.typography.fontSize.lg,
@@ -892,7 +926,7 @@ const styles = StyleSheet.create({
   activityItem: {
     padding: theme.spacing[4],
     marginBottom: theme.spacing[3],
-    // backgroundColor removed - using entry variant for white background
+    // backgroundColor removed - using LinearGradient
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -1105,7 +1139,9 @@ const styles = StyleSheet.create({
     padding: 0,
     borderRadius: theme.spacing[3],
     overflow: 'hidden',
-    backgroundColor: theme.colors.card,
+    // backgroundColor removed - using LinearGradient
+    borderWidth: 1,
+    borderColor: '#36454F', // Charcoal border
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

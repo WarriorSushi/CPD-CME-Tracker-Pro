@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ViewStyle, StatusBar } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../../constants/theme';
 import { SvgIcon, IconName } from './SvgIcon';
@@ -47,7 +48,12 @@ export const StandardHeader: React.FC<StandardHeaderProps> = ({
         backgroundColor="#003087"
         translucent={false}
       />
-      <View style={[styles.header, { paddingTop: insets.top + theme.spacing[4] }, style]}>
+      <LinearGradient
+        colors={['#003087', '#001a4d']} // Current blue to darker blue
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.header, { paddingTop: insets.top + theme.spacing[4] }, style]}
+      >
         <View style={styles.headerContent}>
         {/* Left - Back Button */}
         <View style={styles.leftSection}>
@@ -118,7 +124,7 @@ export const StandardHeader: React.FC<StandardHeaderProps> = ({
             )
           )}
         </View>
-      </View>
+      </LinearGradient>
     </View>
     </>
   );
@@ -126,7 +132,7 @@ export const StandardHeader: React.FC<StandardHeaderProps> = ({
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: '#003087', // HSL(215°, 100%, 26%)
+    // backgroundColor removed - using LinearGradient
     paddingHorizontal: theme.spacing[4],
     paddingBottom: theme.spacing[4],
     borderBottomLeftRadius: theme.spacing[3],

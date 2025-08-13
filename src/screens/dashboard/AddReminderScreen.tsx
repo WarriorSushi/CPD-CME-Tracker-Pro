@@ -15,6 +15,7 @@ import { RouteProp } from '@react-navigation/native';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
+import { StandardHeader } from '../../components/common/StandardHeader';
 import { ModernDatePicker } from '../../components/common/ModernDatePicker';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
@@ -88,17 +89,11 @@ export const AddReminderScreen: React.FC<Props> = ({ navigation }) => {
       style={[styles.container, { paddingTop: insets.top }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.backButtonText}>← Back</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add Event Reminder</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <StandardHeader
+        title="Add Event Reminder"
+        onBackPress={() => navigation.goBack()}
+        showBackButton={true}
+      />
 
       <ScrollView 
         style={styles.scrollView}
@@ -187,32 +182,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF5EE',
   },
 
-  // Header
-  header: {
-    backgroundColor: '#003087',
-    paddingHorizontal: theme.spacing[4],
-    paddingVertical: theme.spacing[4],
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  backButton: {
-    paddingVertical: theme.spacing[2],
-    paddingRight: theme.spacing[2],
-  },
-  backButtonText: {
-    color: theme.colors.background,
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.medium,
-  },
-  headerTitle: {
-    color: theme.colors.background,
-    fontSize: theme.typography.fontSize.xl,
-    fontWeight: theme.typography.fontWeight.bold,
-  },
-  headerSpacer: {
-    width: 60, // Balance the header
-  },
+  // Header styles removed - using StandardHeader
 
   // Content
   scrollView: {
