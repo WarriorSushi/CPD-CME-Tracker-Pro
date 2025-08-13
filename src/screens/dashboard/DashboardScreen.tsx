@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, D
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { Card, Button, LoadingSpinner, CertificateViewer } from '../../components';
+import { Card, Button, LoadingSpinner, CertificateViewer, SvgIcon } from '../../components';
 import { SimpleProgressRing } from '../../components/charts/SimpleProgressRing';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
@@ -74,18 +74,18 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: string, color = '#22C55E') => {
     switch (status) {
       case 'completed':
-        return '🎉';
+        return <SvgIcon name="checkmark" size={16} color={color} />;
       case 'on_track':
-        return '✅';
+        return <SvgIcon name="checkmark" size={16} color={color} />;
       case 'behind':
-        return '⚠️';
+        return <Text style={{ fontSize: 16 }}>⚠️</Text>;
       case 'overdue':
-        return '🚨';
+        return <Text style={{ fontSize: 16 }}>🚨</Text>;
       default:
-        return '🎯';
+        return <Text style={{ fontSize: 16 }}>🎯</Text>;
     }
   };
 
@@ -274,7 +274,12 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
               style={styles.quickActionItem}
               onPress={() => navigation.navigate('Settings')}
             >
-              <Text style={styles.quickActionIcon}>⚙️</Text>
+              <SvgIcon 
+                name="settings" 
+                size={24} 
+                color={theme.colors.text.primary} 
+                accessibilityLabel="Settings"
+              />
               <Text style={styles.quickActionText}>Settings</Text>
             </TouchableOpacity>
           </View>
@@ -409,7 +414,12 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           ) : (
             <Card style={styles.remindersPlaceholder}>
               <View style={styles.remindersPlaceholderContent}>
-                <Text style={styles.remindersPlaceholderIcon}>📅</Text>
+                <SvgIcon 
+                  name="reminder" 
+                  size={40} 
+                  color={theme.colors.text.secondary}
+                  accessibilityLabel="No reminders"
+                />
                 <Text style={styles.remindersPlaceholderTitle}>No Reminders Set</Text>
                 <Text style={styles.remindersPlaceholderSubtitle}>
                   Tap the + button above to add reminders for upcoming CME events
@@ -475,20 +485,20 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 const { daysUntil } = license;
                 let statusColor = theme.colors.success;
                 let statusText = 'Active';
-                let statusIcon = '✅';
+                let statusIcon = <SvgIcon name="tickWithCircle" size={20} />;
 
                 if (daysUntil < 0) {
                   statusColor = theme.colors.error;
                   statusText = 'Expired';
-                  statusIcon = '🚨';
+                  statusIcon = <Text style={{ fontSize: 16 }}>🚨</Text>;
                 } else if (daysUntil <= 30) {
                   statusColor = theme.colors.error;
                   statusText = `${daysUntil} days left`;
-                  statusIcon = '⚠️';
+                  statusIcon = <Text style={{ fontSize: 16 }}>⚠️</Text>;
                 } else if (daysUntil <= 90) {
                   statusColor = theme.colors.warning;
                   statusText = `${daysUntil} days left`;
-                  statusIcon = '⏰';
+                  statusIcon = <Text style={{ fontSize: 16 }}>⏰</Text>;
                 } else {
                   statusText = `${daysUntil} days left`;
                 }
@@ -497,9 +507,11 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                   <Card key={license.id} style={styles.licenseCard}>
                     <View style={styles.licenseCardHeader}>
                       <View style={styles.licenseCardMain}>
-                        <View style={[styles.licenseIcon, { backgroundColor: statusColor + '20' }]}>
+                        {typeof statusIcon === 'string' ? (
                           <Text style={styles.licenseIconText}>{statusIcon}</Text>
-                        </View>
+                        ) : (
+                          statusIcon
+                        )}
                         <View style={styles.licenseInfo}>
                           <Text style={styles.licenseCardTitle} numberOfLines={1}>
                             {license.licenseType}
@@ -527,7 +539,10 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                           (navigation as any).navigate('AddLicense', { editLicense: license });
                         }}
                       >
-                        <Text style={styles.licenseActionText}>📝 Edit</Text>
+                        <View style={styles.licenseActionContent}>
+                          <SvgIcon name="edit" size={14} color={theme.colors.text.primary} />
+                          <Text style={styles.licenseActionText}>Edit</Text>
+                        </View>
                       </TouchableOpacity>
                       
                       <TouchableOpacity 
@@ -544,7 +559,10 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                           );
                         }}
                       >
-                        <Text style={styles.licenseActionText}>🔔 Remind</Text>
+                        <View style={styles.licenseActionContent}>
+                          <SvgIcon name="reminder" size={14} color={theme.colors.text.primary} />
+                          <Text style={styles.licenseActionText}>Remind</Text>
+                        </View>
                       </TouchableOpacity>
                     </View>
 
@@ -589,7 +607,12 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.noLicensesSection}>
             <Card style={styles.noLicensesCard}>
               <View style={styles.noLicensesContent}>
-                <Text style={styles.noLicensesIcon}>🏥</Text>
+                <SvgIcon 
+                  name="profile" 
+                  size={48} 
+                  color={theme.colors.text.secondary}
+                  accessibilityLabel="No licenses"
+                />
                 <Text style={styles.noLicensesTitle}>Track Your Licenses</Text>
                 <Text style={styles.noLicensesSubtitle}>
                   Add your professional licenses to track renewal deadlines and never miss a renewal date.
@@ -999,15 +1022,20 @@ const styles = StyleSheet.create({
   licenseActionButton: {
     flex: 1,
     backgroundColor: '#f8f9fa',
-    paddingVertical: theme.spacing[2],
-    paddingHorizontal: theme.spacing[3],
-    borderRadius: theme.spacing[2],
+    paddingVertical: theme.spacing[1],
+    paddingHorizontal: theme.spacing[2],
+    borderRadius: theme.spacing[1],
     alignItems: 'center',
     borderWidth: 1,
     borderColor: theme.colors.border.light,
   },
+  licenseActionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing[1],
+  },
   licenseActionText: {
-    fontSize: theme.typography.fontSize.sm,
+    fontSize: theme.typography.fontSize.xs,
     fontWeight: theme.typography.fontWeight.medium,
     color: theme.colors.text.primary,
   },

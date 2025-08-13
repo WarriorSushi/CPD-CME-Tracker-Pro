@@ -18,7 +18,7 @@ import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
 import { Camera } from 'expo-camera';
 
-import { Button, Card, Input, LoadingSpinner, DatePicker } from '../../components';
+import { Button, Card, Input, LoadingSpinner, DatePicker, StandardHeader } from '../../components';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { MainTabParamList } from '../../types/navigation';
@@ -556,17 +556,11 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Compact Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButtonContainer}>
-          <Text style={styles.backButton}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>
-          {isEditing ? 'Edit Entry' : 'Add New Entry'}
-        </Text>
-        <View style={styles.headerSpacer} />
-      </View>
+    <View style={styles.container}>
+      <StandardHeader
+        title={isEditing ? 'Edit Entry' : 'Add New Entry'}
+        onBackPress={() => navigation.goBack()}
+      />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {/* Compact Form */}
@@ -760,36 +754,6 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   
-  // Compact Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: theme.spacing[4],
-    paddingVertical: theme.spacing[3],
-    backgroundColor: theme.colors.primary,
-  },
-  backButtonContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  backButton: {
-    fontSize: 20,
-    color: theme.colors.background,
-    fontWeight: theme.typography.fontWeight.bold,
-  },
-  title: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.background,
-  },
-  headerSpacer: {
-    width: 32, // Same as back button for centering
-  },
   
   content: {
     flex: 1,

@@ -17,7 +17,7 @@ import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import { Camera } from 'expo-camera';
 
-import { Card, Button, LoadingSpinner, Input } from '../../components';
+import { Card, Button, LoadingSpinner, Input, StandardHeader, SvgIcon } from '../../components';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { Certificate } from '../../types';
@@ -461,24 +461,23 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Certificate Vault</Text>
-          <Text style={styles.headerSubtitle}>Store and manage your certificates securely</Text>
-        </View>
-        <TouchableOpacity 
-          style={styles.infoButton}
-          onPress={() => Alert.alert('Certificate Vault', 'Take photos or upload your certificates to keep them organized and easily accessible.')}
-        >
-          <Text style={styles.infoButtonText}>ℹ️</Text>
-        </TouchableOpacity>
+    <View style={styles.container}>
+      <StandardHeader
+        title="Certificate Vault"
+        showBackButton={false}
+      />
+      
+      {/* Subtitle */}
+      <View style={styles.subtitleSection}>
+        <Text style={styles.subtitle}>Store and manage your certificates securely</Text>
       </View>
 
       {/* Prominent Add Section */}
       <View style={styles.prominentAddSection}>
-        <Text style={styles.addSectionTitle}>📎 Add Certificate</Text>
+        <View style={styles.addSectionTitleContainer}>
+          <SvgIcon name="vault" size={20} color={theme.colors.primary} />
+          <Text style={styles.addSectionTitle}>Add Certificate</Text>
+        </View>
         <View style={styles.addButtonsRow}>
           <TouchableOpacity 
             style={[styles.addButton, styles.cameraButton]}
@@ -551,41 +550,16 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   
-  // Header
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  // Subtitle
+  subtitleSection: {
     paddingHorizontal: theme.spacing[4],
-    paddingVertical: theme.spacing[4],
-    backgroundColor: '#1e3a8a',
-    borderBottomLeftRadius: theme.spacing[3],
-    borderBottomRightRadius: theme.spacing[3],
+    paddingVertical: theme.spacing[3],
+    backgroundColor: '#f8f9fa',
   },
-  headerContent: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontSize: theme.typography.fontSize.xl,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.background,
-    marginBottom: 2,
-  },
-  headerSubtitle: {
+  subtitle: {
     fontSize: theme.typography.fontSize.sm,
-    color: 'rgba(255, 255, 255, 0.8)',
-    opacity: 0.9,
-  },
-  infoButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  infoButtonText: {
-    fontSize: 16,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
   },
 
   // Compact Add Section
@@ -603,12 +577,17 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 2,
   },
+  addSectionTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: theme.spacing[2],
+  },
   addSectionTitle: {
     fontSize: theme.typography.fontSize.sm,
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.text.primary,
-    textAlign: 'center',
-    marginBottom: theme.spacing[2],
+    marginLeft: theme.spacing[2],
   },
   addButtonsRow: {
     flexDirection: 'row',

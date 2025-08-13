@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../constants/theme';
 import { MainTabParamList, TabParamList } from '../types/navigation';
+import { SvgIcon } from '../components';
 
 // Import screens and navigators
 import { DashboardScreen } from '../screens/dashboard/DashboardScreen';
@@ -61,7 +62,12 @@ const TabNavigator: React.FC = () => {
         options={{
           tabBarLabel: 'Dashboard',
           tabBarIcon: ({ color }) => (
-            <Text style={[styles.icon, { color }]}>📊</Text>
+            <SvgIcon 
+              name="dashboard" 
+              size={20} 
+              color={color}
+              accessibilityLabel="Dashboard"
+            />
           ),
         }}
       />
@@ -71,7 +77,12 @@ const TabNavigator: React.FC = () => {
         options={{
           tabBarLabel: 'History',
           tabBarIcon: ({ color }) => (
-            <Text style={[styles.icon, { color }]}>📚</Text>
+            <SvgIcon 
+              name="history" 
+              size={20} 
+              color={color}
+              accessibilityLabel="History"
+            />
           ),
         }}
         listeners={{
@@ -87,7 +98,12 @@ const TabNavigator: React.FC = () => {
         options={{
           tabBarLabel: 'Vault',
           tabBarIcon: ({ color }) => (
-            <Text style={[styles.icon, { color }]}>🏆</Text>
+            <SvgIcon 
+              name="vault" 
+              size={20} 
+              color={color}
+              accessibilityLabel="Vault"
+            />
           ),
         }}
       />
@@ -97,7 +113,12 @@ const TabNavigator: React.FC = () => {
         options={{
           tabBarLabel: 'Settings',
           tabBarIcon: ({ color }) => (
-            <Text style={[styles.icon, { color }]}>⚙️</Text>
+            <SvgIcon 
+              name="settings" 
+              size={20} 
+              color={color}
+              accessibilityLabel="Settings"
+            />
           ),
         }}
       />
@@ -186,8 +207,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-  },
-  icon: {
-    fontSize: 20,
   },
 });

@@ -8,3 +8,6 @@ export { PressableFX } from './PressableFX';
 export { DatePicker } from './DatePicker';
 export { ModernDatePicker } from './ModernDatePicker';
 export { ProgressIndicator } from './ProgressIndicator';
+export { SvgIcon } from './SvgIcon';
+export type { IconName } from './SvgIcon';
+export { StandardHeader } from './StandardHeader';
