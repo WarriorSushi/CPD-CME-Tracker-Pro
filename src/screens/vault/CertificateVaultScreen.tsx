@@ -417,7 +417,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         style={[styles.masonryCard, { height: cardHeight }]}
         onPress={() => handleViewCertificate(item)}
       >
-        <Card style={[styles.masonryContent, { height: cardHeight }]}>
+        <Card variant="entry" style={[styles.masonryContent, { height: cardHeight }]}>
           {/* Certificate Preview */}
           <View style={[styles.masonryPreview, { height: imageHeight }]}>
             {isImage ? (
@@ -696,6 +696,8 @@ const styles = StyleSheet.create({
   masonryImage: {
     width: '100%',
     height: '100%',
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
   },
   masonryPdfPreview: {
     flex: 1,

@@ -224,7 +224,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
   );
 
   const renderEntry = ({ item }: { item: CMEEntry }) => (
-    <Card style={styles.entryCard}>
+    <Card variant="entry" style={styles.entryCard}>
       <View style={styles.entryHeader}>
         <View style={styles.entryInfo}>
           <Text style={styles.entryTitle} numberOfLines={2}>
@@ -728,6 +728,8 @@ const styles = StyleSheet.create({
     borderRadius: theme.spacing[2],
     backgroundColor: theme.colors.gray.light,
     marginBottom: theme.spacing[1],
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
   },
   certificateLabel: {
     fontSize: 10,

@@ -299,7 +299,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             </View>
             
             {recentEntries.map((entry, index) => (
-              <Card key={entry.id} style={styles.activityItem}>
+              <Card key={entry.id} variant="entry" style={styles.activityItem}>
                 <View style={styles.activityContent}>
                   <TouchableOpacity 
                     style={styles.activityIcon}
@@ -390,7 +390,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 }
 
                 return (
-                  <Card key={reminder.id} style={styles.reminderCard}>
+                  <Card key={reminder.id} variant="entry" style={styles.reminderCard}>
                     <View style={styles.reminderCardHeader}>
                       <View style={styles.reminderCardMain}>
                         <View style={[styles.reminderIcon, { backgroundColor: statusColor + '20' }]}>
@@ -507,7 +507,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 }
 
                 return (
-                  <Card key={license.id} style={styles.licenseCard}>
+                  <Card key={license.id} variant="entry" style={styles.licenseCard}>
                     <View style={styles.licenseCardHeader}>
                       <View style={styles.licenseCardMain}>
                         {typeof statusIcon === 'string' ? (
@@ -897,7 +897,7 @@ const styles = StyleSheet.create({
   activityItem: {
     padding: theme.spacing[4],
     marginBottom: theme.spacing[3],
-    backgroundColor: theme.colors.card,
+    // backgroundColor removed - using entry variant for white background
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -960,7 +960,7 @@ const styles = StyleSheet.create({
   licenseCard: {
     padding: theme.spacing[3],
     marginBottom: theme.spacing[3],
-    backgroundColor: theme.colors.card,
+    // backgroundColor removed - using entry variant for white background
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -1121,7 +1121,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   cardHeader: {
-    backgroundColor: '#FFF7EC', // Section background
+    backgroundColor: theme.colors.gray.medium, // Gray header background
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border.light,
     paddingVertical: theme.spacing[4],
@@ -1133,7 +1133,7 @@ const styles = StyleSheet.create({
   cardHeaderTitle: {
     fontSize: theme.typography.fontSize.lg,
     fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text.primary,
+    color: theme.colors.white, // White text on gray header
   },
   headerButton: {
     minHeight: 32,
@@ -1189,7 +1189,7 @@ const styles = StyleSheet.create({
   reminderCard: {
     padding: theme.spacing[3],
     marginBottom: theme.spacing[3],
-    backgroundColor: theme.colors.card,
+    // backgroundColor removed - using entry variant for white background
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

@@ -4,7 +4,7 @@ import { useColors, useTokens } from '../../theme';
 
 export interface CardProps {
   children: React.ReactNode;
-  variant?: 'base' | 'selected' | 'outline' | 'success';
+  variant?: 'base' | 'selected' | 'outline' | 'success' | 'entry';
   style?: ViewStyle | ViewStyle[];
   titleStyle?: TextStyle | TextStyle[];
 }
@@ -70,6 +70,16 @@ const getVariantStyles = (variant: CardProps['variant'], getColor: any, tokens: 
       backgroundColor: getColor('cardBg'), // Card background from theme
       borderWidth: 2,
       borderColor: getColor('success'),
+      shadowColor: tokens.shadow.card.color,
+      shadowOffset: tokens.shadow.card.offset,
+      shadowOpacity: tokens.shadow.card.opacity,
+      shadowRadius: tokens.shadow.card.radius,
+      elevation: 2, // Android shadow
+    },
+    entry: {
+      backgroundColor: getColor('white'), // Pure white for entry cards (top layer)
+      borderWidth: 1,
+      borderColor: getColor('border'),
       shadowColor: tokens.shadow.card.color,
       shadowOffset: tokens.shadow.card.offset,
       shadowOpacity: tokens.shadow.card.opacity,
