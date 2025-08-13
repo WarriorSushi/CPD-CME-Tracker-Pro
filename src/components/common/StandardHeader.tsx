@@ -125,7 +125,6 @@ export const StandardHeader: React.FC<StandardHeaderProps> = ({
           )}
         </View>
       </LinearGradient>
-    </View>
     </>
   );
 };
