@@ -58,7 +58,11 @@ export const StandardHeader: React.FC<StandardHeaderProps> = ({
               accessibilityLabel="Go back"
               accessibilityRole="button"
             >
-              <Text style={styles.backButtonText}>←</Text>
+              <SvgIcon 
+                name="backicon"
+                size={20}
+                color="#FFFFFF"
+              />
             </TouchableOpacity>
           )}
         </View>
@@ -159,13 +163,14 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   backButton: {
-    paddingVertical: theme.spacing[2],
-    paddingHorizontal: theme.spacing[2],
-    borderRadius: theme.spacing[2],
-    minWidth: 44,
-    minHeight: 44,
+    width: 44,
+    height: 44,
+    borderRadius: 22, // Perfect circle
+    backgroundColor: 'rgba(255, 255, 255, 0.15)', // Lighter than header background
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   backButtonText: {
     color: theme.colors.background,

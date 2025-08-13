@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-import { Card, Button, Input, LoadingSpinner, CertificateViewer, StandardHeader } from '../../components';
+import { Card, Button, Input, LoadingSpinner, StandardHeader } from '../../components';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { CMEStackParamList } from '../../types/navigation';
@@ -51,7 +51,6 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
   const [allEntries, setAllEntries] = useState<CMEEntry[]>([]);
   const [isLoadingAll, setIsLoadingAll] = useState(false);
   const [showAllEntries, setShowAllEntries] = useState(false);
-  const [selectedCertificate, setSelectedCertificate] = useState<string | undefined>(undefined);
 
   const lastRefreshRef = useRef<number>(0);
   const REFRESH_DEBOUNCE_MS = 3000; // Debounce CME data refresh to 3 seconds
@@ -247,7 +246,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
             style={styles.certificateThumbnailContainer}
             onPress={() => {
               console.log('📄 Opening certificate:', item.certificatePath);
-              setSelectedCertificate(item.certificatePath);
+              navigation.navigate('CertificateViewer', { imageUri: item.certificatePath });
             }}
           >
             <Image 
@@ -410,12 +409,6 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
         />
       )}
 
-      {/* Certificate Viewer */}
-      <CertificateViewer
-        visible={!!selectedCertificate}
-        imageUri={selectedCertificate}
-        onClose={() => setSelectedCertificate(undefined)}
-      />
     </View>
   );
 };

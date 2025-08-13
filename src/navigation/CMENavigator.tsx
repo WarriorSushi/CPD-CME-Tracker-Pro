@@ -6,6 +6,7 @@ import { useAppContext } from '../contexts/AppContext';
 // Import screens
 import { CMEHistoryScreen } from '../screens/cme/CMEHistoryScreen';
 import { AddCMEScreen } from '../screens/cme/AddCMEScreen';
+import { CertificateViewerScreen } from '../screens/cme/CertificateViewerScreen';
 
 const Stack = createStackNavigator<CMEStackParamList>();
 
@@ -34,6 +35,13 @@ export const CMENavigator: React.FC = () => {
         component={AddCMEScreen}
         options={{
           presentation: 'modal',
+        }}
+      />
+      <Stack.Screen
+        name="CertificateViewer"
+        component={CertificateViewerScreen}
+        options={{
+          headerShown: false,
         }}
       />
     </Stack.Navigator>

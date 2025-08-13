@@ -45,6 +45,7 @@ export type TabParamList = {
 export type CMEStackParamList = {
   CMEHistory: undefined;
   CMEDetails: { entryId: number };
+  CertificateViewer: { imageUri: string };
 };
 
 export type VaultStackParamList = {

@@ -373,16 +373,11 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         return;
       }
 
-      // For now, just show file info
-      Alert.alert(
-        certificate.fileName,
-        `Size: ${(certificate.fileSize / 1024).toFixed(1)} KB\nType: ${certificate.mimeType}\nCreated: ${new Date(certificate.createdAt).toLocaleDateString()}`,
-        [
-          {
-            text: 'OK',
-          },
-        ]
-      );
+      // Navigate to the certificate viewer screen in the CME stack
+      navigation.navigate('CME', { 
+        screen: 'CertificateViewer', 
+        params: { imageUri: certificate.filePath } 
+      });
     } catch (error) {
       console.error('Error viewing certificate:', error);
       Alert.alert('Error', 'Failed to view certificate.');
