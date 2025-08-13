@@ -37,7 +37,7 @@ export const Card: React.FC<CardProps> = ({
 const getVariantStyles = (variant: CardProps['variant'], getColor: any, tokens: any) => {
   const variants = {
     base: {
-      backgroundColor: getColor('gray100'),
+      backgroundColor: getColor('cardBg'), // Card background from theme
       borderWidth: 1,
       borderColor: getColor('border'),
       shadowColor: tokens.shadow.card.color,
@@ -47,7 +47,7 @@ const getVariantStyles = (variant: CardProps['variant'], getColor: any, tokens: 
       elevation: 2, // Android shadow
     },
     selected: {
-      backgroundColor: getColor('selectedBg'),
+      backgroundColor: getColor('cardBg'), // Card background from theme
       borderWidth: 2,
       borderColor: getColor('primary'),
       shadowColor: tokens.shadow.card.color,
@@ -57,7 +57,7 @@ const getVariantStyles = (variant: CardProps['variant'], getColor: any, tokens: 
       elevation: 3, // Android shadow
     },
     outline: {
-      backgroundColor: getColor('white'),
+      backgroundColor: getColor('cardBg'), // Card background from theme
       borderWidth: 1,
       borderColor: getColor('border'),
       shadowColor: tokens.shadow.card.color,
@@ -67,7 +67,7 @@ const getVariantStyles = (variant: CardProps['variant'], getColor: any, tokens: 
       elevation: 2, // Android shadow
     },
     success: {
-      backgroundColor: getColor('white'),
+      backgroundColor: getColor('cardBg'), // Card background from theme
       borderWidth: 2,
       borderColor: getColor('success'),
       shadowColor: tokens.shadow.card.color,

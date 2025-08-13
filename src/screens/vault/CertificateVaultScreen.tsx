@@ -78,7 +78,6 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
     try {
       setIsScanning(true);
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
         quality: 0.8,
         base64: false,
@@ -99,7 +98,6 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
     try {
       setIsScanning(true);
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
         quality: 0.8,
         base64: false,
@@ -155,11 +153,24 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         console.warn('⚠️ Thumbnail generation failed:', thumbnailError);
       }
 
-      // TODO: Save certificate to database with thumbnail path
-      // For now, just show success
-      Alert.alert('Success', 'Certificate saved to your vault!');
+      // Save certificate to database with thumbnail path
+      const addResult = await databaseOperations.certificates.addCertificate({
+        filePath: newFilePath,
+        fileName: newFileName,
+        fileSize: fileInfo.size,
+        mimeType: 'image/jpeg',
+        thumbnailPath: thumbnailPath || undefined,
+        cmeEntryId: null // Standalone certificate, not linked to a CME entry
+      });
 
-      await refreshCertificates();
+      if (addResult.success && addResult.data) {
+        console.log('✅ Certificate added to vault with ID:', addResult.data);
+        Alert.alert('Success', 'Certificate saved to your vault!');
+        await refreshCertificates();
+      } else {
+        console.error('❌ Failed to save certificate to database:', addResult.error);
+        Alert.alert('Error', 'Certificate saved to device but failed to add to vault database.');
+      }
 
     } catch (error) {
       console.error('💥 Error processing certificate:', error);
@@ -554,7 +565,7 @@ const styles = StyleSheet.create({
   subtitleSection: {
     paddingHorizontal: theme.spacing[4],
     paddingVertical: theme.spacing[3],
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FFF7EC', // Section background
   },
   subtitle: {
     fontSize: theme.typography.fontSize.sm,
@@ -567,7 +578,7 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.spacing[3],
     marginVertical: theme.spacing[2],
     padding: theme.spacing[3],
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#FFF7EC', // Section background
     borderRadius: theme.spacing[2],
     borderWidth: 1,
     borderColor: '#e2e8f0',
@@ -724,7 +735,7 @@ const styles = StyleSheet.create({
   // Masonry Info
   masonryInfo: {
     padding: theme.spacing[3],
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.card, // Card background for certificate info
   },
   masonryName: {
     fontSize: theme.typography.fontSize.sm,

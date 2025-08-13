@@ -10,6 +10,11 @@ export const tokens = {
     // Base colors
     white:          'hsl(0 0% 100%)',    // #FFFFFF
     black:          'hsl(0 0% 0%)',      // #000000
+    
+    // Custom app backgrounds
+    appBackground:  '#FFF5EE',           // Warm seashell - main screen background
+    sectionBg:      '#FFF7EC',           // Slightly warmer - section backgrounds
+    cardBg:         '#FBFBF9',           // Light warm gray - card backgrounds
 
     // Gray scale
     gray50:         'hsl(210 20% 98%)',  // #F9FAFB

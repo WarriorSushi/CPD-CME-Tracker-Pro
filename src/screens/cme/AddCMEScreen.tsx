@@ -102,13 +102,11 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
   const [pressedButtons, setPressedButtons] = useState<{
     camera: boolean;
     gallery: boolean;
-    vault: boolean;
     files: boolean;
     remove: boolean;
   }>({
     camera: false,
     gallery: false,
-    vault: false,
     files: false,
     remove: false,
   });
@@ -186,7 +184,6 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
     try {
       setIsUploadingCertificate(true);
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
         quality: 0.8,
         base64: false,
@@ -207,7 +204,6 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
     try {
       setIsUploadingCertificate(true);
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
         quality: 0.8,
         base64: false,
@@ -297,16 +293,6 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
-  const handleChooseFromVault = () => {
-    // For now, just close modal and show alert to navigate manually
-    // TODO: Implement proper certificate selection from vault
-    navigation.goBack();
-    Alert.alert(
-      'Choose from Vault',
-      'Please navigate to the Vault tab to select a certificate, then return to add a new entry.',
-      [{ text: 'OK' }]
-    );
-  };
 
   const handleChooseFiles = async () => {
     try {
@@ -695,18 +681,6 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
                 </TouchableOpacity>
                 
                 <TouchableOpacity 
-                  style={[styles.uploadButtonTiny, styles.vaultButtonTiny, getPressedButtonStyle('vault')]}
-                  onPress={handleChooseFromVault}
-                  onPressIn={() => handlePressIn('vault')}
-                  onPressOut={() => handlePressOut('vault')}
-                  disabled={isUploadingCertificate}
-                  activeOpacity={1}
-                >
-                  <Text style={styles.uploadButtonIconTiny}>📁</Text>
-                  <Text style={styles.uploadButtonTextTiny}>Vault</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
                   style={[styles.uploadButtonTiny, styles.filesButtonTiny, getPressedButtonStyle('files')]}
                   onPress={handleChooseFiles}
                   onPressIn={() => handlePressIn('files')}
@@ -758,6 +732,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: theme.spacing[4],
+    backgroundColor: '#FFF7EC', // Section background
   },
   
   // Compact Form
@@ -881,9 +856,6 @@ const styles = StyleSheet.create({
   },
   galleryButtonTiny: {
     backgroundColor: '#10b981',
-  },
-  vaultButtonTiny: {
-    backgroundColor: '#8b5cf6',
   },
   filesButtonTiny: {
     backgroundColor: '#f59e0b',

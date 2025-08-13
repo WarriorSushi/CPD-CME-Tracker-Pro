@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   },
   circularBackground: {
     position: 'absolute',
-    backgroundColor: '#f8f9fa', // Match the dashboard background
+    backgroundColor: '#FFF5EE', // Match the dashboard background
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

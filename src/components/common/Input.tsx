@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     height: theme.layout.inputHeight,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.background,
+    backgroundColor: '#FFFFFF', // Pure white for input fields
     borderRadius: theme.borderRadius.base,
     paddingHorizontal: theme.spacing[4],
     borderWidth: 1,

@@ -44,9 +44,9 @@ export const theme = {
     info: tokens.color.info,             // 'hsl(217 91% 60%)'
     
     // Background colors
-    background: tokens.color.white,      // 'hsl(0 0% 100%)'
-    surface: tokens.color.gray50,        // 'hsl(210 20% 98%)'
-    card: tokens.color.white,            // 'hsl(0 0% 100%)'
+    background: '#FFF5EE',               // Warm seashell background
+    surface: '#FFF7EC',                  // Section background
+    card: '#FBFBF9',                     // Card background
     
     // Text colors
     text: {

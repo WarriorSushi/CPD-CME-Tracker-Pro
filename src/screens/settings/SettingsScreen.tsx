@@ -14,7 +14,7 @@ import { CompositeNavigationProp } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-import { Card, Button, LoadingSpinner } from '../../components';
+import { Card, Button, LoadingSpinner, StandardHeader } from '../../components';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { useOnboardingContext } from '../../contexts/OnboardingContext';
@@ -344,12 +344,11 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Beautiful Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Settings</Text>
-        <Text style={styles.headerSubtitle}>Manage your account and preferences</Text>
-      </View>
+    <View style={styles.container}>
+      <StandardHeader
+        title="Settings"
+        showBackButton={false}
+      />
 
       <ScrollView 
         style={styles.scrollContent}
@@ -546,7 +545,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FFF5EE',
   },
   
   // Beautiful Header
@@ -776,7 +775,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: theme.spacing[3],
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FFF5EE',
     borderRadius: theme.spacing[2],
   },
   settingIcon: {

@@ -265,7 +265,7 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FFF5EE',
   },
 
   // Header
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
   },
   dateButtonEmpty: {
     borderColor: theme.colors.border.light,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FFF5EE',
   },
   dateButtonText: {
     fontSize: theme.typography.fontSize.base,
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.spacing[4],
     marginBottom: theme.spacing[4],
     padding: theme.spacing[4],
-    backgroundColor: '#f0f7ff',
+    backgroundColor: '#FFF7EC', // Section background
     borderLeftWidth: 4,
     borderLeftColor: theme.colors.primary,
   },

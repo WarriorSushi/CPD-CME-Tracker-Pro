@@ -144,7 +144,7 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
             top: modalTop,
             width: modalWidth,
             height: modalHeight,
-            backgroundColor: '#f8f9fa',
+            backgroundColor: '#FFF5EE',
             borderRadius: 16,
             padding: 20,
             elevation: 12,
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.spacing[2],
     marginBottom: theme.spacing[2], // Less bottom margin
     padding: theme.spacing[2], // Much smaller padding
-    backgroundColor: '#f0f7ff',
+    backgroundColor: '#FFF7EC', // Section background
     borderLeftWidth: 3, // Thinner border
     borderLeftColor: theme.colors.primary,
   },

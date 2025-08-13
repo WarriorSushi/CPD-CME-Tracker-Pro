@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-import { Card, Button, Input, LoadingSpinner, CertificateViewer } from '../../components';
+import { Card, Button, Input, LoadingSpinner, CertificateViewer, StandardHeader } from '../../components';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { CMEStackParamList } from '../../types/navigation';
@@ -316,22 +316,21 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
   );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Education History</Text>
-          <Text style={styles.headerSubtitle}>All your entries in one place</Text>
-        </View>
-        <TouchableOpacity 
-          style={styles.addButton}
+    <View style={styles.container}>
+      <StandardHeader
+        title="Education History"
+        showBackButton={false}
+      />
+
+      {/* Add Entry Button */}
+      <View style={styles.addButtonContainer}>
+        <Button
+          title="Add Entry"
           onPress={() => navigation.navigate('AddCME', {})}
-        >
-          <View style={styles.addButtonContent}>
-            <Text style={styles.addButtonIcon}>+</Text>
-            <Text style={styles.addButtonText}>Add Entry</Text>
-          </View>
-        </TouchableOpacity>
+          variant="primary"
+          size="medium"
+          style={styles.addEntryButton}
+        />
       </View>
 
       {/* Search and Stats */}
@@ -424,7 +423,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FFF5EE',
   },
   
   // Header
@@ -493,8 +492,11 @@ const styles = StyleSheet.create({
 
   // Controls - More compact
   controls: {
-    padding: theme.spacing[3],
+    paddingHorizontal: theme.spacing[3],
+    paddingTop: theme.spacing[1], // Reduced top padding to close gap
+    paddingBottom: theme.spacing[3],
     gap: theme.spacing[2],
+    backgroundColor: '#FFF7EC', // Section background
   },
   searchInput: {
     // Input styles applied by component
@@ -730,5 +732,16 @@ const styles = StyleSheet.create({
   certificateLabel: {
     fontSize: 10,
     opacity: 0.7,
+  },
+
+  // Add Entry Button Section
+  addButtonContainer: {
+    paddingHorizontal: theme.spacing[4],
+    paddingTop: theme.spacing[3],
+    paddingBottom: theme.spacing[1], // Further reduced bottom padding
+    backgroundColor: '#FFF7EC', // Section background
+  },
+  addEntryButton: {
+    width: '100%',
   },
 });

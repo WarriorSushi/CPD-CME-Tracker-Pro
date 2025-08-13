@@ -4,8 +4,8 @@ import { tokens, ColorToken } from './tokens';
 // Global semantic mapping - single source of truth for color usage
 export const appTheme = {
   // Layout
-  background: 'white' as ColorToken,
-  surface: 'gray50' as ColorToken,
+  background: 'appBackground' as ColorToken,
+  surface: 'sectionBg' as ColorToken,
   
   // Text
   textPrimary: 'gray900' as ColorToken,

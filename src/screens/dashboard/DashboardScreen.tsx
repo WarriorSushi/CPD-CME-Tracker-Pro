@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, D
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { Card, Button, LoadingSpinner, CertificateViewer, SvgIcon } from '../../components';
+import { Card, Button, LoadingSpinner, CertificateViewer, SvgIcon, StandardHeader } from '../../components';
 import { SimpleProgressRing } from '../../components/charts/SimpleProgressRing';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
@@ -133,22 +133,25 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     );
   }
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  };
+
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Compact Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <View>
-            <Text style={styles.greeting}>
-              {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 18 ? 'Good afternoon' : 'Good evening'}
-            </Text>
-            <Text style={styles.userName}>{user?.profession || 'Healthcare Professional'}</Text>
-          </View>
-          <TouchableOpacity style={styles.profileButton} onPress={() => navigation.navigate('Settings')}>
-            <Text style={styles.profileIcon}>👤</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+    <View style={styles.container}>
+      <StandardHeader
+        title={`${getGreeting()}, ${user?.profession || 'Professional'}`}
+        showBackButton={false}
+        rightIcon="profile"
+        rightIconPress={() => navigation.navigate('Settings')}
+        rightIconColor="#FFD700" // Bright gold that pops against blue background
+        rightIconSize={28} // Larger size to make it more prominent
+        titleAlign="left"
+        titleSize="base"
+      />
 
       <ScrollView 
         style={styles.scrollView}
@@ -645,7 +648,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.card,
   },
   centerContent: {
     justifyContent: 'center',
@@ -703,19 +706,20 @@ const styles = StyleSheet.create({
   // ScrollView
   scrollView: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FFF5EE',
   },
 
   // Enhanced Progress Section
   progressSection: {
     paddingHorizontal: theme.spacing[4],
     paddingTop: theme.spacing[3],
+    backgroundColor: '#FFF7EC', // Section background
   },
   progressCard: {
     paddingVertical: theme.spacing[2],
     paddingHorizontal: theme.spacing[3],
     marginBottom: theme.spacing[2],
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.card,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -823,6 +827,8 @@ const styles = StyleSheet.create({
   addEntrySection: {
     paddingHorizontal: theme.spacing[4],
     marginBottom: theme.spacing[6],
+    backgroundColor: '#FFF7EC', // Section background
+    paddingVertical: theme.spacing[3],
   },
   addEntryButton: {
     // Custom styling for the button if needed
@@ -832,6 +838,8 @@ const styles = StyleSheet.create({
   quickActionsSection: {
     paddingHorizontal: theme.spacing[4],
     marginBottom: theme.spacing[6],
+    backgroundColor: '#FFF7EC', // Section background
+    paddingVertical: theme.spacing[3],
   },
   quickActionsGrid: {
     flexDirection: 'row',
@@ -843,7 +851,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: theme.spacing[4],
     marginHorizontal: theme.spacing[1],
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.card,
     borderRadius: theme.spacing[3],
     shadowColor: '#000',
     shadowOffset: {
@@ -870,6 +878,8 @@ const styles = StyleSheet.create({
   recentSection: {
     paddingHorizontal: theme.spacing[4],
     marginBottom: theme.spacing[4],
+    backgroundColor: '#FFF7EC', // Section background
+    paddingVertical: theme.spacing[3],
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -887,7 +897,7 @@ const styles = StyleSheet.create({
   activityItem: {
     padding: theme.spacing[4],
     marginBottom: theme.spacing[3],
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.card,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -950,7 +960,7 @@ const styles = StyleSheet.create({
   licenseCard: {
     padding: theme.spacing[3],
     marginBottom: theme.spacing[3],
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.card,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -1021,7 +1031,7 @@ const styles = StyleSheet.create({
   },
   licenseActionButton: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FFF5EE',
     paddingVertical: theme.spacing[1],
     paddingHorizontal: theme.spacing[2],
     borderRadius: theme.spacing[1],
@@ -1064,7 +1074,7 @@ const styles = StyleSheet.create({
 
   // License Renewal Instructions
   licenseRenewalInstructions: {
-    backgroundColor: '#f0f7ff',
+    backgroundColor: '#FFF7EC', // Section background
     borderRadius: theme.spacing[2],
     padding: theme.spacing[2],
     marginTop: theme.spacing[3],
@@ -1093,12 +1103,14 @@ const styles = StyleSheet.create({
   sectionContainer: {
     paddingHorizontal: theme.spacing[4],
     marginBottom: theme.spacing[6],
+    backgroundColor: '#FFF7EC', // Section background
+    paddingVertical: theme.spacing[3],
   },
   sectionCard: {
     padding: 0,
     borderRadius: theme.spacing[3],
     overflow: 'hidden',
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.card,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -1109,7 +1121,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   cardHeader: {
-    backgroundColor: '#f8f9ff',
+    backgroundColor: '#FFF7EC', // Section background
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border.light,
     paddingVertical: theme.spacing[4],
@@ -1177,7 +1189,7 @@ const styles = StyleSheet.create({
   reminderCard: {
     padding: theme.spacing[3],
     marginBottom: theme.spacing[3],
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.card,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -1267,7 +1279,7 @@ const styles = StyleSheet.create({
   remindersPlaceholder: {
     marginTop: theme.spacing[3],
     padding: theme.spacing[6],
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FFF5EE',
     borderWidth: 2,
     borderColor: '#e9ecef',
     borderStyle: 'dashed',
