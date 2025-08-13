@@ -35,6 +35,7 @@ export type MainTabParamList = {
   AddReminder: undefined;
   CertificateViewer: { imageUri: string };
   ProfileEdit: undefined;
+  NotificationSettings: undefined;
 };
 
 export type TabParamList = {

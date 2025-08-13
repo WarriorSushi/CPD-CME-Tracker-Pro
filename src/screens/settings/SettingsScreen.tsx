@@ -493,15 +493,19 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
               style={styles.cardContent}
             >
               <View style={styles.settingsGrid}>
-                <View style={styles.modernSettingItem}>
+                <TouchableOpacity 
+                  style={styles.modernSettingItem}
+                  onPress={() => (navigation as any).navigate('NotificationSettings')}
+                >
                   <View style={styles.settingIconWrapper}>
                     <SvgIcon name="bell" size={22} color="#1e40af" />
                   </View>
                   <View style={styles.settingDetails}>
                     <Text style={styles.modernSettingLabel}>Notifications</Text>
-                    <Text style={styles.modernSettingValue}>Enabled</Text>
+                    <Text style={styles.modernSettingValue}>Reminders & Alerts</Text>
                   </View>
-                </View>
+                  <SvgIcon name="chevron-right" size={16} color="#9ca3af" />
+                </TouchableOpacity>
                 
                 <View style={styles.modernSettingItem}>
                   <View style={styles.settingIconWrapper}>

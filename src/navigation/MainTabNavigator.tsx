@@ -17,6 +17,7 @@ import { AddLicenseScreen } from '../screens/settings/AddLicenseScreen';
 import { AddReminderScreen } from '../screens/dashboard/AddReminderScreen';
 import { CertificateViewerScreen } from '../screens/cme/CertificateViewerScreen';
 import { ProfileEditScreen } from '../screens/settings/ProfileEditScreen';
+import { NotificationSettingsScreen } from '../screens/settings/NotificationSettingsScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createStackNavigator<MainTabParamList>();
@@ -183,6 +184,14 @@ export const MainTabNavigator: React.FC = () => {
       <Stack.Screen
         name="ProfileEdit"
         component={ProfileEditScreen}
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="NotificationSettings"
+        component={NotificationSettingsScreen}
         options={{
           presentation: 'modal',
           headerShown: false,

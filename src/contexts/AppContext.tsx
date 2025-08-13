@@ -10,6 +10,7 @@ import {
 } from '../types';
 import { databaseOperations } from '../services/database';
 import { getUserCached, refreshUserCache, clearUserCache, getCachedUserSync } from '../services/database/userCache';
+import { NotificationService } from '../services/notifications';
 
 // Development logging helper
 const isDevelopment = __DEV__;
@@ -111,6 +112,9 @@ interface AppContextType {
   // User actions
   updateUser: (userData: Partial<User>) => Promise<boolean>;
   updateUserProfile: (userData: Partial<User>) => Promise<boolean>; // Alias for profile updates
+  
+  // Notification refresh
+  refreshNotifications: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -585,6 +589,24 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   }, [refreshUserData]);
 
+  // Refresh notifications with current app data
+  const refreshNotifications = useCallback(async (): Promise<void> => {
+    try {
+      if (!user) return;
+      
+      devLog('🔔 AppContext: Refreshing notifications with current data...');
+      await NotificationService.refreshAllNotifications(
+        user,
+        licenses,
+        eventReminders,
+        totalCredits
+      );
+      devLog('✅ AppContext: Notifications refreshed successfully');
+    } catch (error) {
+      console.error('💥 AppContext: Error refreshing notifications:', error);
+    }
+  }, [user, licenses, eventReminders, totalCredits]);
+
   // Update progress when user or credits change
   useEffect(() => {
     if (user && !isLoadingCME) {
@@ -592,6 +614,17 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       setCurrentYearProgress(progress);
     }
   }, [user, totalCredits, isLoadingCME]);
+
+  // Auto-refresh notifications when relevant data changes
+  useEffect(() => {
+    if (user && !isInitializing) {
+      const timeoutId = setTimeout(() => {
+        refreshNotifications();
+      }, 1000); // Debounce to prevent excessive refreshing
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [user, licenses, eventReminders, totalCredits, refreshNotifications, isInitializing]);
 
   // Smart initial data loading - prioritize essential data
   // Use ref to prevent double execution in React 18 StrictMode
@@ -613,6 +646,14 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       try {
         devLog('🚀 AppContext: Starting smart initial data load...');
         setIsInitializing(true);
+        
+        // Initialize notification service
+        try {
+          await NotificationService.initialize();
+          devLog('✅ AppContext: Notification service initialized');
+        } catch (error) {
+          console.error('💥 AppContext: Failed to initialize notifications:', error);
+        }
         
         // Load user first (essential for everything else)
         await refreshUserData();
@@ -709,6 +750,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     deleteEventReminder,
     updateUser,
     updateUserProfile: updateUser, // Alias for profile updates
+    refreshNotifications,
   }), [
     user,
     recentCMEEntries,
@@ -743,6 +785,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     updateEventReminder,
     deleteEventReminder,
     updateUser,
+    refreshNotifications,
   ]);
 
   return (
