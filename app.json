@@ -51,18 +51,14 @@
         "android.permission.ACCESS_WIFI_STATE"
       ]
     },
-    "web": {
-      "favicon": "./assets/favicon.png",
-      "bundler": "metro"
-    },
+    "platforms": ["ios", "android"],
     "plugins": [
       "expo-sqlite",
       "expo-secure-store",
       "expo-document-picker",
       "expo-image-picker",
       "expo-camera",
-      "expo-notifications",
-      "@react-native-community/netinfo"
+      "expo-notifications"
     ],
     "extra": {
       "eas": {
