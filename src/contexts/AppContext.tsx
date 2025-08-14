@@ -11,6 +11,7 @@ import {
 import { databaseOperations } from '../services/database';
 import { getUserCached, refreshUserCache, clearUserCache, getCachedUserSync } from '../services/database/userCache';
 import { NotificationService } from '../services/notifications';
+import { AuditTrailService } from '../services/AuditTrailService';
 
 // Development logging helper
 const isDevelopment = __DEV__;
@@ -449,13 +450,21 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       
       if (result.success) {
         console.log('✅ AppContext.addCMEEntry: Success! Force refreshing CME data...');
+        await AuditTrailService.logCMEAction('add_entry', result.data?.id || 0, {
+          title: entry.title,
+          provider: entry.provider,
+          credits: entry.creditsEarned,
+          category: entry.category
+        }, true);
         await forceRefreshCMEData();
         return true;
       }
       console.log('❌ AppContext.addCMEEntry: Database operation failed');
+      await AuditTrailService.logCMEAction('add_entry', 0, { title: entry.title }, false, 'Database operation failed');
       return false;
     } catch (error) {
       console.error('💥 AppContext.addCMEEntry: Exception occurred:', error);
+      await AuditTrailService.logCMEAction('add_entry', 0, { title: entry.title }, false, String(error));
       return false;
     }
   }, [forceRefreshCMEData]);
@@ -464,12 +473,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     try {
       const result = await databaseOperations.cme.updateEntry(id, entry);
       if (result.success) {
+        await AuditTrailService.logCMEAction('update_entry', id, entry, true);
         await forceRefreshCMEData();
         return true;
       }
+      await AuditTrailService.logCMEAction('update_entry', id, entry, false, 'Database operation failed');
       return false;
     } catch (error) {
       console.error('Error updating CME entry:', error);
+      await AuditTrailService.logCMEAction('update_entry', id, entry, false, String(error));
       return false;
     }
   }, [forceRefreshCMEData]);
@@ -478,12 +490,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     try {
       const result = await databaseOperations.cme.deleteEntry(id);
       if (result.success) {
+        await AuditTrailService.logCMEAction('delete_entry', id, {}, true);
         await forceRefreshCMEData();
         return true;
       }
+      await AuditTrailService.logCMEAction('delete_entry', id, {}, false, 'Database operation failed');
       return false;
     } catch (error) {
       console.error('Error deleting CME entry:', error);
+      await AuditTrailService.logCMEAction('delete_entry', id, {}, false, String(error));
       return false;
     }
   }, [forceRefreshCMEData]);

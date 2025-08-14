@@ -27,6 +27,7 @@ import { CMEEntry } from '../../types';
 import { getCreditUnit } from '../../utils/creditTerminology';
 import { ThumbnailService } from '../../services/thumbnailService';
 import { databaseOperations } from '../../services/database';
+import { HapticsUtils } from '../../utils/HapticsUtils';
 
 type AddCMEScreenNavigationProp = StackNavigationProp<MainTabParamList, 'AddCME'>;
 type AddCMEScreenRouteProp = RouteProp<MainTabParamList, 'AddCME'>;
@@ -480,6 +481,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
     
     if (!validateForm()) {
       console.log('❌ handleSubmit: Form validation failed');
+      HapticsUtils.error();
       Alert.alert('Validation Error', 'Please fix the errors in the form.');
       return;
     }
@@ -514,10 +516,12 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
 
       if (success) {
         console.log('🎉 handleSubmit: Success! Navigating back to dashboard');
+        HapticsUtils.success();
         // Navigate back to close modal - this will automatically return to whatever screen called it
         navigation.goBack();
       } else {
         console.log('💥 handleSubmit: Operation failed');
+        HapticsUtils.error();
         Alert.alert(
           'Error',
           `Failed to ${isEditing ? 'update' : 'add'} CME entry. Please try again.`
@@ -570,6 +574,11 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       ...prev, 
       [field]: newErrors[field as keyof FormErrors] 
     }));
+    
+    // Add haptic feedback for validation errors
+    if (newErrors[field as keyof FormErrors]) {
+      HapticsUtils.warning();
+    }
   };
 
   const handleDateChange = (selectedDate: Date) => {

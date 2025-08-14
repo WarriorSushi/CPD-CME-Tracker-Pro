@@ -5,6 +5,7 @@ import { ThemeProvider } from './src/theme';
 import { AppNavigator } from './src/navigation';
 import { OnboardingProvider } from './src/contexts/OnboardingContext';
 import { AppProvider } from './src/contexts/AppContext';
+import { OfflineIndicator } from './src/components/common/OfflineIndicator';
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
           <ThemeProvider>
             <StatusBar style="auto" />
             <AppNavigator />
+            <OfflineIndicator />
           </ThemeProvider>
         </AppProvider>
       </OnboardingProvider>

@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../constants/theme';
 import { MainTabParamList, TabParamList } from '../types/navigation';
 import { SvgIcon } from '../components';
+import { HapticsUtils } from '../utils/HapticsUtils';
 
 // Import screens and navigators
 import { DashboardScreen } from '../screens/dashboard/DashboardScreen';
@@ -65,6 +66,10 @@ const TabNavigator: React.FC = () => {
               style={[props.style, { flex: 1 }]}
               activeOpacity={0.7} // Add press effect for better feedback
               delayLongPress={delayLongPress || undefined}
+              onPress={(e) => {
+                HapticsUtils.light(); // Add haptic feedback for tab navigation
+                props.onPress?.(e);
+              }}
             />
           );
         },

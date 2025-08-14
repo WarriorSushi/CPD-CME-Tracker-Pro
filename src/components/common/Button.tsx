@@ -18,6 +18,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useColors, useTokens } from '../../theme';
 import { ButtonProps } from '../../types';
+import { HapticsUtils } from '../../utils/HapticsUtils';
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
@@ -36,6 +37,22 @@ export const Button: React.FC<ButtonProps> = ({
 
   const handlePressIn = () => {
     if (!disabled) { // No animation for disabled buttons
+      // Add haptic feedback based on button variant
+      switch (variant) {
+        case 'destructive':
+          HapticsUtils.warning();
+          break;
+        case 'primary':
+          HapticsUtils.medium();
+          break;
+        case 'outline':
+          HapticsUtils.light();
+          break;
+        default:
+          HapticsUtils.light();
+          break;
+      }
+      
       pressAnimation.value = withTiming(1, { 
         duration: 100, 
         easing: Easing.out(Easing.quad) 

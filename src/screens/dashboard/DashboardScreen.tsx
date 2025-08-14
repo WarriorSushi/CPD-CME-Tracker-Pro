@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { Card, Button, LoadingSpinner, SvgIcon, StandardHeader } from '../../components';
+import { Card, Button, LoadingSpinner, SvgIcon, StandardHeader, LoadingState, ErrorBoundary } from '../../components';
 import { SimpleProgressRing } from '../../components/charts/SimpleProgressRing';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
@@ -141,23 +141,31 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <StandardHeader
-        title={`${getGreeting()}, ${user?.profileName || user?.profession || 'Professional'}`}
-        showBackButton={false}
-        rightIcon="profile"
-        rightIconPress={() => navigation.navigate('Settings')}
-        rightIconColor="#FFD700" // Bright gold that pops against blue background
-        rightIconSize={28} // Larger size to make it more prominent
-        titleAlign="left"
-        titleSize="base"
-      />
+    <ErrorBoundary>
+      <View style={styles.container}>
+        <StandardHeader
+          title={`${getGreeting()}, ${user?.profileName || user?.profession || 'Professional'}`}
+          showBackButton={false}
+          rightIcon="profile"
+          rightIconPress={() => navigation.navigate('Settings')}
+          rightIconColor="#FFD700" // Bright gold that pops against blue background
+          rightIconSize={28} // Larger size to make it more prominent
+          titleAlign="left"
+          titleSize="base"
+        />
 
-      <ScrollView 
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
+        <LoadingState
+          loading={isInitializing}
+          error={error}
+          retry={refreshAllData}
+          loadingText="Loading your CME data..."
+          skeleton={true}
+        >
+          <ScrollView 
+            style={styles.scrollView}
+            showsVerticalScrollIndicator={false}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          >
         {/* Upper Section - Your Progress + Add Entry Button */}
         <View style={styles.upperSection}>
           <View style={styles.progressHeader}>
@@ -611,10 +619,10 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* Bottom spacer for tab bar */}
         <View style={styles.bottomSpacer} />
-      </ScrollView>
-
-
-    </View>
+          </ScrollView>
+        </LoadingState>
+      </View>
+    </ErrorBoundary>
   );
 };
 
