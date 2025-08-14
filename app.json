@@ -1,32 +1,74 @@
 {
   "expo": {
-    "name": "cme-tracker",
-    "slug": "cme-tracker",
+    "name": "CME Tracker Pro",
+    "slug": "cme-tracker-pro",
+    "description": "Professional continuing medical education tracking application for healthcare professionals. Track CME/CPD credits, manage licenses, store certificates, and maintain compliance - all offline and secure.",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "privacy": "unlisted",
+    "primaryColor": "#003087",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cmetrackerpro.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Camera access is required to scan and upload CME certificates for your professional records.",
+        "NSPhotoLibraryUsageDescription": "Photo library access is required to select and upload CME certificates from your device.",
+        "NSDocumentPickerUsageDescription": "Document access is required to import CME certificates and export your professional records."
+      }
     },
     "android": {
+      "package": "com.cmetrackerpro.app",
+      "versionCode": 1,
+      "compileSdkVersion": 34,
+      "targetSdkVersion": 34,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.WAKE_LOCK",
+        "android.permission.VIBRATE",
+        "android.permission.RECEIVE_BOOT_COMPLETED"
+      ],
+      "blockedPermissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.ACCESS_WIFI_STATE"
+      ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     },
     "plugins": [
       "expo-sqlite",
-      "expo-secure-store"
-    ]
+      "expo-secure-store",
+      "expo-document-picker",
+      "expo-image-picker",
+      "expo-camera",
+      "expo-notifications",
+      "expo-haptics",
+      "@react-native-community/netinfo"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "cme-tracker-pro"
+      }
+    }
   }
 }

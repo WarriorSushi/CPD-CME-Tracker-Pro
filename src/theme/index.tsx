@@ -62,7 +62,9 @@ export const getColor = (colorName: ColorToken | keyof typeof appTheme): string 
     return tokens.color[colorName as ColorToken];
   }
   
-  console.warn(`Color token '${String(colorName)}' not found`);
+  if (__DEV__) {
+    console.warn(`Color token '${String(colorName)}' not found`);
+  }
   return tokens.color.gray500; // fallback
 };
 
