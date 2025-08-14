@@ -315,20 +315,20 @@ const styles = StyleSheet.create({
   },
   badgeName: {
     fontWeight: '600',
-    color: theme.colors.textPrimary,
+    color: theme.colors.gray[900],
     textAlign: 'center',
     marginBottom: 2,
   },
   badgeNameDisabled: {
-    color: theme.colors.textSecondary,
+    color: theme.colors.gray[500],
   },
   badgeDescription: {
-    color: theme.colors.textSecondary,
+    color: theme.colors.gray[600],
     textAlign: 'center',
     lineHeight: 14,
   },
   badgeDescriptionDisabled: {
-    color: theme.colors.textTertiary,
+    color: theme.colors.gray[400],
   },
   progressContainer: {
     width: '100%',
@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     width: '100%',
-    backgroundColor: theme.colors.gray200,
+    backgroundColor: theme.colors.gray[200],
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 9,
-    color: theme.colors.textSecondary,
+    color: theme.colors.gray[600],
     marginTop: 2,
     fontWeight: '500',
   },

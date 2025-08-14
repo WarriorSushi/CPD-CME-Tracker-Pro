@@ -120,13 +120,13 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: theme.colors.textPrimary,
+    color: theme.colors.gray[900],
     marginBottom: theme.spacing[3],
     textAlign: 'center',
   },
   errorMessage: {
     fontSize: 16,
-    color: theme.colors.textSecondary,
+    color: theme.colors.gray[600],
     textAlign: 'center',
     marginBottom: theme.spacing[5],
     lineHeight: 24,
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     paddingHorizontal: theme.spacing[6],
     paddingVertical: theme.spacing[3],
-    borderRadius: theme.radius.medium,
+    borderRadius: 8,
     marginBottom: theme.spacing[4],
   },
   retryButtonText: {
@@ -146,19 +146,19 @@ const styles = StyleSheet.create({
   debugContainer: {
     marginTop: theme.spacing[4],
     padding: theme.spacing[3],
-    backgroundColor: theme.colors.gray100,
-    borderRadius: theme.radius.small,
+    backgroundColor: theme.colors.gray[100],
+    borderRadius: 4,
     maxWidth: '100%',
   },
   debugTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: theme.colors.textPrimary,
+    color: theme.colors.gray[900],
     marginBottom: theme.spacing[2],
   },
   debugText: {
     fontSize: 12,
-    color: theme.colors.textSecondary,
+    color: theme.colors.gray[600],
     fontFamily: 'monospace',
     lineHeight: 16,
   },

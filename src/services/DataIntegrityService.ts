@@ -62,7 +62,7 @@ export class DataIntegrityService {
       }
 
       // Check user data
-      const userResult = await databaseOperations.user.getUser();
+      const userResult = await databaseOperations.user.getCurrentUser();
       if (userResult.success && userResult.data) {
         await this.validateUser(userResult.data, result);
       }

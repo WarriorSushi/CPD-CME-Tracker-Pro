@@ -16,7 +16,6 @@ export class NotificationPermissions {
           allowAlert: true,
           allowBadge: true,
           allowSound: true,
-          allowAnnouncements: false,
         },
       });
 
