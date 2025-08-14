@@ -34,7 +34,8 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
       if (countryColumnExists) {
         // Country column exists - leaving it for backward compatibility
         // SQLite doesn't support DROP COLUMN directly without rebuilding table
-        if (__DEV__) }
+        if (__DEV__) console.log('Country column exists - leaving it for backward compatibility');
+      }
 
       // Add missing profile columns safely
       if (!profileColumnsExist) {
@@ -389,7 +390,7 @@ const ensureTablesExist = async (db: SQLite.SQLiteDatabase): Promise<void> => {
 
       await createTables(db);
     } else {
-
+      // Tables already exist
     }
   } catch (error) {
       __DEV__ && console.error('💥 ensureTablesExist: Error checking tables:', error);

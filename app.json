@@ -62,7 +62,6 @@
       "expo-image-picker",
       "expo-camera",
       "expo-notifications",
-      "expo-haptics",
       "@react-native-community/netinfo"
     ],
     "extra": {
