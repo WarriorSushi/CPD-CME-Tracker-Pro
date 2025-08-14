@@ -145,7 +145,13 @@ export const SimpleProgressRing: React.FC<SimpleProgressRingProps> = ({
       </View>
 
       {/* Content */}
-      <View style={styles.content}>
+      <View 
+        style={styles.content}
+        accessible={true}
+        accessibilityLabel={`Progress: ${percentage}% complete`}
+        accessibilityHint="Annual CME requirement progress"
+        accessibilityRole="progressbar"
+      >
         {children || (
           <View style={styles.defaultContent}>
             <Text style={[styles.percentageText, { color }]}>{percentage}%</Text>

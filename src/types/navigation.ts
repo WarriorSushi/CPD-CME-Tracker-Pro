@@ -48,6 +48,17 @@ export type TabParamList = {
 export type CMEStackParamList = {
   CMEHistory: undefined;
   CMEDetails: { entryId: number };
+  AddCME: { 
+    editEntry?: any;
+    ocrData?: {
+      title: string;
+      provider: string;
+      dateAttended: string;
+      creditsEarned: string;
+      category: string;
+      certificatePath?: string;
+    };
+  };
 };
 
 export type VaultStackParamList = {

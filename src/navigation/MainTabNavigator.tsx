@@ -57,13 +57,17 @@ const TabNavigator: React.FC = () => {
         tabBarActiveTintColor: '#003087', // Blue color from top bar
         tabBarInactiveTintColor: '#374151', // Charcoal color
         tabBarLabelPosition: 'below-icon',
-        tabBarButton: (props) => (
-          <TouchableOpacity
-            {...props}
-            style={[props.style, { flex: 1 }]}
-            activeOpacity={1.0} // Remove press effect
-          />
-        ),
+        tabBarButton: (props) => {
+          const { delayLongPress, ...restProps } = props;
+          return (
+            <TouchableOpacity
+              {...restProps}
+              style={[props.style, { flex: 1 }]}
+              activeOpacity={0.7} // Add press effect for better feedback
+              delayLongPress={delayLongPress || undefined}
+            />
+          );
+        },
       })}
     >
       <Tab.Screen

@@ -232,6 +232,8 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
               title="+ Add New Entry"
               onPress={() => (navigation.getParent() as any).navigate('AddCME', { editEntry: undefined })}
               style={styles.addEntryButton}
+              accessibilityLabel="Add new CME entry"
+              accessibilityHint="Opens form to add a new continuing education entry"
             />
           </View>
         </View>

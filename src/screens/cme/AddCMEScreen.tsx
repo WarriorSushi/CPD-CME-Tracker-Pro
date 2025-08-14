@@ -533,10 +533,43 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const updateFormData = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
-    if (errors[field as keyof FormErrors]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+    
+    // Real-time validation feedback
+    const newErrors: Partial<FormErrors> = {};
+    
+    switch (field) {
+      case 'title':
+        if (!value?.trim()) {
+          newErrors.title = 'Title is required';
+        } else if (value.trim().length < 3) {
+          newErrors.title = 'Title must be at least 3 characters';
+        }
+        break;
+      case 'provider':
+        if (!value?.trim()) {
+          newErrors.provider = 'Provider is required';
+        }
+        break;
+      case 'creditsEarned':
+        const credits = parseFloat(value);
+        if (isNaN(credits) || credits <= 0) {
+          newErrors.creditsEarned = 'Credits must be a positive number';
+        } else if (credits > 100) {
+          newErrors.creditsEarned = 'Credits seem unusually high. Please verify.';
+        }
+        break;
+      case 'category':
+        if (!value?.trim()) {
+          newErrors.category = 'Category is required';
+        }
+        break;
     }
+    
+    // Update errors - clear field error if valid, set if invalid
+    setErrors(prev => ({ 
+      ...prev, 
+      [field]: newErrors[field as keyof FormErrors] 
+    }));
   };
 
   const handleDateChange = (selectedDate: Date) => {

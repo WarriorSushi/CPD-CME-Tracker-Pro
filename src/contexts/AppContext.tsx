@@ -161,8 +161,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     return getUserCached();
   }, []);
 
-  // Calculate progress based on current data and user's requirement period
-  const calculateProgress = (user: User, totalCredits: number): Progress => {
+  // Calculate progress based on current data and user's requirement period (memoized)
+  const calculateProgress = useCallback((user: User, totalCredits: number): Progress => {
     const now = new Date();
     const periodYears = user.requirementPeriod || 1;
     
@@ -211,7 +211,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       remainingDays,
       status,
     };
-  };
+  }, []); // Empty dependencies since function only uses parameters
 
   // Data fetching functions
   const refreshUserData = useCallback(async (): Promise<void> => {
@@ -615,14 +615,26 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   }, [user, totalCredits, isLoadingCME]);
 
-  // Auto-refresh notifications when relevant data changes
+  // Auto-refresh notifications when relevant data changes (optimized debouncing)
+  const notificationRefreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   useEffect(() => {
     if (user && !isInitializing) {
-      const timeoutId = setTimeout(() => {
-        refreshNotifications();
-      }, 1000); // Debounce to prevent excessive refreshing
+      // Clear any existing timeout
+      if (notificationRefreshTimeoutRef.current) {
+        clearTimeout(notificationRefreshTimeoutRef.current);
+      }
       
-      return () => clearTimeout(timeoutId);
+      // Set new timeout with longer debounce for better performance
+      notificationRefreshTimeoutRef.current = setTimeout(() => {
+        refreshNotifications();
+      }, 2000); // Increased debounce to 2 seconds
+      
+      return () => {
+        if (notificationRefreshTimeoutRef.current) {
+          clearTimeout(notificationRefreshTimeoutRef.current);
+        }
+      };
     }
   }, [user, licenses, eventReminders, totalCredits, refreshNotifications, isInitializing]);
 
