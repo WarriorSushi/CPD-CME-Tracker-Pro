@@ -73,21 +73,19 @@ export const CertificateViewerScreen: React.FC<Props> = ({ navigation, route }) 
         dialogTitle: 'Share Certificate',
       });
     } catch (error) {
-      console.error('Error sharing certificate:', error);
+      __DEV__ && console.error('Error sharing certificate:', error);
       Alert.alert('Error', 'Failed to share certificate.');
     }
   };
 
   const handleClose = () => {
     // Ensure we go back to the previous screen in the CME stack
-    console.log('CertificateViewer: Attempting to go back');
-    console.log('Can go back:', navigation.canGoBack());
-    
+
     if (navigation.canGoBack()) {
       navigation.goBack();
     } else {
       // Fallback: navigate to CMEHistory within the same stack
-      console.log('CertificateViewer: Fallback - navigating to CMEHistory');
+
       navigation.navigate('CMEHistory');
     }
   };

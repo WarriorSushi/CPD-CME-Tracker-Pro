@@ -14,7 +14,6 @@ export class AsyncMutex {
    */
   async runExclusive<T>(fn: () => Promise<T>): Promise<T> {
     const currentLockId = ++this.lockId;
-    console.log(`🔐 ${this.name}: Lock requested by operation ${currentLockId}`);
 
     // Wait for the previous operation to complete
     const previousMutex = this.mutex;
@@ -31,20 +30,19 @@ export class AsyncMutex {
     try {
       // Wait for previous operation to complete
       await previousMutex;
-      console.log(`🟢 ${this.name}: Lock acquired by operation ${currentLockId}`);
+
       this.locked = true;
 
       // Execute the protected function
       const result = await fn();
-      console.log(`✅ ${this.name}: Operation ${currentLockId} completed successfully`);
-      
+
       return result;
     } catch (error) {
-      console.error(`💥 ${this.name}: Operation ${currentLockId} failed:`, error);
+      __DEV__ && console.error(`💥 ${this.name}: Operation ${currentLockId} failed:`, error);
       throw error;
     } finally {
       this.locked = false;
-      console.log(`🔓 ${this.name}: Lock released by operation ${currentLockId}`);
+
       resolve!(); // Resolve the mutex for the next operation
     }
   }
@@ -86,9 +84,9 @@ class DatabaseMutex extends AsyncMutex {
    * Specialized method for database initialization operations
    */
   async runDatabaseInit<T>(operationName: string, fn: () => Promise<T>): Promise<T> {
-    console.log(`🔄 DatabaseMutex: Starting database init operation: ${operationName}`);
+
     return this.runExclusive(async () => {
-      console.log(`🏗️ DatabaseMutex: Executing ${operationName}`);
+
       return await fn();
     });
   }
@@ -97,9 +95,9 @@ class DatabaseMutex extends AsyncMutex {
    * Specialized method for database write operations
    */
   async runDatabaseWrite<T>(operationName: string, fn: () => Promise<T>): Promise<T> {
-    console.log(`✏️ DatabaseMutex: Starting database write operation: ${operationName}`);
+
     return this.runExclusive(async () => {
-      console.log(`📝 DatabaseMutex: Executing ${operationName}`);
+
       return await fn();
     });
   }
@@ -109,9 +107,9 @@ class DatabaseMutex extends AsyncMutex {
    * Reads also need to be serialized to prevent NPEs during concurrent init/health checks
    */
   async runDatabaseRead<T>(operationName: string, fn: () => Promise<T>): Promise<T> {
-    console.log(`👁️ DatabaseMutex: Starting database read operation: ${operationName}`);
+
     return this.runExclusive(async () => {
-      console.log(`📖 DatabaseMutex: Executing ${operationName}`);
+
       return await fn();
     });
   }
@@ -120,9 +118,9 @@ class DatabaseMutex extends AsyncMutex {
    * Specialized method for database cleanup operations
    */
   async runDatabaseCleanup<T>(operationName: string, fn: () => Promise<T>): Promise<T> {
-    console.log(`🧹 DatabaseMutex: Starting database cleanup operation: ${operationName}`);
+
     return this.runExclusive(async () => {
-      console.log(`🗑️ DatabaseMutex: Executing ${operationName}`);
+
       return await fn();
     });
   }

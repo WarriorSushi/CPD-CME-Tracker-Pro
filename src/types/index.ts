@@ -81,28 +81,7 @@ export type Profession =
   | 'Allied Health'
   | 'Other';
 
-// Navigation types
-export type RootStackParamList = {
-  Onboarding: undefined;
-  Dashboard: undefined;
-  AddCME: { 
-    editEntry?: CMEEntry; 
-    ocrData?: {
-      title?: string;
-      provider?: string;
-      date?: string;
-      credits?: string;
-      category?: string;
-      certificatePath?: string;
-    };
-  };
-  CMEHistory: undefined;
-  CMEDetails: { entryId: number };
-  CertificateVault: undefined;
-  CertificateScanner: undefined;
-  LicenseRenewal: undefined;
-  Settings: undefined;
-};
+// Navigation types moved to navigation.ts to avoid conflicts
 
 // Form types
 export interface CMEEntryForm {

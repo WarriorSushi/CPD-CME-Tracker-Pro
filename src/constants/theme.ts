@@ -1,6 +1,5 @@
 // LEGACY: Theme constants for CME Tracker - MIGRATE TO NEW THEME SYSTEM
 // This is maintained for backward compatibility during migration
-// TODO: Replace all imports of this with the new theme system
 
 import { tokens, getColor } from '../theme/tokens';
 

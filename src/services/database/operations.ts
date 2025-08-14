@@ -21,7 +21,7 @@ import {
 const isDevelopment = __DEV__;
 const devLog = (...args: any[]) => {
   if (isDevelopment) {
-    console.log(...args);
+
   }
 };
 
@@ -94,7 +94,7 @@ export const userOperations = {
   // Update user information
   updateUser: async (userData: Partial<User>): Promise<DatabaseOperationResult> => {
     try {
-      devLog('💾 DB Operations: updateUser called with:', userData?.profession);
+
       const db = await getDatabase();
       
       return dbMutex.runDatabaseWrite('updateUser', async () => {
@@ -107,7 +107,7 @@ export const userOperations = {
         const existingUser = await getFirstSafe<any>(db, 'SELECT id FROM users WHERE id = 1');
         
         if (!existingUser) {
-          devLog('⚠️ DB Operations: No user found, creating user with provided data only...');
+
           // Create user with only the fields that were actually provided
           const createFields = ['id'];
           const createPlaceholders = ['1']; // User ID is always 1
@@ -163,7 +163,7 @@ export const userOperations = {
             INSERT INTO users (${createFields.join(', ')})
             VALUES (${createPlaceholders.join(', ')})
           `, createValues);
-          devLog('✅ DB Operations: User created with provided fields only');
+
           return { success: true };
         }
         
@@ -175,7 +175,7 @@ export const userOperations = {
           values.push(userData.profession);
         }
         if (userData.creditSystem) {
-          devLog('🎯 DB Operations: Adding creditSystem to update:', userData.creditSystem);
+
           fields.push('credit_system = ?');
           values.push(userData.creditSystem);
         }
@@ -215,10 +215,8 @@ export const userOperations = {
         values.push(1); // user ID
 
         const query = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
-        devLog('📝 DB Operations: Executing query:', query);
-        
+
         const result = await runSafe(db, query, values);
-        devLog('✅ DB Operations: Update result:', !!result);
 
         return { success: true };
       });
@@ -266,12 +264,11 @@ export const cmeOperations = {
         query += ' ORDER BY date_attended DESC, id DESC';
         
         const entries = await getAllSafe<CMEEntry>(db, query, params);
-        
-        // DEBUG: Log entries as they come from database (dev only)
+
         if (isDevelopment && entries.length > 0) {
-          devLog('🗃️ DATABASE getAllEntries result (should be newest first):');
+
           entries.slice(0, 3).forEach((entry, index) => {
-            devLog(`  ${index + 1}. ${entry.title} - ${entry.dateAttended}`);
+
           });
           if (entries.length > 3) devLog(`  ... and ${entries.length - 3} more entries`);
         }
@@ -325,30 +322,25 @@ export const cmeOperations = {
   // Add new CME entry - with mutex protection to prevent Android NPEs
   addEntry: async (entry: Omit<CMEEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<DatabaseOperationResult<number>> => {
     try {
-      devLog('🗃️ cmeOperations.addEntry: Starting database operation...');
-      
+
       // Get healthy database instance from singleton
       const db = await getDatabase();
-      devLog('🗃️ cmeOperations.addEntry: Database connection established');
-      
+
       return dbMutex.runDatabaseWrite('addEntry', async () => {
         
         // Ensure user exists
-        devLog('👤 cmeOperations.addEntry: Checking if user exists...');
+
         const userCheck = await getFirstSafe<any>(db, 'SELECT id FROM users WHERE id = 1');
-        devLog('👤 cmeOperations.addEntry: User check result:', !!userCheck);
-        
+
         if (!userCheck) {
-          devLog('⚠️ cmeOperations.addEntry: User with ID 1 does not exist, creating default user...');
+
           await runSafe(db, `
             INSERT OR IGNORE INTO users (id, profession, credit_system, annual_requirement, requirement_period)
             VALUES (1, 'Healthcare Professional', 'Credits', 50, 1)
           `);
-          devLog('✅ cmeOperations.addEntry: Default user created');
+
         }
-        
-        devLog('📝 cmeOperations.addEntry: Preparing to insert CME entry');
-        
+
         const result = await runSafe(db, `
           INSERT INTO cme_entries (
             title, provider, date_attended, credits_earned, 
@@ -363,16 +355,14 @@ export const cmeOperations = {
           entry.notes || null,
           entry.certificatePath || null,
         ]);
-        
-        devLog('✅ cmeOperations.addEntry: Insert successful, lastInsertRowId:', result.lastInsertRowId);
-        
+
         return {
           success: true,
           data: result.lastInsertRowId,
         };
       });
     } catch (error) {
-      console.error('💥 cmeOperations.addEntry: Database error occurred:', error);
+      __DEV__ && console.error('💥 cmeOperations.addEntry: Database error occurred:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to add CME entry',
@@ -384,8 +374,7 @@ export const cmeOperations = {
   updateEntry: async (id: number, entry: Partial<CMEEntry>): Promise<DatabaseOperationResult> => {
     return dbMutex.runDatabaseWrite('updateEntry', async () => {
       try {
-        devLog('✏️ cmeOperations.updateEntry: Starting update for ID:', id);
-        
+
         const db = await getDatabase();
         
         const fields = [];
@@ -421,21 +410,19 @@ export const cmeOperations = {
         }
 
         if (fields.length === 0) {
-          devLog('⚠️ cmeOperations.updateEntry: No fields to update');
+
           return { success: true };
         }
 
         values.push(id);
 
         const query = `UPDATE cme_entries SET ${fields.join(', ')} WHERE id = ? AND user_id = 1`;
-        devLog('📝 cmeOperations.updateEntry: Executing query');
-        
+
         const result = await runSafe(db, query, values);
-        devLog('✅ cmeOperations.updateEntry: Update result:', !!result);
 
         return { success: true };
       } catch (error) {
-        console.error('💥 cmeOperations.updateEntry: Database error occurred:', error);
+      __DEV__ && console.error('💥 cmeOperations.updateEntry: Database error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to update CME entry',
@@ -448,8 +435,7 @@ export const cmeOperations = {
   deleteEntry: async (id: number): Promise<DatabaseOperationResult> => {
     return dbMutex.runDatabaseWrite('deleteEntry', async () => {
       try {
-        devLog('🗑️ cmeOperations.deleteEntry: Starting delete for ID:', id);
-        
+
         const db = await getDatabase();
         
         // First check if entry exists
@@ -457,10 +443,9 @@ export const cmeOperations = {
           'SELECT id, title FROM cme_entries WHERE id = ? AND user_id = 1', 
           [id]
         );
-        devLog('🔍 cmeOperations.deleteEntry: Existing entry check:', !!existingEntry);
-        
+
         if (!existingEntry) {
-          devLog('⚠️ cmeOperations.deleteEntry: Entry not found');
+
           return { 
             success: false, 
             error: 'Entry not found' 
@@ -468,11 +453,10 @@ export const cmeOperations = {
         }
         
         const result = await runSafe(db, 'DELETE FROM cme_entries WHERE id = ? AND user_id = 1', [id]);
-        devLog('✅ cmeOperations.deleteEntry: Delete result:', !!result);
-        
+
         return { success: true };
       } catch (error) {
-        console.error('💥 cmeOperations.deleteEntry: Database error occurred:', error);
+      __DEV__ && console.error('💥 cmeOperations.deleteEntry: Database error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to delete CME entry',
@@ -530,12 +514,11 @@ export const cmeOperations = {
         AND date_attended < ?
         ORDER BY date_attended DESC, id DESC
       `, [startDate, endDate]);
-      
-      // DEBUG: Log entries as they come from database (dev only)
+
       if (isDevelopment && entries.length > 0) {
-        devLog('🗃️ DATABASE getEntriesInDateRange result (should be newest first):');
+
         entries.slice(0, 3).forEach((entry, index) => {
-          devLog(`  ${index + 1}. ${entry.title} - ${entry.dateAttended}`);
+
         });
         if (entries.length > 3) devLog(`  ... and ${entries.length - 3} more entries`);
       }
@@ -834,10 +817,9 @@ export const settingsOperations = {
   setSetting: async (key: string, value: string): Promise<DatabaseOperationResult> => {
     return dbMutex.runDatabaseWrite('setSetting', async () => {
       try {
-        devLog(`⚙️ settingsOperations.setSetting: Starting with key:`, key, 'value:', value);
+
         const db = await getDatabase();
-        devLog('⚙️ settingsOperations.setSetting: Database connection established');
-        
+
         // First, ensure the app_settings table exists
         await db.execAsync(`
           CREATE TABLE IF NOT EXISTS app_settings (
@@ -846,19 +828,17 @@ export const settingsOperations = {
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
           )
         `);
-        devLog('✅ settingsOperations.setSetting: Table ensured to exist');
-        
+
         // Use safe prepared statement execution
         await runSafe(db, `
           INSERT OR REPLACE INTO app_settings (key, value) 
           VALUES (?, ?)
         `, [key, value]);
-        
-        devLog('✅ settingsOperations.setSetting: Setting saved successfully');
+
         return { success: true };
         
       } catch (error) {
-        console.error('💥 settingsOperations.setSetting: Error occurred:', error);
+      __DEV__ && console.error('💥 settingsOperations.setSetting: Error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to set setting',
@@ -871,44 +851,37 @@ export const settingsOperations = {
   resetAllData: async (): Promise<DatabaseOperationResult> => {
     return dbMutex.runDatabaseCleanup('resetAllData', async () => {
       try {
-        devLog('🧹 settingsOperations.resetAllData: Starting complete app reset...');
+
         const db = await getDatabase();
-        devLog('🧹 settingsOperations.resetAllData: Database connection established');
-        
+
         // Delete all data from all tables using transaction
         await runInTransaction(db, async () => {
           await runSafe(db, 'DELETE FROM cme_entries');
-          devLog('✅ settingsOperations.resetAllData: CME entries cleared');
-          
+
           await runSafe(db, 'DELETE FROM certificates');
-          devLog('✅ settingsOperations.resetAllData: Certificates cleared');
-          
+
           await runSafe(db, 'DELETE FROM license_renewals');
-          devLog('✅ settingsOperations.resetAllData: License renewals cleared');
-          
+
           await runSafe(db, 'DELETE FROM cme_event_reminders');
-          devLog('✅ settingsOperations.resetAllData: Event reminders cleared');
-          
+
           await runSafe(db, 'DELETE FROM users');
-          devLog('✅ settingsOperations.resetAllData: Users cleared');
-          
+
           await runSafe(db, 'DELETE FROM app_settings');
-          devLog('✅ settingsOperations.resetAllData: App settings cleared');
+
         });
         
         // Reset database version to 0 to force recreation of tables and data
-        devLog('🔄 settingsOperations.resetAllData: Resetting database version...');
+
         await db.execAsync('PRAGMA user_version = 0');
         
         // Reset the database singleton
-        devLog('🔄 settingsOperations.resetAllData: Resetting database instance...');
+
         const { resetDatabaseForAppReset } = await import('./singleton');
         await resetDatabaseForAppReset();
-        
-        devLog('🎉 settingsOperations.resetAllData: Complete app reset successful');
+
         return { success: true };
       } catch (error) {
-        console.error('💥 settingsOperations.resetAllData: Error occurred:', error);
+      __DEV__ && console.error('💥 settingsOperations.resetAllData: Error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to reset app data',
@@ -949,7 +922,7 @@ export const eventReminderOperations = {
   // Ensure the reminders table exists (manual migration helper)
   ensureTableExists: async (): Promise<DatabaseOperationResult> => {
     try {
-      devLog('📅 eventReminderOperations.ensureTableExists: Checking/creating table...');
+
       const db = await getDatabase();
       
       // Create the table if it doesn't exist
@@ -984,11 +957,10 @@ export const eventReminderOperations = {
         END;
       `);
 
-      devLog('✅ eventReminderOperations.ensureTableExists: Table ensured');
       return { success: true };
       
     } catch (error) {
-      console.error('💥 eventReminderOperations.ensureTableExists: Error occurred:', error);
+      __DEV__ && console.error('💥 eventReminderOperations.ensureTableExists: Error occurred:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to ensure table exists',
@@ -999,8 +971,7 @@ export const eventReminderOperations = {
   // Get all event reminders for the current user
   getAllReminders: async (): Promise<DatabaseOperationResult<CMEEventReminder[]>> => {
     try {
-      devLog('📅 eventReminderOperations.getAllReminders: Fetching reminders...');
-      
+
       // First ensure table exists (outside mutex to avoid blocking)
       await eventReminderOperations.ensureTableExists();
       
@@ -1019,15 +990,14 @@ export const eventReminderOperations = {
             WHERE user_id = 1
             ORDER BY event_date ASC
           `);
-          
-          devLog(`✅ eventReminderOperations.getAllReminders: Found ${reminders.length} reminders`);
+
           return {
             success: true,
             data: reminders as CMEEventReminder[],
           };
           
         } catch (error) {
-          console.error('💥 eventReminderOperations.getAllReminders: Error occurred:', error);
+      __DEV__ && console.error('💥 eventReminderOperations.getAllReminders: Error occurred:', error);
           return {
             success: false,
             error: error instanceof Error ? error.message : 'Failed to fetch event reminders',
@@ -1036,7 +1006,7 @@ export const eventReminderOperations = {
       });
       
     } catch (error) {
-      console.error('💥 eventReminderOperations.getAllReminders: Outer error occurred:', error);
+      __DEV__ && console.error('💥 eventReminderOperations.getAllReminders: Outer error occurred:', error);
       // Return empty array if table creation fails
       return {
         success: true,
@@ -1049,25 +1019,23 @@ export const eventReminderOperations = {
   addReminder: async (reminder: Omit<CMEEventReminder, 'id' | 'createdAt' | 'updatedAt'>): Promise<DatabaseOperationResult<number>> => {
     return dbMutex.runDatabaseWrite('addReminder', async () => {
       try {
-        devLog('📅 eventReminderOperations.addReminder: Adding reminder...', reminder);
+
         const db = await getDatabase();
-        
-        
+
         const result = await runSafe(db, `
           INSERT INTO cme_event_reminders (event_name, event_date, user_id)
           VALUES (?, ?, 1)
         `, [reminder.eventName, reminder.eventDate]);
         
         const newId = result.lastInsertRowId as number;
-        devLog(`✅ eventReminderOperations.addReminder: Reminder added with ID ${newId}`);
-        
+
         return {
           success: true,
           data: newId,
         };
         
       } catch (error) {
-        console.error('💥 eventReminderOperations.addReminder: Error occurred:', error);
+      __DEV__ && console.error('💥 eventReminderOperations.addReminder: Error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to add event reminder',
@@ -1080,7 +1048,7 @@ export const eventReminderOperations = {
   updateReminder: async (id: number, updates: Partial<CMEEventReminder>): Promise<DatabaseOperationResult> => {
     return dbMutex.runDatabaseWrite('updateReminder', async () => {
       try {
-        devLog(`📅 eventReminderOperations.updateReminder: Updating reminder ${id}...`, updates);
+
         const db = await getDatabase();
         
         const setParts = [];
@@ -1096,7 +1064,7 @@ export const eventReminderOperations = {
         }
         
         if (setParts.length === 0) {
-          devLog('⚠️ eventReminderOperations.updateReminder: No fields to update');
+
           return { success: true };
         }
         
@@ -1107,12 +1075,11 @@ export const eventReminderOperations = {
           SET ${setParts.join(', ')}, updated_at = CURRENT_TIMESTAMP
           WHERE id = ? AND user_id = 1
         `, values);
-        
-        devLog(`✅ eventReminderOperations.updateReminder: Reminder ${id} updated successfully`);
+
         return { success: true };
         
       } catch (error) {
-        console.error('💥 eventReminderOperations.updateReminder: Error occurred:', error);
+      __DEV__ && console.error('💥 eventReminderOperations.updateReminder: Error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to update event reminder',
@@ -1125,19 +1092,18 @@ export const eventReminderOperations = {
   deleteReminder: async (id: number): Promise<DatabaseOperationResult> => {
     return dbMutex.runDatabaseWrite('deleteReminder', async () => {
       try {
-        devLog(`📅 eventReminderOperations.deleteReminder: Deleting reminder ${id}...`);
+
         const db = await getDatabase();
         
         await runSafe(db, `
           DELETE FROM cme_event_reminders 
           WHERE id = ? AND user_id = 1
         `, [id]);
-        
-        devLog(`✅ eventReminderOperations.deleteReminder: Reminder ${id} deleted successfully`);
+
         return { success: true };
         
       } catch (error) {
-        console.error('💥 eventReminderOperations.deleteReminder: Error occurred:', error);
+      __DEV__ && console.error('💥 eventReminderOperations.deleteReminder: Error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to delete event reminder',

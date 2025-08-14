@@ -23,19 +23,19 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
 
   const checkOnboardingStatus = useCallback(async () => {
     try {
-      console.log('🔍 Checking onboarding status from context...');
+
       const result = await settingsOperations.getSetting(STORAGE_KEYS.ONBOARDING_COMPLETED);
       
       if (result.success && result.data) {
         const isComplete = result.data === 'true';
-        console.log('📋 Onboarding status from DB:', isComplete);
+
         setIsOnboardingComplete(isComplete);
       } else {
-        console.log('📋 No onboarding setting found, defaulting to false');
+
         setIsOnboardingComplete(false);
       }
     } catch (error) {
-      console.error('Error checking onboarding status:', error);
+      __DEV__ && console.error('Error checking onboarding status:', error);
       setIsOnboardingComplete(false);
     } finally {
       setIsLoading(false);
@@ -44,15 +44,14 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
 
   const completeOnboarding = useCallback(async () => {
     try {
-      console.log('🔄 Setting onboarding completion flag...');
+
       const result = await settingsOperations.setSetting(
         STORAGE_KEYS.ONBOARDING_COMPLETED, 
         'true'
       );
-      console.log('📊 Database setSetting result:', result);
-      
+
       if (result.success) {
-        console.log('✨ Setting context state isOnboardingComplete to true');
+
         setIsOnboardingComplete(true);
         setIsLoading(false);
         
@@ -63,19 +62,19 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
         
         return true;
       } else {
-        console.error('❌ Database setSetting failed:', result.error);
+      __DEV__ && console.error('❌ Database setSetting failed:', result.error);
         
         // Fallback: Set the state anyway and let the user continue
-        console.log('⚠️ Using fallback: Setting onboarding complete anyway');
+
         setIsOnboardingComplete(true);
         setIsLoading(false);
         return true;
       }
     } catch (error) {
-      console.error('💥 Exception in completeOnboarding:', error);
+      __DEV__ && console.error('💥 Exception in completeOnboarding:', error);
       
       // Fallback: Set the state anyway and let the user continue
-      console.log('⚠️ Using fallback due to exception: Setting onboarding complete anyway');
+
       setIsOnboardingComplete(true);
       setIsLoading(false);
       return true;
@@ -84,22 +83,19 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
 
   const resetOnboarding = useCallback(async () => {
     try {
-      console.log('🔄 resetOnboarding: Starting reset process...');
-      
+
       // Immediately set states to ensure navigation happens
       setIsOnboardingComplete(false);
       setIsLoading(false);
-      console.log('🧭 resetOnboarding: Immediately set navigation states');
-      
+
       const result = await settingsOperations.setSetting(
         STORAGE_KEYS.ONBOARDING_COMPLETED, 
         'false'
       );
-      console.log('📝 resetOnboarding: Database setSetting result:', result);
-      
+
       return result.success;
     } catch (error) {
-      console.error('💥 Error resetting onboarding:', error);
+      __DEV__ && console.error('💥 Error resetting onboarding:', error);
       // Even if DB fails, allow navigation to onboarding
       setIsOnboardingComplete(false);
       setIsLoading(false);
@@ -109,27 +105,25 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
 
   const resetCompleteApp = useCallback(async () => {
     try {
-      console.log('🧹 resetCompleteApp: Starting complete app reset...');
-      
+
       // First, complete the database reset BEFORE changing navigation
-      console.log('🗃️ resetCompleteApp: Resetting database first...');
+
       const result = await settingsOperations.resetAllData();
-      console.log('📝 resetCompleteApp: Database resetAllData result:', result);
-      
+
       // Only after database reset is complete, change navigation states
       if (result.success) {
-        console.log('🧭 resetCompleteApp: Database reset successful, changing navigation states');
+
         setIsOnboardingComplete(false);
         setIsLoading(false);
         return true;
       } else {
-        console.error('❌ resetCompleteApp: Database reset failed, but allowing navigation anyway');
+      __DEV__ && console.error('❌ resetCompleteApp: Database reset failed, but allowing navigation anyway');
         setIsOnboardingComplete(false);
         setIsLoading(false);
         return false;
       }
     } catch (error) {
-      console.error('💥 Error resetting complete app:', error);
+      __DEV__ && console.error('💥 Error resetting complete app:', error);
       // Even if DB fails, allow navigation to onboarding
       setIsOnboardingComplete(false);
       setIsLoading(false);

@@ -21,7 +21,7 @@ export const useOnboardingStatus = () => {
         setIsOnboardingComplete(false);
       }
     } catch (error) {
-      console.error('Error checking onboarding status:', error);
+      __DEV__ && console.error('Error checking onboarding status:', error);
       setIsOnboardingComplete(false);
     } finally {
       setIsLoading(false);
@@ -30,26 +30,25 @@ export const useOnboardingStatus = () => {
 
   const completeOnboarding = async () => {
     try {
-      console.log('🔄 Setting onboarding completion flag...');
+
       const result = await settingsOperations.setSetting(
         STORAGE_KEYS.ONBOARDING_COMPLETED, 
         'true'
       );
-      console.log('📊 Database setSetting result:', result);
-      
+
       if (result.success) {
-        console.log('✨ Setting state isOnboardingComplete to true');
+
         setIsOnboardingComplete(true);
         // Force a recheck to ensure all hook instances get updated
-        console.log('🔄 Forcing recheck of onboarding status...');
+
         setTimeout(() => checkOnboardingStatus(), 100);
       } else {
-        console.error('❌ Database setSetting failed:', result.error);
+      __DEV__ && console.error('❌ Database setSetting failed:', result.error);
       }
       
       return result.success;
     } catch (error) {
-      console.error('💥 Exception in completeOnboarding:', error);
+      __DEV__ && console.error('💥 Exception in completeOnboarding:', error);
       return false;
     }
   };
@@ -67,7 +66,7 @@ export const useOnboardingStatus = () => {
       
       return result.success;
     } catch (error) {
-      console.error('Error resetting onboarding:', error);
+      __DEV__ && console.error('Error resetting onboarding:', error);
       return false;
     }
   };

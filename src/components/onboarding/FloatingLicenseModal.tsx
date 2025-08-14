@@ -31,7 +31,7 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  console.log('DEBUG: FloatingLicenseModal render, visible =', visible);
+
   const { addLicense } = useAppContext();
   
   // Form state
@@ -92,7 +92,7 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
         Alert.alert('Error', 'Failed to add license. Please try again.');
       }
     } catch (error) {
-      console.error('Error adding license:', error);
+      __DEV__ && console.error('Error adding license:', error);
       Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -101,7 +101,7 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
 
   const handleClose = useCallback(() => {
     if (isSubmitting) return; // Prevent closing while submitting
-    console.log('DEBUG: handleClose called in modal');
+
     onClose();
   }, [isSubmitting, onClose]);
 
@@ -133,7 +133,7 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
         activeOpacity={1}
         onPress={(e) => {
           e.preventDefault();
-          console.log('DEBUG: Overlay touched, closing modal');
+
           handleClose();
         }}
       >

@@ -7,13 +7,9 @@ export class OCRService {
    */
   static async extractText(imageUri: string): Promise<OCRResult> {
     try {
-      console.log('🔍 OCRService: Starting text extraction from:', imageUri);
-      
+
       const result = await extractTextFromImage(imageUri);
       const extractedText = (result as any).text || '';
-      
-      console.log('📄 OCRService: Extracted text length:', extractedText.length);
-      console.log('📄 OCRService: Raw text preview:', extractedText.substring(0, 200));
 
       // Parse the extracted text to identify CME-relevant data
       const parsedData = this.parseCMEData(extractedText);
@@ -24,7 +20,7 @@ export class OCRService {
         extractedData: parsedData,
       };
     } catch (error) {
-      console.error('💥 OCRService: Text extraction failed:', error);
+      __DEV__ && console.error('💥 OCRService: Text extraction failed:', error);
       throw new Error('Failed to extract text from image');
     }
   }
@@ -33,8 +29,7 @@ export class OCRService {
    * Parse extracted text to identify CME-relevant information
    */
   private static parseCMEData(text: string) {
-    console.log('🔍 OCRService: Parsing CME data from extracted text...');
-    
+
     const lowerText = text.toLowerCase();
     const lines = text.split('\n').filter(line => line.trim().length > 0);
     
@@ -70,7 +65,6 @@ export class OCRService {
       extractedData.category = categoryCandidate;
     }
 
-    console.log('🎯 OCRService: Parsed data:', extractedData);
     return extractedData;
   }
 

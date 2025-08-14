@@ -75,7 +75,7 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
         await saveProfilePicture(result.assets[0]);
       }
     } catch (error) {
-      console.error('Camera error:', error);
+      __DEV__ && console.error('Camera error:', error);
       Alert.alert('Error', 'Failed to open camera. Please try again.');
     } finally {
       setIsUploadingImage(false);
@@ -96,7 +96,7 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
         await saveProfilePicture(result.assets[0]);
       }
     } catch (error) {
-      console.error('Photo library error:', error);
+      __DEV__ && console.error('Photo library error:', error);
       Alert.alert('Error', 'Failed to open photo library. Please try again.');
     } finally {
       setIsUploadingImage(false);
@@ -138,9 +138,9 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
       }
 
       setProfilePicturePath(newFilePath);
-      console.log('✅ Profile picture saved to:', newFilePath);
+
     } catch (error) {
-      console.error('Error saving profile picture:', error);
+      __DEV__ && console.error('Error saving profile picture:', error);
       Alert.alert('Error', 'Failed to save profile picture. Please try again.');
     }
   };
@@ -178,7 +178,7 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
         Alert.alert('Error', 'Failed to update profile. Please try again.');
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
+      __DEV__ && console.error('Error updating profile:', error);
       Alert.alert('Error', 'An error occurred while updating your profile.');
     } finally {
       setIsSaving(false);

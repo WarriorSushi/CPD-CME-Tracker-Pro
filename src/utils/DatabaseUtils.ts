@@ -10,14 +10,13 @@ export async function getFirstSafe<T = any>(
   sql: string,
   params?: any[]
 ): Promise<T | null> {
-  console.log('🔍 DatabaseUtils: Getting first row with query:', sql);
-  
+
   try {
     // Use direct database method for better compatibility
     const result = await db.getFirstAsync<T>(sql, params || []);
     return result;
   } catch (error) {
-    console.error('💥 DatabaseUtils: getFirstSafe failed:', error);
+      __DEV__ && console.error('💥 DatabaseUtils: getFirstSafe failed:', error);
     throw error;
   }
 }
@@ -30,14 +29,13 @@ export async function getAllSafe<T = any>(
   sql: string,
   params?: any[]
 ): Promise<T[]> {
-  console.log('📋 DatabaseUtils: Getting all rows with query:', sql);
-  
+
   try {
     // Use direct database method for better compatibility
     const result = await db.getAllAsync<T>(sql, params || []);
     return result;
   } catch (error) {
-    console.error('💥 DatabaseUtils: getAllSafe failed:', error);
+      __DEV__ && console.error('💥 DatabaseUtils: getAllSafe failed:', error);
     throw error;
   }
 }
@@ -50,14 +48,13 @@ export async function runSafe(
   sql: string,
   params?: any[]
 ): Promise<SQLite.SQLiteRunResult> {
-  console.log('🚀 DatabaseUtils: Running statement safely:', sql);
-  
+
   try {
     // Use direct database method for better compatibility
     const result = await db.runAsync(sql, params || []);
     return result;
   } catch (error) {
-    console.error('💥 DatabaseUtils: runSafe failed:', error);
+      __DEV__ && console.error('💥 DatabaseUtils: runSafe failed:', error);
     throw error;
   }
 }
@@ -67,9 +64,9 @@ export async function runSafe(
  */
 export async function closeDatabaseSafe(db: SQLite.SQLiteDatabase): Promise<void> {
   try {
-    console.log('🔒 DatabaseUtils: Closing database safely...');
+
     await db.closeAsync();
-    console.log('✅ DatabaseUtils: Database closed successfully');
+
   } catch (error) {
     console.warn('⚠️ DatabaseUtils: Warning during database close (may already be closed):', error);
     // Don't throw - database might already be closed
@@ -82,15 +79,13 @@ export async function closeDatabaseSafe(db: SQLite.SQLiteDatabase): Promise<void
  */
 export async function waitForPendingOperations(db: SQLite.SQLiteDatabase): Promise<void> {
   try {
-    console.log('⏳ DatabaseUtils: Waiting for pending operations...');
-    
+
     // Execute a simple query to ensure all pending operations are complete
     await db.execAsync('PRAGMA schema_version');
     
     // Small delay to ensure Android native handles are released
     await new Promise(resolve => setTimeout(resolve, 100));
-    
-    console.log('✅ DatabaseUtils: All pending operations completed');
+
   } catch (error) {
     console.warn('⚠️ DatabaseUtils: Error waiting for pending operations:', error);
     throw error;
@@ -102,8 +97,7 @@ export async function waitForPendingOperations(db: SQLite.SQLiteDatabase): Promi
  */
 export async function forceCleanupHandles(db: SQLite.SQLiteDatabase): Promise<void> {
   try {
-    console.log('🧹 DatabaseUtils: Force cleaning up database handles...');
-    
+
     // Wait for pending operations
     await waitForPendingOperations(db);
     
@@ -112,10 +106,9 @@ export async function forceCleanupHandles(db: SQLite.SQLiteDatabase): Promise<vo
     
     // Additional wait for Android to release native handles
     await new Promise(resolve => setTimeout(resolve, 200));
-    
-    console.log('✅ DatabaseUtils: Database handles cleaned up');
+
   } catch (error) {
-    console.error('💥 DatabaseUtils: Error during force cleanup:', error);
+      __DEV__ && console.error('💥 DatabaseUtils: Error during force cleanup:', error);
     throw error;
   }
 }
@@ -125,15 +118,13 @@ export async function forceCleanupHandles(db: SQLite.SQLiteDatabase): Promise<vo
  */
 export async function testDatabaseHealthSafe(db: SQLite.SQLiteDatabase): Promise<boolean> {
   try {
-    console.log('🩺 DatabaseUtils: Testing database health safely...');
-    
+
     // Use a simple safe query that shouldn't cause NPEs
     await getFirstSafe(db, 'SELECT 1 as test');
-    
-    console.log('✅ DatabaseUtils: Database health check passed');
+
     return true;
   } catch (error) {
-    console.log('💀 DatabaseUtils: Database health check failed:', error);
+
     return false;
   }
 }
@@ -143,8 +134,7 @@ export async function testDatabaseHealthSafe(db: SQLite.SQLiteDatabase): Promise
  */
 export async function deleteDatabaseSafe(databaseName: string, db?: SQLite.SQLiteDatabase): Promise<void> {
   try {
-    console.log(`🗑️ DatabaseUtils: Safely deleting database: ${databaseName}`);
-    
+
     // If database instance provided, clean it up first
     if (db) {
       await forceCleanupHandles(db);
@@ -155,10 +145,9 @@ export async function deleteDatabaseSafe(databaseName: string, db?: SQLite.SQLit
     
     // Attempt to delete the database file
     await SQLite.deleteDatabaseAsync(databaseName);
-    console.log(`✅ DatabaseUtils: Database ${databaseName} deleted successfully`);
-    
+
   } catch (error) {
-    console.error(`💥 DatabaseUtils: Error deleting database ${databaseName}:`, error);
+      __DEV__ && console.error(`💥 DatabaseUtils: Error deleting database ${databaseName}:`, error);
     throw error;
   }
 }
@@ -170,25 +159,22 @@ export async function runInTransaction<T>(
   db: SQLite.SQLiteDatabase,
   operation: () => Promise<T>
 ): Promise<T> {
-  console.log('🔄 DatabaseUtils: Starting transaction...');
-  
+
   try {
     await db.execAsync('BEGIN TRANSACTION');
-    console.log('✅ DatabaseUtils: Transaction started');
-    
+
     const result = await operation();
     
     await db.execAsync('COMMIT');
-    console.log('✅ DatabaseUtils: Transaction committed');
-    
+
     return result;
   } catch (error) {
-    console.error('💥 DatabaseUtils: Transaction failed, rolling back:', error);
+      __DEV__ && console.error('💥 DatabaseUtils: Transaction failed, rolling back:', error);
     try {
       await db.execAsync('ROLLBACK');
-      console.log('🔄 DatabaseUtils: Transaction rolled back');
+
     } catch (rollbackError) {
-      console.error('💥 DatabaseUtils: Rollback failed:', rollbackError);
+      __DEV__ && console.error('💥 DatabaseUtils: Rollback failed:', rollbackError);
     }
     throw error;
   }

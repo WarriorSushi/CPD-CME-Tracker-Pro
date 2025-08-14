@@ -77,7 +77,7 @@ export const AddReminderScreen: React.FC<Props> = ({ navigation }) => {
         Alert.alert('Error', 'Failed to add event reminder. Please try again.');
       }
     } catch (error) {
-      console.error('Error adding reminder:', error);
+      __DEV__ && console.error('Error adding reminder:', error);
       Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);

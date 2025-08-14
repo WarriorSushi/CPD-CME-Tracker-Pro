@@ -9,8 +9,7 @@ export class NotificationPermissions {
    */
   static async requestPermissions(): Promise<boolean> {
     try {
-      console.log('🔔 NotificationPermissions: Requesting permissions...');
-      
+
       const { status } = await Notifications.requestPermissionsAsync({
         ios: {
           allowAlert: true,
@@ -20,10 +19,10 @@ export class NotificationPermissions {
       });
 
       const granted = status === 'granted';
-      console.log('🔔 NotificationPermissions: Permission result:', status);
+
       return granted;
     } catch (error) {
-      console.error('💥 NotificationPermissions: Error requesting permissions:', error);
+      __DEV__ && console.error('💥 NotificationPermissions: Error requesting permissions:', error);
       return false;
     }
   }
@@ -36,7 +35,7 @@ export class NotificationPermissions {
       const settings = await Notifications.getPermissionsAsync();
       return settings.status as PermissionStatus;
     } catch (error) {
-      console.error('💥 NotificationPermissions: Error getting permission status:', error);
+      __DEV__ && console.error('💥 NotificationPermissions: Error getting permission status:', error);
       return 'undetermined';
     }
   }
@@ -116,7 +115,7 @@ export class NotificationPermissions {
         await Linking.openSettings();
       }
     } catch (error) {
-      console.error('💥 NotificationPermissions: Error opening settings:', error);
+      __DEV__ && console.error('💥 NotificationPermissions: Error opening settings:', error);
     }
   }
 

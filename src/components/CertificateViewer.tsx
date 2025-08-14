@@ -38,7 +38,7 @@ export const CertificateViewer: React.FC<Props> = ({ visible, imageUri, onClose 
         dialogTitle: 'Share Certificate',
       });
     } catch (error) {
-      console.error('Error sharing certificate:', error);
+      __DEV__ && console.error('Error sharing certificate:', error);
       Alert.alert('Error', 'Failed to share certificate.');
     }
   };

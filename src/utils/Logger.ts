@@ -11,13 +11,13 @@ export class Logger {
    */
   static debug(message: string, ...args: any[]) {
     if (IS_DEVELOPMENT) {
-      console.log(`🐛 ${message}`, ...args);
+
     }
   }
 
   static info(message: string, ...args: any[]) {
     if (IS_DEVELOPMENT) {
-      console.log(`ℹ️ ${message}`, ...args);
+
     }
   }
 
@@ -33,11 +33,11 @@ export class Logger {
    */
   static error(message: string, error?: any) {
     if (IS_DEVELOPMENT) {
-      console.error(`💥 ${message}`, error);
+      __DEV__ && console.error(`💥 ${message}`, error);
     } else {
       // In production, could send to crash reporting service
       // For now, just use console.error for critical issues
-      console.error(message, error);
+      __DEV__ && console.error(message, error);
     }
   }
 
@@ -46,7 +46,7 @@ export class Logger {
    */
   static performance(operation: string, duration: number) {
     if (IS_DEVELOPMENT) {
-      console.log(`⏱️ ${operation}: ${duration}ms`);
+
     }
   }
 
@@ -55,7 +55,7 @@ export class Logger {
    */
   static userAction(action: string, details?: any) {
     if (IS_DEVELOPMENT) {
-      console.log(`👤 User Action: ${action}`, details);
+
     }
   }
 }
@@ -66,6 +66,6 @@ export class Logger {
  */
 export const devLog = (...args: any[]) => {
   if (IS_DEVELOPMENT) {
-    console.log(...args);
+
   }
 };

@@ -12,7 +12,7 @@ const USER_TTL = 60000; // 1 minute TTL for user data
 const isDevelopment = __DEV__;
 const devLog = (...args: any[]) => {
   if (isDevelopment) {
-    console.log(...args);
+
   }
 };
 
@@ -21,19 +21,18 @@ export async function getUserCached(): Promise<User | null> {
   
   // Return cached user if fresh
   if (lastUser && (now - lastUserAt) < USER_TTL) {
-    devLog('💾 getUserCached: Using fresh cached user data');
+
     return lastUser;
   }
   
   // If already fetching, wait for the same promise
   if (inflightUser) {
-    devLog('⏳ getUserCached: Waiting for inflight user request...');
+
     return inflightUser;
   }
   
   // Start new fetch
-  devLog('🔄 getUserCached: Fetching fresh user data...');
-  
+
   inflightUser = (async () => {
     try {
       const result = await userOperations.getCurrentUser();
@@ -42,11 +41,10 @@ export async function getUserCached(): Promise<User | null> {
       // Cache the result
       lastUser = userData || null;
       lastUserAt = Date.now();
-      
-      devLog('✅ getUserCached: Fresh user data cached');
+
       return userData || null;
     } catch (error) {
-      console.error('💥 getUserCached: Error fetching user:', error);
+      __DEV__ && console.error('💥 getUserCached: Error fetching user:', error);
       return null;
     }
   })().finally(() => {
@@ -58,8 +56,7 @@ export async function getUserCached(): Promise<User | null> {
 
 // Force refresh user data (for updates)
 export async function refreshUserCache(): Promise<User | null> {
-  devLog('🔄 refreshUserCache: Force refreshing user cache...');
-  
+
   // Clear cache
   lastUser = null;
   lastUserAt = 0;
@@ -75,7 +72,7 @@ export async function refreshUserCache(): Promise<User | null> {
 
 // Clear cache (for logout/reset)
 export function clearUserCache(): void {
-  devLog('🧹 clearUserCache: Clearing user cache...');
+
   lastUser = null;
   lastUserAt = 0;
   inflightUser = null;

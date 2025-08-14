@@ -144,7 +144,6 @@ const TabNavigator: React.FC = () => {
   );
 };
 
-
 export const MainTabNavigator: React.FC = () => {
   return (
     <Stack.Navigator

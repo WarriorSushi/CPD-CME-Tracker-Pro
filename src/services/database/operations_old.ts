@@ -25,7 +25,7 @@ import {
 const isDevelopment = __DEV__;
 const devLog = (...args: any[]) => {
   if (isDevelopment) {
-    console.log(...args);
+
   }
 };
 
@@ -41,15 +41,14 @@ let skipHealthCheckUntil = 0; // Skip health checks for a period after successfu
 // Force clean database migration with proper cleanup (with mutex protection)
 const forceCleanMigration = async (): Promise<SQLite.SQLiteDatabase> => {
   return dbMutex.runDatabaseInit('forceCleanMigration', async () => {
-    console.log('🧹 Force migration: Starting clean database migration...');
-    
+
     try {
       // Create fresh database with simple initialization
       const db = await SQLite.openDatabaseAsync('cme_tracker.db');
       await db.execAsync('PRAGMA foreign_keys = ON;');
       
       // Create tables directly without migration system
-      console.log('🏗️ Force migration: Creating fresh tables...');
+
       await createSimpleTables(db);
       
       // Test the new database before returning
@@ -58,11 +57,10 @@ const forceCleanMigration = async (): Promise<SQLite.SQLiteDatabase> => {
         await closeDatabaseSafe(db);
         throw new Error('Newly created database failed health check');
       }
-      
-      console.log('✅ Force migration: Created and verified fresh database');
+
       return db;
     } catch (error) {
-      console.error('💥 Force migration: Error during clean migration:', error);
+      __DEV__ && console.error('💥 Force migration: Error during clean migration:', error);
       throw error;
     }
   });
@@ -71,8 +69,7 @@ const forceCleanMigration = async (): Promise<SQLite.SQLiteDatabase> => {
 // Simple table creation without migration complexity (uses transaction wrapper)
 const createSimpleTables = async (db: SQLite.SQLiteDatabase): Promise<void> => {
   await runInTransaction(db, async () => {
-    console.log('🏗️ createSimpleTables: Creating tables within transaction...');
-    
+
     try {
     // Users table without country column
     await db.execAsync(`
@@ -162,9 +159,8 @@ const createSimpleTables = async (db: SQLite.SQLiteDatabase): Promise<void> => {
       ('auto_scan_enabled', 'true');
     `);
 
-      console.log('✅ Simple tables created successfully within transaction');
     } catch (error) {
-      console.error('💥 createSimpleTables: Error creating tables:', error);
+      __DEV__ && console.error('💥 createSimpleTables: Error creating tables:', error);
       throw error;
     }
   });
@@ -203,11 +199,10 @@ const safeCloseDatabase = async (db: SQLite.SQLiteDatabase): Promise<void> => {
 // Force close and delete database with proper cleanup (with mutex protection)
 const forceCleanupDatabase = async (): Promise<void> => {
   return dbMutex.runDatabaseCleanup('forceCleanupDatabase', async () => {
-    console.log('🧹 forceCleanupDatabase: Starting database cleanup...');
-    
+
     // First, try to close the existing instance if it exists
     if (dbInstance) {
-      console.log('🔒 forceCleanupDatabase: Closing existing database instance...');
+
       await forceCleanupHandles(dbInstance);
       dbInstance = null;
     }
@@ -250,27 +245,26 @@ const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
     
     // If initialization is in progress, wait for it
     if (dbInitPromise) {
-      console.log('⏳ getDatabase: Waiting for existing database initialization...');
+
       try {
         const db = await dbInitPromise;
         // Test the initialized database before returning
         const isHealthy = await testDatabaseHealthSafe(db);
         if (!isHealthy) {
-          console.log('💀 getDatabase: Newly initialized database is unhealthy, forcing cleanup...');
+
           dbInitPromise = null;
           throw new Error('Database initialization produced unhealthy instance');
         }
         return db;
       } catch (error) {
-        console.error('💥 getDatabase: Waiting for initialization failed:', error);
+      __DEV__ && console.error('💥 getDatabase: Waiting for initialization failed:', error);
         dbInitPromise = null;
         // Continue to create new instance
       }
     }
     
     // Start new database initialization
-    console.log('🔄 getDatabase: Starting fresh database initialization...');
-    
+
     dbInitPromise = (async () => {
       try {
         // Check if we need to force clean migration
@@ -290,29 +284,29 @@ const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
             `);
             
             if (tableInfo && tableInfo.sql && tableInfo.sql.includes('country TEXT NOT NULL')) {
-              console.log('⚠️ getDatabase: Found problematic country column, needs clean migration');
+
               needsCleanMigration = true;
             }
             
             await closeDatabaseSafe(testDb);
           } catch (testError) {
-            console.log('💀 getDatabase: Database test failed, needs clean migration:', testError);
+
             await closeDatabaseSafe(testDb);
             needsCleanMigration = true;
           }
         } catch (openError) {
-          console.log('🆕 getDatabase: Database doesn\'t exist or can\'t be opened, creating new...');
+
           needsCleanMigration = false; // Just create normally
         }
         
         let db: SQLite.SQLiteDatabase;
         
         if (needsCleanMigration) {
-          console.log('🧹 getDatabase: Performing clean migration...');
+
           await forceCleanupDatabase();
           db = await forceCleanMigration();
         } else {
-          console.log('📊 getDatabase: Using normal setup...');
+
           db = await setupDatabase();
         }
         
@@ -322,12 +316,11 @@ const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
           await closeDatabaseSafe(db);
           throw new Error('Database created but failed health check');
         }
-        
-        console.log('✅ getDatabase: Database instance created and verified healthy');
+
         return db;
         
       } catch (error) {
-        console.error('💥 getDatabase: Database initialization failed:', error);
+      __DEV__ && console.error('💥 getDatabase: Database initialization failed:', error);
         throw error;
       }
     })();
@@ -336,7 +329,7 @@ const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
     dbInstance = await dbInitPromise;
     return dbInstance;
   } catch (error) {
-    console.error('💥 getDatabase: Failed to get database instance:', error);
+      __DEV__ && console.error('💥 getDatabase: Failed to get database instance:', error);
     // Reset state for next attempt
     dbInstance = null;
     dbInitPromise = null;
@@ -347,8 +340,7 @@ const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
 // Reset database instance (for complete app reset) with mutex protection
 export const resetDatabaseInstance = async (): Promise<void> => {
   return dbMutex.runDatabaseCleanup('resetDatabaseInstance', async () => {
-    console.log('🔄 resetDatabaseInstance: Starting database instance reset...');
-    
+
     // Safely close existing database
     if (dbInstance) {
       await closeDatabaseSafe(dbInstance);
@@ -357,8 +349,7 @@ export const resetDatabaseInstance = async (): Promise<void> => {
     // Clear references
     dbInstance = null;
     dbInitPromise = null;
-    
-    console.log('✅ resetDatabaseInstance: Database instance reset - will be recreated on next access');
+
   });
 };
 
@@ -399,7 +390,7 @@ export const userOperations = {
   // Update user information
   updateUser: async (userData: Partial<User>): Promise<DatabaseOperationResult> => {
     try {
-      console.log('💾 DB Operations: updateUser called with:', userData);
+
       const db = await getDatabase(); // Get DB first, then acquire mutex
       
       return dbMutex.runDatabaseWrite('updateUser', async () => {
@@ -408,7 +399,7 @@ export const userOperations = {
         const existingUser = await getFirstSafe<any>(db, 'SELECT id FROM users WHERE id = 1');
         
         if (!existingUser) {
-          console.log('⚠️ DB Operations: No user found, creating user with provided data only...');
+
           // Create user with only the fields that were actually provided
           const createFields = ['id'];
           const createPlaceholders = ['1']; // User ID is always 1
@@ -449,7 +440,7 @@ export const userOperations = {
             INSERT INTO users (${createFields.join(', ')})
             VALUES (${createPlaceholders.join(', ')})
           `, createValues);
-          console.log('✅ DB Operations: User created with provided fields only');
+
           return { success: true };
         }
         
@@ -461,7 +452,7 @@ export const userOperations = {
           values.push(userData.profession);
         }
         if (userData.creditSystem) {
-          console.log('🎯 DB Operations: Adding creditSystem to update:', userData.creditSystem);
+
           fields.push('credit_system = ?');
           values.push(userData.creditSystem);
         }
@@ -489,11 +480,8 @@ export const userOperations = {
         values.push(1); // user ID
 
         const query = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
-        console.log('📝 DB Operations: Executing query:', query);
-        console.log('📝 DB Operations: With values:', values);
-        
+
         const result = await runSafe(db, query, values);
-        console.log('✅ DB Operations: Update result:', result);
 
         return { success: true };
       });
@@ -541,12 +529,11 @@ export const cmeOperations = {
         query += ' ORDER BY date_attended DESC, id DESC';
         
         const entries = await getAllSafe<CMEEntry>(db, query, params);
-        
-        // DEBUG: Log entries as they come from database (dev only)
+
         if (isDevelopment && entries.length > 0) {
-          devLog('🗃️ DATABASE getAllEntries result (should be newest first):');
+
           entries.slice(0, 3).forEach((entry, index) => {
-            devLog(`  ${index + 1}. ${entry.title} - ${entry.dateAttended}`);
+
           });
           if (entries.length > 3) devLog(`  ... and ${entries.length - 3} more entries`);
         }
@@ -600,38 +587,25 @@ export const cmeOperations = {
   // Add new CME entry - with mutex protection to prevent Android NPEs
   addEntry: async (entry: Omit<CMEEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<DatabaseOperationResult<number>> => {
     try {
-      devLog('🗃️ cmeOperations.addEntry: Starting database operation...');
-      
+
       // Get healthy database instance first (handles all corruption automatically)
       const db = await getDatabase();
-      devLog('🗃️ cmeOperations.addEntry: Healthy database connection established');
-      
+
       return dbMutex.runDatabaseWrite('addEntry', async () => {
         
         // Ensure user exists
-        console.log('👤 cmeOperations.addEntry: Checking if user exists...');
+
         const userCheck = await getFirstSafe<any>(db, 'SELECT id FROM users WHERE id = 1');
-        console.log('👤 cmeOperations.addEntry: User check result:', userCheck);
-        
+
         if (!userCheck) {
-          console.log('⚠️ cmeOperations.addEntry: User with ID 1 does not exist, creating default user...');
+
           await runSafe(db, `
             INSERT OR IGNORE INTO users (id, profession, credit_system, annual_requirement, requirement_period)
             VALUES (1, 'Healthcare Professional', 'Credits', 50, 1)
           `);
-          console.log('✅ cmeOperations.addEntry: Default user created');
+
         }
-        
-        console.log('📝 cmeOperations.addEntry: Preparing to insert CME entry with data:', {
-          title: entry.title,
-          provider: entry.provider,
-          dateAttended: entry.dateAttended,
-          creditsEarned: entry.creditsEarned,
-          category: entry.category,
-          notes: entry.notes || null,
-          certificatePath: entry.certificatePath || null,
-        });
-        
+
         const result = await runSafe(db, `
           INSERT INTO cme_entries (
             title, provider, date_attended, credits_earned, 
@@ -646,16 +620,14 @@ export const cmeOperations = {
           entry.notes || null,
           entry.certificatePath || null,
         ]);
-        
-        devLog('✅ cmeOperations.addEntry: Insert successful, lastInsertRowId:', result.lastInsertRowId);
-        
+
         return {
           success: true,
           data: result.lastInsertRowId,
         };
       });
     } catch (error) {
-      console.error('💥 cmeOperations.addEntry: Database error occurred:', error);
+      __DEV__ && console.error('💥 cmeOperations.addEntry: Database error occurred:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to add CME entry',
@@ -667,9 +639,7 @@ export const cmeOperations = {
   updateEntry: async (id: number, entry: Partial<CMEEntry>): Promise<DatabaseOperationResult> => {
     return dbMutex.runDatabaseWrite('updateEntry', async () => {
       try {
-        console.log('✏️ cmeOperations.updateEntry: Starting update for ID:', id);
-        console.log('📝 cmeOperations.updateEntry: Update data:', entry);
-        
+
         const db = await getDatabase();
         
         const fields = [];
@@ -705,22 +675,19 @@ export const cmeOperations = {
         }
 
         if (fields.length === 0) {
-          console.log('⚠️ cmeOperations.updateEntry: No fields to update');
+
           return { success: true };
         }
 
         values.push(id);
 
         const query = `UPDATE cme_entries SET ${fields.join(', ')} WHERE id = ? AND user_id = 1`;
-        console.log('📝 cmeOperations.updateEntry: Executing query:', query);
-        console.log('📝 cmeOperations.updateEntry: With values:', values);
-        
+
         const result = await runSafe(db, query, values);
-        console.log('✅ cmeOperations.updateEntry: Update result:', result);
 
         return { success: true };
       } catch (error) {
-        console.error('💥 cmeOperations.updateEntry: Database error occurred:', error);
+      __DEV__ && console.error('💥 cmeOperations.updateEntry: Database error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to update CME entry',
@@ -733,8 +700,7 @@ export const cmeOperations = {
   deleteEntry: async (id: number): Promise<DatabaseOperationResult> => {
     return dbMutex.runDatabaseWrite('deleteEntry', async () => {
       try {
-        console.log('🗑️ cmeOperations.deleteEntry: Starting delete for ID:', id);
-        
+
         const db = await getDatabase();
         
         // First check if entry exists
@@ -742,10 +708,9 @@ export const cmeOperations = {
           'SELECT id, title FROM cme_entries WHERE id = ? AND user_id = 1', 
           [id]
         );
-        console.log('🔍 cmeOperations.deleteEntry: Existing entry check:', existingEntry);
-        
+
         if (!existingEntry) {
-          console.log('⚠️ cmeOperations.deleteEntry: Entry not found');
+
           return { 
             success: false, 
             error: 'Entry not found' 
@@ -753,18 +718,16 @@ export const cmeOperations = {
         }
         
         const result = await runSafe(db, 'DELETE FROM cme_entries WHERE id = ? AND user_id = 1', [id]);
-        console.log('✅ cmeOperations.deleteEntry: Delete result:', result);
-        
+
         // Verify deletion
         const verifyDeleted = await getFirstSafe<any>(db,
           'SELECT id FROM cme_entries WHERE id = ? AND user_id = 1', 
           [id]
         );
-        console.log('🔍 cmeOperations.deleteEntry: Verify deleted:', verifyDeleted);
-        
+
         return { success: true };
       } catch (error) {
-        console.error('💥 cmeOperations.deleteEntry: Database error occurred:', error);
+      __DEV__ && console.error('💥 cmeOperations.deleteEntry: Database error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to delete CME entry',
@@ -822,12 +785,11 @@ export const cmeOperations = {
         AND date_attended < ?
         ORDER BY date_attended DESC, id DESC
       `, [startDate, endDate]);
-      
-      // DEBUG: Log entries as they come from database (dev only)
+
       if (isDevelopment && entries.length > 0) {
-        devLog('🗃️ DATABASE getEntriesInDateRange result (should be newest first):');
+
         entries.slice(0, 3).forEach((entry, index) => {
-          devLog(`  ${index + 1}. ${entry.title} - ${entry.dateAttended}`);
+
         });
         if (entries.length > 3) devLog(`  ... and ${entries.length - 3} more entries`);
       }
@@ -1126,10 +1088,9 @@ export const settingsOperations = {
   setSetting: async (key: string, value: string): Promise<DatabaseOperationResult> => {
     return dbMutex.runDatabaseWrite('setSetting', async () => {
       try {
-        console.log(`⚙️ settingsOperations.setSetting: Starting with key:`, key, 'value:', value);
+
         const db = await getDatabase();
-        console.log('⚙️ settingsOperations.setSetting: Database connection established');
-        
+
         // First, ensure the app_settings table exists
         await db.execAsync(`
           CREATE TABLE IF NOT EXISTS app_settings (
@@ -1138,19 +1099,17 @@ export const settingsOperations = {
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
           )
         `);
-        console.log('✅ settingsOperations.setSetting: Table ensured to exist');
-        
+
         // Use safe prepared statement execution
         await runSafe(db, `
           INSERT OR REPLACE INTO app_settings (key, value) 
           VALUES (?, ?)
         `, [key, value]);
-        
-        console.log('✅ settingsOperations.setSetting: Setting saved successfully');
+
         return { success: true };
         
       } catch (error) {
-        console.error('💥 settingsOperations.setSetting: Error occurred:', error);
+      __DEV__ && console.error('💥 settingsOperations.setSetting: Error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to set setting',
@@ -1163,40 +1122,34 @@ export const settingsOperations = {
   resetAllData: async (): Promise<DatabaseOperationResult> => {
     return dbMutex.runDatabaseCleanup('resetAllData', async () => {
       try {
-        console.log('🧹 settingsOperations.resetAllData: Starting complete app reset...');
+
         const db = await getDatabase();
-        console.log('🧹 settingsOperations.resetAllData: Database connection established');
-        
+
         // Delete all data from all tables using transaction
         await runInTransaction(db, async () => {
           await runSafe(db, 'DELETE FROM cme_entries');
-          console.log('✅ settingsOperations.resetAllData: CME entries cleared');
-          
+
           await runSafe(db, 'DELETE FROM certificates');
-          console.log('✅ settingsOperations.resetAllData: Certificates cleared');
-          
+
           await runSafe(db, 'DELETE FROM license_renewals');
-          console.log('✅ settingsOperations.resetAllData: License renewals cleared');
-          
+
           await runSafe(db, 'DELETE FROM users');
-          console.log('✅ settingsOperations.resetAllData: Users cleared');
-          
+
           await runSafe(db, 'DELETE FROM app_settings');
-          console.log('✅ settingsOperations.resetAllData: App settings cleared');
+
         });
         
         // Reset database version to 0 to force recreation of tables and data
-        console.log('🔄 settingsOperations.resetAllData: Resetting database version...');
+
         await db.execAsync('PRAGMA user_version = 0');
         
         // Reset the database instance so it gets recreated properly on next access
-        console.log('🔄 settingsOperations.resetAllData: Resetting database instance...');
+
         await resetDatabaseInstance();
-        
-        console.log('🎉 settingsOperations.resetAllData: Complete app reset successful');
+
         return { success: true };
       } catch (error) {
-        console.error('💥 settingsOperations.resetAllData: Error occurred:', error);
+      __DEV__ && console.error('💥 settingsOperations.resetAllData: Error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to reset app data',

@@ -15,7 +15,6 @@ export const initializeDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
 // Create all tables (assumes transaction is already started by caller)
 export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => {
   try {
-    console.log('🏗️ createTables: Starting table creation/migration...');
 
     // First, handle users table migration/creation
     const tableExists = await db.getFirstAsync(`
@@ -23,8 +22,7 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
     `);
     
     if (tableExists) {
-      console.log('🔍 Migration: Checking if users table needs migration...');
-      
+
       // Check if we need migration (either country column exists or profile columns are missing)
       const columns = await db.getAllAsync('PRAGMA table_info(users)');
       const columnNames = columns.map((col: any) => col.name);
@@ -32,90 +30,30 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
       const countryColumnExists = columnNames.includes('country');
       const profileColumnsExist = columnNames.includes('profile_name') && columnNames.includes('age') && columnNames.includes('profile_picture_path');
       
-      // Force migration if any profile column is missing - make this more explicit
-      const needsMigration = countryColumnExists || !profileColumnsExist;
-      
-      console.log('🔍 Migration check - Column names:', columnNames);
-      console.log('🔍 Migration check - Country exists:', countryColumnExists, 'Profile exists:', profileColumnsExist);
-      console.log('🔍 Migration check - Needs migration:', needsMigration);
-      console.log('🔍 Migration check - Specific profile columns missing:', {
-        profile_name: !columnNames.includes('profile_name'),
-        age: !columnNames.includes('age'),
-        profile_picture_path: !columnNames.includes('profile_picture_path')
-      });
-      
-      // FORCE migration for now to ensure profile columns are added
-      if (needsMigration || !profileColumnsExist) {
-        console.log('🔄 Migration: Recreating users table...');
-        console.log('🔄 Migration reason - Country exists:', countryColumnExists, 'Profile missing:', !profileColumnsExist);
-        
-        // Backup existing user data - only select columns that exist
-        const selectColumns = ['id', 'profession', 'credit_system', 'annual_requirement', 
-                              'requirement_period', 'cycle_start_date', 'cycle_end_date'];
-        
-        // Add profile columns only if they exist
-        if (columnNames.includes('profile_name')) selectColumns.push('profile_name');
-        if (columnNames.includes('age')) selectColumns.push('age');
-        if (columnNames.includes('profile_picture_path')) selectColumns.push('profile_picture_path');
-        selectColumns.push('created_at');
-        
-        const existingUsers = await db.getAllAsync(`
-          SELECT ${selectColumns.join(', ')} FROM users
-        `);
-        
-        console.log('📦 Migration: Backed up', existingUsers.length, 'user records');
-        
-        // Drop old table
-        await db.execAsync('DROP TABLE users');
-        console.log('🗑️ Migration: Dropped old users table');
-        
-        // Create new table without country column
-        await db.execAsync(`
-          CREATE TABLE users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            profession TEXT,
-            credit_system TEXT,
-            annual_requirement INTEGER,
-            requirement_period INTEGER DEFAULT 1,
-            cycle_start_date DATE,
-            cycle_end_date DATE,
-            profile_name TEXT,
-            age INTEGER,
-            profile_picture_path TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-          );
-        `);
-        console.log('🆕 Migration: Created new users table');
-        
-        // Restore data without country column
-        for (const user of existingUsers) {
-          const userData = user as any; // Type assertion for migration data
-          await db.runAsync(`
-            INSERT INTO users (id, profession, credit_system, annual_requirement, requirement_period, cycle_start_date, cycle_end_date, profile_name, age, profile_picture_path, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          `, [
-            userData.id,
-            userData.profession,
-            userData.credit_system,
-            userData.annual_requirement || null,
-            userData.requirement_period || 1,
-            userData.cycle_start_date || null,
-            userData.cycle_end_date || null,
-            userData.profile_name || null,
-            userData.age || null,
-            userData.profile_picture_path || null,
-            userData.created_at
-          ]);
+      // Safe migration: Add missing columns without dropping table
+      if (countryColumnExists) {
+        // Country column exists - leaving it for backward compatibility
+        // SQLite doesn't support DROP COLUMN directly without rebuilding table
+        if (__DEV__) }
+
+      // Add missing profile columns safely
+      if (!profileColumnsExist) {
+        if (!columnNames.includes('profile_name')) {
+          await db.execAsync('ALTER TABLE users ADD COLUMN profile_name TEXT');
         }
-        
-        console.log('✅ Migration: Successfully migrated', existingUsers.length, 'users to new table');
-      } else {
-        console.log('ℹ️ Migration: Users table already migrated, no action needed');
+        if (!columnNames.includes('age')) {
+          await db.execAsync('ALTER TABLE users ADD COLUMN age INTEGER');
+        }
+        if (!columnNames.includes('profile_picture_path')) {
+          await db.execAsync('ALTER TABLE users ADD COLUMN profile_picture_path TEXT');
+        }
+        if (!columnNames.includes('updated_at')) {
+          await db.execAsync('ALTER TABLE users ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP');
+        }
       }
     } else {
       // Create table normally (first time)
-      console.log('🆕 Creating users table for the first time...');
+
       await db.execAsync(`
         CREATE TABLE users (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -132,7 +70,7 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
       `);
-      console.log('✅ Created new users table');
+
     }
 
     // CME entries table
@@ -302,10 +240,8 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
       ('auto_scan_enabled', 'true');
     `);
 
-    
-    console.log('✅ createTables: Database tables created successfully');
   } catch (error) {
-    console.error('💥 createTables: Error creating database tables:', error);
+      __DEV__ && console.error('💥 createTables: Error creating database tables:', error);
     throw error;
   }
 };
@@ -316,13 +252,11 @@ export const migrateDatabase = async (
   currentVersion: number,
   targetVersion: number
 ): Promise<void> => {
-  console.log(`Migrating database from version ${currentVersion} to ${targetVersion}`);
-  
+
   try {
     // Migration from version 0 to 1 - initial setup
     if (currentVersion < 1 && targetVersion >= 1) {
-      console.log('🔄 Running migration 0 -> 1: Creating initial tables...');
-      
+
       // Check if users table exists and add missing columns if needed
       const tableInfo = await db.getAllAsync(`PRAGMA table_info(users)`);
       const hasRequirementPeriod = tableInfo.some((col: any) => col.name === 'requirement_period');
@@ -332,30 +266,28 @@ export const migrateDatabase = async (
       if (tableInfo.length > 0) {
         // Table exists, add missing columns
         if (!hasRequirementPeriod) {
-          console.log('⚙️ Adding requirement_period column to existing users table...');
+
           await db.execAsync(`ALTER TABLE users ADD COLUMN requirement_period INTEGER NOT NULL DEFAULT 1`);
         }
         if (!hasCycleStartDate) {
-          console.log('⚙️ Adding cycle_start_date column to existing users table...');
+
           await db.execAsync(`ALTER TABLE users ADD COLUMN cycle_start_date DATE`);
         }
         if (!hasCycleEndDate) {
-          console.log('⚙️ Adding cycle_end_date column to existing users table...');
+
           await db.execAsync(`ALTER TABLE users ADD COLUMN cycle_end_date DATE`);
         }
       } else {
         // Table doesn't exist, create all tables
-        console.log('🏗️ Creating all database tables...');
+
         await createTables(db);
       }
-      
-      console.log('✅ Migration 0 -> 1 completed successfully');
+
     }
 
     // Migration from version 1 to 2 - add CME event reminders table
     if (currentVersion < 2 && targetVersion >= 2) {
-      console.log('🔄 Running migration 1 -> 2: Adding CME event reminders table...');
-      
+
       // Create the CME event reminders table
       await db.execAsync(`
         CREATE TABLE IF NOT EXISTS cme_event_reminders (
@@ -388,10 +320,9 @@ export const migrateDatabase = async (
         END;
       `);
 
-      console.log('✅ Migration 1 -> 2 completed successfully');
     }
   } catch (error) {
-    console.error('💥 Migration failed:', error);
+      __DEV__ && console.error('💥 Migration failed:', error);
     throw error;
   }
 };
@@ -402,7 +333,7 @@ export const getDatabaseVersion = async (db: SQLite.SQLiteDatabase): Promise<num
     const result = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
     return result?.user_version || 0;
   } catch (error) {
-    console.error('Error getting database version:', error);
+      __DEV__ && console.error('Error getting database version:', error);
     return 0;
   }
 };
@@ -415,7 +346,7 @@ export const setDatabaseVersion = async (
   try {
     await db.execAsync(`PRAGMA user_version = ${version}`);
   } catch (error) {
-    console.error('Error setting database version:', error);
+      __DEV__ && console.error('Error setting database version:', error);
     throw error;
   }
 };
@@ -423,27 +354,25 @@ export const setDatabaseVersion = async (
 // Initialize and migrate database
 export const setupDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
   try {
-    console.log('🗃️ setupDatabase: Initializing database...');
+
     const db = await initializeDatabase();
     
     const currentVersion = await getDatabaseVersion(db);
     const targetVersion = APP_CONFIG.DATABASE_VERSION;
-    console.log(`🗃️ setupDatabase: Current version: ${currentVersion}, Target version: ${targetVersion}`);
-    
+
     if (currentVersion < targetVersion) {
-      console.log('🗃️ setupDatabase: Running migration...');
+
       await migrateDatabase(db, currentVersion, targetVersion);
       await setDatabaseVersion(db, targetVersion);
     }
     
     // Always ensure tables exist (safety mechanism)
-    console.log('🗃️ setupDatabase: Verifying tables exist...');
+
     await ensureTablesExist(db);
-    
-    console.log('✅ setupDatabase: Database setup complete');
+
     return db;
   } catch (error) {
-    console.error('💥 setupDatabase: Error setting up database:', error);
+      __DEV__ && console.error('💥 setupDatabase: Error setting up database:', error);
     throw error;
   }
 };
@@ -457,13 +386,13 @@ const ensureTablesExist = async (db: SQLite.SQLiteDatabase): Promise<void> => {
     );
     
     if (!tableCheck) {
-      console.log('⚠️ ensureTablesExist: Tables missing, creating them...');
+
       await createTables(db);
     } else {
-      console.log('✅ ensureTablesExist: All tables exist');
+
     }
   } catch (error) {
-    console.error('💥 ensureTablesExist: Error checking tables:', error);
+      __DEV__ && console.error('💥 ensureTablesExist: Error checking tables:', error);
     // If there's any error, try to create tables anyway
     await createTables(db);
   }

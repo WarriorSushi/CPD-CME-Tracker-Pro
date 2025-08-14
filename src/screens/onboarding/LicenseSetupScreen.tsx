@@ -20,16 +20,16 @@ export const LicenseSetupScreen: React.FC<Props> = ({ navigation }) => {
   const [showLicenseForm, setShowLicenseForm] = useState(false);
 
   const handleAddLicenses = useCallback(() => {
-    console.log('DEBUG: handleAddLicenses called, current state:', showLicenseForm);
+
     // Small delay to ensure stable state
     setTimeout(() => {
       setShowLicenseForm(true);
-      console.log('DEBUG: setShowLicenseForm(true) called after timeout');
+
     }, 100);
   }, [showLicenseForm]);
 
   const handleLicenseModalClose = useCallback(() => {
-    console.log('DEBUG: handleLicenseModalClose called');
+
     setShowLicenseForm(false);
   }, []);
 
@@ -39,7 +39,7 @@ export const LicenseSetupScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleSkipForNow = () => {
     setSkipForNow(true);
-    // TODO: Save that user skipped license setup
+    
     navigation.navigate('SetupComplete');
   };
 

@@ -35,7 +35,6 @@ export class NotificationService {
     if (this.initialized) return;
 
     try {
-      console.log('🔔 NotificationService: Initializing...');
 
       // Configure notification categories and actions
       await this.setupNotificationCategories();
@@ -47,9 +46,9 @@ export class NotificationService {
       this.setupNotificationHandlers();
 
       this.initialized = true;
-      console.log('✅ NotificationService: Initialized successfully');
+
     } catch (error) {
-      console.error('💥 NotificationService: Initialization failed:', error);
+      __DEV__ && console.error('💥 NotificationService: Initialization failed:', error);
       throw error;
     }
   }
@@ -93,9 +92,8 @@ export class NotificationService {
         },
       ]);
 
-      console.log('✅ NotificationService: Categories configured');
     } catch (error) {
-      console.error('💥 NotificationService: Error setting up categories:', error);
+      __DEV__ && console.error('💥 NotificationService: Error setting up categories:', error);
     }
   }
 
@@ -105,13 +103,12 @@ export class NotificationService {
   private static setupNotificationHandlers(): void {
     // Handle notification received while app is open
     Notifications.addNotificationReceivedListener(notification => {
-      console.log('🔔 NotificationService: Notification received:', notification.request.identifier);
+
     });
 
     // Handle notification tapped
     Notifications.addNotificationResponseReceivedListener(response => {
-      console.log('👆 NotificationService: Notification tapped:', response.actionIdentifier);
-      
+
       const { notification } = response;
       const data = notification.request.content.data;
       
@@ -142,7 +139,7 @@ export class NotificationService {
    */
   private static handleDefaultNotificationAction(data: any): void {
     // This will be used by the app's navigation system
-    console.log('🎯 NotificationService: Handling default action for:', data.type);
+
   }
 
   /**
@@ -196,10 +193,9 @@ export class NotificationService {
       // Store in our local storage
       await NotificationStorage.saveScheduledNotification(notification);
 
-      console.log(`✅ NotificationService: Scheduled notification ${notification.id} for ${notification.scheduledFor}`);
       return notificationId;
     } catch (error) {
-      console.error('💥 NotificationService: Error scheduling notification:', error);
+      __DEV__ && console.error('💥 NotificationService: Error scheduling notification:', error);
       throw error;
     }
   }
@@ -211,9 +207,9 @@ export class NotificationService {
     try {
       await Notifications.cancelScheduledNotificationAsync(id);
       await NotificationStorage.removeScheduledNotification(id);
-      console.log(`🗑️ NotificationService: Cancelled notification ${id}`);
+
     } catch (error) {
-      console.error('💥 NotificationService: Error cancelling notification:', error);
+      __DEV__ && console.error('💥 NotificationService: Error cancelling notification:', error);
     }
   }
 
@@ -224,9 +220,9 @@ export class NotificationService {
     try {
       await Notifications.cancelAllScheduledNotificationsAsync();
       await NotificationStorage.clearAllScheduledNotifications();
-      console.log('🗑️ NotificationService: Cancelled all notifications');
+
     } catch (error) {
-      console.error('💥 NotificationService: Error cancelling all notifications:', error);
+      __DEV__ && console.error('💥 NotificationService: Error cancelling all notifications:', error);
     }
   }
 
@@ -240,25 +236,24 @@ export class NotificationService {
     currentProgress?: number
   ): Promise<void> {
     if (this.isRefreshing) {
-      console.log('⏳ NotificationService: Refresh already in progress, skipping...');
+
       return;
     }
 
     this.isRefreshing = true;
 
     try {
-      console.log('🔄 NotificationService: Refreshing all notifications...');
 
       const settings = await this.getSettings();
       if (!settings.enabled) {
-        console.log('⚠️ NotificationService: Notifications disabled, clearing all');
+
         await this.cancelAllNotifications();
         return;
       }
 
       const hasPermissions = await this.hasPermissions();
       if (!hasPermissions) {
-        console.log('⚠️ NotificationService: No permissions, cannot schedule notifications');
+
         return;
       }
 
@@ -302,15 +297,14 @@ export class NotificationService {
           await this.scheduleNotification(notification);
           scheduledCount++;
         } catch (error) {
-          console.error(`💥 NotificationService: Failed to schedule notification ${notification.id}:`, error);
+      __DEV__ && console.error(`💥 NotificationService: Failed to schedule notification ${notification.id}:`, error);
         }
       }
 
       await NotificationStorage.saveLastRefresh();
 
-      console.log(`✅ NotificationService: Refreshed notifications - ${scheduledCount}/${allNotifications.length} scheduled`);
     } catch (error) {
-      console.error('💥 NotificationService: Error refreshing notifications:', error);
+      __DEV__ && console.error('💥 NotificationService: Error refreshing notifications:', error);
     } finally {
       this.isRefreshing = false;
     }
@@ -331,13 +325,11 @@ export class NotificationService {
       const current = await this.getSettings();
       const updated = { ...current, ...settings };
       await NotificationStorage.saveNotificationSettings(updated);
-      
-      console.log('✅ NotificationService: Settings updated');
-      
+
       // Refresh notifications with new settings
       // Note: This should be called by the app after updating settings with current data
     } catch (error) {
-      console.error('💥 NotificationService: Error updating settings:', error);
+      __DEV__ && console.error('💥 NotificationService: Error updating settings:', error);
       throw error;
     }
   }
@@ -359,9 +351,8 @@ export class NotificationService {
         trigger: null, // Show immediately
       });
 
-      console.log('✅ NotificationService: Test notification sent');
     } catch (error) {
-      console.error('💥 NotificationService: Error sending test notification:', error);
+      __DEV__ && console.error('💥 NotificationService: Error sending test notification:', error);
     }
   }
 
@@ -414,7 +405,7 @@ export class NotificationService {
       const systemNotifications = await Notifications.getAllScheduledNotificationsAsync();
       systemScheduledCount = systemNotifications.length;
     } catch (error) {
-      console.error('💥 NotificationService: Error getting system notifications:', error);
+      __DEV__ && console.error('💥 NotificationService: Error getting system notifications:', error);
     }
 
     return {

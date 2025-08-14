@@ -56,7 +56,7 @@ export const NotificationSettingsScreen: React.FC<Props> = ({ navigation }) => {
       setPermissionStatus(permStatus as PermissionStatus);
       setStorageStats(stats);
     } catch (error) {
-      console.error('Error loading notification settings:', error);
+      __DEV__ && console.error('Error loading notification settings:', error);
       Alert.alert('Error', 'Failed to load notification settings.');
     } finally {
       setLoading(false);
@@ -78,9 +78,8 @@ export const NotificationSettingsScreen: React.FC<Props> = ({ navigation }) => {
         currentProgress
       );
 
-      console.log('✅ Notification settings saved and notifications refreshed');
     } catch (error) {
-      console.error('Error saving notification settings:', error);
+      __DEV__ && console.error('Error saving notification settings:', error);
       Alert.alert('Error', 'Failed to save notification settings.');
     } finally {
       setSaving(false);

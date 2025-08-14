@@ -1,14 +1,14 @@
 # Medical and Professional Disclaimer
 
-**CME Tracker Pro - Professional Responsibility Notice**
+**CPD/CME Tracker Pro - Professional Responsibility Notice**
 
 ## Professional Use Only
 
-CME Tracker Pro is designed exclusively for use by licensed medical professionals, healthcare providers, and other licensed professionals required to maintain continuing education credits. This application is intended for professional record-keeping and compliance tracking purposes only.
+CPD/CME Tracker Pro is designed exclusively for use by licensed medical professionals, healthcare providers, and other licensed professionals required to maintain continuing education credits. This application is intended for professional record-keeping and compliance tracking purposes only.
 
 ## Not Medical Advice
 
-**IMPORTANT: CME Tracker Pro does not provide medical advice, diagnosis, or treatment recommendations.**
+**IMPORTANT: CPD/CME Tracker Pro does not provide medical advice, diagnosis, or treatment recommendations.**
 
 - This application is a record-keeping tool only
 - It does not replace professional medical judgment
@@ -32,14 +32,14 @@ CME Tracker Pro is designed exclusively for use by licensed medical professional
 ## Limitation of Liability
 
 ### No Warranties
-CME Tracker Pro is provided "as is" without warranties of any kind, either express or implied, including but not limited to:
+CPD/CME Tracker Pro is provided "as is" without warranties of any kind, either express or implied, including but not limited to:
 - Fitness for a particular purpose
 - Accuracy of calculations or tracking
 - Compliance with specific regulatory requirements
 - Completeness of features or functionality
 
 ### Limitation of Damages
-In no event shall CME Tracker Pro, its developers, or distributors be liable for any:
+In no event shall CPD/CME Tracker Pro, its developers, or distributors be liable for any:
 - Direct, indirect, incidental, or consequential damages
 - Loss of professional standing or licensing issues
 - Regulatory compliance failures
@@ -134,7 +134,7 @@ Consult qualified professional advisors for:
 
 ## Acknowledgment
 
-By using CME Tracker Pro, you acknowledge that:
+By using CPD/CME Tracker Pro, you acknowledge that:
 
 1. You are a licensed professional responsible for your own compliance
 2. You understand this app is a tool, not a compliance service
@@ -142,7 +142,7 @@ By using CME Tracker Pro, you acknowledge that:
 4. You assume full responsibility for professional compliance
 5. You will maintain appropriate backup and documentation practices
 
-**This disclaimer is part of the terms of use for CME Tracker Pro and is legally binding. If you do not agree with any part of this disclaimer, discontinue use of the application immediately.**
+**This disclaimer is part of the terms of use for CPD/CME Tracker Pro and is legally binding. If you do not agree with any part of this disclaimer, discontinue use of the application immediately.**
 
 ---
 

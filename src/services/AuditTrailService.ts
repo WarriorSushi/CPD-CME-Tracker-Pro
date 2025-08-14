@@ -54,10 +54,10 @@ export class AuditTrailService {
       
       // In development, also log to console
       if (__DEV__) {
-        console.log('📋 Audit:', action, entityType, entityId, success ? '✅' : '❌');
+
       }
     } catch (error) {
-      console.error('Failed to log audit event:', error);
+      __DEV__ && console.error('Failed to log audit event:', error);
       // Don't throw - audit logging should never break the app
     }
   }
@@ -70,7 +70,7 @@ export class AuditTrailService {
       const data = await AsyncStorage.getItem(this.STORAGE_KEY);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('Failed to retrieve audit events:', error);
+      __DEV__ && console.error('Failed to retrieve audit events:', error);
       return [];
     }
   }
@@ -211,7 +211,7 @@ export class AuditTrailService {
       await AsyncStorage.removeItem(this.STORAGE_KEY);
       await this.logEvent('clear_audit_trail', 'system', { reason: 'manual_clear' });
     } catch (error) {
-      console.error('Failed to clear audit trail:', error);
+      __DEV__ && console.error('Failed to clear audit trail:', error);
       throw error;
     }
   }

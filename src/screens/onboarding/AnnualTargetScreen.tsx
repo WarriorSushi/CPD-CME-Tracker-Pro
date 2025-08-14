@@ -46,7 +46,7 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
           setCreditSystem(result.data.creditSystem);
         }
       } catch (error) {
-        console.error('Error loading credit system:', error);
+      __DEV__ && console.error('Error loading credit system:', error);
       }
     };
 
@@ -60,22 +60,22 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
     const target = useCustomTarget ? parseInt(customTarget) : selectedTarget;
     const period = useCustomPeriod ? parseInt(customPeriod) : selectedPeriod;
     if (target && target > 0 && period && period > 0) {
-      console.log('💾 AnnualTargetScreen: Saving target and period:', { target, period });
+
       try {
         // Save both annual requirement and requirement period
         const result = await userOperations.updateUser({
           annualRequirement: target,
           requirementPeriod: period
         });
-        console.log('📊 AnnualTargetScreen: Save result:', result);
+
         if (result.success) {
-          console.log('✅ AnnualTargetScreen: Successfully saved, navigating...');
+
           navigation.navigate('CycleStartDate');
         } else {
-          console.error('❌ AnnualTargetScreen: Failed to save target and period');
+      __DEV__ && console.error('❌ AnnualTargetScreen: Failed to save target and period');
         }
       } catch (error) {
-        console.error('💥 AnnualTargetScreen: Error saving:', error);
+      __DEV__ && console.error('💥 AnnualTargetScreen: Error saving:', error);
       }
     }
   };

@@ -27,8 +27,7 @@ interface Props {
 }
 
 export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
-  console.log('📚 CMEHistoryScreen: Component rendering/mounting');
-  
+
   const insets = useSafeAreaInsets();
   const { 
     recentCMEEntries,
@@ -38,12 +37,6 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
     loadAllCMEEntries,
     user 
   } = useAppContext();
-  
-  console.log('📊 CMEHistoryScreen: Current state:', {
-    entriesCount: recentCMEEntries.length,
-    isLoading: isLoadingCME,
-    hasUser: !!user
-  });
 
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -71,7 +64,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
               const freshEntries = await loadAllCMEEntries();
               setAllEntries(freshEntries);
             } catch (error) {
-              console.error('Error refreshing all entries:', error);
+      __DEV__ && console.error('Error refreshing all entries:', error);
             }
           }
         };
@@ -104,7 +97,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
       setAllEntries(entries);
       setShowAllEntries(true);
     } catch (error) {
-      console.error('Error loading all entries:', error);
+      __DEV__ && console.error('Error loading all entries:', error);
       Alert.alert('Error', 'Failed to load all entries. Please try again.');
     } finally {
       setIsLoadingAll(false);
@@ -115,9 +108,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
   const entriesToFilter = showAllEntries ? allEntries : recentCMEEntries;
   
   // DATABASE already sorts entries by date_attended DESC (newest first)
-  console.log('🔍 CMEHistoryScreen: Entries from database (should be newest first):', 
-    entriesToFilter.map(e => ({ id: e.id, title: e.title, date: e.dateAttended })));
-  
+
   // Filter entries based on search and year - DO NOT SORT (database already sorted correctly)
   const filteredEntries = entriesToFilter.filter(entry => {
     const matchesSearch = !searchQuery || 
@@ -132,9 +123,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
   });
   
   // Debug: log final filtered entries (should maintain database order)
-  console.log('✅ CMEHistoryScreen: Filtered entries (maintaining DB order):', 
-    filteredEntries.map(e => ({ id: e.id, title: e.title, date: e.dateAttended })));
-  
+
   // Check if we need to show "Load More" button
   const canLoadMore = !showAllEntries && recentCMEEntries.length > 0;
 
@@ -148,11 +137,11 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleEditEntry = (entry: CMEEntry) => {
     try {
-      console.log('✏️ Attempting to edit entry:', entry.id, entry.title);
+
       (navigation as any).navigate('AddCME', { editEntry: entry });
-      console.log('✅ Navigation to AddCME screen initiated');
+
     } catch (error) {
-      console.error('💥 Error navigating to edit screen:', error);
+      __DEV__ && console.error('💥 Error navigating to edit screen:', error);
       Alert.alert('Error', 'Failed to open edit screen. Please try again.');
     }
   };
@@ -171,12 +160,11 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
           style: 'destructive',
           onPress: async () => {
             try {
-              console.log('🗑️ Attempting to delete entry:', entry.id);
+
               const success = await deleteCMEEntry(entry.id);
               
               if (success) {
-                console.log('✅ Entry deleted successfully, refreshing local state...');
-                
+
                 // Update local state immediately for better UX
                 if (showAllEntries) {
                   // Remove from allEntries if we're showing all
@@ -189,11 +177,11 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
                 // Show success message
                 Alert.alert('Success', 'Entry deleted successfully.');
               } else {
-                console.error('❌ Delete operation returned false');
+      __DEV__ && console.error('❌ Delete operation returned false');
                 Alert.alert('Error', 'Failed to delete entry. Please try again.');
               }
             } catch (error) {
-              console.error('💥 Error during delete operation:', error);
+      __DEV__ && console.error('💥 Error during delete operation:', error);
               Alert.alert('Error', 'An unexpected error occurred while deleting the entry.');
             }
           },
@@ -245,7 +233,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
           <TouchableOpacity 
             style={styles.certificateThumbnailContainer}
             onPress={() => {
-              console.log('📄 Opening certificate:', item.certificatePath);
+
               (navigation.getParent() as any).navigate('CertificateViewer', { imageUri: item.certificatePath });
             }}
           >
@@ -274,7 +262,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
         <TouchableOpacity 
           style={[styles.actionButton, styles.editButton]}
           onPress={() => {
-            console.log('🖱️ Edit button pressed for entry:', item.id);
+
             handleEditEntry(item);
           }}
           activeOpacity={0.7}
@@ -285,7 +273,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
         <TouchableOpacity 
           style={[styles.actionButton, styles.deleteButton]}
           onPress={() => {
-            console.log('🖱️ Delete button pressed for entry:', item.id);
+
             handleDeleteEntry(item);
           }}
           activeOpacity={0.7}

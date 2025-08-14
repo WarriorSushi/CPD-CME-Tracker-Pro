@@ -14,7 +14,7 @@ const HEALTH_OK_TTL = 300000; // 5 minutes - much longer since we never close
 const isDevelopment = __DEV__;
 const devLog = (...args: any[]) => {
   if (isDevelopment) {
-    console.log(...args);
+
   }
 };
 
@@ -29,7 +29,7 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
         if (isHealthy) {
           lastHealthOkAt = now;
         } else {
-          console.error('💥 Database health check failed - this should never happen');
+      __DEV__ && console.error('💥 Database health check failed - this should never happen');
           // In production, we might want to restart the app or show error
         }
       }).catch(() => {
@@ -41,13 +41,12 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 
   // If already opening, wait for the same promise (singleflight pattern)
   if (opening) {
-    devLog('⏳ getDatabase: Waiting for existing database initialization...');
+
     return opening;
   }
 
   // Start opening process
-  devLog('🚀 getDatabase: Starting fresh database initialization...');
-  
+
   opening = (async () => {
     try {
       // Open and setup database
@@ -60,11 +59,10 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
       }
       
       lastHealthOkAt = Date.now();
-      devLog('✅ getDatabase: Database opened and verified healthy');
-      
+
       return handle;
     } catch (error) {
-      console.error('💥 getDatabase: Failed to open database:', error);
+      __DEV__ && console.error('💥 getDatabase: Failed to open database:', error);
       throw error;
     }
   })().finally(() => {
@@ -83,34 +81,31 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 
 // Only for complete app reset - not used during normal operation
 export async function resetDatabaseForAppReset(): Promise<void> {
-  devLog('🔄 resetDatabaseForAppReset: Resetting database singleton...');
-  
+
   if (db) {
     try {
       await db.closeAsync();
     } catch (error) {
-      devLog('⚠️ resetDatabaseForAppReset: Error closing database:', error);
+
     }
   }
   
   db = null;
   opening = null;
   lastHealthOkAt = 0;
-  
-  devLog('✅ resetDatabaseForAppReset: Database singleton reset');
+
 }
 
 // Emergency corruption recovery - recreate database from scratch
 export async function recoverFromCorruption(): Promise<void> {
   try {
-    devLog('🚨 recoverFromCorruption: Starting emergency database recovery...');
-    
+
     // Force close any existing connection
     if (db) {
       try {
         await db.closeAsync();
       } catch (error) {
-        devLog('⚠️ recoverFromCorruption: Error closing corrupted database (expected):', error);
+
       }
     }
     
@@ -125,17 +120,16 @@ export async function recoverFromCorruption(): Promise<void> {
       const dbInfo = await FileSystem.getInfoAsync(dbPath);
       if (dbInfo.exists) {
         await FileSystem.deleteAsync(dbPath);
-        devLog('🗑️ recoverFromCorruption: Deleted corrupted database file');
+
       }
     } catch (error) {
-      devLog('⚠️ recoverFromCorruption: Could not delete database file (may not exist):', error);
+
     }
     
     // Force fresh database creation on next access
-    devLog('✅ recoverFromCorruption: Recovery complete - database will be recreated on next access');
-    
+
   } catch (error) {
-    console.error('💥 recoverFromCorruption: Recovery failed:', error);
+      __DEV__ && console.error('💥 recoverFromCorruption: Recovery failed:', error);
     throw error;
   }
 }
@@ -150,7 +144,7 @@ export async function checkDatabaseHealth(): Promise<boolean> {
     // Try basic operations
     const testResult = await db.getFirstAsync<{ test: number }>('SELECT 1 as test');
     if (!testResult || testResult.test !== 1) {
-      devLog('⚠️ checkDatabaseHealth: Basic test query failed');
+
       return false;
     }
     
@@ -160,7 +154,7 @@ export async function checkDatabaseHealth(): Promise<boolean> {
       WHERE type='table' AND name='users'
     `);
     if (!tableTest) {
-      devLog('⚠️ checkDatabaseHealth: Required tables not found');
+
       return false;
     }
     
@@ -168,8 +162,7 @@ export async function checkDatabaseHealth(): Promise<boolean> {
     return true;
     
   } catch (error) {
-    devLog('💀 checkDatabaseHealth: Database health check failed:', error);
-    
+
     // Check if this is a corruption-related error
     const errorMessage = error instanceof Error ? error.message.toLowerCase() : '';
     const isCorruption = errorMessage.includes('database') && 
@@ -179,11 +172,11 @@ export async function checkDatabaseHealth(): Promise<boolean> {
                          errorMessage.includes('rejected'));
     
     if (isCorruption) {
-      devLog('🚨 checkDatabaseHealth: Database corruption detected - triggering recovery');
+
       try {
         await recoverFromCorruption();
       } catch (recoveryError) {
-        console.error('💥 checkDatabaseHealth: Recovery failed:', recoveryError);
+      __DEV__ && console.error('💥 checkDatabaseHealth: Recovery failed:', recoveryError);
       }
     }
     

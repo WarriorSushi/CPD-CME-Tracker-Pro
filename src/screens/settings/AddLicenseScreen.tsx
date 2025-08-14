@@ -126,7 +126,7 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
         }
       }
     } catch (error) {
-      console.error(`Error ${isEditing ? 'updating' : 'adding'} license:`, error);
+      __DEV__ && console.error(`Error ${isEditing ? 'updating' : 'adding'} license:`, error);
       Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);

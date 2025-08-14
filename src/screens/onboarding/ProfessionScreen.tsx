@@ -62,10 +62,10 @@ export const ProfessionScreen: React.FC<Props> = ({ navigation }) => {
         navigation.navigate('CreditSystem');
       } else {
         // Handle error - in a real app, we'd show an error message
-        console.error('Failed to save profession:', result.error);
+      __DEV__ && console.error('Failed to save profession:', result.error);
       }
     } catch (error) {
-      console.error('Error saving profession:', error);
+      __DEV__ && console.error('Error saving profession:', error);
     } finally {
       setIsLoading(false);
     }

@@ -13,8 +13,7 @@ export class DocumentEdgeDetectionService {
    */
   static async detectAndCropDocument(imageUri: string): Promise<EdgeDetectionResult> {
     try {
-      console.log('🔍 DocumentEdgeDetection: Starting edge detection for:', imageUri);
-      
+
       // Get image information
       const imageInfo = await FileSystem.getInfoAsync(imageUri);
       if (!imageInfo.exists) {
@@ -27,7 +26,7 @@ export class DocumentEdgeDetectionService {
       
       return processedResult;
     } catch (error) {
-      console.error('💥 DocumentEdgeDetection: Failed to detect edges:', error);
+      __DEV__ && console.error('💥 DocumentEdgeDetection: Failed to detect edges:', error);
       throw new Error('Failed to detect document edges');
     }
   }
@@ -65,7 +64,7 @@ export class DocumentEdgeDetectionService {
         confidence: 0.85, // Estimated confidence for basic processing
       };
     } catch (error) {
-      console.error('💥 DocumentEdgeDetection: Image processing failed:', error);
+      __DEV__ && console.error('💥 DocumentEdgeDetection: Image processing failed:', error);
       throw error;
     }
   }
@@ -75,8 +74,7 @@ export class DocumentEdgeDetectionService {
    */
   static async enhanceImageForOCR(imageUri: string): Promise<string> {
     try {
-      console.log('✨ DocumentEdgeDetection: Enhancing image for OCR');
-      
+
       const enhanced = await ImageManipulator.manipulateAsync(
         imageUri,
         [
@@ -91,7 +89,7 @@ export class DocumentEdgeDetectionService {
 
       return enhanced.uri;
     } catch (error) {
-      console.error('💥 DocumentEdgeDetection: Image enhancement failed:', error);
+      __DEV__ && console.error('💥 DocumentEdgeDetection: Image enhancement failed:', error);
       // Return original image if enhancement fails
       return imageUri;
     }
@@ -106,8 +104,7 @@ export class DocumentEdgeDetectionService {
     corners: Array<{ x: number; y: number }>
   ): Promise<string> {
     try {
-      console.log('📐 DocumentEdgeDetection: Applying perspective correction');
-      
+
       // For now, just apply basic image enhancement
       // A full implementation would use the corners to apply perspective transformation
       const corrected = await ImageManipulator.manipulateAsync(
@@ -123,7 +120,7 @@ export class DocumentEdgeDetectionService {
 
       return corrected.uri;
     } catch (error) {
-      console.error('💥 DocumentEdgeDetection: Perspective correction failed:', error);
+      __DEV__ && console.error('💥 DocumentEdgeDetection: Perspective correction failed:', error);
       return imageUri;
     }
   }

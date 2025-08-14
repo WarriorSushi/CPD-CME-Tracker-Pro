@@ -1,7 +1,7 @@
 # Google Play Store Listing Content
 
 ## App Title
-**CME Tracker Pro - Medical Education Credits**
+**CPD/CME Tracker Pro - Medical Education Credits**
 
 ## Short Description (80 characters max)
 Professional CME/CPD tracking for healthcare providers. Secure, offline-first.
@@ -10,7 +10,7 @@ Professional CME/CPD tracking for healthcare providers. Secure, offline-first.
 
 **Professional Continuing Medical Education Tracking Made Simple**
 
-CME Tracker Pro is the comprehensive solution for healthcare professionals to track continuing medical education (CME), continuing professional development (CPD), and continuing education (CE) credits. Designed specifically for medical professionals who need reliable, secure, and offline-first record keeping.
+CPD/CME Tracker Pro is the comprehensive solution for healthcare professionals to track continuing medical education (CME), continuing professional development (CPD), and continuing education (CE) credits. Designed specifically for medical professionals who need reliable, secure, and offline-first record keeping.
 
 **🏥 DESIGNED FOR MEDICAL PROFESSIONALS**
 • Doctors, Nurses, Pharmacists, Allied Health Professionals
@@ -102,7 +102,7 @@ Medical
 
 ## Feature Graphic (1024 x 500px)
 - Professional medical theme
-- CME Tracker Pro branding
+- CPD/CME Tracker Pro branding
 - Visual elements: stethoscope, certificates, progress indicators
 - Color scheme: Medical blue (#003087) with clean whites
 - Text: "Professional CME Tracking" subtitle
@@ -157,7 +157,7 @@ https://cmetrackerpro.com/privacy-policy
 
 ### What's New (Release Notes Template)
 ```
-🎉 CME Tracker Pro v1.0.0 - Initial Release
+🎉 CPD/CME Tracker Pro v1.0.0 - Initial Release
 
 ✨ NEW FEATURES
 • Complete offline CME/CPD tracking
@@ -185,10 +185,10 @@ Get started tracking your professional development today!
 ### Developer Response Templates
 ```
 Support Response:
-"Thank you for your feedback! CME Tracker Pro is designed specifically for medical professionals. For technical support or feature requests, please contact us at support@cmetrackerpro.com. We're committed to helping healthcare professionals maintain their professional development records securely and efficiently."
+"Thank you for your feedback! CPD/CME Tracker Pro is designed specifically for medical professionals. For technical support or feature requests, please contact us at support@cmetrackerpro.com. We're committed to helping healthcare professionals maintain their professional development records securely and efficiently."
 
 Feature Request Response:
-"We appreciate your suggestion! CME Tracker Pro is continuously evolving based on feedback from medical professionals. Please send detailed feature requests to feedback@cmetrackerpro.com so we can consider them for future updates."
+"We appreciate your suggestion! CPD/CME Tracker Pro is continuously evolving based on feedback from medical professionals. Please send detailed feature requests to feedback@cmetrackerpro.com so we can consider them for future updates."
 ```
 
 ## Launch Strategy

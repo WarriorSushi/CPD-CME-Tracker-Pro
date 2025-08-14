@@ -37,7 +37,6 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     clearError,
   } = useAppContext();
 
-
   const [refreshing, setRefreshing] = React.useState(false);
   const lastRefreshRef = useRef<number>(0);
   const REFRESH_DEBOUNCE_MS = 5000; // Only refresh if last refresh was more than 5 seconds ago
@@ -393,7 +392,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 
                 const expDate = new Date(expirationDateString);
                 if (isNaN(expDate.getTime())) {
-                  console.error('🚨 Invalid date string:', expirationDateString);
+      __DEV__ && console.error('🚨 Invalid date string:', expirationDateString);
                   return 0;
                 }
                 expDate.setHours(0, 0, 0, 0);
@@ -478,7 +477,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                       <TouchableOpacity 
                         style={styles.licenseActionButton}
                         onPress={() => {
-                          // TODO: Setup reminder - for now show alert
+                          
                           Alert.alert(
                             'Set Reminder',
                             `Would you like to set renewal reminders for ${license.licenseType}?\n\nRecommended reminder schedule:\n• 90 days before\n• 60 days before\n• 30 days before\n• 14 days before\n• 7 days before\n• 1 day before`,
@@ -580,7 +579,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                     style={styles.activityIcon}
                     onPress={() => {
                       if (entry.certificatePath) {
-                        console.log('📄 Dashboard opening certificate:', entry.certificatePath);
+
                         (navigation.getParent() as any).navigate('CertificateViewer', { imageUri: entry.certificatePath });
                       }
                     }}

@@ -87,7 +87,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         await processCertificateImage(result.assets[0]);
       }
     } catch (error) {
-      console.error('Camera error:', error);
+      __DEV__ && console.error('Camera error:', error);
       Alert.alert('Error', 'Failed to open camera. Please try again.');
     } finally {
       setIsScanning(false);
@@ -107,7 +107,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         await processCertificateImage(result.assets[0]);
       }
     } catch (error) {
-      console.error('Gallery error:', error);
+      __DEV__ && console.error('Gallery error:', error);
       Alert.alert('Error', 'Failed to open photo gallery. Please try again.');
     } finally {
       setIsScanning(false);
@@ -116,8 +116,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
 
   const processCertificateImage = async (imageAsset: any) => {
     try {
-      console.log('📄 Processing certificate image:', imageAsset.uri);
-      
+
       // Create certificates directory if it doesn't exist
       const certificatesDir = `${FileSystem.documentDirectory}${FILE_PATHS.CERTIFICATES}`;
       const dirInfo = await FileSystem.getInfoAsync(certificatesDir);
@@ -140,15 +139,14 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
 
       // Get file info
       const fileInfo = await FileSystem.getInfoAsync(newFilePath);
-      console.log('📁 Certificate saved to:', newFilePath);
 
       // Generate thumbnail
-      console.log('📸 Generating thumbnail...');
+
       let thumbnailPath: string | undefined = undefined;
       try {
         const thumbnailResult = await ThumbnailService.generateThumbnail(imageAsset.uri, newFileName);
         thumbnailPath = thumbnailResult.thumbnailUri;
-        console.log('✅ Thumbnail generated successfully:', thumbnailPath);
+
       } catch (thumbnailError) {
         console.warn('⚠️ Thumbnail generation failed:', thumbnailError);
       }
@@ -164,22 +162,21 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
       });
 
       if (addResult.success && addResult.data) {
-        console.log('✅ Certificate added to vault with ID:', addResult.data);
+
         Alert.alert('Success', 'Certificate saved to your vault!');
         await refreshCertificates();
       } else {
-        console.error('❌ Failed to save certificate to database:', addResult.error);
+      __DEV__ && console.error('❌ Failed to save certificate to database:', addResult.error);
         Alert.alert('Error', 'Certificate saved to device but failed to add to vault database.');
       }
 
     } catch (error) {
-      console.error('💥 Error processing certificate:', error);
+      __DEV__ && console.error('💥 Error processing certificate:', error);
       Alert.alert('Error', 'Failed to process certificate. Please try again.');
     }
   };
 
   // No filtering needed since search is removed
-
 
   const handleUploadCertificate = async () => {
     try {
@@ -229,16 +226,16 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
       });
 
       // Generate thumbnail only for images
-      console.log('📸 Generating thumbnail for uploaded file...');
+
       let thumbnailPath: string | undefined = undefined;
       try {
         if (isImageType) {
           const thumbnailResult = await ThumbnailService.generateThumbnail(file.uri, file.name);
           thumbnailPath = thumbnailResult.thumbnailUri;
-          console.log('✅ Thumbnail generated for uploaded image');
+
         } else {
           // For documents, we'll just use document name and icon - no thumbnail needed
-          console.log('📄 Document type detected, using document tile (no thumbnail)');
+
         }
       } catch (thumbnailError) {
         console.warn('⚠️ Thumbnail generation failed for uploaded file:', thumbnailError);
@@ -254,22 +251,20 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         cmeEntryId: undefined, // Not associated with any specific CME entry
       };
 
-      console.log('💾 Adding certificate to vault database:', certificateData);
-      
       const addResult = await databaseOperations.certificates.addCertificate(certificateData);
       
       if (addResult.success) {
-        console.log('✅ Certificate added to vault with ID:', addResult.data);
+
         Alert.alert('Success', 'Certificate uploaded successfully!');
         // Refresh the list
         await refreshCertificates();
       } else {
-        console.error('❌ Failed to add certificate to database:', addResult.error);
+      __DEV__ && console.error('❌ Failed to add certificate to database:', addResult.error);
         Alert.alert('Error', 'Failed to save certificate to vault. Please try again.');
       }
 
     } catch (error) {
-      console.error('Error uploading certificate:', error);
+      __DEV__ && console.error('Error uploading certificate:', error);
       Alert.alert('Error', 'Failed to upload certificate. Please try again.');
     } finally {
       setIsUploading(false);
@@ -306,7 +301,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
                   }
                   
                   if (entriesToUpdate.length > 0) {
-                    console.log(`✅ Cleared certificate references from ${entriesToUpdate.length} CME entries`);
+
                   }
                 }
               } catch (updateError) {
@@ -354,7 +349,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
               
               Alert.alert('Success', 'Certificate deleted successfully!');
             } catch (error) {
-              console.error('Error deleting certificate:', error);
+      __DEV__ && console.error('Error deleting certificate:', error);
               Alert.alert('Error', 'Failed to delete certificate.');
             }
           },
@@ -376,7 +371,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
       // Navigate to the certificate viewer screen in the main stack
       (navigation.getParent() as any).navigate('CertificateViewer', { imageUri: certificate.filePath });
     } catch (error) {
-      console.error('Error viewing certificate:', error);
+      __DEV__ && console.error('Error viewing certificate:', error);
       Alert.alert('Error', 'Failed to view certificate.');
     }
   };
@@ -790,6 +785,5 @@ const styles = StyleSheet.create({
   emptyButton: {
     minWidth: 150,
   },
-
 
 });

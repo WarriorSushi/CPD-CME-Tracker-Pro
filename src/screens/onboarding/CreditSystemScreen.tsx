@@ -34,26 +34,23 @@ export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
     if (selectedSystem) {
       setIsLoading(true);
       try {
-        console.log('🔄 CreditSystemScreen: Selected system:', selectedSystem);
-        
+
         // Save credit system to user data
         const result = await userOperations.updateUser({
           creditSystem: selectedSystem,
         });
 
-        console.log('💾 CreditSystemScreen: Update result:', result);
-
         if (result.success) {
-          console.log('✅ CreditSystemScreen: Successfully saved, refreshing user data...');
+
           // Refresh user data in context to pick up the new credit system
           await refreshUserData();
-          console.log('✅ CreditSystemScreen: User data refreshed, navigating...');
+
           navigation.navigate('AnnualTarget');
         } else {
-          console.error('❌ CreditSystemScreen: Failed to save credit system:', result.error);
+      __DEV__ && console.error('❌ CreditSystemScreen: Failed to save credit system:', result.error);
         }
       } catch (error) {
-        console.error('💥 CreditSystemScreen: Error saving credit system:', error);
+      __DEV__ && console.error('💥 CreditSystemScreen: Error saving credit system:', error);
       } finally {
         setIsLoading(false);
       }

@@ -55,18 +55,13 @@ interface FormErrors {
 }
 
 export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
-  console.log('➕ AddCMEScreen: Component rendering/mounting');
-  console.log('📄 AddCMEScreen: Route params:', route.params);
-  
+
   const insets = useSafeAreaInsets();
   const { user, addCMEEntry, updateCMEEntry, refreshCertificates } = useAppContext();
   
   const editEntry = route.params?.editEntry;
   const ocrData = route.params?.ocrData;
   const isEditing = !!editEntry;
-  
-  console.log('🔧 AddCMEScreen: Mode:', isEditing ? 'EDITING' : 'ADDING');
-  console.log('📄 AddCMEScreen: OCR Data received:', ocrData);
 
   // Helper function to parse date from OCR
   const parseOCRDate = (dateString?: string): Date => {
@@ -116,10 +111,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
   useEffect(() => {
     const currentEditEntry = route.params?.editEntry;
     const currentOcrData = route.params?.ocrData;
-    
-    console.log('🔄 AddCMEScreen: Resetting form with editEntry:', currentEditEntry);
-    console.log('🔄 AddCMEScreen: Resetting form with ocrData:', currentOcrData);
-    
+
     setFormData({
       title: currentEditEntry?.title || currentOcrData?.title || '',
       provider: currentEditEntry?.provider || currentOcrData?.provider || '',
@@ -143,7 +135,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       
       // Only reset if this is a new entry (no editEntry) AND we haven't already populated form data
       if (!currentEditEntry && !formData.title && !formData.provider) {
-        console.log('🔄 AddCMEScreen: Screen focused, resetting for new entry');
+
         setFormData({
           title: '',
           provider: '',
@@ -155,7 +147,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
         });
         setErrors({});
       } else {
-        console.log('🔄 AddCMEScreen: Screen focused, skipping reset (editing or form has data)');
+
       }
     }, [route.params?.editEntry, formData.title, formData.provider])
   );
@@ -194,7 +186,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
         await processCertificateImage(result.assets[0]);
       }
     } catch (error) {
-      console.error('Camera error:', error);
+      __DEV__ && console.error('Camera error:', error);
       Alert.alert('Error', 'Failed to open camera. Please try again.');
     } finally {
       setIsUploadingCertificate(false);
@@ -214,7 +206,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
         await processCertificateImage(result.assets[0]);
       }
     } catch (error) {
-      console.error('Gallery error:', error);
+      __DEV__ && console.error('Gallery error:', error);
       Alert.alert('Error', 'Failed to open photo gallery. Please try again.');
     } finally {
       setIsUploadingCertificate(false);
@@ -223,8 +215,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const processCertificateImage = async (imageAsset: any) => {
     try {
-      console.log('📄 Processing certificate image for CME entry:', imageAsset.uri);
-      
+
       // Create certificates directory if it doesn't exist
       const certificatesDir = `${FileSystem.documentDirectory}${FILE_PATHS.CERTIFICATES}`;
       const dirInfo = await FileSystem.getInfoAsync(certificatesDir);
@@ -271,14 +262,14 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
 
         const addResult = await databaseOperations.certificates.addCertificate(certificateData);
         if (addResult.success) {
-          console.log('✅ Certificate automatically added to vault with ID:', addResult.data);
+
           // Refresh certificates in AppContext so vault shows the new certificate
           await refreshCertificates();
         } else {
           console.warn('⚠️ Failed to add certificate to vault:', addResult.error);
         }
       } catch (certError) {
-        console.error('💥 Error adding certificate to vault:', certError);
+      __DEV__ && console.error('💥 Error adding certificate to vault:', certError);
       }
 
       // Update form data with certificate path
@@ -290,11 +281,10 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       Alert.alert('Success', 'Certificate added to entry and saved to vault!');
 
     } catch (error) {
-      console.error('💥 Error processing certificate:', error);
+      __DEV__ && console.error('💥 Error processing certificate:', error);
       Alert.alert('Error', 'Failed to process certificate. Please try again.');
     }
   };
-
 
   const handleChooseFiles = async () => {
     try {
@@ -322,7 +312,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
         await processDocument(file);
       }
     } catch (error) {
-      console.error('File picker error:', error);
+      __DEV__ && console.error('File picker error:', error);
       Alert.alert('Error', 'Failed to open file picker. Please try again.');
     } finally {
       setIsUploadingCertificate(false);
@@ -331,8 +321,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const processDocument = async (file: any) => {
     try {
-      console.log('📄 Processing document file:', file.name);
-      
+
       // Create certificates directory if it doesn't exist
       const certificatesDir = `${FileSystem.documentDirectory}${FILE_PATHS.CERTIFICATES}`;
       const dirInfo = await FileSystem.getInfoAsync(certificatesDir);
@@ -360,10 +349,10 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
         if (isImageType) {
           const thumbnailResult = await ThumbnailService.generateThumbnail(file.uri, newFileName);
           thumbnailPath = thumbnailResult.thumbnailUri;
-          console.log('✅ Thumbnail generated for image file');
+
         } else {
           // For documents, we'll just use document name and icon - no thumbnail needed
-          console.log('📄 Document type detected, using document tile (no thumbnail)');
+
         }
       } catch (thumbnailError) {
         console.warn('⚠️ Thumbnail generation failed:', thumbnailError);
@@ -382,14 +371,14 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
 
         const addResult = await databaseOperations.certificates.addCertificate(certificateData);
         if (addResult.success) {
-          console.log('✅ Document automatically added to vault with ID:', addResult.data);
+
           // Refresh certificates in AppContext so vault shows the new certificate
           await refreshCertificates();
         } else {
           console.warn('⚠️ Failed to add document to vault:', addResult.error);
         }
       } catch (certError) {
-        console.error('💥 Error adding document to vault:', certError);
+      __DEV__ && console.error('💥 Error adding document to vault:', certError);
       }
 
       // Update form data with certificate path
@@ -401,7 +390,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       Alert.alert('Success', 'Document added to entry and saved to vault!');
 
     } catch (error) {
-      console.error('💥 Error processing document:', error);
+      __DEV__ && console.error('💥 Error processing document:', error);
       Alert.alert('Error', 'Failed to process document. Please try again.');
     }
   };
@@ -477,16 +466,14 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const handleSubmit = async () => {
-    console.log('💾 handleSubmit: Starting form submission...');
-    
+
     if (!validateForm()) {
-      console.log('❌ handleSubmit: Form validation failed');
+
       HapticsUtils.error();
       Alert.alert('Validation Error', 'Please fix the errors in the form.');
       return;
     }
 
-    console.log('✅ handleSubmit: Form validation passed');
     setIsLoading(true);
 
     try {
@@ -500,27 +487,23 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
         certificatePath: formData.certificatePath,
       };
 
-      console.log('📝 handleSubmit: Entry data prepared:', entryData);
-
       let success = false;
 
       if (isEditing) {
-        console.log('🔄 handleSubmit: Updating existing entry...');
+
         success = await updateCMEEntry(editEntry.id, entryData);
       } else {
-        console.log('➕ handleSubmit: Adding new entry...');
+
         success = await addCMEEntry(entryData);
       }
 
-      console.log('📊 handleSubmit: Operation result:', success);
-
       if (success) {
-        console.log('🎉 handleSubmit: Success! Navigating back to dashboard');
+
         HapticsUtils.success();
         // Navigate back to close modal - this will automatically return to whatever screen called it
         navigation.goBack();
       } else {
-        console.log('💥 handleSubmit: Operation failed');
+
         HapticsUtils.error();
         Alert.alert(
           'Error',
@@ -528,7 +511,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
         );
       }
     } catch (error) {
-      console.error('💥 handleSubmit: Exception occurred:', error);
+      __DEV__ && console.error('💥 handleSubmit: Exception occurred:', error);
       Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
@@ -771,8 +754,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  
-  
+
   content: {
     flex: 1,
     padding: theme.spacing[4],

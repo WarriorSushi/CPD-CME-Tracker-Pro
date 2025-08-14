@@ -17,14 +17,14 @@ import { AuditTrailService } from '../services/AuditTrailService';
 const isDevelopment = __DEV__;
 const devLog = (...args: any[]) => {
   if (isDevelopment) {
-    console.log(...args);
+
   }
 };
 
 // Remount detection for debugging
 if (isDevelopment) {
   const remountCounter = (globalThis.__appContextMountCount = (globalThis.__appContextMountCount || 0) + 1);
-  devLog('🔄 AppContext: Provider mounting (count:', remountCounter, ')');
+
 }
 
 // Batch state updates helper
@@ -218,14 +218,14 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const refreshUserData = useCallback(async (): Promise<void> => {
     try {
       setIsLoadingUser(true);
-      devLog('🔄 AppContext: Refreshing user data...');
+
       const userData = await refreshUserCache(); // Use singleflight cache
       if (userData) {
-        devLog('✅ AppContext: User data loaded:', userData?.creditSystem);
+
         setUser(userData);
       }
     } catch (error) {
-      console.error('💥 AppContext: Error refreshing user data:', error);
+      __DEV__ && console.error('💥 AppContext: Error refreshing user data:', error);
     } finally {
       setIsLoadingUser(false);
     }
@@ -241,11 +241,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       if (!userData) {
         userData = await getUserCached(); // Use singleflight cache
       }
-      
-      devLog('📊 AppContext.refreshCMEData: User data:', userData?.profession);
-      
+
       if (!userData) {
-        devLog('⚠️ AppContext: No user data, skipping CME refresh');
+
         // Still try to load all entries without date filtering
         const allEntriesResult = await databaseOperations.cme.getAllEntries();
         if (allEntriesResult.success && allEntriesResult.data) {
@@ -276,21 +274,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         // we need to use the first day of the next year to include all of the current year
         endDate = `${currentYear + periodYears}-01-01`;
       }
-      
-      devLog('📅 AppContext.refreshCMEData: Using date range:', { startDate, endDate });
-      
+
       // Check staleness to avoid redundant queries
       const now = Date.now();
       const isStale = (now - lastEntriesRefreshRef.current) > ENTRIES_STALENESS_TTL;
       
       if (!isStale && !force) {
-        devLog('✅ AppContext: CME data is fresh, skipping refresh');
+
         return;
       }
       
       lastEntriesRefreshRef.current = now;
-      devLog('🔄 AppContext: CME data is stale, refreshing...');
-      
+
       // Load recent entries and total credits (remove redundant getAllEntries call for performance) 
       const [recentEntriesResult, creditsResult] = await Promise.all([
         databaseOperations.cme.getEntriesInDateRange(startDate, endDate).then(result => {
@@ -334,7 +329,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         }
       });
     } catch (error) {
-      console.error('Error refreshing CME data:', error);
+      __DEV__ && console.error('Error refreshing CME data:', error);
       setError('Unable to load CME data. Please check your connection and try again.');
     } finally {
       setIsLoadingCME(false);
@@ -375,11 +370,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
       
       const result = await databaseOperations.cme.getEntriesInDateRange(startDate, endDate);
-      console.log('📋 AppContext.loadAllCMEEntries: Raw data from database:', result.data);
+
       // DATABASE already sorts with ORDER BY date_attended DESC - do NOT sort again
       return result.success ? (result.data || []) : [];
     } catch (error) {
-      console.error('Error loading all CME entries:', error);
+      __DEV__ && console.error('Error loading all CME entries:', error);
       return [];
     }
   }, []);
@@ -392,7 +387,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         setCertificates(result.data || []);
       }
     } catch (error) {
-      console.error('Error refreshing certificates:', error);
+      __DEV__ && console.error('Error refreshing certificates:', error);
     } finally {
       setIsLoadingCertificates(false);
     }
@@ -406,7 +401,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         setLicenses(result.data || []);
       }
     } catch (error) {
-      console.error('Error refreshing licenses:', error);
+      __DEV__ && console.error('Error refreshing licenses:', error);
     } finally {
       setIsLoadingLicenses(false);
     }
@@ -420,7 +415,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         setEventReminders(result.data || []);
       }
     } catch (error) {
-      console.error('Error refreshing reminders:', error);
+      __DEV__ && console.error('Error refreshing reminders:', error);
     } finally {
       setIsLoadingReminders(false);
     }
@@ -444,12 +439,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // CME Actions
   const addCMEEntry = useCallback(async (entry: Omit<CMEEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<boolean> => {
     try {
-      console.log('🗃️ AppContext.addCMEEntry: Attempting to add entry:', entry);
+
       const result = await databaseOperations.cme.addEntry(entry);
-      console.log('🗃️ AppContext.addCMEEntry: Database result:', result);
-      
+
       if (result.success) {
-        console.log('✅ AppContext.addCMEEntry: Success! Force refreshing CME data...');
+
         await AuditTrailService.logCMEAction('add_entry', result.data?.id || 0, {
           title: entry.title,
           provider: entry.provider,
@@ -459,11 +453,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         await forceRefreshCMEData();
         return true;
       }
-      console.log('❌ AppContext.addCMEEntry: Database operation failed');
+
       await AuditTrailService.logCMEAction('add_entry', 0, { title: entry.title }, false, 'Database operation failed');
       return false;
     } catch (error) {
-      console.error('💥 AppContext.addCMEEntry: Exception occurred:', error);
+      __DEV__ && console.error('💥 AppContext.addCMEEntry: Exception occurred:', error);
       await AuditTrailService.logCMEAction('add_entry', 0, { title: entry.title }, false, String(error));
       return false;
     }
@@ -480,7 +474,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       await AuditTrailService.logCMEAction('update_entry', id, entry, false, 'Database operation failed');
       return false;
     } catch (error) {
-      console.error('Error updating CME entry:', error);
+      __DEV__ && console.error('Error updating CME entry:', error);
       await AuditTrailService.logCMEAction('update_entry', id, entry, false, String(error));
       return false;
     }
@@ -497,7 +491,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       await AuditTrailService.logCMEAction('delete_entry', id, {}, false, 'Database operation failed');
       return false;
     } catch (error) {
-      console.error('Error deleting CME entry:', error);
+      __DEV__ && console.error('Error deleting CME entry:', error);
       await AuditTrailService.logCMEAction('delete_entry', id, {}, false, String(error));
       return false;
     }
@@ -513,7 +507,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
       return false;
     } catch (error) {
-      console.error('Error adding license:', error);
+      __DEV__ && console.error('Error adding license:', error);
       return false;
     }
   }, [refreshLicenses]);
@@ -527,7 +521,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
       return false;
     } catch (error) {
-      console.error('Error updating license:', error);
+      __DEV__ && console.error('Error updating license:', error);
       return false;
     }
   }, [refreshLicenses]);
@@ -541,7 +535,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
       return false;
     } catch (error) {
-      console.error('Error deleting license:', error);
+      __DEV__ && console.error('Error deleting license:', error);
       return false;
     }
   }, [refreshLicenses]);
@@ -556,7 +550,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
       return false;
     } catch (error) {
-      console.error('Error adding event reminder:', error);
+      __DEV__ && console.error('Error adding event reminder:', error);
       return false;
     }
   }, [refreshReminders]);
@@ -570,7 +564,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
       return false;
     } catch (error) {
-      console.error('Error updating event reminder:', error);
+      __DEV__ && console.error('Error updating event reminder:', error);
       return false;
     }
   }, [refreshReminders]);
@@ -584,7 +578,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
       return false;
     } catch (error) {
-      console.error('Error deleting event reminder:', error);
+      __DEV__ && console.error('Error deleting event reminder:', error);
       return false;
     }
   }, [refreshReminders]);
@@ -599,7 +593,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
       return false;
     } catch (error) {
-      console.error('Error updating user:', error);
+      __DEV__ && console.error('Error updating user:', error);
       return false;
     }
   }, [refreshUserData]);
@@ -608,17 +602,16 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const refreshNotifications = useCallback(async (): Promise<void> => {
     try {
       if (!user) return;
-      
-      devLog('🔔 AppContext: Refreshing notifications with current data...');
+
       await NotificationService.refreshAllNotifications(
         user,
         licenses,
         eventReminders,
         totalCredits
       );
-      devLog('✅ AppContext: Notifications refreshed successfully');
+
     } catch (error) {
-      console.error('💥 AppContext: Error refreshing notifications:', error);
+      __DEV__ && console.error('💥 AppContext: Error refreshing notifications:', error);
     }
   }, [user, licenses, eventReminders, totalCredits]);
 
@@ -656,11 +649,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Smart initial data loading - prioritize essential data
   // Use ref to prevent double execution in React 18 StrictMode
   const didInitialLoadRef = useRef(false);
+  const timeoutRefs = useRef<{ secondary?: NodeJS.Timeout; reminders?: NodeJS.Timeout }>({});
   
   useEffect(() => {
     // Guard against double execution
     if (didInitialLoadRef.current) {
-      devLog('⚠️ AppContext: Initial load already completed, skipping...');
+
       return;
     }
     
@@ -671,15 +665,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       if (!mounted) return;
       
       try {
-        devLog('🚀 AppContext: Starting smart initial data load...');
+
         setIsInitializing(true);
         
         // Initialize notification service
         try {
           await NotificationService.initialize();
-          devLog('✅ AppContext: Notification service initialized');
+
         } catch (error) {
-          console.error('💥 AppContext: Failed to initialize notifications:', error);
+      __DEV__ && console.error('💥 AppContext: Failed to initialize notifications:', error);
         }
         
         // Load user first (essential for everything else)
@@ -692,30 +686,32 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           refreshCMEData(), // Only recent entries + totals
           // Skip certificates and licenses initially - load on demand
         ]);
-        
-        devLog('✅ AppContext: Essential data loaded quickly');
-        
+
         // Load secondary data in background after a brief delay
-        setTimeout(async () => {
+        const secondaryTimeout = setTimeout(async () => {
           if (mounted) {
-            devLog('🔄 AppContext: Loading secondary data...');
             await Promise.all([
               refreshCertificates(),
               refreshLicenses(),
             ]);
             
             // Load reminders separately to avoid blocking
-            setTimeout(async () => {
+            const remindersTimeout = setTimeout(async () => {
               if (mounted) {
                 await refreshReminders();
               }
             }, 500);
-            devLog('✅ AppContext: All data loaded');
+            
+            // Store timeout for cleanup
+            timeoutRefs.current.reminders = remindersTimeout;
           }
         }, 100); // Short delay to prioritize UI responsiveness
         
+        // Store timeout for cleanup
+        timeoutRefs.current.secondary = secondaryTimeout;
+        
       } catch (error) {
-        console.error('💥 AppContext: Error during initial load:', error); // Keep error logs
+      __DEV__ && console.error('💥 AppContext: Error during initial load:', error); // Keep error logs
         setError('Failed to load app data. Please restart the app.');
       } finally {
         if (mounted) {
@@ -728,6 +724,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     
     return () => {
       mounted = false;
+      // Clean up any pending timeouts
+      if (timeoutRefs.current.secondary) {
+        clearTimeout(timeoutRefs.current.secondary);
+      }
+      if (timeoutRefs.current.reminders) {
+        clearTimeout(timeoutRefs.current.reminders);
+      }
     };
   }, []); // No dependencies - run once on mount
 

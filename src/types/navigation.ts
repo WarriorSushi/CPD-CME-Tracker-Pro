@@ -1,4 +1,6 @@
-// Navigation types for CME Tracker
+// Navigation types for CPD/CME Tracker
+import { CMEEntry } from './index';
+
 export type RootStackParamList = {
   Onboarding: undefined;
   Main: undefined;
@@ -21,12 +23,12 @@ export type MainTabParamList = {
   Vault: undefined;
   Settings: undefined;
   AddCME: { 
-    editEntry?: any;
+    editEntry?: CMEEntry;
     ocrData?: {
       title?: string;
       provider?: string;
       date?: string;
-      credits?: string;
+      credits?: number;
       category?: string;
       certificatePath?: string;
     };
@@ -49,13 +51,13 @@ export type CMEStackParamList = {
   CMEHistory: undefined;
   CMEDetails: { entryId: number };
   AddCME: { 
-    editEntry?: any;
+    editEntry?: CMEEntry;
     ocrData?: {
-      title: string;
-      provider: string;
-      dateAttended: string;
-      creditsEarned: string;
-      category: string;
+      title?: string;
+      provider?: string;
+      date?: string;
+      credits?: number;
+      category?: string;
       certificatePath?: string;
     };
   };

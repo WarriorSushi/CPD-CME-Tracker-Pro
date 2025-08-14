@@ -19,31 +19,30 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
   const { completeOnboarding } = useOnboardingContext();
 
   const handleStartUsingApp = async () => {
-    console.log('🚀 Starting app button pressed');
+
     setIsLoading(true);
     
     try {
-      console.log('📝 Calling completeOnboarding...');
+
       const success = await completeOnboarding();
-      console.log('✅ completeOnboarding result:', success);
-      
+
       if (success) {
-        console.log('🎉 Onboarding completed successfully - navigation should switch automatically');
+
         // Force a small delay to ensure state propagation
         setTimeout(() => {
-          console.log('⏰ Triggering manual state refresh check...');
+
           // This should trigger any listeners to recheck the state
         }, 200);
         // Navigation will automatically switch to main app due to the navigation logic
         // in AppNavigator based on onboarding status
       } else {
-        console.error('❌ Failed to complete onboarding');
+      __DEV__ && console.error('❌ Failed to complete onboarding');
       }
     } catch (error) {
-      console.error('💥 Error completing onboarding:', error);
+      __DEV__ && console.error('💥 Error completing onboarding:', error);
     } finally {
       setIsLoading(false);
-      console.log('🏁 Button action completed, loading state reset');
+
     }
   };
 

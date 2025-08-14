@@ -61,9 +61,7 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
     if (selectedOption !== null || customDate) {
       const selectedDate = getSelectedDate();
       if (!selectedDate) return;
-      
-      console.log('💾 CycleStartDateScreen: Saving cycle dates...');
-      
+
       try {
         // Get user's requirement period to calculate end date
         const userResult = await userOperations.getCurrentUser();
@@ -72,32 +70,24 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
         // Calculate cycle end date
         const cycleEndDate = new Date(selectedDate);
         cycleEndDate.setFullYear(selectedDate.getFullYear() + requirementPeriod);
-        
-        console.log('📅 CycleStartDateScreen: Cycle dates calculated:', {
-          startDate: selectedDate.toISOString().split('T')[0],
-          endDate: cycleEndDate.toISOString().split('T')[0],
-          period: requirementPeriod
-        });
-        
+
         // Save cycle dates to database
         const result = await userOperations.updateUser({
           cycleStartDate: selectedDate.toISOString().split('T')[0], // YYYY-MM-DD format
           cycleEndDate: cycleEndDate.toISOString().split('T')[0]
         });
-        
-        console.log('📊 CycleStartDateScreen: Save result:', result);
-        
+
         if (result.success) {
-          console.log('✅ CycleStartDateScreen: Successfully saved cycle dates, navigating...');
+
           navigation.navigate('LicenseSetup', {
             cycleStartDate: selectedDate?.toISOString(),
             syncWithLicense: licenseSyncSelected === true,
           });
         } else {
-          console.error('❌ CycleStartDateScreen: Failed to save cycle dates');
+      __DEV__ && console.error('❌ CycleStartDateScreen: Failed to save cycle dates');
         }
       } catch (error) {
-        console.error('💥 CycleStartDateScreen: Error saving cycle dates:', error);
+      __DEV__ && console.error('💥 CycleStartDateScreen: Error saving cycle dates:', error);
       }
     }
   };

@@ -14,10 +14,7 @@ export const CMENavigator: React.FC = () => {
   
   // Always start with CMEHistory - let the history screen handle showing empty state or entries
   const initialRoute = "CMEHistory";
-  
-  console.log('🏗️ CMENavigator: Rendering CME stack navigator with initial route:', initialRoute);
-  console.log('📊 CMENavigator: Current entries count:', recentCMEEntries.length);
-  
+
   return (
     <Stack.Navigator
       initialRouteName={initialRoute}

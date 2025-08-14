@@ -1,4 +1,4 @@
-# Production Readiness Checklist for CME Tracker Pro
+# Production Readiness Checklist for CPD/CME Tracker Pro
 
 ## ✅ COMPLETED ITEMS
 
@@ -7,7 +7,7 @@
 - [x] **Bundle ID** - Set to com.cmetrackerpro.app
 - [x] **Version Codes** - Android versionCode: 1, iOS buildNumber: 1
 - [x] **Target SDK** - Android 34 (API 34)
-- [x] **App Name** - "CME Tracker Pro"
+- [x] **App Name** - "CPD/CME Tracker Pro"
 - [x] **Permissions** - Properly declared and justified
 - [x] **Description** - Professional app description added
 

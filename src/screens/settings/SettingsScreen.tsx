@@ -90,14 +90,14 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
           text: 'Reset',
           style: 'destructive',
           onPress: async () => {
-            console.log('🔄 User confirmed reset onboarding');
+
             const success = await resetOnboarding();
             if (success) {
-              console.log('✅ Onboarding reset successful - app should automatically navigate to onboarding');
+
               // Don't show alert - let the automatic navigation to onboarding happen
               // The AppNavigator will automatically switch to OnboardingNavigator when isOnboardingComplete becomes false
             } else {
-              console.log('❌ Onboarding reset failed');
+
               Alert.alert('Error', 'Failed to reset onboarding. Please try again.');
             }
           },
@@ -132,14 +132,14 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
                   text: 'YES, DELETE EVERYTHING',
                   style: 'destructive',
                   onPress: async () => {
-                    console.log('🧹 User confirmed complete app reset');
+
                     const success = await resetCompleteApp();
                     if (success) {
-                      console.log('✅ Complete app reset successful - app should automatically navigate to onboarding');
+
                       // Don't show alert - let the automatic navigation to onboarding happen
                       // The AppNavigator will automatically switch to OnboardingNavigator when isOnboardingComplete becomes false
                     } else {
-                      console.log('❌ Complete app reset failed');
+
                       Alert.alert('Error', 'Failed to reset app completely. Please try again.');
                     }
                   },
@@ -318,7 +318,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
           <TouchableOpacity 
             style={[styles.actionButton, styles.remindButton]}
             onPress={() => {
-              // TODO: Setup notification reminders for this license
+              
               Alert.alert('Reminder Setup', 'License reminder notifications will be available in a future update.');
             }}
           >
@@ -429,7 +429,6 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
             </LinearGradient>
           </View>
         </View>
-
 
         {/* Data Management Section */}
         <View style={styles.sectionContainer}>

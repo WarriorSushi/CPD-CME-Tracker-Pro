@@ -21,7 +21,6 @@ export class ThumbnailService {
     fileName: string
   ): Promise<ThumbnailResult> {
     try {
-      console.log('📸 ThumbnailService: Generating thumbnail for:', originalImageUri);
 
       // Create thumbnails directory if it doesn't exist
       const thumbnailsDir = `${FileSystem.documentDirectory}${FILE_PATHS.THUMBNAILS}`;
@@ -61,9 +60,7 @@ export class ThumbnailService {
 
       // Get thumbnail file info
       const thumbnailInfo = await FileSystem.getInfoAsync(thumbnailPath);
-      
-      console.log('✅ ThumbnailService: Thumbnail generated successfully');
-      
+
       return {
         thumbnailUri: thumbnailPath,
         width: thumbnail.width,
@@ -72,7 +69,7 @@ export class ThumbnailService {
       };
 
     } catch (error) {
-      console.error('💥 ThumbnailService: Failed to generate thumbnail:', error);
+      __DEV__ && console.error('💥 ThumbnailService: Failed to generate thumbnail:', error);
       throw new Error('Failed to generate thumbnail');
     }
   }
@@ -86,7 +83,6 @@ export class ThumbnailService {
     fileName: string
   ): Promise<ThumbnailResult> {
     try {
-      console.log('📄 ThumbnailService: Generating PDF thumbnail for:', pdfUri);
 
       // Create thumbnails directory if it doesn't exist
       const thumbnailsDir = `${FileSystem.documentDirectory}${FILE_PATHS.THUMBNAILS}`;
@@ -125,9 +121,7 @@ export class ThumbnailService {
       });
 
       const thumbnailInfo = await FileSystem.getInfoAsync(thumbnailPath);
-      
-      console.log('✅ ThumbnailService: PDF placeholder thumbnail generated');
-      
+
       return {
         thumbnailUri: thumbnailPath,
         width: placeholderThumbnail.width,
@@ -136,7 +130,7 @@ export class ThumbnailService {
       };
 
     } catch (error) {
-      console.error('💥 ThumbnailService: Failed to generate PDF thumbnail:', error);
+      __DEV__ && console.error('💥 ThumbnailService: Failed to generate PDF thumbnail:', error);
       throw new Error('Failed to generate PDF thumbnail');
     }
   }
@@ -149,10 +143,10 @@ export class ThumbnailService {
       const fileInfo = await FileSystem.getInfoAsync(thumbnailUri);
       if (fileInfo.exists) {
         await FileSystem.deleteAsync(thumbnailUri);
-        console.log('🗑️ ThumbnailService: Thumbnail deleted:', thumbnailUri);
+
       }
     } catch (error) {
-      console.error('💥 ThumbnailService: Failed to delete thumbnail:', error);
+      __DEV__ && console.error('💥 ThumbnailService: Failed to delete thumbnail:', error);
     }
   }
 
@@ -173,11 +167,11 @@ export class ThumbnailService {
         if (!validUriSet.has(file)) {
           const orphanedPath = `${thumbnailsDir}${file}`;
           await FileSystem.deleteAsync(orphanedPath);
-          console.log('🧹 ThumbnailService: Cleaned up orphaned thumbnail:', file);
+
         }
       }
     } catch (error) {
-      console.error('💥 ThumbnailService: Failed to cleanup orphaned thumbnails:', error);
+      __DEV__ && console.error('💥 ThumbnailService: Failed to cleanup orphaned thumbnails:', error);
     }
   }
 
@@ -207,7 +201,7 @@ export class ThumbnailService {
         totalSize,
       };
     } catch (error) {
-      console.error('💥 ThumbnailService: Failed to get storage stats:', error);
+      __DEV__ && console.error('💥 ThumbnailService: Failed to get storage stats:', error);
       return { count: 0, totalSize: 0 };
     }
   }

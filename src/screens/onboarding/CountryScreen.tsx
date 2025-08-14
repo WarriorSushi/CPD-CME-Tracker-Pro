@@ -57,7 +57,7 @@ export const CountryScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleContinue = () => {
     if (selectedCountry) {
-      // TODO: Save country to onboarding data
+      
       navigation.navigate('CreditSystem');
     }
   };

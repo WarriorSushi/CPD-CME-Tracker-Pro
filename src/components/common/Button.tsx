@@ -135,7 +135,7 @@ export const Button: React.FC<ButtonProps> = ({
         backgroundColor = interpolateColor(
           pressAnimation.value,
           [0, 1],
-          [colors.error, colors.error] // TODO: Add errorDark token
+          [colors.error, colors.error] 
         );
         break;
         

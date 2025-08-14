@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "CME Tracker Pro",
+    "name": "CPD/CME Tracker Pro",
     "slug": "cme-tracker-pro",
     "description": "Professional continuing medical education tracking application for healthcare professionals. Track CME/CPD credits, manage licenses, store certificates, and maintain compliance - all offline and secure.",
     "version": "1.0.0",
