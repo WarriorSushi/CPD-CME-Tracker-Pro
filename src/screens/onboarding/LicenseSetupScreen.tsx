@@ -5,8 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card, ProgressIndicator } from '../../components';
 import { FloatingLicenseModal } from '../../components/onboarding/FloatingLicenseModal';
 import { theme } from '../../constants/theme';
+import { tokens } from '../../theme/tokens';
 import { OnboardingStackParamList } from '../../types/navigation';
-import { getColor } from '../../theme';
 
 type LicenseSetupScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'LicenseSetup'>;
 
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: getColor('selectedBg'),
+    backgroundColor: tokens.color.selectedBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: theme.spacing[2],

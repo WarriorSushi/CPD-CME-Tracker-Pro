@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, ViewStyle, StyleSheet, Text, TextStyle } from 'react-native';
-import { useColors, useTokens } from '../../theme';
+import { theme } from '../../constants/theme';
 
 export interface CardProps {
   children: React.ReactNode;
@@ -14,11 +14,8 @@ export const Card: React.FC<CardProps> = ({
   variant = 'base',
   style,
 }) => {
-  const getColor = useColors();
-  const tokens = useTokens();
-
   // Get variant-specific styles
-  const variantStyles = getVariantStyles(variant, getColor, tokens);
+  const variantStyles = getVariantStyles(variant);
 
   const cardStyle: ViewStyle[] = [
     styles.base,
@@ -34,57 +31,37 @@ export const Card: React.FC<CardProps> = ({
 };
 
 // Helper function to get variant-specific styles
-const getVariantStyles = (variant: CardProps['variant'], getColor: any, tokens: any) => {
+const getVariantStyles = (variant: CardProps['variant']) => {
   const variants = {
     base: {
-      backgroundColor: getColor('cardBg'), // Card background from theme
+      backgroundColor: theme.colors.card,
       borderWidth: 1,
-      borderColor: getColor('border'),
-      shadowColor: tokens.shadow.card.color,
-      shadowOffset: tokens.shadow.card.offset,
-      shadowOpacity: tokens.shadow.card.opacity,
-      shadowRadius: tokens.shadow.card.radius,
-      elevation: 2, // Android shadow
+      borderColor: theme.colors.border.medium,
+      ...theme.shadows.small,
     },
     selected: {
-      backgroundColor: getColor('cardBg'), // Card background from theme
+      backgroundColor: theme.colors.card,
       borderWidth: 2,
-      borderColor: getColor('primary'),
-      shadowColor: tokens.shadow.card.color,
-      shadowOffset: tokens.shadow.card.offset,
-      shadowOpacity: tokens.shadow.card.opacity * 1.5,
-      shadowRadius: tokens.shadow.card.radius,
-      elevation: 3, // Android shadow
+      borderColor: theme.colors.primary,
+      ...theme.shadows.medium,
     },
     outline: {
-      backgroundColor: getColor('cardBg'), // Card background from theme
+      backgroundColor: theme.colors.card,
       borderWidth: 1,
-      borderColor: getColor('border'),
-      shadowColor: tokens.shadow.card.color,
-      shadowOffset: tokens.shadow.card.offset,
-      shadowOpacity: tokens.shadow.card.opacity,
-      shadowRadius: tokens.shadow.card.radius,
-      elevation: 2, // Android shadow
+      borderColor: theme.colors.border.medium,
+      ...theme.shadows.small,
     },
     success: {
-      backgroundColor: getColor('cardBg'), // Card background from theme
+      backgroundColor: theme.colors.card,
       borderWidth: 2,
-      borderColor: getColor('success'),
-      shadowColor: tokens.shadow.card.color,
-      shadowOffset: tokens.shadow.card.offset,
-      shadowOpacity: tokens.shadow.card.opacity,
-      shadowRadius: tokens.shadow.card.radius,
-      elevation: 2, // Android shadow
+      borderColor: theme.colors.success,
+      ...theme.shadows.small,
     },
     entry: {
-      backgroundColor: getColor('white'), // Pure white for entry cards (top layer)
+      backgroundColor: theme.colors.white,
       borderWidth: 1,
-      borderColor: getColor('border'),
-      shadowColor: tokens.shadow.card.color,
-      shadowOffset: tokens.shadow.card.offset,
-      shadowOpacity: tokens.shadow.card.opacity,
-      shadowRadius: tokens.shadow.card.radius,
-      elevation: 2, // Android shadow
+      borderColor: theme.colors.border.medium,
+      ...theme.shadows.small,
     },
   };
 
@@ -103,21 +80,18 @@ export const CardTitle: React.FC<CardTitleProps> = ({
   variant = 'base',
   style,
 }) => {
-  const getColor = useColors();
-  const tokens = useTokens();
-
   const titleVariants = {
     base: {
-      color: getColor('textPrimary'),
-      fontWeight: tokens.fontWeight.medium as any,
+      color: theme.colors.text.primary,
+      fontWeight: theme.typography.fontWeight.medium,
     },
     selected: {
-      color: getColor('primary'),
-      fontWeight: tokens.fontWeight.semibold as any,
+      color: theme.colors.primary,
+      fontWeight: theme.typography.fontWeight.semibold,
     },
     success: {
-      color: getColor('success'),
-      fontWeight: tokens.fontWeight.semibold as any,
+      color: theme.colors.success,
+      fontWeight: theme.typography.fontWeight.semibold,
     },
   };
 

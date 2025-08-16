@@ -4,8 +4,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card } from '../../components';
 import { theme } from '../../constants/theme';
+import { tokens } from '../../theme/tokens';
 import { OnboardingStackParamList } from '../../types/navigation';
-import { getColor } from '../../theme';
 
 type PrivacyScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Privacy'>;
 
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   assurance: {
-    backgroundColor: getColor('selectedBg'),
+    backgroundColor: tokens.color.selectedBg,
     borderRadius: theme.borderRadius.medium,
     padding: theme.spacing[4],
     borderLeftWidth: 4,

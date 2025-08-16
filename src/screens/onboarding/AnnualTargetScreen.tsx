@@ -4,10 +4,10 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input, Card, ProgressIndicator } from '../../components';
 import { theme } from '../../constants/theme';
+import { tokens } from '../../theme/tokens';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { DEFAULT_CREDIT_REQUIREMENTS } from '../../constants';
 import { Profession, CreditSystem } from '../../types';
-import { getColor } from '../../theme';
 import { getCreditTerminology } from '../../utils/creditTerminology';
 import { userOperations } from '../../services/database';
 
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   },
   selectedCard: {
     borderColor: theme.colors.primary,
-    backgroundColor: getColor('selectedBg'),
+    backgroundColor: tokens.color.selectedBg,
   },
   optionText: {
     fontSize: theme.typography.fontSize.sm,

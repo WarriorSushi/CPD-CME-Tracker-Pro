@@ -153,6 +153,23 @@ const iconSources = {
   files: `<svg viewBox="0 0 24 24" fill="currentColor">
     <path d="M6,2A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6M6,4H13V9H18V20H6V4Z"/>
   </svg>`,
+
+  // Navigation Icons
+  'chevron-right': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="9,18 15,12 9,6"/>
+  </svg>`,
+
+  'chevron-left': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="15,18 9,12 15,6"/>
+  </svg>`,
+
+  'chevron-down': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="6,9 12,15 18,9"/>
+  </svg>`,
+
+  'chevron-up': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18,15 12,9 6,15"/>
+  </svg>`,
 };
 
 export type IconName = keyof typeof iconSources;

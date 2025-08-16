@@ -6,7 +6,6 @@ import { Button, Card, ProgressIndicator } from '../../components';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList, Profession } from '../../types';
 import { userOperations } from '../../services/database';
-import { getColor } from '../../theme';
 
 type ProfessionScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Profession'>;
 

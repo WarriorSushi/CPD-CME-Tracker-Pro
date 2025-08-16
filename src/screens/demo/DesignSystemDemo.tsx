@@ -2,13 +2,10 @@ import React from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card, CardTitle, Chip } from '../../components';
-import { useColors, useTokens } from '../../theme';
-import { tokens } from '../../theme/tokens';
+import { theme } from '../../constants/theme';
 
 export const DesignSystemDemo: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const getColor = useColors();
-  const tokensData = useTokens();
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
@@ -16,44 +13,44 @@ export const DesignSystemDemo: React.FC = () => {
         <View style={styles.content}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={[styles.title, { color: getColor('textPrimary') }]}>
+            <Text style={[styles.title, { color: theme.colors.text.primary }]}>
               CPD/CME Tracker Design System
             </Text>
-            <Text style={[styles.subtitle, { color: getColor('textSecondary') }]}>
+            <Text style={[styles.subtitle, { color: theme.colors.text.secondary }]}>
               Improved contrast, interactive states, and tactile feedback
             </Text>
           </View>
 
           {/* Cards Section */}
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: getColor('textPrimary') }]}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
               Cards
             </Text>
             <View style={styles.cardsGrid}>
               <Card variant="base" style={styles.demoCard}>
                 <CardTitle variant="base">Unselected</CardTitle>
-                <Text style={[styles.cardText, { color: getColor('textSecondary') }]}>
+                <Text style={[styles.cardText, { color: theme.colors.text.secondary }]}>
                   Base card style with subtle shadow
                 </Text>
               </Card>
 
               <Card variant="selected" style={styles.demoCard}>
                 <CardTitle variant="selected">Selected</CardTitle>
-                <Text style={[styles.cardText, { color: getColor('textSecondary') }]}>
+                <Text style={[styles.cardText, { color: theme.colors.text.secondary }]}>
                   Blue background with primary border
                 </Text>
               </Card>
 
               <Card variant="outline" style={styles.demoCard}>
                 <CardTitle variant="base">Outline</CardTitle>
-                <Text style={[styles.cardText, { color: getColor('textSecondary') }]}>
+                <Text style={[styles.cardText, { color: theme.colors.text.secondary }]}>
                   Clean white background with border
                 </Text>
               </Card>
 
               <Card variant="success" style={styles.demoCard}>
                 <CardTitle variant="success">Success</CardTitle>
-                <Text style={[styles.cardText, { color: getColor('textSecondary') }]}>
+                <Text style={[styles.cardText, { color: theme.colors.text.secondary }]}>
                   Success state with green accent
                 </Text>
               </Card>
@@ -62,7 +59,7 @@ export const DesignSystemDemo: React.FC = () => {
 
           {/* Buttons Section */}
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: getColor('textPrimary') }]}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
               Buttons
             </Text>
             <View style={styles.buttonsRow}>
@@ -89,7 +86,7 @@ export const DesignSystemDemo: React.FC = () => {
 
           {/* Chips Section */}
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: getColor('textPrimary') }]}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
               Chips
             </Text>
             <View style={styles.chipsRow}>
@@ -115,24 +112,24 @@ export const DesignSystemDemo: React.FC = () => {
           </View>
 
           {/* Color Tokens Footer */}
-          <View style={[styles.footer, { backgroundColor: getColor('surface'), borderColor: getColor('borderLight') }]}>
-            <Text style={[styles.footerTitle, { color: getColor('textPrimary') }]}>
+          <View style={[styles.footer, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border.light }]}>
+            <Text style={[styles.footerTitle, { color: theme.colors.text.primary }]}>
               HSL Color Tokens
             </Text>
             <View style={styles.tokensContainer}>
-              <Text style={[styles.tokenText, { color: getColor('textSecondary') }]}>
+              <Text style={[styles.tokenText, { color: theme.colors.text.secondary }]}>
                 Primary: {tokens.color.primary}
               </Text>
-              <Text style={[styles.tokenText, { color: getColor('textSecondary') }]}>
+              <Text style={[styles.tokenText, { color: theme.colors.text.secondary }]}>
                 Selected: {tokens.color.selectedBg}
               </Text>
-              <Text style={[styles.tokenText, { color: getColor('textSecondary') }]}>
+              <Text style={[styles.tokenText, { color: theme.colors.text.secondary }]}>
                 Success: {tokens.color.success}
               </Text>
-              <Text style={[styles.tokenText, { color: getColor('textSecondary') }]}>
+              <Text style={[styles.tokenText, { color: theme.colors.text.secondary }]}>
                 Warning: {tokens.color.warningBorder}
               </Text>
-              <Text style={[styles.tokenText, { color: getColor('textSecondary') }]}>
+              <Text style={[styles.tokenText, { color: theme.colors.text.secondary }]}>
                 Error: {tokens.color.error}
               </Text>
             </View>

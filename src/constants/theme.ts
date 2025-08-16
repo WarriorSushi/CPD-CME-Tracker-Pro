@@ -1,7 +1,7 @@
 // LEGACY: Theme constants for CME Tracker - MIGRATE TO NEW THEME SYSTEM
 // This is maintained for backward compatibility during migration
 
-import { tokens, getColor } from '../theme/tokens';
+import { tokens } from '../theme/tokens';
 
 export const theme = {
   colors: {
@@ -199,9 +199,9 @@ export const theme = {
   
   // Progress circle colors
   progress: {
-    background: getColor('gray200'),
-    fill: getColor('primary'),
-    text: getColor('gray700'),
+    background: tokens.color.gray200,
+    fill: tokens.color.primary,
+    text: tokens.color.gray700,
   },
 } as const;
 
@@ -214,11 +214,11 @@ export const getTheme = () => theme;
 export const commonStyles = {
   container: {
     flex: 1,
-    backgroundColor: getColor('white'),
+    backgroundColor: tokens.color.white,
     padding: 20,
   },
   card: {
-    backgroundColor: getColor('white'),
+    backgroundColor: tokens.color.white,
     borderRadius: 5,
     padding: 16,
     shadowColor: '#000',
@@ -238,24 +238,24 @@ export const commonStyles = {
     height: 48,
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: getColor('gray200'),
+    borderColor: tokens.color.gray200,
     paddingHorizontal: 16,
     fontSize: 16,
-    backgroundColor: getColor('white'),
+    backgroundColor: tokens.color.white,
   },
   text: {
     primary: {
-      color: getColor('gray900'),
+      color: tokens.color.gray900,
       fontSize: 16,
       fontWeight: '400',
     },
     secondary: {
-      color: getColor('gray500'),
+      color: tokens.color.gray500,
       fontSize: 14,
       fontWeight: '400',
     },
     heading: {
-      color: getColor('gray900'),
+      color: tokens.color.gray900,
       fontSize: 24,
       fontWeight: '700',
     },

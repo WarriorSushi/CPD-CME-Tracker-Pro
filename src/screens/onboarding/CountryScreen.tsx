@@ -5,7 +5,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card, Input, ProgressIndicator } from '../../components';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
-import { getColor } from '../../theme';
 
 type CountryScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Country'>;
 

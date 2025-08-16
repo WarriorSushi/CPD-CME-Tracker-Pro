@@ -4,9 +4,9 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card, ProgressIndicator } from '../../components';
 import { theme } from '../../constants/theme';
+import { tokens } from '../../theme/tokens';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { CreditSystem } from '../../types';
-import { getColor } from '../../theme';
 import { userOperations } from '../../services/database';
 import { useAppContext } from '../../contexts/AppContext';
 
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   },
   selectedSystemCard: {
     borderColor: theme.colors.primary,
-    backgroundColor: getColor('selectedBg'),
+    backgroundColor: tokens.color.selectedBg,
   },
   systemContent: {
     flex: 1,

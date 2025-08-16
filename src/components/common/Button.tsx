@@ -16,7 +16,7 @@ import Animated, {
   interpolateColor,
   Easing,
 } from 'react-native-reanimated';
-import { useColors, useTokens } from '../../theme';
+import { theme } from '../../constants/theme';
 import { ButtonProps } from '../../types';
 import { HapticsUtils } from '../../utils/HapticsUtils';
 
@@ -31,8 +31,6 @@ export const Button: React.FC<ButtonProps> = ({
   loading = false,
   style,
 }) => {
-  const getColor = useColors();
-  const tokens = useTokens();
   const pressAnimation = useSharedValue(0);
 
   const handlePressIn = () => {
@@ -72,15 +70,15 @@ export const Button: React.FC<ButtonProps> = ({
 
   // Pre-calculate colors outside animation context
   const colors = {
-    primary: getColor('primary'),
-    primaryDark: getColor('primaryDark'),
-    primaryDisabled: getColor('primaryDisabled'),
-    gray100: getColor('gray100'),
-    gray300: getColor('gray300'),
-    gray400: getColor('gray400'),
-    error: getColor('error'),
-    errorDisabled: getColor('errorDisabled'),
-    white: getColor('white'),
+    primary: theme.colors.primary,
+    primaryDark: theme.colors.primaryDark,
+    primaryDisabled: theme.colors.button.disabled,
+    gray100: theme.colors.gray[100],
+    gray300: theme.colors.gray[300],
+    gray400: theme.colors.gray[400],
+    error: theme.colors.error,
+    errorDisabled: theme.colors.button.disabled,
+    white: theme.colors.white,
   };
 
   // Enhanced tactile animation with color interpolation and reduced travel
@@ -155,11 +153,11 @@ export const Button: React.FC<ButtonProps> = ({
 
   const getBaseStyle = (): ViewStyle => {
     const baseStyle: ViewStyle = {
-      borderRadius: tokens.radius.small,
+      borderRadius: theme.borderRadius.small,
       alignItems: 'center',
       justifyContent: 'center',
       minHeight: 48,
-      paddingHorizontal: tokens.space[5],
+      paddingHorizontal: theme.spacing[5],
     };
 
     // Add shadow/elevation for non-outline buttons
@@ -180,10 +178,10 @@ export const Button: React.FC<ButtonProps> = ({
     // Size variations
     if (size === 'small') {
       baseStyle.minHeight = 40;
-      baseStyle.paddingHorizontal = tokens.space[3];
+      baseStyle.paddingHorizontal = theme.spacing[3];
     } else if (size === 'large') {
       baseStyle.minHeight = 56;
-      baseStyle.paddingHorizontal = tokens.space[6];
+      baseStyle.paddingHorizontal = theme.spacing[6];
     }
 
     return baseStyle;
@@ -194,11 +192,11 @@ export const Button: React.FC<ButtonProps> = ({
       case 'outline':
         return {
           backgroundColor: 'transparent',
-          borderColor: disabled ? getColor('gray200') : getColor('gray300'),
+          borderColor: disabled ? theme.colors.gray[200] : theme.colors.gray[300],
           borderWidth: 1,
           borderBottomWidth: disabled ? 1 : 6, // Remove ledge when disabled
-          borderBottomColor: disabled ? getColor('gray200') : getColor('gray400'),
-          color: disabled ? getColor('textDisabled') : getColor('textPrimary'),
+          borderBottomColor: disabled ? theme.colors.gray[200] : theme.colors.gray[400],
+          color: disabled ? theme.colors.text.disabled : theme.colors.text.primary,
         };
       case 'destructive':
         return {

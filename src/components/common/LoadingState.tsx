@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     paddingHorizontal: theme.spacing[4],
     paddingVertical: theme.spacing[2],
-    borderRadius: theme.radius.medium,
+    borderRadius: theme.borderRadius.medium,
   },
   retryButtonText: {
     color: theme.colors.white,

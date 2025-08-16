@@ -1,7 +1,7 @@
 import React from 'react';
-import { Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { Text, StyleSheet, ViewStyle, TextStyle, View } from 'react-native';
 import { PressableFX } from './PressableFX';
-import { useColors, useTokens } from '../../theme';
+import { theme } from '../../constants/theme';
 
 export interface ChipProps {
   label: string;
@@ -18,11 +18,8 @@ export const Chip: React.FC<ChipProps> = ({
   disabled = false,
   style,
 }) => {
-  const getColor = useColors();
-  const tokens = useTokens();
-
   // Get variant-specific styles
-  const variantStyles = getVariantStyles(variant, getColor, tokens);
+  const variantStyles = getVariantStyles(variant);
 
   const chipStyle: ViewStyle[] = [
     styles.base,
@@ -62,39 +59,39 @@ export const Chip: React.FC<ChipProps> = ({
 };
 
 // Helper function to get variant-specific styles
-const getVariantStyles = (variant: ChipProps['variant'], getColor: any, tokens: any) => {
+const getVariantStyles = (variant: ChipProps['variant']) => {
   const variants = {
     default: {
       container: {
-        backgroundColor: getColor('gray100'),
+        backgroundColor: theme.colors.gray[100],
         borderWidth: 1,
-        borderColor: getColor('border'),
+        borderColor: theme.colors.border.medium,
       },
       text: {
-        color: getColor('textPrimary'),
-        fontWeight: tokens.fontWeight.medium,
+        color: theme.colors.text.primary,
+        fontWeight: theme.typography.fontWeight.medium,
       },
     },
     selected: {
       container: {
-        backgroundColor: getColor('selectedBg'),
+        backgroundColor: theme.colors.primary + '15', // Light blue background
         borderWidth: 1,
-        borderColor: getColor('primary'),
+        borderColor: theme.colors.primary,
       },
       text: {
-        color: getColor('primary'),
-        fontWeight: tokens.fontWeight.medium,
+        color: theme.colors.primary,
+        fontWeight: theme.typography.fontWeight.medium,
       },
     },
     warning: {
       container: {
-        backgroundColor: getColor('warningBg'),
+        backgroundColor: theme.colors.warning + '15', // Light warning background
         borderWidth: 1,
-        borderColor: getColor('warningBorder'),
+        borderColor: theme.colors.warning,
       },
       text: {
-        color: getColor('warningText'),
-        fontWeight: tokens.fontWeight.medium,
+        color: theme.colors.warning,
+        fontWeight: theme.typography.fontWeight.medium,
       },
     },
   };
@@ -123,6 +120,3 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
 });
-
-// Need to import View for the non-pressable case
-import { View } from 'react-native';
