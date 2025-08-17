@@ -7,11 +7,12 @@ import * as Haptics from 'expo-haptics';
 
 export class HapticsUtils {
   /**
-   * Light impact for subtle interactions (button taps, toggles)
+   * Light impact for subtle interactions (button taps, toggles) - 50% weaker
    */
   static light() {
     try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      // Use selection feedback instead of light impact for weaker feel
+      Haptics.selectionAsync();
     } catch (error) {
       // Graceful fallback - haptics not available on all devices
       console.debug('Haptics not available:', error);
@@ -19,62 +20,67 @@ export class HapticsUtils {
   }
 
   /**
-   * Medium impact for standard interactions (navigation, selections)
+   * Medium impact for standard interactions (navigation, selections) - 50% weaker
    */
   static medium() {
     try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      // Use light impact instead of medium for 50% weaker feel
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     } catch (error) {
       console.debug('Haptics not available:', error);
     }
   }
 
   /**
-   * Heavy impact for important actions (saves, deletions)
+   * Heavy impact for important actions (saves, deletions) - 50% weaker
    */
   static heavy() {
     try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      // Use light impact instead of heavy for 50% weaker feel
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     } catch (error) {
       console.debug('Haptics not available:', error);
     }
   }
 
   /**
-   * Success feedback for positive actions (successful save, completion)
+   * Success feedback for positive actions (successful save, completion) - 50% weaker
    */
   static success() {
     try {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      // Use light impact instead of notification for subtler success feedback
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     } catch (error) {
       console.debug('Haptics not available:', error);
     }
   }
 
   /**
-   * Warning feedback for cautionary actions (validation errors)
+   * Warning feedback for cautionary actions (validation errors) - 50% weaker
    */
   static warning() {
     try {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      // Use selection feedback instead of notification warning for weaker feel
+      Haptics.selectionAsync();
     } catch (error) {
       console.debug('Haptics not available:', error);
     }
   }
 
   /**
-   * Error feedback for failed actions (save failures, errors)
+   * Error feedback for failed actions (save failures, errors) - 50% weaker
    */
   static error() {
     try {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      // Use light impact instead of notification error for weaker feel
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     } catch (error) {
       console.debug('Haptics not available:', error);
     }
   }
 
   /**
-   * Selection feedback for picker/selector interactions
+   * Selection feedback for picker/selector interactions - already weakest
    */
   static selection() {
     try {
