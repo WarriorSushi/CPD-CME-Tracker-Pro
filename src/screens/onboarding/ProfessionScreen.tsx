@@ -97,17 +97,10 @@ export const ProfessionScreen: React.FC<Props> = ({ navigation }) => {
       <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <AnimatedGradientBackground />
 
-        <Animated.View 
-          style={[
-            styles.progressWrapper,
-            {
-              opacity: progressAnim,
-              transform: [{ translateY: slideAnim }],
-            },
-          ]}
-        >
+        {/* Fixed Progress Indicator - no animation to prevent moving */}
+        <View style={styles.progressWrapper}>
           <ProgressIndicator currentStep={1} totalSteps={5} showTitle={false} />
-        </Animated.View>
+        </View>
 
         <KeyboardAvoidingView 
           style={styles.keyboardView}
@@ -121,15 +114,8 @@ export const ProfessionScreen: React.FC<Props> = ({ navigation }) => {
             keyboardShouldPersistTaps="handled"
           >
             <View style={styles.content}>
-              <Animated.View 
-                style={[
-                  styles.header,
-                  {
-                    opacity: fadeAnim,
-                    transform: [{ translateY: slideAnim }],
-                  },
-                ]}
-              >
+              {/* Fixed Header - no animation to prevent moving */}
+              <View style={styles.header}>
                 <View style={styles.emojiContainer}>
                   <LinearGradient
                     colors={['#667EEA', '#764BA2']}
@@ -144,7 +130,7 @@ export const ProfessionScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.subtitle}>
                   Let's personalize your experience with a friendly touch
                 </Text>
-              </Animated.View>
+              </View>
 
               <Animated.View 
                 style={[

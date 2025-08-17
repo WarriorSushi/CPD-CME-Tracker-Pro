@@ -242,67 +242,58 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.optionsContainer}>
             <Text style={styles.sectionTitle}>Choose the closest option:</Text>
             
-            {QUICK_OPTIONS.map((option, index) => (
-              <Animated.View
-                key={index}
-                style={[
-                  styles.optionWrapper,
-                  {
-                    opacity: optionCardsAnim[index],
-                    transform: [{
-                      translateY: optionCardsAnim[index].interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [15, 0],
-                      }),
-                    }],
-                  },
-                ]}
-              >
-                <PremiumCard
-                  selected={selectedOption === index}
-                  onPress={() => handleQuickSelect(option.months, index)}
-                  style={styles.optionCard}
+            {/* Grid layout for quick options */}
+            <View style={styles.optionsGrid}>
+              {QUICK_OPTIONS.map((option, index) => (
+                <Animated.View
+                  key={index}
+                  style={[
+                    styles.gridOptionWrapper,
+                    {
+                      opacity: optionCardsAnim[index],
+                      transform: [{
+                        translateY: optionCardsAnim[index].interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [15, 0],
+                        }),
+                      }],
+                    },
+                  ]}
                 >
-                  <View style={styles.optionContent}>
-                    <View style={styles.optionTextContent}>
+                  <PremiumCard
+                    selected={selectedOption === index}
+                    onPress={() => handleQuickSelect(option.months, index)}
+                    style={styles.gridOptionCard}
+                  >
+                    <View style={styles.gridOptionContent}>
                       <Text style={[
-                        styles.optionText,
+                        styles.gridOptionText,
                         selectedOption === index && styles.selectedText,
                       ]}>
                         {option.label}
                       </Text>
                       {option.months !== 0 && (
                         <Text style={[
-                          styles.optionDate,
+                          styles.gridOptionDate,
                           selectedOption === index && styles.selectedDateText,
                         ]}>
                           {(() => {
                             const date = new Date();
                             date.setMonth(date.getMonth() + option.months);
-                            return `(${formatDateForDisplay(date)})`;
+                            return formatDateForDisplay(date);
                           })()}
                         </Text>
                       )}
                     </View>
-                    <View style={[
-                      styles.radioButton,
-                      selectedOption === index && styles.radioSelected,
-                    ]}>
-                      {selectedOption === index && (
-                        <LinearGradient
-                          colors={['#4FACFE', '#00F2FE']}
-                          style={styles.radioButtonInner}
-                        />
-                      )}
-                    </View>
-                  </View>
-                </PremiumCard>
-              </Animated.View>
-            ))}
+                  </PremiumCard>
+                </Animated.View>
+              ))}
+            </View>
 
+            {/* Custom date option - full width at bottom */}
             <Animated.View
               style={[
-                styles.optionWrapper,
+                styles.customOptionWrapper,
                 {
                   opacity: customCardAnim,
                   transform: [{
@@ -317,17 +308,17 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
               <PremiumCard
                 selected={selectedOption === -1}
                 onPress={handleCustomDate}
-                style={styles.optionCard}
+                style={styles.customOptionCard}
               >
-                <View style={styles.optionContent}>
-                  <View style={styles.optionTextContent}>
+                <View style={styles.customOptionContent}>
+                  <View style={styles.customOptionTextContent}>
                     <Text style={[
-                      styles.optionText,
+                      styles.customOptionText,
                       selectedOption === -1 && styles.selectedText,
                     ]}>
                       Pick a different date
                     </Text>
-                    <Text style={styles.optionSubtext}>
+                    <Text style={styles.customOptionSubtext}>
                       {customDate ? formatDateForDisplay(customDate) : 'Select any month and year'}
                     </Text>
                   </View>
@@ -457,6 +448,65 @@ const styles = StyleSheet.create({
   },
   optionWrapper: {
     marginBottom: 4,
+  },
+  // Grid layout styles
+  optionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  gridOptionWrapper: {
+    width: '48%',
+    marginBottom: 8,
+  },
+  gridOptionCard: {
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    minHeight: 70,
+  },
+  gridOptionContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gridOptionText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#1A202C',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  gridOptionDate: {
+    fontSize: 10,
+    color: '#718096',
+    textAlign: 'center',
+  },
+  // Custom option styles (full width)
+  customOptionWrapper: {
+    width: '100%',
+    marginTop: 8,
+  },
+  customOptionCard: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  customOptionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  customOptionTextContent: {
+    flex: 1,
+    marginRight: 16,
+  },
+  customOptionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1A202C',
+    marginBottom: 2,
+  },
+  customOptionSubtext: {
+    fontSize: 11,
+    color: '#718096',
   },
   optionCard: {
     paddingVertical: 10,
