@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-import { Card, Button, Input, LoadingSpinner, StandardHeader } from '../../components';
+import { Card, Button, Input, LoadingSpinner, StandardHeader, SvgIcon } from '../../components';
 import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../onboarding/OnboardingComponents';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
