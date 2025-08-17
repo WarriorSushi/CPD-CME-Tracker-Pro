@@ -362,9 +362,9 @@ export const PremiumCard: React.FC<PremiumCardProps> = ({
 };
 
 const styles = StyleSheet.create({
-  // New Button styles - clean design following user's pressed effect specs
+  // Button styles - original border radius with grey overlay fix
   newPrimaryButton: {
-    borderRadius: 5,
+    borderRadius: 16,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 5,
     borderBottomColor: 'rgba(102, 126, 234, 0.3)',
@@ -387,6 +387,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 16,
   },
   newPrimaryButtonGradientPressed: {
     // Gradient remains the same when pressed
@@ -402,7 +403,7 @@ const styles = StyleSheet.create({
   },
   
   newSecondaryButton: {
-    borderRadius: 5,
+    borderRadius: 16,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 5,
     borderBottomColor: 'rgba(102, 126, 234, 0.2)',
@@ -436,7 +437,7 @@ const styles = StyleSheet.create({
   },
   
   newGhostButton: {
-    borderRadius: 5,
+    borderRadius: 16,
     backgroundColor: 'transparent',
     paddingVertical: 16,
     paddingHorizontal: 32,

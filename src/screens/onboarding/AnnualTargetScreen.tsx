@@ -270,14 +270,15 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
               >
                 {selectedTarget === 'custom' ? (
                   <TextInput
-                    placeholder="#"
+                    placeholder="0"
                     placeholderTextColor="#A0AEC0"
-                    value={customTarget}
+                    value={customTarget || ''}
                     onChangeText={handleCustomTargetInput}
                     keyboardType="numeric"
                     style={styles.customTileInput}
                     maxLength={4}
                     autoFocus
+                    selectTextOnFocus
                   />
                 ) : (
                   <Text style={[
@@ -349,14 +350,15 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
               >
                 {selectedPeriod === 'custom' ? (
                   <TextInput
-                    placeholder="#"
+                    placeholder="0"
                     placeholderTextColor="#A0AEC0"
-                    value={customPeriod}
+                    value={customPeriod || ''}
                     onChangeText={handleCustomPeriodInput}
                     keyboardType="numeric"
                     style={styles.customTileInput}
                     maxLength={2}
                     autoFocus
+                    selectTextOnFocus
                   />
                 ) : (
                   <Text style={[
@@ -391,9 +393,9 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.summaryEmoji}>✓</Text>
               </LinearGradient>
               <Text style={styles.summaryText}>
-                <Text style={styles.summaryBold}>{targetValue} {terminology.plural.toLowerCase()}</Text>
-                {' '}over{' '}
-                <Text style={styles.summaryBold}>{periodValue} year{periodValue > 1 ? 's' : ''}</Text>
+                <Text style={styles.summaryBold}>{String(targetValue || '')} {terminology.plural.toLowerCase()}</Text>
+                <Text> over </Text>
+                <Text style={styles.summaryBold}>{String(periodValue || '')} year{(periodValue && periodValue > 1) ? 's' : ''}</Text>
               </Text>
             </PremiumCard>
           </Animated.View>
@@ -527,6 +529,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     minWidth: 30,
     backgroundColor: 'transparent',
+    borderWidth: 0,
+    padding: 0,
+    margin: 0,
+    outlineWidth: 0,
   },
   summaryContainer: {
     marginTop: -4,

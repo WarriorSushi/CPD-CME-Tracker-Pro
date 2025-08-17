@@ -57,15 +57,11 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
   const handleCustomDate = () => {
     setSelectedOption(-1);
     setAskAboutLicenseSync(true);
-    // Initialize with a reasonable default if not set
+    // Initialize with a reasonable default
     const defaultDate = new Date(new Date().setFullYear(new Date().getFullYear() - 1));
-    if (!customDate) {
-      setCustomDate(defaultDate);
-    }
-    // Use setTimeout to ensure state is updated before showing picker
-    setTimeout(() => {
-      setShowDatePicker(true);
-    }, 10);
+    setCustomDate(defaultDate);
+    // Show picker immediately
+    setShowDatePicker(true);
   };
 
   const handleDatePickerChange = (selectedDate: Date) => {
