@@ -519,7 +519,7 @@ const styles = StyleSheet.create({
   profilePictureCard: {
     marginBottom: theme.spacing[4],
     padding: theme.spacing[5],
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.surface,
     borderRadius: 20,
     // Shadow will be handled by animation interpolation
     shadowColor: '#000',
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
   profileInfoCard: {
     marginBottom: theme.spacing[4],
     padding: theme.spacing[5],
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.surface,
     borderRadius: 20,
     // Shadow will be handled by animation interpolation
     shadowColor: '#000',
@@ -606,10 +606,10 @@ const styles = StyleSheet.create({
   previewCard: {
     marginBottom: theme.spacing[4],
     padding: theme.spacing[4],
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.surface,
     borderRadius: 16,
     borderLeftWidth: 4,
-    borderLeftColor: theme.colors.primary,
+    borderLeftColor: theme.colors.purple,
     // Shadow will be handled by animation interpolation
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -628,7 +628,7 @@ const styles = StyleSheet.create({
   previewGreeting: {
     fontSize: theme.typography.fontSize.base,
     fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.primary,
+    color: theme.colors.purple,
     fontStyle: 'italic',
     textAlign: 'center',
     padding: theme.spacing[3],

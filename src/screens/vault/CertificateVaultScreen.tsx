@@ -667,7 +667,7 @@ const styles = StyleSheet.create({
   subtitleSection: {
     paddingHorizontal: theme.spacing[4],
     paddingVertical: theme.spacing[3],
-    backgroundColor: '#FFF7EC', // Section background
+    backgroundColor: theme.colors.accent,
   },
   subtitle: {
     fontSize: theme.typography.fontSize.sm,
@@ -680,10 +680,8 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.spacing[4],
     marginVertical: theme.spacing[2],
     padding: theme.spacing[3],
-    backgroundColor: '#FFFFFF', // Clean white card background
+    backgroundColor: theme.colors.surface,
     borderRadius: theme.spacing[3],
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -709,26 +707,24 @@ const styles = StyleSheet.create({
   addButton: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: theme.spacing[2], // Reduced from spacing[3]
+    paddingVertical: theme.spacing[2],
     paddingHorizontal: theme.spacing[2],
     borderRadius: theme.spacing[2],
-    backgroundColor: '#1f2937', // Charcoal/black background
-    // Pressable button effect with subtle shadow
-    shadowColor: '#6b7280',
-    shadowOffset: { width: 0, height: 2 }, // Reduced shadow
-    shadowOpacity: 0.15, // Reduced opacity
-    shadowRadius: 3, // Reduced radius
-    elevation: 3, // Reduced elevation
-    // Remove problematic bottom border that was causing clipping
-    marginBottom: 2, // Add small margin instead
+    backgroundColor: theme.colors.purple,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 3,
+    marginBottom: 2,
   },
   addButtonIconSvg: {
     marginBottom: 4, // Reduced margin
   },
   addButtonText: {
-    fontSize: 9, // Reduced font size
+    fontSize: 9,
     fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.background,
+    color: theme.colors.white,
     textAlign: 'center',
   },
   tinyStats: {
@@ -770,18 +766,19 @@ const styles = StyleSheet.create({
 
   // Masonry Certificate Cards
   masonryCard: {
-    width: (width - theme.spacing[2] * 2 - theme.spacing[1] * 2 - theme.spacing[2]) / 2, // Adjusted width calculation
-    marginBottom: theme.spacing[2], // Reduced bottom margin
-    marginHorizontal: theme.spacing[1], // Added horizontal margin for better spacing
+    width: (width - theme.spacing[2] * 2 - theme.spacing[1] * 2 - theme.spacing[2]) / 2,
+    marginBottom: theme.spacing[2],
+    marginHorizontal: theme.spacing[1],
   },
   masonryContent: {
+    backgroundColor: theme.colors.surface,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.12,
     shadowRadius: 6,
     elevation: 4,
-    borderRadius: theme.spacing[3], // Consistent border radius
+    borderRadius: theme.spacing[3],
   },
   masonryPreview: {
     position: 'relative',
@@ -799,7 +796,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f1f5f9',
+    backgroundColor: theme.colors.accent,
   },
   masonryPdfIcon: {
     fontSize: 28,
@@ -833,7 +830,7 @@ const styles = StyleSheet.create({
   // Masonry Info
   masonryInfo: {
     padding: theme.spacing[3],
-    backgroundColor: theme.colors.card, // Card background for certificate info
+    backgroundColor: theme.colors.surface,
   },
   masonryName: {
     fontSize: theme.typography.fontSize.sm,

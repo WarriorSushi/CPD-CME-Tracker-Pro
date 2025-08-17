@@ -867,7 +867,7 @@ const styles = StyleSheet.create({
   formCard: {
     padding: theme.spacing[5],
     marginBottom: theme.spacing[4],
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.surface,
     borderRadius: 20,
     // Shadow will be handled by animation interpolation
     shadowColor: '#000',
@@ -1048,7 +1048,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 2,
     borderLeftWidth: 1,
     borderRightWidth: 1,
-    borderColor: 'rgba(0,0,0,0.2)',
+    borderColor: theme.colors.border.light,
     // Slight translate down for pressed feeling
     transform: [{ translateY: 2 }],
   },

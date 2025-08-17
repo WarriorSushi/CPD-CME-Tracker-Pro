@@ -461,12 +461,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
                 shadowOpacity: profileShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
               }
             ]}>
-            <LinearGradient
-              colors={['#36454F', '#000000']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.cardHeader}
-            >
+            <View style={styles.cardHeader}>
               <Text style={styles.cardHeaderTitle}>Profile</Text>
               <PremiumButton
                 title="Edit"
@@ -476,14 +471,9 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
                 variant="secondary"
                 style={styles.headerButton}
               />
-            </LinearGradient>
+            </View>
             
-            <LinearGradient
-              colors={['#FBFBF9', '#FEFEFE']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.cardContent}
-            >
+            <View style={styles.cardContent}>
               <View style={styles.profileHeader}>
                 <View style={styles.profilePictureContainer}>
                   {user?.profilePicturePath ? (
@@ -524,7 +514,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
               ) : (
                 <LoadingSpinner size={20} />
               )}
-            </LinearGradient>
+            </View>
             </PremiumCard>
           </Animated.View>
 
@@ -550,21 +540,11 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
                 shadowOpacity: dataShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
               }
             ]}>
-            <LinearGradient
-              colors={['#36454F', '#000000']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.cardHeader}
-            >
+            <View style={styles.cardHeader}>
               <Text style={styles.cardHeaderTitle}>Data Management</Text>
-            </LinearGradient>
+            </View>
             
-            <LinearGradient
-              colors={['#FBFBF9', '#FEFEFE']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.cardContent}
-            >
+            <View style={styles.cardContent}>
               <View style={styles.modernButtonGrid}>
                 <TouchableOpacity
                   style={styles.modernActionButton}
@@ -586,7 +566,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
                   <Text style={styles.modernActionSubtext}>Full Backup</Text>
                 </TouchableOpacity>
               </View>
-            </LinearGradient>
+            </View>
             </PremiumCard>
           </Animated.View>
 
@@ -612,21 +592,11 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
                 shadowOpacity: aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
               }
             ]}>
-            <LinearGradient
-              colors={['#36454F', '#000000']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.cardHeader}
-            >
+            <View style={styles.cardHeader}>
               <Text style={styles.cardHeaderTitle}>App Settings</Text>
-            </LinearGradient>
+            </View>
             
-            <LinearGradient
-              colors={['#FBFBF9', '#FEFEFE']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.cardContent}
-            >
+            <View style={styles.cardContent}>
               <View style={styles.settingsGrid}>
                 <TouchableOpacity 
                   style={styles.modernSettingItem}
@@ -662,7 +632,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
                   </View>
                 </View>
               </View>
-            </LinearGradient>
+            </View>
             </PremiumCard>
           </Animated.View>
 
@@ -688,21 +658,11 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
                 shadowOpacity: aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
               }
             ]}>
-            <LinearGradient
-              colors={['#36454F', '#000000']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.cardHeader}
-            >
+            <View style={styles.cardHeader}>
               <Text style={styles.cardHeaderTitle}>About</Text>
-            </LinearGradient>
+            </View>
             
-            <LinearGradient
-              colors={['#FBFBF9', '#FEFEFE']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.cardContent}
-            >
+            <View style={styles.cardContent}>
               <View style={styles.modernAboutInfo}>
                 <View style={styles.aboutIconWrapper}>
                   <SvgIcon name="medical" size={36} color="#1e40af" />
@@ -714,7 +674,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
                   manage certificates, and stay compliant with renewal requirements.
                 </Text>
               </View>
-            </LinearGradient>
+            </View>
             </PremiumCard>
           </Animated.View>
 
@@ -784,7 +744,7 @@ const styles = StyleSheet.create({
   
   // Beautiful Header
   header: {
-    backgroundColor: '#003087', // HSL(215°, 100%, 26%)
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: theme.spacing[4],
     paddingVertical: theme.spacing[4],
     borderBottomLeftRadius: theme.spacing[3],
@@ -992,12 +952,12 @@ const styles = StyleSheet.create({
   },
   modernActionButton: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: theme.colors.accent,
     padding: theme.spacing[3], // Reduced padding
     borderRadius: theme.spacing[2],
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: theme.colors.border.light,
     marginHorizontal: theme.spacing[1],
     shadowColor: '#000',
     shadowOffset: {
@@ -1015,13 +975,13 @@ const styles = StyleSheet.create({
   modernActionText: {
     fontSize: theme.typography.fontSize.base,
     fontWeight: theme.typography.fontWeight.bold,
-    color: '#1f2937', // Dark gray for better contrast
+    color: theme.colors.text.primary,
     marginBottom: theme.spacing[1],
     textAlign: 'center',
   },
   modernActionSubtext: {
     fontSize: theme.typography.fontSize.xs,
-    color: '#6b7280', // Medium gray for good contrast
+    color: theme.colors.text.secondary,
     textAlign: 'center',
   },
 
@@ -1033,7 +993,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: theme.spacing[3],
-    backgroundColor: '#FFF5EE',
+    backgroundColor: theme.colors.accent,
     borderRadius: theme.spacing[2],
   },
   settingIcon: {
@@ -1054,12 +1014,12 @@ const styles = StyleSheet.create({
   modernSettingLabel: {
     fontSize: theme.typography.fontSize.base,
     fontWeight: theme.typography.fontWeight.semibold,
-    color: '#1f2937', // Dark gray for better contrast
+    color: theme.colors.text.primary,
     marginBottom: theme.spacing[1],
   },
   modernSettingValue: {
     fontSize: theme.typography.fontSize.sm,
-    color: '#6b7280', // Medium gray for good contrast
+    color: theme.colors.text.secondary,
     fontWeight: theme.typography.fontWeight.medium,
   },
 
@@ -1293,8 +1253,7 @@ const styles = StyleSheet.create({
     padding: 0,
     borderRadius: theme.spacing[3],
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#36454F',
+    backgroundColor: theme.colors.surface,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -1305,22 +1264,24 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   cardHeader: {
+    backgroundColor: theme.colors.accent,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing[3], // Reduced from [4]
-    paddingVertical: theme.spacing[3], // Reduced from [4]
+    paddingHorizontal: theme.spacing[3],
+    paddingVertical: theme.spacing[3],
   },
   cardHeaderTitle: {
     fontSize: theme.typography.fontSize.lg,
     fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.background,
+    color: theme.colors.text.primary,
   },
   headerButton: {
     minWidth: 100,
   },
   cardContent: {
-    padding: theme.spacing[3], // Reduced from [4]
+    backgroundColor: theme.colors.surface,
+    padding: theme.spacing[3],
   },
   sectionSubtitle: {
     fontSize: theme.typography.fontSize.sm,
@@ -1398,7 +1359,7 @@ const styles = StyleSheet.create({
     color: theme.colors.background,
   },
   licenseRenewalInstructions: {
-    backgroundColor: '#FFF7EC',
+    backgroundColor: theme.colors.accent,
     borderRadius: theme.spacing[2],
     padding: theme.spacing[2],
     borderWidth: 1,
@@ -1412,7 +1373,7 @@ const styles = StyleSheet.create({
   noLicensesSection: {
     paddingHorizontal: theme.spacing[4],
     marginBottom: theme.spacing[4],
-    backgroundColor: '#FFF7EC',
+    backgroundColor: theme.colors.accent,
     paddingVertical: theme.spacing[3],
   },
   noLicensesCard: {

@@ -531,7 +531,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: theme.spacing[4],
     paddingVertical: theme.spacing[4],
-    backgroundColor: '#1e3a8a', // Dark blue
+    backgroundColor: theme.colors.primary,
     borderBottomLeftRadius: theme.spacing[3],
     borderBottomRightRadius: theme.spacing[3],
     shadowColor: '#000',
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     fontSize: theme.typography.fontSize.sm,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: theme.colors.white + '80',
     opacity: 0.9,
   },
   addButton: {
@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing[3],
     paddingBottom: theme.spacing[4],
     gap: theme.spacing[3],
-    backgroundColor: '#FFFFFF', // Premium card background
+    backgroundColor: theme.colors.surface,
     borderRadius: 20,
     marginHorizontal: theme.spacing[1],
     marginBottom: theme.spacing[3],
@@ -618,7 +618,7 @@ const styles = StyleSheet.create({
   statsCard: {
     paddingVertical: theme.spacing[2], // Reduced from spacing[3]
     paddingHorizontal: theme.spacing[3], // Reduced from spacing[4]
-    backgroundColor: '#374151', // Charcoal background
+    backgroundColor: theme.colors.accent,
     borderRadius: theme.spacing[2], // Reduced border radius
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -636,12 +636,12 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: theme.typography.fontSize.sm, // Reduced from base
     fontWeight: theme.typography.fontWeight.bold,
-    color: '#93c5fd', // Light blue color
+    color: theme.colors.purple,
     marginBottom: 1, // Reduced margin
   },
   statLabel: {
     fontSize: 10, // Further reduced from xs
-    color: '#bfdbfe', // Very light blue color
+    color: theme.colors.text.secondary,
     textAlign: 'center',
   },
 
