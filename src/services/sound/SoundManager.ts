@@ -1,4 +1,4 @@
-import { AudioPlayer } from 'expo-audio';
+import { createAudioPlayer } from 'expo-audio';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -21,7 +21,7 @@ export type SoundType =
 interface SoundConfig {
   source: any; // require() result
   volume: number;
-  player?: AudioPlayer;
+  player?: any; // AudioPlayer instance from createAudioPlayer
 }
 
 class SoundManager {
@@ -161,7 +161,7 @@ class SoundManager {
     if (!config || config.player) return;
 
     try {
-      const player = new AudioPlayer(config.source);
+      const player = createAudioPlayer(config.source);
       player.volume = config.volume * this.globalVolume;
       config.player = player;
     } catch (error) {
@@ -188,7 +188,7 @@ class SoundManager {
       
       if (!player) {
         // Create player on-demand if not preloaded
-        player = new AudioPlayer(config.source);
+        player = createAudioPlayer(config.source);
         config.player = player;
       }
 
@@ -196,8 +196,9 @@ class SoundManager {
       const finalVolume = (options?.volume ?? config.volume) * this.globalVolume;
       player.volume = Math.max(0, Math.min(1, finalVolume));
 
-      // Play the sound
-      await player.play();
+      // Reset position and play the sound (expo-audio doesn't auto-reset)
+      player.seekTo(0);
+      player.play();
 
     } catch (error) {
       __DEV__ && console.warn(`Failed to play sound ${soundType}:`, error);
@@ -290,7 +291,7 @@ class SoundManager {
     for (const [, config] of this.sounds.entries()) {
       if (config.player && config.player !== null) {
         try {
-          await config.player.remove();
+          config.player.release();
         } catch (error) {
           __DEV__ && console.warn('Error disposing audio player:', error);
         }
