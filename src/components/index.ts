@@ -5,3 +5,6 @@ export * from './charts';
 // Component categories
 export * as CommonComponents from './common';
 export * as ChartComponents from './charts';
+
+// Sound-enabled components
+export { SoundButton } from './common/SoundButton';

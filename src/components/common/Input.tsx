@@ -15,6 +15,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { theme } from '../../constants/theme';
+import { useSound } from '../../hooks/useSound';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -26,6 +27,8 @@ interface InputProps extends TextInputProps {
   autoExpand?: boolean; // Enable WhatsApp-like auto-expansion
   minLines?: number; // Minimum number of lines to show
   maxLines?: number; // Maximum number of lines before scrolling
+  enableSound?: boolean; // Enable focus sound feedback
+  soundVolume?: number; // Custom volume for this input
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -42,9 +45,13 @@ export const Input: React.FC<InputProps> = ({
   minLines = 1,
   maxLines = 8,
   multiline,
+  enableSound = true,
+  soundVolume,
   ...props
 }) => {
   const [isFocused, setIsFocused] = useState(false);
+  const { playFocus } = useSound({ enabled: enableSound, volume: soundVolume });
+  
   // Initialize height for auto-expanding inputs
   const getInitialHeight = () => {
     if (!autoExpand) return undefined;
@@ -58,8 +65,14 @@ export const Input: React.FC<InputProps> = ({
   const focusAnimation = useSharedValue(0);
   const errorAnimation = useSharedValue(0);
 
-  const handleFocus = (e: any) => {
+  const handleFocus = async (e: any) => {
     setIsFocused(true);
+    
+    // Play subtle focus sound
+    if (enableSound) {
+      await playFocus();
+    }
+    
     focusAnimation.value = withTiming(1, {
       duration: theme.animation.duration.fast,
     });

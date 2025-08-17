@@ -10,6 +10,7 @@ import {
   TextStyle,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSound } from '../../hooks/useSound';
 
 const { width, height } = Dimensions.get('window');
 
@@ -21,6 +22,8 @@ interface PremiumButtonProps {
   disabled?: boolean;
   loading?: boolean;
   style?: ViewStyle;
+  enableSound?: boolean;
+  soundVolume?: number;
 }
 
 export const PremiumButton: React.FC<PremiumButtonProps> = ({
@@ -30,8 +33,11 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
   disabled = false,
   loading = false,
   style,
+  enableSound = true,
+  soundVolume,
 }) => {
   const [isPressed, setIsPressed] = React.useState(false);
+  const { playButtonPress, playButtonTap } = useSound({ enabled: enableSound, volume: soundVolume });
 
   const handlePressIn = () => {
     setIsPressed(true);
@@ -41,10 +47,24 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
     setIsPressed(false);
   };
 
+  const handlePress = async () => {
+    // Play appropriate sound based on button variant
+    if (enableSound && !disabled && !loading) {
+      if (variant === 'primary') {
+        await playButtonPress(); // More substantial sound for primary actions
+      } else {
+        await playButtonTap(); // Lighter sound for secondary/ghost buttons
+      }
+    }
+    
+    // Call the original onPress handler
+    onPress();
+  };
+
   if (variant === 'primary') {
     return (
       <TouchableOpacity
-        onPress={onPress}
+        onPress={handlePress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         disabled={disabled || loading}
@@ -79,7 +99,7 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
   if (variant === 'secondary') {
     return (
       <TouchableOpacity
-        onPress={onPress}
+        onPress={handlePress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         disabled={disabled || loading}
@@ -104,7 +124,7 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
   // Ghost variant
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={disabled || loading}

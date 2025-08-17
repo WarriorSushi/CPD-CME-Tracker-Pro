@@ -30,6 +30,7 @@ import { getCreditUnit } from '../../utils/creditTerminology';
 import { ThumbnailService } from '../../services/thumbnailService';
 import { databaseOperations } from '../../services/database';
 import { HapticsUtils } from '../../utils/HapticsUtils';
+import { useSound } from '../../hooks/useSound';
 
 type AddCMEScreenNavigationProp = StackNavigationProp<MainTabParamList, 'AddCME'>;
 type AddCMEScreenRouteProp = RouteProp<MainTabParamList, 'AddCME'>;
@@ -60,6 +61,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const insets = useSafeAreaInsets();
   const { user, addCMEEntry, updateCMEEntry, refreshCertificates } = useAppContext();
+  const { playFormSubmit, playSuccess, playError, playEntryAdd } = useSound();
   
   const editEntry = route.params?.editEntry;
   const ocrData = route.params?.ocrData;
@@ -518,11 +520,15 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
   const handleSubmit = async () => {
 
     if (!validateForm()) {
-
+      // Play error sound for validation failure
+      await playError();
       HapticsUtils.error();
       Alert.alert('Validation Error', 'Please fix the errors in the form.');
       return;
     }
+    
+    // Play form submit sound when starting submission
+    await playFormSubmit();
 
     setIsLoading(true);
 
@@ -548,12 +554,17 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       }
 
       if (success) {
-
+        // Play success sound and entry add sound for positive feedback
+        await playSuccess();
+        if (!isEditing) {
+          await playEntryAdd(); // Special sound for new entries
+        }
         HapticsUtils.success();
         // Navigate back to close modal - this will automatically return to whatever screen called it
         navigation.goBack();
       } else {
-
+        // Play error sound for operation failure
+        await playError();
         HapticsUtils.error();
         Alert.alert(
           'Error',
@@ -561,6 +572,8 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
         );
       }
     } catch (error) {
+      // Play error sound for exceptions
+      await playError();
       __DEV__ && console.error('💥 handleSubmit: Exception occurred:', error);
       Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     } finally {
