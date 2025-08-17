@@ -42,10 +42,17 @@ export const theme = {
     error: tokens.color.error,           // 'hsl(0 83% 57%)'
     info: tokens.color.info,             // 'hsl(217 91% 60%)'
     
-    // Background colors
-    background: '#FFF5EE',               // Warm seashell background
-    surface: '#FFF7EC',                  // Section background
-    card: '#FBFBF9',                     // Card background
+    // Background colors - Modern neutral system
+    background: '#FAFBFC',               // Clean light gray background
+    surface: '#FFFFFF',                  // Pure white surface
+    card: '#FFFFFF',                     // Pure white cards
+    accent: '#F8FAFC',                   // Subtle accent background
+    
+    // Modern accent colors
+    purple: '#8B5CF6',                   // Modern purple accent
+    blue: '#3B82F6',                     // Modern blue accent
+    emerald: '#10B981',                  // Modern emerald accent
+    orange: '#F59E0B',                   // Modern orange accent
     
     // Text colors
     text: {

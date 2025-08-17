@@ -199,7 +199,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const getStatusIcon = (status: string, color = '#22C55E') => {
+  const getStatusIcon = (status: string, color = theme.colors.success) => {
     switch (status) {
       case 'completed':
         return <SvgIcon name="checkmark" size={16} color={color} />;
@@ -269,9 +269,9 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   const ProgressAnimatedBackground = () => {
     return (
       <View style={StyleSheet.absoluteFillObject}>
-        {/* Base gradient - soft blue/purple theme for progress */}
+        {/* Base gradient - modern neutral theme for progress */}
         <LinearGradient
-          colors={['#F8FAFF', '#F0F4FF', '#E8F2FF']}
+          colors={[theme.colors.background, theme.colors.surface, theme.colors.accent]}
           style={StyleSheet.absoluteFillObject}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -307,7 +307,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           ]}
         >
           <LinearGradient
-            colors={['rgba(103, 126, 234, 0.15)', 'rgba(159, 122, 234, 0.08)']}
+            colors={[theme.colors.purple + '20', theme.colors.blue + '10']}
             style={styles.progressOrb}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -343,7 +343,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           ]}
         >
           <LinearGradient
-            colors={['rgba(59, 130, 246, 0.12)', 'rgba(147, 51, 234, 0.06)']}
+            colors={[theme.colors.blue + '18', theme.colors.purple + '08']}
             style={styles.progressOrb}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -379,7 +379,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           ]}
         >
           <LinearGradient
-            colors={['rgba(168, 85, 247, 0.1)', 'rgba(236, 72, 153, 0.05)']}
+            colors={[theme.colors.purple + '15', theme.colors.emerald + '08']}
             style={styles.progressOrb}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -399,7 +399,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           showBackButton={false}
           rightIcon="profile"
           rightIconPress={() => navigation.navigate('Settings')}
-          rightIconColor="#667EEA" // Premium purple to match design
+          rightIconColor={theme.colors.purple} // Modern purple to match design
           rightIconSize={28} 
           titleAlign="left"
           titleSize="base"
@@ -543,12 +543,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
               shadowOpacity: remindersShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
             }
           ]}>
-          <LinearGradient
-            colors={['#36454F', '#000000']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.cardHeader}
-          >
+          <View style={styles.cardHeader}>
             <Text style={styles.cardHeaderTitle}>CME Event Reminders</Text>
             <PremiumButton
               title="+ Add Reminder"
@@ -556,14 +551,9 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
               variant="secondary"
               style={styles.headerButton}
             />
-          </LinearGradient>
+          </View>
           
-          <LinearGradient
-            colors={['#FBFBF9', '#FEFEFE']} // Current card color to lighter
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.cardContent}
-          >
+          <View style={styles.cardContent}>
             <Text style={styles.sectionSubtitle}>
               Set reminders for upcoming CME events, conferences, and workshops so you never miss important learning opportunities.
             </Text>
@@ -638,7 +628,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             </PremiumCard>
           )}
           
-          </LinearGradient>
+          </View>
           </PremiumCard>
         </Animated.View>
 
@@ -665,12 +655,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 shadowOpacity: licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
               }
             ]}>
-            <LinearGradient
-              colors={['#36454F', '#000000']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.cardHeader}
-            >
+            <View style={styles.cardHeader}>
               <Text style={styles.cardHeaderTitle}>Your Licenses</Text>
               <PremiumButton
                 title="+ Add License"
@@ -678,14 +663,9 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 variant="secondary"
                 style={styles.headerButton}
               />
-            </LinearGradient>
+            </View>
             
-            <LinearGradient
-              colors={['#FBFBF9', '#FEFEFE']} // Current card color to lighter
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.cardContent}
-            >
+            <View style={styles.cardContent}>
               <Text style={styles.sectionSubtitle}>
                 View and manage all your professional licenses here. Tap Edit to update expiration dates after renewal.
               </Text>
@@ -835,7 +815,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
               });
             })()}
             
-            </LinearGradient>
+            </View>
             </PremiumCard>
           </Animated.View>
         )}
@@ -973,7 +953,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.card,
+    backgroundColor: theme.colors.background,
   },
   centerContent: {
     justifyContent: 'center',
@@ -987,7 +967,7 @@ const styles = StyleSheet.create({
 
   // Header
   header: {
-    backgroundColor: '#003087', // HSL(215°, 100%, 26%)
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: theme.spacing[4],
     paddingVertical: theme.spacing[4],
     borderBottomLeftRadius: theme.spacing[3],
@@ -1020,7 +1000,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: theme.colors.white + '30',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1046,7 +1026,7 @@ const styles = StyleSheet.create({
   progressCard: {
     padding: theme.spacing[5],
     marginHorizontal: theme.spacing[1],
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.surface,
     borderRadius: 20,
     // Shadow will be handled by animation interpolation
     shadowColor: '#000',
@@ -1188,7 +1168,7 @@ const styles = StyleSheet.create({
   // Dividing Line
   dividerLine: {
     height: 1, // 1 pixel wide
-    backgroundColor: '#374151', // Charcoal color
+    backgroundColor: theme.colors.gray[600],
     marginHorizontal: 0, // Full width line
     marginBottom: theme.spacing[8], // Increased padding below the line
     shadowColor: '#000',
@@ -1202,7 +1182,7 @@ const styles = StyleSheet.create({
   quickActionsSection: {
     paddingHorizontal: theme.spacing[4],
     marginBottom: theme.spacing[6],
-    backgroundColor: '#FFF7EC', // Section background
+    backgroundColor: theme.colors.accent,
     paddingVertical: theme.spacing[3],
   },
   quickActionsGrid: {
@@ -1395,7 +1375,7 @@ const styles = StyleSheet.create({
   },
   licenseActionButton: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)', // Semi-transparent white for readability
+    backgroundColor: theme.colors.surface,
     paddingVertical: theme.spacing[1],
     paddingHorizontal: theme.spacing[2],
     borderRadius: theme.spacing[1],
@@ -1438,7 +1418,7 @@ const styles = StyleSheet.create({
 
   // License Renewal Instructions
   licenseRenewalInstructions: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)', // Semi-transparent white for readability
+    backgroundColor: theme.colors.surface,
     borderRadius: theme.spacing[2],
     padding: theme.spacing[2],
     marginTop: theme.spacing[3],
@@ -1474,9 +1454,7 @@ const styles = StyleSheet.create({
     padding: 0,
     borderRadius: theme.spacing[3],
     overflow: 'hidden',
-    // backgroundColor removed - using LinearGradient
-    borderWidth: 1,
-    borderColor: '#36454F', // Charcoal border
+    backgroundColor: theme.colors.surface,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -1487,7 +1465,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   cardHeader: {
-    backgroundColor: '#36454F', // Charcoal header background
+    backgroundColor: theme.colors.accent,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border.light,
     paddingVertical: theme.spacing[4],
@@ -1499,7 +1477,7 @@ const styles = StyleSheet.create({
   cardHeaderTitle: {
     fontSize: theme.typography.fontSize.lg,
     fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.white, // White text on gray header
+    color: theme.colors.text.primary,
   },
   headerButton: {
     minHeight: 28,
@@ -1508,6 +1486,7 @@ const styles = StyleSheet.create({
     marginLeft: theme.spacing[2], // Add space from title
   },
   cardContent: {
+    backgroundColor: theme.colors.surface,
     padding: theme.spacing[4],
   },
 
@@ -1517,7 +1496,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[4],
   },
   addReminderButton: {
-    backgroundColor: theme.colors.secondary || '#6c5ce7',
+    backgroundColor: theme.colors.purple,
     paddingVertical: theme.spacing[2],
     paddingHorizontal: theme.spacing[3],
     borderRadius: theme.spacing[2],
@@ -1648,9 +1627,9 @@ const styles = StyleSheet.create({
   remindersPlaceholder: {
     marginTop: theme.spacing[3],
     padding: theme.spacing[6],
-    backgroundColor: '#FFF5EE',
+    backgroundColor: theme.colors.accent,
     borderWidth: 2,
-    borderColor: '#e9ecef',
+    borderColor: theme.colors.border.light,
     borderStyle: 'dashed',
   },
   remindersPlaceholderContent: {
