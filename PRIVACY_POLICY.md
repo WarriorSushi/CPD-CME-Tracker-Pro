@@ -1,12 +1,12 @@
-# Privacy Policy for CPD/CME Tracker Pro
+# Privacy Policy for CPD & CME Tracker
 
 **Last Updated: January 14, 2025**
 
 ## Introduction
 
-CPD/CME Tracker Pro ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how our mobile application collects, uses, and protects your information when you use CPD/CME Tracker Pro (the "Service").
+CPD & CME Tracker ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how our mobile application collects, uses, and protects your information when you use CPD & CME Tracker (the "Service").
 
-**IMPORTANT: CPD/CME Tracker Pro is designed as a completely offline application. We do not collect, transmit, or store any of your personal data on our servers.**
+**IMPORTANT: CPD & CME Tracker is designed as a completely offline application. We do not collect, transmit, or store any of your personal data on our servers.**
 
 ## Information We Collect
 
@@ -90,7 +90,7 @@ We request the following permissions:
 
 ## Children's Privacy
 
-CPD/CME Tracker Pro is designed for licensed medical professionals and is not intended for use by children under 13. We do not knowingly collect personal information from children under 13.
+CPD & CME Tracker is designed for licensed medical professionals and is not intended for use by children under 13. We do not knowingly collect personal information from children under 13.
 
 ## Changes to This Privacy Policy
 
@@ -129,7 +129,7 @@ We may update this Privacy Policy from time to time. We will notify you of any c
 
 ## Contact Information
 
-For questions about this Privacy Policy or CPD/CME Tracker Pro:
+For questions about this Privacy Policy or CPD & CME Tracker:
 
 **Email**: privacy@cmetrackerpro.com
 **Website**: www.cmetrackerpro.com
@@ -153,4 +153,4 @@ Where applicable under GDPR, our legal basis for processing personal information
 
 **This Privacy Policy is effective as of January 14, 2025, and will remain in effect except with respect to any changes in its provisions in the future, which will be in effect immediately after being posted in the application.**
 
-**By using CPD/CME Tracker Pro, you acknowledge that you have read and understood this Privacy Policy.**
+**By using CPD & CME Tracker, you acknowledge that you have read and understood this Privacy Policy.**

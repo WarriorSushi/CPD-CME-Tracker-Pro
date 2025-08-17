@@ -24,7 +24,7 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>Welcome to</Text>
-          <Text style={styles.appName}>CPD/CME Tracker</Text>
+          <Text style={styles.appName}>CPD & CME Tracker</Text>
           <Text style={styles.subtitle}>
             Your secure, offline continuing education companion
           </Text>

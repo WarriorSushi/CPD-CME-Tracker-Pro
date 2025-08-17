@@ -1,4 +1,4 @@
-// Navigation types for CPD/CME Tracker
+// Navigation types for CPD & CME Tracker
 import { CMEEntry } from './index';
 
 export type RootStackParamList = {
