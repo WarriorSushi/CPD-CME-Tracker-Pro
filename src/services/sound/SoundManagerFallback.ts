@@ -1,4 +1,4 @@
-// Fallback Sound Manager for when expo-av is not available
+// Fallback Sound Manager for when expo-audio is not available
 // This provides the same interface but with no actual audio output
 
 import AsyncStorage from '@react-native-async-storage/async-storage';

@@ -1,4 +1,4 @@
-import { Audio } from 'expo-av';
+import { AudioPlayer } from 'expo-audio';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -19,16 +19,15 @@ export type SoundType =
   | 'focus';
 
 interface SoundConfig {
-  file: any; // require() result
+  source: any; // require() result
   volume: number;
-  rate?: number;
-  cached?: Audio.Sound;
+  player?: AudioPlayer;
 }
 
 class SoundManager {
   private sounds: Map<SoundType, SoundConfig> = new Map();
   private isEnabled: boolean = true;
-  private globalVolume: number = 0.3; // Low volume by default for aesthetic, unintrusive experience
+  private globalVolume: number = 0.3; // Low volume by default for aesthetic experience
   private isInitialized: boolean = false;
 
   constructor() {
@@ -49,75 +48,85 @@ class SoundManager {
   }
 
   private initializeSounds() {
-    // Apple-inspired sound mappings with very low, aesthetic volumes
+    // Using available sound files with intelligent mapping for different interaction types
+    
+    // Button interactions - using button-press.mp3
     this.sounds.set('buttonTap', {
-      file: require('../../../assets/sounds/button-tap.mp3'),
-      volume: 0.2, // Very soft tap
+      source: require('../../../assets/sounds/button-press.mp3'),
+      volume: 0.15, // Lower volume for light taps
     });
 
     this.sounds.set('buttonPress', {
-      file: require('../../../assets/sounds/button-press.mp3'),
-      volume: 0.25, // Slightly more prominent for primary actions
+      source: require('../../../assets/sounds/button-press.mp3'),
+      volume: 0.25, // Higher volume for primary actions
     });
 
+    // Navigation - using navigation-swipe.mp3
     this.sounds.set('navigationSwipe', {
-      file: require('../../../assets/sounds/navigation-swipe.mp3'),
-      volume: 0.15, // Very subtle for navigation
+      source: require('../../../assets/sounds/navigation-swipe.mp3'),
+      volume: 0.18, // Subtle for navigation
     });
 
+    // Success/positive feedback - using entry-add.mp3 (sounds positive)
     this.sounds.set('success', {
-      file: require('../../../assets/sounds/success.mp3'),
-      volume: 0.4, // More noticeable for positive feedback
+      source: require('../../../assets/sounds/entry-add.mp3'),
+      volume: 0.35, // More noticeable for positive feedback
     });
 
+    // Error feedback - using error.mp3
     this.sounds.set('error', {
-      file: require('../../../assets/sounds/error.mp3'),
-      volume: 0.35, // Noticeable but not harsh
+      source: require('../../../assets/sounds/error.mp3'),
+      volume: 0.3, // Noticeable but not harsh
     });
 
+    // Notifications - using notification.mp3
     this.sounds.set('notification', {
-      file: require('../../../assets/sounds/notification.mp3'),
-      volume: 0.3, // Balanced for alerts
+      source: require('../../../assets/sounds/notification.mp3'),
+      volume: 0.25, // Balanced for alerts
     });
 
+    // Modal interactions - using navigation-swipe.mp3 with different volumes
     this.sounds.set('modalOpen', {
-      file: require('../../../assets/sounds/modal-open.mp3'),
-      volume: 0.2, // Subtle for modal appearance
+      source: require('../../../assets/sounds/navigation-swipe.mp3'),
+      volume: 0.15, // Subtle for modal appearance
     });
 
     this.sounds.set('modalClose', {
-      file: require('../../../assets/sounds/modal-close.mp3'),
-      volume: 0.18, // Even more subtle for dismissal
+      source: require('../../../assets/sounds/navigation-swipe.mp3'),
+      volume: 0.12, // Even more subtle for dismissal
     });
 
+    // Form submission - using button-press.mp3 with higher volume
     this.sounds.set('formSubmit', {
-      file: require('../../../assets/sounds/form-submit.mp3'),
-      volume: 0.25, // Confirming but not overwhelming
+      source: require('../../../assets/sounds/button-press.mp3'),
+      volume: 0.28, // Confirming but not overwhelming
     });
 
+    // Entry management - using dedicated entry sounds
     this.sounds.set('entryAdd', {
-      file: require('../../../assets/sounds/entry-add.mp3'),
+      source: require('../../../assets/sounds/entry-add.mp3'),
       volume: 0.3, // Positive reinforcement
     });
 
     this.sounds.set('entryDelete', {
-      file: require('../../../assets/sounds/entry-delete.mp3'),
+      source: require('../../../assets/sounds/entry-delete.mp3'),
       volume: 0.25, // Subtle for destructive actions
     });
 
+    // System interactions - using button-press.mp3 with low volume
     this.sounds.set('refresh', {
-      file: require('../../../assets/sounds/refresh.mp3'),
-      volume: 0.2, // Very subtle for data refresh
+      source: require('../../../assets/sounds/button-press.mp3'),
+      volume: 0.15, // Very subtle for data refresh
     });
 
     this.sounds.set('toggle', {
-      file: require('../../../assets/sounds/toggle.mp3'),
-      volume: 0.22, // Clear but soft for switches
+      source: require('../../../assets/sounds/button-press.mp3'),
+      volume: 0.18, // Clear but soft for switches
     });
 
     this.sounds.set('focus', {
-      file: require('../../../assets/sounds/focus.mp3'),
-      volume: 0.15, // Very subtle for input focus
+      source: require('../../../assets/sounds/button-press.mp3'),
+      volume: 0.1, // Very subtle for input focus
     });
 
     this.isInitialized = true;
@@ -127,17 +136,6 @@ class SoundManager {
     if (!this.isEnabled) return;
 
     try {
-      // Set audio mode for optimal UI sound playback
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_MIX_WITH_OTHERS,
-        playsInSilentModeIOS: false, // Respect user's silent mode
-        interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
-        shouldDuckAndroid: false,
-        staysActiveInBackground: false,
-        playThroughEarpieceAndroid: false,
-      });
-
       // Preload frequently used sounds
       const frequentSounds: SoundType[] = ['buttonTap', 'buttonPress', 'success'];
       
@@ -150,7 +148,7 @@ class SoundManager {
         }
       }
 
-      __DEV__ && console.log('✅ Sound system initialized successfully');
+      __DEV__ && console.log('✅ Sound system initialized successfully with expo-audio');
     } catch (error) {
       __DEV__ && console.warn('Failed to initialize sound system:', error);
       // Disable sounds if initialization fails completely
@@ -160,20 +158,16 @@ class SoundManager {
 
   private async preloadSound(soundType: SoundType) {
     const config = this.sounds.get(soundType);
-    if (!config || config.cached) return;
+    if (!config || config.player) return;
 
     try {
-      const { sound } = await Audio.Sound.createAsync(config.file, {
-        shouldPlay: false,
-        volume: config.volume * this.globalVolume,
-        rate: config.rate || 1.0,
-      });
-      
-      config.cached = sound;
+      const player = new AudioPlayer(config.source);
+      player.volume = config.volume * this.globalVolume;
+      config.player = player;
     } catch (error) {
       __DEV__ && console.warn(`Failed to preload sound ${soundType}:`, error);
       // Mark as failed to prevent repeated attempts
-      config.cached = null;
+      config.player = null;
     }
   }
 
@@ -187,40 +181,28 @@ class SoundManager {
     }
 
     // Skip if we know this sound failed to load
-    if (config.cached === null) return;
+    if (config.player === null) return;
 
     try {
-      let sound = config.cached;
+      let player = config.player;
       
-      if (!sound) {
-        // Create sound on-demand if not preloaded
-        const result = await Audio.Sound.createAsync(config.file, {
-          shouldPlay: false,
-          volume: (options?.volume ?? config.volume) * this.globalVolume,
-          rate: options?.rate ?? config.rate ?? 1.0,
-        });
-        sound = result.sound;
-      } else {
-        // Update volume if specified
-        if (options?.volume) {
-          await sound.setVolumeAsync(options.volume * this.globalVolume);
-        }
-        if (options?.rate) {
-          await sound.setRateAsync(options.rate, true);
-        }
+      if (!player) {
+        // Create player on-demand if not preloaded
+        player = new AudioPlayer(config.source);
+        config.player = player;
       }
+
+      // Set volume
+      const finalVolume = (options?.volume ?? config.volume) * this.globalVolume;
+      player.volume = Math.max(0, Math.min(1, finalVolume));
 
       // Play the sound
-      await sound.replayAsync();
+      await player.play();
 
-      // Clean up non-cached sounds after playing
-      if (!config.cached) {
-        sound.unloadAsync();
-      }
     } catch (error) {
       __DEV__ && console.warn(`Failed to play sound ${soundType}:`, error);
       // Mark as failed to prevent repeated attempts
-      config.cached = null;
+      config.player = null;
     }
   }
 
@@ -287,10 +269,10 @@ class SoundManager {
     this.globalVolume = Math.max(0, Math.min(1, volume)); // Clamp between 0-1
     await AsyncStorage.setItem('sound_volume', this.globalVolume.toString());
     
-    // Update cached sounds with new volume
+    // Update all cached players with new volume
     for (const [soundType, config] of this.sounds.entries()) {
-      if (config.cached) {
-        await config.cached.setVolumeAsync(config.volume * this.globalVolume);
+      if (config.player && config.player !== null) {
+        config.player.volume = config.volume * this.globalVolume;
       }
     }
   }
@@ -306,8 +288,12 @@ class SoundManager {
   // Clean up resources
   async dispose() {
     for (const [, config] of this.sounds.entries()) {
-      if (config.cached) {
-        await config.cached.unloadAsync();
+      if (config.player && config.player !== null) {
+        try {
+          await config.player.remove();
+        } catch (error) {
+          __DEV__ && console.warn('Error disposing audio player:', error);
+        }
       }
     }
     this.sounds.clear();

@@ -8,3 +8,6 @@ export * as ChartComponents from './charts';
 
 // Sound-enabled components
 export { SoundButton } from './common/SoundButton';
+
+// Debug components (development only)
+export { SoundTestComponent } from './debug/SoundTestComponent';
