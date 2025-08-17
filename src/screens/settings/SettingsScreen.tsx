@@ -8,7 +8,8 @@ import {
   RefreshControl,
   Alert,
   Image,
-  Animated
+  Animated,
+  Switch
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -32,6 +33,8 @@ import {
   generateSummaryReport, 
   createBackup 
 } from '../../utils/dataExport';
+import { soundManager } from '../../services/sound/SoundManager';
+import { useSound } from '../../hooks/useSound';
 
 type SettingsScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<TabParamList, 'Settings'>,
@@ -58,8 +61,11 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [showLicenseForm, setShowLicenseForm] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(soundManager.isAudioEnabled());
   const lastRefreshRef = useRef<number>(0);
   const REFRESH_DEBOUNCE_MS = 3000; // Debounce settings refresh to 3 seconds
+  
+  const { playToggle } = useSound();
   
   // Premium animation values
   const fadeAnim = useRef(new Animated.Value(1)).current; // Start visible to prevent flash
@@ -534,6 +540,26 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
                   </View>
                   <SvgIcon name="chevron-right" size={16} color="#9ca3af" />
                 </TouchableOpacity>
+                
+                <View style={styles.modernSettingItem}>
+                  <View style={styles.settingIconWrapper}>
+                    <SvgIcon name="volume" size={22} color="#1e40af" />
+                  </View>
+                  <View style={styles.settingDetails}>
+                    <Text style={styles.modernSettingLabel}>Sound Effects</Text>
+                    <Text style={styles.modernSettingValue}>{soundEnabled ? 'Enabled' : 'Disabled'}</Text>
+                  </View>
+                  <Switch
+                    value={soundEnabled}
+                    onValueChange={async (enabled) => {
+                      await playToggle();
+                      setSoundEnabled(enabled);
+                      await soundManager.setEnabled(enabled);
+                    }}
+                    trackColor={{ false: theme.colors.gray.light, true: theme.colors.primary }}
+                    thumbColor={theme.colors.background}
+                  />
+                </View>
                 
                 <View style={styles.modernSettingItem}>
                   <View style={styles.settingIconWrapper}>

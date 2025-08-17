@@ -27,7 +27,7 @@ interface SoundConfig {
 class SoundManager {
   private sounds: Map<SoundType, SoundConfig> = new Map();
   private isEnabled: boolean = true;
-  private globalVolume: number = 1.0; // Full volume for clear feedback
+  private globalVolume: number = 1.0; // Keep at 100% since individual volumes are already set
   private isInitialized: boolean = false;
   private isPreloaded: boolean = false;
 
