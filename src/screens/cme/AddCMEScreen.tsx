@@ -666,6 +666,9 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
                 value={formData.title}
                 onChangeText={(value) => updateFormData('title', value)}
                 placeholder="Activity title"
+                autoExpand={true}
+                minLines={1}
+                maxLines={3}
                 style={[styles.compactInput, errors.title ? styles.inputError : undefined]}
               />
               {errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
@@ -677,6 +680,9 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
                 value={formData.provider}
                 onChangeText={(value) => updateFormData('provider', value)}
                 placeholder="Organization"
+                autoExpand={true}
+                minLines={1}
+                maxLines={3}
                 style={[styles.compactInput, errors.provider ? styles.inputError : undefined]}
               />
               {errors.provider && <Text style={styles.errorText}>{errors.provider}</Text>}
@@ -731,8 +737,9 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
               value={formData.notes}
               onChangeText={(value) => updateFormData('notes', value)}
               placeholder="Optional notes about this activity..."
-              multiline={true}
-              numberOfLines={2}
+              autoExpand={true}
+              minLines={2}
+              maxLines={6}
               style={styles.notesInput}
             />
           </View>
@@ -908,10 +915,8 @@ const styles = StyleSheet.create({
     height: 44,
   },
   notesInput: {
-    minHeight: 60,
+    // Auto-expanding Input will handle height automatically
     textAlignVertical: 'top',
-    paddingTop: theme.spacing[3],
-    paddingBottom: theme.spacing[3],
   },
   
   inputError: {

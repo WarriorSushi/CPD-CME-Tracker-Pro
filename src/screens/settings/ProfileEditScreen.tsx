@@ -387,6 +387,9 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
               value={profileName}
               onChangeText={setProfileName}
               placeholder="Enter your display name"
+              autoExpand={true}
+              minLines={1}
+              maxLines={2}
               style={styles.input}
               maxLength={50}
             />

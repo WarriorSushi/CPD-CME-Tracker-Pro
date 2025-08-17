@@ -256,6 +256,9 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
                 value={licenseType}
                 onChangeText={setLicenseType}
                 placeholder="e.g., Medical License, RN License, PharmD"
+                autoExpand={true}
+                minLines={1}
+                maxLines={2}
                 style={styles.input}
                 autoCapitalize="words"
                 returnKeyType="next"
@@ -269,6 +272,9 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
                 value={issuingAuthority}
                 onChangeText={setIssuingAuthority}
                 placeholder="e.g., State Medical Board, College of Physicians"
+                autoExpand={true}
+                minLines={1}
+                maxLines={3}
                 style={styles.input}
                 autoCapitalize="words"
                 returnKeyType="next"
@@ -282,6 +288,9 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
                 value={licenseNumber}
                 onChangeText={setLicenseNumber}
                 placeholder="Enter license number if available"
+                autoExpand={true}
+                minLines={1}
+                maxLines={2}
                 style={styles.input}
                 autoCapitalize="characters"
                 returnKeyType="done"

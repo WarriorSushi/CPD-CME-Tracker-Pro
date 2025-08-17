@@ -365,6 +365,9 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
           value={searchQuery}
           onChangeText={setSearchQuery}
           placeholder="Search entries..."
+          autoExpand={true}
+          minLines={1}
+          maxLines={2}
           style={styles.searchInput}
           inputStyle={styles.searchInputField}
         />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   TextInput,
   View,
@@ -7,6 +7,7 @@ import {
   TextInputProps,
   ViewStyle,
   TextStyle,
+  LayoutChangeEvent,
 } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -22,6 +23,9 @@ interface InputProps extends TextInputProps {
   containerStyle?: ViewStyle;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  autoExpand?: boolean; // Enable WhatsApp-like auto-expansion
+  minLines?: number; // Minimum number of lines to show
+  maxLines?: number; // Maximum number of lines before scrolling
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -34,9 +38,15 @@ export const Input: React.FC<InputProps> = ({
   onFocus,
   onBlur,
   style,
+  autoExpand = false,
+  minLines = 1,
+  maxLines = 8,
+  multiline,
   ...props
 }) => {
   const [isFocused, setIsFocused] = useState(false);
+  const [inputHeight, setInputHeight] = useState<number | undefined>(undefined);
+  const textInputRef = useRef<TextInput>(null);
   const focusAnimation = useSharedValue(0);
   const errorAnimation = useSharedValue(0);
 
@@ -62,6 +72,23 @@ export const Input: React.FC<InputProps> = ({
     });
   }, [error]);
 
+  // Auto-expansion logic for multiline inputs
+  const handleContentSizeChange = (event: any) => {
+    if (!autoExpand || !multiline) return;
+    
+    const { height } = event.nativeEvent.contentSize;
+    const lineHeight = (theme.typography.lineHeight.normal * theme.typography.fontSize.base) || 20;
+    const paddingVertical = theme.spacing[3] * 2; // Top + bottom padding
+    
+    // Calculate height based on content, respecting min and max lines
+    const minHeight = (lineHeight * minLines) + paddingVertical;
+    const maxHeight = (lineHeight * maxLines) + paddingVertical;
+    
+    const newHeight = Math.max(minHeight, Math.min(height + paddingVertical, maxHeight));
+    
+    setInputHeight(newHeight);
+  };
+
   const animatedBorderStyle = useAnimatedStyle(() => {
     const borderColor = error
       ? theme.colors.error
@@ -86,24 +113,50 @@ export const Input: React.FC<InputProps> = ({
     ],
   }));
 
-  const getInputStyle = (): TextStyle => ({
-    flex: 1,
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.text.primary,
-    paddingVertical: 0, // Remove default padding
-  });
+  const getInputStyle = (): TextStyle => {
+    const baseStyle: TextStyle = {
+      flex: 1,
+      fontSize: theme.typography.fontSize.base,
+      color: theme.colors.text.primary,
+      paddingVertical: autoExpand && multiline ? theme.spacing[3] : 0,
+    };
+
+    if (autoExpand && multiline) {
+      baseStyle.textAlignVertical = 'top';
+      if (inputHeight) {
+        baseStyle.height = inputHeight - (theme.spacing[3] * 2); // Subtract container padding
+      }
+    }
+
+    return baseStyle;
+  };
+
+  const getContainerStyle = (): ViewStyle => {
+    const baseStyle: ViewStyle = {
+      ...styles.inputContainer,
+      height: autoExpand && multiline && inputHeight ? inputHeight : theme.layout.inputHeight,
+      alignItems: autoExpand && multiline ? 'flex-start' : 'center',
+      paddingVertical: autoExpand && multiline ? theme.spacing[3] : theme.spacing[0],
+    };
+
+    return baseStyle;
+  };
 
   return (
     <View style={[styles.container, containerStyle]}>
       {label && <Text style={styles.label}>{label}</Text>}
       
-      <Animated.View style={[styles.inputContainer, animatedBorderStyle]}>
+      <Animated.View style={[getContainerStyle(), animatedBorderStyle]}>
         {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
         
         <TextInput
+          ref={textInputRef}
           style={[getInputStyle(), style]}
           onFocus={handleFocus}
           onBlur={handleBlur}
+          onContentSizeChange={handleContentSizeChange}
+          multiline={autoExpand ? true : multiline}
+          scrollEnabled={autoExpand && multiline ? false : undefined}
           placeholderTextColor={theme.colors.text.disabled}
           {...props}
         />
