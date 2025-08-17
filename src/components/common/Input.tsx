@@ -45,7 +45,15 @@ export const Input: React.FC<InputProps> = ({
   ...props
 }) => {
   const [isFocused, setIsFocused] = useState(false);
-  const [inputHeight, setInputHeight] = useState<number | undefined>(undefined);
+  // Initialize height for auto-expanding inputs
+  const getInitialHeight = () => {
+    if (!autoExpand) return undefined;
+    const lineHeight = 24;
+    const containerPadding = theme.spacing[3] * 2;
+    return (lineHeight * minLines) + containerPadding;
+  };
+  
+  const [inputHeight, setInputHeight] = useState<number | undefined>(getInitialHeight());
   const textInputRef = useRef<TextInput>(null);
   const focusAnimation = useSharedValue(0);
   const errorAnimation = useSharedValue(0);
@@ -74,17 +82,18 @@ export const Input: React.FC<InputProps> = ({
 
   // Auto-expansion logic for multiline inputs
   const handleContentSizeChange = (event: any) => {
-    if (!autoExpand || !multiline) return;
+    if (!autoExpand) return;
     
     const { height } = event.nativeEvent.contentSize;
-    const lineHeight = (theme.typography.lineHeight.normal * theme.typography.fontSize.base) || 20;
-    const paddingVertical = theme.spacing[3] * 2; // Top + bottom padding
+    const lineHeight = 24; // Approximate line height for base font size
+    const containerPadding = theme.spacing[3] * 2; // Top + bottom padding
     
-    // Calculate height based on content, respecting min and max lines
-    const minHeight = (lineHeight * minLines) + paddingVertical;
-    const maxHeight = (lineHeight * maxLines) + paddingVertical;
+    // Calculate minimum and maximum heights
+    const minHeight = (lineHeight * minLines) + containerPadding;
+    const maxHeight = (lineHeight * maxLines) + containerPadding;
     
-    const newHeight = Math.max(minHeight, Math.min(height + paddingVertical, maxHeight));
+    // Use content height directly, constrained by min/max
+    const newHeight = Math.max(minHeight, Math.min(height + containerPadding, maxHeight));
     
     setInputHeight(newHeight);
   };
@@ -118,14 +127,12 @@ export const Input: React.FC<InputProps> = ({
       flex: 1,
       fontSize: theme.typography.fontSize.base,
       color: theme.colors.text.primary,
-      paddingVertical: autoExpand && multiline ? theme.spacing[3] : 0,
+      paddingVertical: 0, // Let container handle padding
     };
 
-    if (autoExpand && multiline) {
+    if (autoExpand) {
       baseStyle.textAlignVertical = 'top';
-      if (inputHeight) {
-        baseStyle.height = inputHeight - (theme.spacing[3] * 2); // Subtract container padding
-      }
+      // Don't set height here, let it expand naturally
     }
 
     return baseStyle;
@@ -134,10 +141,21 @@ export const Input: React.FC<InputProps> = ({
   const getContainerStyle = (): ViewStyle => {
     const baseStyle: ViewStyle = {
       ...styles.inputContainer,
-      height: autoExpand && multiline && inputHeight ? inputHeight : theme.layout.inputHeight,
-      alignItems: autoExpand && multiline ? 'flex-start' : 'center',
-      paddingVertical: autoExpand && multiline ? theme.spacing[3] : theme.spacing[0],
+      alignItems: autoExpand ? 'flex-start' : 'center',
+      paddingVertical: autoExpand ? theme.spacing[3] : theme.spacing[0],
     };
+
+    // Apply dynamic height only if auto-expanding
+    if (autoExpand && inputHeight) {
+      baseStyle.height = inputHeight;
+    } else if (!autoExpand) {
+      baseStyle.height = theme.layout.inputHeight;
+    } else {
+      // Initial height for auto-expand inputs
+      const lineHeight = 24;
+      const containerPadding = theme.spacing[3] * 2;
+      baseStyle.height = (lineHeight * minLines) + containerPadding;
+    }
 
     return baseStyle;
   };
@@ -155,8 +173,8 @@ export const Input: React.FC<InputProps> = ({
           onFocus={handleFocus}
           onBlur={handleBlur}
           onContentSizeChange={handleContentSizeChange}
-          multiline={autoExpand ? true : multiline}
-          scrollEnabled={autoExpand && multiline ? false : undefined}
+          multiline={autoExpand || multiline}
+          scrollEnabled={false}
           placeholderTextColor={theme.colors.text.disabled}
           {...props}
         />
