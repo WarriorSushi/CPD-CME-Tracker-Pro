@@ -52,7 +52,7 @@ export const StandardHeader: React.FC<StandardHeaderProps> = ({
         colors={['#003087', '#001a4d']} // Current blue to darker blue
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.header, { paddingTop: insets.top + theme.spacing[4] }, style]}
+        style={[styles.header, { paddingTop: insets.top + theme.spacing[2] }, style]}
       >
         <View style={styles.headerContent}>
         {/* Left - Back Button */}
@@ -134,23 +134,23 @@ const styles = StyleSheet.create({
   header: {
     // backgroundColor removed - using LinearGradient
     paddingHorizontal: theme.spacing[4],
-    paddingBottom: theme.spacing[4],
-    borderBottomLeftRadius: theme.spacing[5],
-    borderBottomRightRadius: theme.spacing[5],
+    paddingBottom: theme.spacing[2],
+    borderBottomLeftRadius: theme.spacing[3],
+    borderBottomRightRadius: theme.spacing[3],
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 2,
     },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 10,
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 8,
   },
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    minHeight: 44, // Minimum touch target
+    minHeight: 32, // Reduced minimum height for more compact header
   },
   leftSection: {
     width: 60,

@@ -397,12 +397,6 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         <StandardHeader
           title={`${getGreeting()}, ${user?.profileName || user?.profession || 'Professional'}`}
           showBackButton={false}
-          rightIcon="profile"
-          rightIconPress={() => navigation.navigate('Settings')}
-          rightIconColor={theme.colors.purple} // Modern purple to match design
-          rightIconSize={28} 
-          titleAlign="left"
-          titleSize="base"
         />
 
         <LoadingState

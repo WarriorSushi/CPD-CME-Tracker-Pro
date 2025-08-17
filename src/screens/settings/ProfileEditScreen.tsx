@@ -19,7 +19,7 @@ import { Card, Button, Input, LoadingSpinner, StandardHeader, SvgIcon } from '..
 import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../onboarding/OnboardingComponents';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
-import { User } from '../../types';
+import { User, Profession } from '../../types';
 
 const { width } = Dimensions.get('window');
 
@@ -33,6 +33,7 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
   
   const [profileName, setProfileName] = useState(user?.profileName || '');
   const [age, setAge] = useState(user?.age?.toString() || '');
+  const [profession, setProfession] = useState<Profession>(user?.profession as Profession || 'Physician');
   const [profilePicturePath, setProfilePicturePath] = useState(user?.profilePicturePath || '');
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -247,6 +248,7 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
       const updatedUser: Partial<User> = {
         profileName: profileName.trim() || undefined,
         age: ageNum,
+        profession: profession,
         profilePicturePath: profilePicturePath || undefined,
       };
 
@@ -418,6 +420,32 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
           </View>
 
           <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Profession</Text>
+            <View style={styles.professionSelector}>
+              {(['Physician', 'Nurse', 'Pharmacist', 'Allied Health', 'Other'] as Profession[]).map((prof) => (
+                <TouchableOpacity
+                  key={prof}
+                  style={[
+                    styles.professionChip,
+                    profession === prof && styles.professionChipSelected
+                  ]}
+                  onPress={() => setProfession(prof)}
+                >
+                  <Text style={[
+                    styles.professionChipText,
+                    profession === prof && styles.professionChipTextSelected
+                  ]}>
+                    {prof}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <Text style={styles.inputHint}>
+              Your professional designation for personalized experience
+            </Text>
+          </View>
+
+          <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Age (Optional)</Text>
             <Input
               value={age}
@@ -461,7 +489,10 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
               Dashboard greeting will show:
             </Text>
             <Text style={styles.previewGreeting}>
-              "Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, {profileName.trim() || user?.profession || 'Professional'}"
+              "Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, {profileName.trim() || profession || 'Professional'}"
+            </Text>
+            <Text style={styles.previewProfession}>
+              {profession}
             </Text>
           </View>
             </PremiumCard>
@@ -645,6 +676,42 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     width: '100%',
+  },
+
+  // Profession Selector
+  professionSelector: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: theme.spacing[2],
+    marginBottom: theme.spacing[1],
+  },
+  professionChip: {
+    paddingHorizontal: theme.spacing[3],
+    paddingVertical: theme.spacing[2],
+    borderRadius: theme.spacing[3],
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
+    backgroundColor: theme.colors.background,
+  },
+  professionChipSelected: {
+    backgroundColor: theme.colors.purple,
+    borderColor: theme.colors.purple,
+  },
+  professionChipText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.primary,
+    fontWeight: theme.typography.fontWeight.medium,
+  },
+  professionChipTextSelected: {
+    color: theme.colors.background,
+    fontWeight: theme.typography.fontWeight.semibold,
+  },
+  previewProfession: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+    marginTop: theme.spacing[2],
+    fontStyle: 'italic',
   },
 
   // Bottom spacer
