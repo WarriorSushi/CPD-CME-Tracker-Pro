@@ -428,17 +428,22 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Text style={styles.emptyIcon}>🏆</Text>
-      <Text style={styles.emptyTitle}>No certificates yet</Text>
-      <Text style={styles.emptySubtitle}>
-        Upload your first certificate to get started
-      </Text>
-      <Button
-        title="Upload Certificate"
-        onPress={handleUploadCertificate}
-        style={styles.emptyButton}
-        loading={isUploading}
-      />
+      <PremiumCard style={styles.emptyCard}>
+        <View style={styles.emptyIconContainer}>
+          <SvgIcon name="files" size={48} color={theme.colors.purple} />
+        </View>
+        <Text style={styles.emptyTitle}>No certificates yet</Text>
+        <Text style={styles.emptySubtitle}>
+          Upload your first certificate to get started
+        </Text>
+        <PremiumButton
+          title="Upload Certificate"
+          onPress={handleUploadCertificate}
+          variant="primary"
+          style={styles.emptyButton}
+          loading={isUploading}
+        />
+      </PremiumCard>
     </View>
   );
 
@@ -859,10 +864,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing[8],
+    paddingHorizontal: theme.spacing[4],
   },
-  emptyIcon: {
-    fontSize: 64,
+  emptyCard: {
+    padding: theme.spacing[6],
+    alignItems: 'center',
+    backgroundColor: theme.colors.surface,
+  },
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: theme.colors.accent,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: theme.spacing[4],
   },
   emptyTitle: {

@@ -197,7 +197,7 @@ export const NotificationSettingsScreen: React.FC<Props> = ({ navigation }) => {
     const availableIntervals = [90, 60, 30, 14, 7, 1];
 
     return (
-      <PremiumCard style={[
+      <Card style={[
         styles.card,
         {
           elevation: cardsShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 6] }),
@@ -254,7 +254,7 @@ export const NotificationSettingsScreen: React.FC<Props> = ({ navigation }) => {
             </View>
           </View>
         )}
-      </PremiumCard>
+      </Card>
     );
   };
 

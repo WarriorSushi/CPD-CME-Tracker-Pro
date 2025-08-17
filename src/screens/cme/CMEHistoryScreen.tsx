@@ -242,21 +242,26 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Text style={styles.emptyIcon}>📚</Text>
-      <Text style={styles.emptyTitle}>No entries found</Text>
-      <Text style={styles.emptySubtitle}>
-        {searchQuery 
-          ? 'Try adjusting your search criteria'
-          : 'Start tracking your continuing education by adding your first entry'
-        }
-      </Text>
-      {!searchQuery && (
-        <Button
-          title="Add First Entry"
-          onPress={() => (navigation as any).navigate('AddCME', {})}
-          style={styles.emptyButton}
-        />
-      )}
+      <PremiumCard style={styles.emptyCard}>
+        <View style={styles.emptyIconContainer}>
+          <SvgIcon name="history" size={48} color={theme.colors.purple} />
+        </View>
+        <Text style={styles.emptyTitle}>No entries found</Text>
+        <Text style={styles.emptySubtitle}>
+          {searchQuery 
+            ? 'Try adjusting your search criteria'
+            : 'Start tracking your continuing education by adding your first entry'
+          }
+        </Text>
+        {!searchQuery && (
+          <PremiumButton
+            title="Add First Entry"
+            onPress={() => (navigation as any).navigate('AddCME', {})}
+            variant="primary"
+            style={styles.emptyButton}
+          />
+        )}
+      </PremiumCard>
     </View>
   );
 
@@ -797,10 +802,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing[8],
+    paddingHorizontal: theme.spacing[4],
   },
-  emptyIcon: {
-    fontSize: 64,
+  emptyCard: {
+    padding: theme.spacing[6],
+    alignItems: 'center',
+    backgroundColor: theme.colors.surface,
+  },
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: theme.colors.accent,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: theme.spacing[4],
   },
   emptyTitle: {

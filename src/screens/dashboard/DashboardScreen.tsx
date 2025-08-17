@@ -1025,9 +1025,8 @@ const styles = StyleSheet.create({
   // Premium Progress Card
   progressCard: {
     padding: theme.spacing[5],
-    marginHorizontal: theme.spacing[1],
     backgroundColor: theme.colors.surface,
-    borderRadius: 20,
+    borderRadius: theme.spacing[3],
     // Shadow will be handled by animation interpolation
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
