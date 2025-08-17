@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   View, 
   Text, 
@@ -6,7 +6,8 @@ import {
   ScrollView, 
   Alert,
   TouchableOpacity,
-  Image
+  Image,
+  Animated
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -19,6 +20,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { Camera } from 'expo-camera';
 
 import { Button, Card, Input, LoadingSpinner, DatePicker, StandardHeader } from '../../components';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../onboarding/OnboardingComponents';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { MainTabParamList } from '../../types/navigation';
@@ -94,6 +96,15 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
   const [cameraPermission, setCameraPermission] = useState<boolean | null>(null);
   const [isUploadingCertificate, setIsUploadingCertificate] = useState(false);
   
+  // Premium animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+  const formCardAnim = useRef(new Animated.Value(0)).current;
+  const actionsAnim = useRef(new Animated.Value(0)).current;
+  
+  // Shadow animations (to prevent gray flash)
+  const formShadowAnim = useRef(new Animated.Value(0)).current;
+  
   // Button pressing states for visual feedback
   const [pressedButtons, setPressedButtons] = useState<{
     camera: boolean;
@@ -149,6 +160,45 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       } else {
 
       }
+      
+      // Premium entrance animations
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          tension: 30,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      // Staggered form animations
+      Animated.sequence([
+        Animated.delay(150),
+        Animated.spring(formCardAnim, {
+          toValue: 1,
+          tension: 40,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.spring(actionsAnim, {
+          toValue: 1,
+          tension: 40,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        // Add shadow after form finishes animating
+        Animated.timing(formShadowAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: false,
+        }).start();
+      });
     }, [route.params?.editEntry, formData.title, formData.provider])
   );
 
@@ -570,14 +620,44 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
+      <AnimatedGradientBackground />
+      
       <StandardHeader
         title={isEditing ? 'Edit Entry' : 'Add New Entry'}
         onBackPress={() => navigation.goBack()}
       />
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-        {/* Compact Form */}
-        <Card style={styles.formCard}>
+      <Animated.View 
+        style={[
+          styles.content,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
+      >
+        <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          {/* Premium Form Card */}
+          <Animated.View 
+            style={[
+              {
+                opacity: formCardAnim,
+                transform: [{
+                  translateY: formCardAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
+            <PremiumCard style={[
+              styles.formCard,
+              {
+                elevation: formShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] }),
+                shadowOpacity: formShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] }),
+              }
+            ]}>
           {/* Row 1: Title and Provider */}
           <View style={styles.row}>
             <View style={[styles.fieldContainer, styles.fieldHalf]}>
@@ -721,30 +801,53 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
               </View>
             )}
           </View>
-        </Card>
+            </PremiumCard>
+          </Animated.View>
 
-        {/* Action Buttons */}
-        <View style={styles.buttonRow}>
-          <Button
-            title="Cancel"
-            variant="outline"
-            onPress={() => navigation.goBack()}
-            disabled={isLoading}
-            style={styles.cancelButton}
-          />
-          <Button
-            title={isEditing ? 'Update' : 'Save'}
-            onPress={handleSubmit}
-            loading={isLoading}
-            style={styles.submitButton}
-          />
-        </View>
+          {/* Premium Action Buttons */}
+          <Animated.View 
+            style={[
+              styles.buttonRow,
+              {
+                opacity: actionsAnim,
+                transform: [{
+                  translateY: actionsAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
+            <PremiumButton
+              title="Cancel"
+              variant="secondary"
+              onPress={() => navigation.goBack()}
+              disabled={isLoading}
+              style={styles.cancelButton}
+            />
+            <PremiumButton
+              title={isEditing ? 'Update' : 'Save'}
+              variant="primary"
+              onPress={handleSubmit}
+              loading={isLoading}
+              style={styles.submitButton}
+            />
+          </Animated.View>
 
-        {/* Compact Helper */}
-        <Text style={styles.helperText}>
-          * Required fields • 💡 Be specific for better tracking
-        </Text>
-      </ScrollView>
+          {/* Compact Helper */}
+          <Animated.Text 
+            style={[
+              styles.helperText,
+              {
+                opacity: actionsAnim,
+              },
+            ]}
+          >
+            * Required fields • 💡 Be specific for better tracking
+          </Animated.Text>
+        </ScrollView>
+      </Animated.View>
     </View>
   );
 };
@@ -758,13 +861,20 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: theme.spacing[4],
-    backgroundColor: '#FFF7EC', // Section background
   },
   
-  // Compact Form
+  // Premium Form Card
   formCard: {
-    padding: theme.spacing[4],
-    marginBottom: theme.spacing[3],
+    padding: theme.spacing[5],
+    marginBottom: theme.spacing[4],
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    // Shadow will be handled by animation interpolation
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 16,
+    elevation: 0, // Start with no elevation, will be animated
+    shadowOpacity: 0, // Start with no shadow, will be animated
   },
   
   // Row Layout

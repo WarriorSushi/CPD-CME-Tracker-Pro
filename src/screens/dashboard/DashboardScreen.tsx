@@ -1,11 +1,12 @@
-import React, { useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Dimensions, Image, Alert } from 'react-native';
+import React, { useCallback, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Dimensions, Image, Alert, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { Card, Button, LoadingSpinner, SvgIcon, StandardHeader, LoadingState, ErrorBoundary } from '../../components';
 import { SimpleProgressRing } from '../../components/charts/SimpleProgressRing';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../onboarding/OnboardingComponents';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { MainTabParamList } from '../../types/navigation';
@@ -41,6 +42,20 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   const lastRefreshRef = useRef<number>(0);
   const REFRESH_DEBOUNCE_MS = 5000; // Only refresh if last refresh was more than 5 seconds ago
 
+  // Premium animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+  const progressCardAnim = useRef(new Animated.Value(0)).current;
+  const remindersCardAnim = useRef(new Animated.Value(0)).current;
+  const recentCardAnim = useRef(new Animated.Value(0)).current;
+  const licensesCardAnim = useRef(new Animated.Value(0)).current;
+  
+  // Shadow animations (to prevent gray flash)
+  const progressShadowAnim = useRef(new Animated.Value(0)).current;
+  const remindersShadowAnim = useRef(new Animated.Value(0)).current;
+  const recentShadowAnim = useRef(new Animated.Value(0)).current;
+  const licensesShadowAnim = useRef(new Animated.Value(0)).current;
+
   // Debounced refresh data when screen comes into focus
   useFocusEffect(
     useCallback(() => {
@@ -57,6 +72,65 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     await refreshAllData();
     setRefreshing(false);
   }, [refreshAllData]);
+
+  // Premium entrance animations
+  useEffect(() => {
+    if (!isInitializing && user) {
+      // Stage 1: Cards appear without shadows
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          tension: 30,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      // Stage 2: Staggered card animations
+      Animated.sequence([
+        Animated.delay(200),
+        Animated.stagger(150, [
+          Animated.spring(progressCardAnim, {
+            toValue: 1,
+            tension: 40,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+          Animated.spring(remindersCardAnim, {
+            toValue: 1,
+            tension: 40,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+          Animated.spring(recentCardAnim, {
+            toValue: 1,
+            tension: 40,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+          Animated.spring(licensesCardAnim, {
+            toValue: 1,
+            tension: 40,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+        ]),
+      ]).start(() => {
+        // Stage 3: Add shadows after cards finish
+        Animated.stagger(100, [
+          Animated.timing(progressShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
+          Animated.timing(remindersShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
+          Animated.timing(recentShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
+          Animated.timing(licensesShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
+        ]).start();
+      });
+    }
+  }, [isInitializing, user]);
 
   const getProgressColor = (status: string) => {
     switch (status) {
@@ -142,13 +216,15 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <ErrorBoundary>
       <View style={styles.container}>
+        <AnimatedGradientBackground />
+        
         <StandardHeader
           title={`${getGreeting()}, ${user?.profileName || user?.profession || 'Professional'}`}
           showBackButton={false}
           rightIcon="profile"
           rightIconPress={() => navigation.navigate('Settings')}
-          rightIconColor="#FFD700" // Bright gold that pops against blue background
-          rightIconSize={28} // Larger size to make it more prominent
+          rightIconColor="#667EEA" // Premium purple to match design
+          rightIconSize={28} 
           titleAlign="left"
           titleSize="base"
         />
@@ -165,19 +241,39 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             showsVerticalScrollIndicator={false}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           >
-        {/* Upper Section - Your Progress + Add Entry Button */}
-        <View style={styles.upperSection}>
-          <View style={styles.progressHeader}>
-            <View style={styles.progressTitleContainer}>
-              <Text style={styles.progressMainTitle}>Your Progress</Text>
-              <Text style={styles.progressSubtitle}>
-                {user?.requirementPeriod && user.requirementPeriod > 1 
-                  ? `${user.requirementPeriod}-Year Cycle` 
-                  : 'Annual Goal'
-                }
-              </Text>
+        {/* Upper Section - Premium Progress Card */}
+        <Animated.View 
+          style={[
+            styles.upperSection,
+            {
+              opacity: progressCardAnim,
+              transform: [{
+                translateY: progressCardAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [20, 0],
+                }),
+              }],
+            },
+          ]}
+        >
+          <PremiumCard style={[
+            styles.progressCard,
+            {
+              elevation: progressShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 6] }),
+              shadowOpacity: progressShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.12] }),
+            }
+          ]}>
+            <View style={styles.progressHeader}>
+              <View style={styles.progressTitleContainer}>
+                <Text style={styles.progressMainTitle}>Your Progress</Text>
+                <Text style={styles.progressSubtitle}>
+                  {user?.requirementPeriod && user.requirementPeriod > 1 
+                    ? `${user.requirementPeriod}-Year Cycle` 
+                    : 'Annual Goal'
+                  }
+                </Text>
+              </View>
             </View>
-          </View>
 
           <View style={styles.progressMainContent}>
             {/* Days remaining moved to left of circle */}
@@ -233,24 +329,43 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             </View>
           </View>
 
-          {/* Add Entry Button - now part of upper section */}
-          <View style={styles.addEntryInUpperSection}>
-            <Button
-              title="+ Add New Entry"
-              onPress={() => (navigation.getParent() as any).navigate('AddCME', { editEntry: undefined })}
-              style={styles.addEntryButton}
-              accessibilityLabel="Add new CME entry"
-              accessibilityHint="Opens form to add a new continuing education entry"
-            />
-          </View>
-        </View>
+            {/* Premium Add Entry Button */}
+            <View style={styles.addEntryInUpperSection}>
+              <PremiumButton
+                title="+ Add New Entry"
+                onPress={() => (navigation.getParent() as any).navigate('AddCME', { editEntry: undefined })}
+                variant="primary"
+                style={styles.addEntryButton}
+              />
+            </View>
+          </PremiumCard>
+        </Animated.View>
 
         {/* Dividing Line */}
         <View style={styles.dividerLine} />
 
         {/* CME Event Reminders Section */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionCard}>
+        <Animated.View 
+          style={[
+            styles.sectionContainer,
+            {
+              opacity: remindersCardAnim,
+              transform: [{
+                translateY: remindersCardAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [20, 0],
+                }),
+              }],
+            },
+          ]}
+        >
+          <PremiumCard style={[
+            styles.sectionCard,
+            {
+              elevation: remindersShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
+              shadowOpacity: remindersShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+            }
+          ]}>
           <LinearGradient
             colors={['#36454F', '#000000']}
             start={{ x: 0, y: 0 }}
@@ -258,11 +373,10 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             style={styles.cardHeader}
           >
             <Text style={styles.cardHeaderTitle}>CME Event Reminders</Text>
-            <Button
+            <PremiumButton
               title="+ Add Reminder"
               onPress={() => (navigation as any).navigate('AddReminder')}
-              variant="primary"
-              size="small"
+              variant="secondary"
               style={styles.headerButton}
             />
           </LinearGradient>
@@ -306,7 +420,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 }
 
                 return (
-                  <Card key={reminder.id} variant="entry" style={styles.reminderCard}>
+                  <PremiumCard key={reminder.id} style={styles.reminderCard}>
                     <View style={styles.reminderCardHeader}>
                       <View style={styles.reminderCardMain}>
                         <View style={[styles.reminderIcon, { backgroundColor: statusColor + '20' }]}>
@@ -326,12 +440,12 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                         <Text style={styles.reminderStatusText}>{statusText}</Text>
                       </View>
                     </View>
-                  </Card>
+                  </PremiumCard>
                 );
               })}
             </View>
           ) : (
-            <Card style={styles.remindersPlaceholder}>
+            <PremiumCard style={styles.remindersPlaceholder}>
               <View style={styles.remindersPlaceholderContent}>
                 <SvgIcon 
                   name="reminder" 
@@ -344,17 +458,36 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                   Tap the + button above to add reminders for upcoming CME events
                 </Text>
               </View>
-            </Card>
+            </PremiumCard>
           )}
           
           </LinearGradient>
-          </View>
-        </View>
+          </PremiumCard>
+        </Animated.View>
 
         {/* License Management Section */}
         {licenses && licenses.length > 0 && (
-          <View style={styles.sectionContainer}>
-            <View style={styles.sectionCard}>
+          <Animated.View 
+            style={[
+              styles.sectionContainer,
+              {
+                opacity: licensesCardAnim,
+                transform: [{
+                  translateY: licensesCardAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
+            <PremiumCard style={[
+              styles.sectionCard,
+              {
+                elevation: licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
+                shadowOpacity: licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+              }
+            ]}>
             <LinearGradient
               colors={['#36454F', '#000000']}
               start={{ x: 0, y: 0 }}
@@ -362,11 +495,10 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
               style={styles.cardHeader}
             >
               <Text style={styles.cardHeaderTitle}>Your Licenses</Text>
-              <Button
+              <PremiumButton
                 title="+ Add License"
                 onPress={() => (navigation.getParent() as any).navigate('AddLicense')}
-                variant="primary"
-                size="small"
+                variant="secondary"
                 style={styles.headerButton}
               />
             </LinearGradient>
@@ -433,7 +565,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 }
 
                 return (
-                  <Card key={license.id} variant="entry" style={styles.licenseCard}>
+                  <PremiumCard key={license.id} style={styles.licenseCard}>
                     <View style={styles.licenseCardHeader}>
                       <View style={styles.licenseCardMain}>
                         {typeof statusIcon === 'string' ? (
@@ -521,20 +653,39 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                         💡 Already renewed? Tap "Edit" and update the expiration date.
                       </Text>
                     </View>
-                  </Card>
+                  </PremiumCard>
                 );
               });
             })()}
             
             </LinearGradient>
-            </View>
-          </View>
+            </PremiumCard>
+          </Animated.View>
         )}
 
         {/* Show Add License Prompt if no licenses */}
         {(!licenses || licenses.length === 0) && (
-          <View style={styles.noLicensesSection}>
-            <Card style={styles.noLicensesCard}>
+          <Animated.View 
+            style={[
+              styles.noLicensesSection,
+              {
+                opacity: licensesCardAnim,
+                transform: [{
+                  translateY: licensesCardAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
+            <PremiumCard style={[
+              styles.noLicensesCard,
+              {
+                elevation: licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
+                shadowOpacity: licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+              }
+            ]}>
               <View style={styles.noLicensesContent}>
                 <SvgIcon 
                   name="profile" 
@@ -546,19 +697,33 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.noLicensesSubtitle}>
                   Add your professional licenses to track renewal deadlines and never miss a renewal date.
                 </Text>
-                <Button
+                <PremiumButton
                   title="Add Your First License"
                   onPress={() => (navigation.getParent() as any).navigate('AddLicense')}
+                  variant="primary"
                   style={styles.addEntryButton}
                 />
               </View>
-            </Card>
-          </View>
+            </PremiumCard>
+          </Animated.View>
         )}
 
         {/* Recent Activity */}
         {recentEntries.length > 0 && (
-          <View style={styles.recentSection}>
+          <Animated.View 
+            style={[
+              styles.recentSection,
+              {
+                opacity: recentCardAnim,
+                transform: [{
+                  translateY: recentCardAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Recent Activity</Text>
               <TouchableOpacity onPress={() => navigation.navigate('CME')}>
@@ -567,12 +732,15 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             </View>
             
             {recentEntries.map((entry, index) => (
-              <LinearGradient
+              <PremiumCard 
                 key={entry.id}
-                colors={['#FFFFFF', '#FAFAFA']} // White to slightly lighter
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={[styles.activityItem, styles.cardGradient]}
+                style={[
+                  styles.activityItem,
+                  {
+                    elevation: recentShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 3] }),
+                    shadowOpacity: recentShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.06] }),
+                  }
+                ]}
               >
                 <View style={styles.activityContent}>
                   <TouchableOpacity 
@@ -611,9 +779,9 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                     <Text style={styles.creditsUnit}>{user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits'}</Text>
                   </View>
                 </View>
-              </LinearGradient>
+              </PremiumCard>
             ))}
-          </View>
+          </Animated.View>
         )}
 
         {/* Bottom spacer for tab bar */}
@@ -691,10 +859,22 @@ const styles = StyleSheet.create({
 
   // Upper Section (Your Progress + Add Entry)
   upperSection: {
-    backgroundColor: '#FFFFFF', // Pure white background
     paddingHorizontal: theme.spacing[5],
     paddingTop: theme.spacing[3],
     paddingBottom: theme.spacing[6], // Increased padding below
+  },
+  // Premium Progress Card
+  progressCard: {
+    padding: theme.spacing[5],
+    marginHorizontal: theme.spacing[1],
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    // Shadow will be handled by animation interpolation
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 12,
+    elevation: 0, // Start with no elevation, will be animated
+    shadowOpacity: 0, // Start with no shadow, will be animated
   },
   progressHeader: {
     marginBottom: theme.spacing[3],
