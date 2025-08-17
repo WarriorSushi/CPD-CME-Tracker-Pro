@@ -480,7 +480,7 @@ const styles = StyleSheet.create({
     borderRadius: width * 0.4,
   },
   
-  // Card styles
+  // Card styles - fixed to prevent rectangular flash
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
@@ -490,9 +490,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 4,
-    borderWidth: 0.5,
-    borderColor: 'rgba(0, 0, 0, 0.06)',
-    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'transparent',
+    // Removed overflow: 'hidden' to prevent flash
   },
   selectedCard: {
     backgroundColor: '#FFFFFF',

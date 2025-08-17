@@ -25,6 +25,11 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
   const feature1Anim = useRef(new Animated.Value(0)).current;
   const feature2Anim = useRef(new Animated.Value(0)).current;
   const feature3Anim = useRef(new Animated.Value(0)).current;
+  
+  // Shadow animations to add elevation after cards appear
+  const shadow1Anim = useRef(new Animated.Value(0)).current;
+  const shadow2Anim = useRef(new Animated.Value(0)).current;
+  const shadow3Anim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Header animations
@@ -71,7 +76,14 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
           useNativeDriver: true,
         }),
       ]),
-    ]).start();
+    ]).start(() => {
+      // Add shadows after cards finish animating
+      Animated.stagger(100, [
+        Animated.timing(shadow1Anim, { toValue: 1, duration: 300, useNativeDriver: false }),
+        Animated.timing(shadow2Anim, { toValue: 1, duration: 300, useNativeDriver: false }),
+        Animated.timing(shadow3Anim, { toValue: 1, duration: 300, useNativeDriver: false }),
+      ]).start();
+    });
   }, []);
 
   const handleContinue = () => {
@@ -128,7 +140,14 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
               }
             ]}
           >
-            <PremiumCard style={styles.featureCard}>
+            <PremiumCard style={[
+              styles.featureCard, 
+              styles.featureCardOverride,
+              {
+                elevation: shadow1Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
+                shadowOpacity: shadow1Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+              }
+            ]}>
               <View style={styles.featureIconContainer}>
                 <LinearGradient
                   colors={['#667EEA', '#764BA2']}
@@ -162,7 +181,14 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
               }
             ]}
           >
-            <PremiumCard style={styles.featureCard}>
+            <PremiumCard style={[
+              styles.featureCard, 
+              styles.featureCardOverride,
+              {
+                elevation: shadow2Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
+                shadowOpacity: shadow2Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+              }
+            ]}>
               <View style={styles.featureIconContainer}>
                 <LinearGradient
                   colors={['#F687B3', '#D53F8C']}
@@ -196,7 +222,14 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
               }
             ]}
           >
-            <PremiumCard style={styles.featureCard}>
+            <PremiumCard style={[
+              styles.featureCard, 
+              styles.featureCardOverride,
+              {
+                elevation: shadow3Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
+                shadowOpacity: shadow3Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+              }
+            ]}>
               <View style={styles.featureIconContainer}>
                 <LinearGradient
                   colors={['#48BB78', '#38A169']}
@@ -290,6 +323,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
     paddingHorizontal: 20,
+  },
+  featureCardOverride: {
+    // Fix gray rectangle flash during animation
+    elevation: 0, // Remove elevation that causes gray shadow during opacity animation
+    shadowOpacity: 0, // Remove shadow that creates gray background
+    borderWidth: 0,
   },
   featureIconContainer: {
     marginRight: 16,
