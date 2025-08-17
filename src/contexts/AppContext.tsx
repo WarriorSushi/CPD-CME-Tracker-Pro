@@ -668,13 +668,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
         setIsInitializing(true);
         
-        // Initialize notification service
-        try {
-          await NotificationService.initialize();
-
-        } catch (error) {
-      __DEV__ && console.error('💥 AppContext: Failed to initialize notifications:', error);
-        }
+        // Initialize notification service in background (non-blocking)
+        NotificationService.initialize().catch(error => {
+          __DEV__ && console.error('💥 AppContext: Failed to initialize notifications:', error);
+        });
         
         // Load user first (essential for everything else)
         await refreshUserData();

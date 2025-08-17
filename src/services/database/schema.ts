@@ -15,14 +15,25 @@ export const initializeDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
 // Create all tables (assumes transaction is already started by caller)
 export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => {
   try {
-
+    // Check schema version to avoid repeated migrations
+    const schemaVersion = await db.getFirstAsync(`
+      SELECT value FROM app_settings WHERE key = 'schema_version' LIMIT 1
+    `).catch(() => null);
+    
+    const currentVersion = schemaVersion?.value || '0';
+    const latestVersion = '2'; // Increment when schema changes
+    
     // First, handle users table migration/creation
     const tableExists = await db.getFirstAsync(`
       SELECT name FROM sqlite_master WHERE type='table' AND name='users'
     `);
     
+    if (tableExists && currentVersion >= latestVersion) {
+      // Schema is up to date, skip migration checks
+      return;
+    }
+    
     if (tableExists) {
-
       // Check if we need migration (either country column exists or profile columns are missing)
       const columns = await db.getAllAsync('PRAGMA table_info(users)');
       const columnNames = columns.map((col: any) => col.name);
@@ -238,8 +249,16 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
       ('biometric_enabled', 'false'),
       ('theme_mode', 'light'),
       ('backup_enabled', 'true'),
-      ('auto_scan_enabled', 'true');
+      ('auto_scan_enabled', 'true'),
+      ('schema_version', '2');
     `);
+
+    // Update schema version if migrations were performed
+    if (currentVersion < latestVersion) {
+      await db.execAsync(`
+        INSERT OR REPLACE INTO app_settings (key, value) VALUES ('schema_version', '${latestVersion}')
+      `);
+    }
 
   } catch (error) {
       __DEV__ && console.error('💥 createTables: Error creating database tables:', error);
