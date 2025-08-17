@@ -166,6 +166,7 @@ export interface ButtonProps {
   disabled?: boolean;
   loading?: boolean;
   style?: any;
+  textStyle?: any;
 }
 
 // Export utility types

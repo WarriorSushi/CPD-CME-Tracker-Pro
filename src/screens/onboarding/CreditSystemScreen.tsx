@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, Animated } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Card, ProgressIndicator } from '../../components';
-import { theme } from '../../constants/theme';
-import { tokens } from '../../theme/tokens';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ProgressIndicator } from '../../components';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { CreditSystem } from '../../types';
 import { userOperations } from '../../services/database';
 import { useAppContext } from '../../contexts/AppContext';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from './OnboardingComponents';
 
 type CreditSystemScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'CreditSystem'>;
 
@@ -16,12 +16,48 @@ interface Props {
   navigation: CreditSystemScreenNavigationProp;
 }
 
-const CREDIT_SYSTEMS: { value: CreditSystem; title: string; description: string }[] = [
-  { value: 'CME', title: 'CME Credits', description: 'Continuing Medical Education credits' },
-  { value: 'CPD', title: 'CPD Points', description: 'Continuing Professional Development points' },
-  { value: 'CE', title: 'CE Units', description: 'Continuing Education units' },
-  { value: 'Hours', title: 'Contact Hours', description: 'Direct contact or learning hours' },
-  { value: 'Points', title: 'Credit Points', description: 'General professional credit points' },
+const CREDIT_SYSTEMS: { 
+  value: CreditSystem; 
+  title: string; 
+  description: string;
+  icon: string;
+  colors: string[];
+}[] = [
+  { 
+    value: 'CME', 
+    title: 'CME Credits', 
+    description: 'Continuing Medical Education for physicians and healthcare providers',
+    icon: '🩺',
+    colors: ['#667EEA', '#764BA2']
+  },
+  { 
+    value: 'CPD', 
+    title: 'CPD Points', 
+    description: 'Continuing Professional Development for all healthcare professionals',
+    icon: '📚',
+    colors: ['#F093FB', '#F5576C']
+  },
+  { 
+    value: 'CE', 
+    title: 'CE Units', 
+    description: 'Continuing Education units for various healthcare disciplines',
+    icon: '🎓',
+    colors: ['#4FACFE', '#00F2FE']
+  },
+  { 
+    value: 'Hours', 
+    title: 'Contact Hours', 
+    description: 'Direct contact or learning hours for skill development',
+    icon: '⏱️',
+    colors: ['#43E97B', '#38F9D7']
+  },
+  { 
+    value: 'Points', 
+    title: 'Credit Points', 
+    description: 'General professional credit points for career advancement',
+    icon: '⭐',
+    colors: ['#FA709A', '#FEE140']
+  },
 ];
 
 export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
@@ -30,27 +66,66 @@ export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
   const [selectedSystem, setSelectedSystem] = useState<CreditSystem | ''>('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+  const progressAnim = useRef(new Animated.Value(0)).current;
+  const cardAnims = useRef(CREDIT_SYSTEMS.map(() => new Animated.Value(0))).current;
+
+  useEffect(() => {
+    // Entry animations
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 30,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+      Animated.timing(progressAnim, {
+        toValue: 1,
+        duration: 600,
+        delay: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Staggered card animations
+    Animated.sequence([
+      Animated.delay(300),
+      Animated.stagger(100, 
+        cardAnims.map(anim => 
+          Animated.spring(anim, {
+            toValue: 1,
+            tension: 40,
+            friction: 8,
+            useNativeDriver: true,
+          })
+        )
+      ),
+    ]).start();
+  }, []);
+
   const handleContinue = async () => {
     if (selectedSystem) {
       setIsLoading(true);
       try {
-
-        // Save credit system to user data
         const result = await userOperations.updateUser({
           creditSystem: selectedSystem,
         });
 
         if (result.success) {
-
-          // Refresh user data in context to pick up the new credit system
           await refreshUserData();
-
           navigation.navigate('AnnualTarget');
         } else {
-      __DEV__ && console.error('❌ CreditSystemScreen: Failed to save credit system:', result.error);
+          __DEV__ && console.error('❌ CreditSystemScreen: Failed to save credit system:', result.error);
         }
       } catch (error) {
-      __DEV__ && console.error('💥 CreditSystemScreen: Error saving credit system:', error);
+        __DEV__ && console.error('💥 CreditSystemScreen: Error saving credit system:', error);
       } finally {
         setIsLoading(false);
       }
@@ -63,57 +138,138 @@ export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      <View style={styles.content}>
-        <ProgressIndicator currentStep={2} totalSteps={5} />
-        
-        <View style={styles.header}>
-          <Text style={styles.title}>Credit System</Text>
-          <Text style={styles.subtitle}>Which credit system do you use?</Text>
-        </View>
+      <AnimatedGradientBackground />
 
-        <View style={styles.systemsContainer}>
-          {CREDIT_SYSTEMS.map((system) => (
-            <TouchableOpacity
-              key={system.value}
-              style={[
-                styles.systemCard,
-                selectedSystem === system.value && styles.selectedSystemCard,
-              ]}
-              onPress={() => setSelectedSystem(system.value)}
-            >
-              <View style={styles.systemContent}>
-                <Text style={[
-                  styles.systemTitle,
-                  selectedSystem === system.value && styles.selectedSystemTitle,
-                ]}>
-                  {system.title}
-                </Text>
-                <Text style={styles.systemDescription}>
-                  {system.description}
-                </Text>
-              </View>
-              {selectedSystem === system.value && (
-                <Text style={styles.checkmark}>✓</Text>
-              )}
-            </TouchableOpacity>
-          ))}
+      <Animated.View 
+        style={[
+          styles.progressWrapper,
+          {
+            opacity: progressAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
+      >
+        <ProgressIndicator currentStep={2} totalSteps={5} />
+      </Animated.View>
+
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <Animated.View 
+            style={[
+              styles.header,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
+          >
+            <View style={styles.iconContainer}>
+              <LinearGradient
+                colors={['#667EEA', '#764BA2']}
+                style={styles.headerIcon}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Text style={styles.headerEmoji}>📊</Text>
+              </LinearGradient>
+            </View>
+            <Text style={styles.title}>Choose Your Credit System</Text>
+            <Text style={styles.subtitle}>
+              Select the type of continuing education credits you track
+            </Text>
+          </Animated.View>
+
+          <View style={styles.optionsList}>
+            {CREDIT_SYSTEMS.map((system, index) => (
+              <Animated.View 
+                key={system.value}
+                style={[
+                  styles.optionWrapper,
+                  {
+                    opacity: cardAnims[index],
+                    transform: [{
+                      translateY: cardAnims[index].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [20, 0],
+                      }),
+                    }],
+                  },
+                ]}
+              >
+                <PremiumCard
+                  selected={selectedSystem === system.value}
+                  onPress={() => setSelectedSystem(system.value)}
+                  style={styles.optionCard}
+                >
+                  <View style={styles.optionContent}>
+                    <View style={styles.optionIconContainer}>
+                      <LinearGradient
+                        colors={system.colors}
+                        style={styles.optionIconGradient}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                      >
+                        <Text style={styles.optionIcon}>{system.icon}</Text>
+                      </LinearGradient>
+                    </View>
+                    <View style={styles.optionTextContent}>
+                      <Text style={[
+                        styles.optionTitle,
+                        selectedSystem === system.value && styles.selectedOptionTitle,
+                      ]}>
+                        {system.title}
+                      </Text>
+                      <Text style={[
+                        styles.optionDescription,
+                        selectedSystem === system.value && styles.selectedOptionDescription,
+                      ]}>
+                        {system.description}
+                      </Text>
+                    </View>
+                    <View style={[
+                      styles.radioButton,
+                      selectedSystem === system.value && styles.selectedRadioButton,
+                    ]}>
+                      {selectedSystem === system.value && (
+                        <LinearGradient
+                          colors={['#667EEA', '#764BA2']}
+                          style={styles.radioButtonInner}
+                        />
+                      )}
+                    </View>
+                  </View>
+                </PremiumCard>
+              </Animated.View>
+            ))}
+          </View>
         </View>
-      </View>
-      
-      <View style={styles.actions}>
-        <Button
+      </ScrollView>
+
+      <Animated.View 
+        style={[
+          styles.actions,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
+      >
+        <PremiumButton
           title="Continue"
           onPress={handleContinue}
-          style={styles.primaryButton}
           disabled={!selectedSystem}
           loading={isLoading}
+          variant="primary"
+          style={styles.primaryButton}
         />
-        <Button
+        
+        <PremiumButton
           title="Back"
-          variant="outline"
+          variant="ghost"
           onPress={handleBack}
+          style={styles.secondaryButton}
         />
-      </View>
+      </Animated.View>
     </View>
   );
 };
@@ -121,77 +277,128 @@ export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+  },
+  progressWrapper: {
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: 10,
+  },
+  scrollView: {
+    flex: 1,
   },
   content: {
-    flex: 1,
-    padding: theme.spacing[3],
-    justifyContent: 'center',
+    padding: 24,
   },
   header: {
     alignItems: 'center',
-    marginBottom: theme.spacing[4],
+    marginBottom: 32,
+  },
+  iconContainer: {
+    marginBottom: 20,
+  },
+  headerIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#667EEA',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  headerEmoji: {
+    fontSize: 28,
   },
   title: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text.primary,
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#1A202C',
     textAlign: 'center',
-    marginBottom: theme.spacing[2],
+    marginBottom: 8,
+    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text.secondary,
+    fontSize: 16,
+    color: '#4A5568',
     textAlign: 'center',
+    lineHeight: 24,
+    paddingHorizontal: 16,
   },
-  systemsContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  optionsList: {
+    gap: 12,
   },
-  systemCard: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.medium,
-    borderWidth: 2,
-    borderColor: theme.colors.border.light,
-    paddingVertical: theme.spacing[2],
-    paddingHorizontal: theme.spacing[3],
-    marginBottom: theme.spacing[2],
+  optionWrapper: {
+    marginBottom: 4,
+  },
+  optionCard: {
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+  },
+  optionContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
   },
-  selectedSystemCard: {
-    borderColor: theme.colors.primary,
-    backgroundColor: tokens.color.selectedBg,
+  optionIconContainer: {
+    marginRight: 16,
   },
-  systemContent: {
+  optionIconGradient: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  optionIcon: {
+    fontSize: 20,
+  },
+  optionTextContent: {
     flex: 1,
+    marginRight: 12,
   },
-  systemTitle: {
-    fontSize: theme.typography.fontSize.sm,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing[1],
+  optionTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#1A202C',
+    marginBottom: 4,
   },
-  selectedSystemTitle: {
-    color: theme.colors.primary,
+  selectedOptionTitle: {
+    color: '#667EEA',
   },
-  systemDescription: {
-    fontSize: 10,
-    color: theme.colors.text.secondary,
-    lineHeight: 12,
+  optionDescription: {
+    fontSize: 13,
+    color: '#718096',
+    lineHeight: 18,
   },
-  checkmark: {
-    fontSize: 18,
-    color: theme.colors.primary,
-    fontWeight: theme.typography.fontWeight.bold,
-    marginLeft: theme.spacing[3],
+  selectedOptionDescription: {
+    color: '#4A5568',
+  },
+  radioButton: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#CBD5E0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  selectedRadioButton: {
+    borderColor: '#667EEA',
+  },
+  radioButtonInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
   actions: {
-    padding: theme.spacing[3],
-    paddingTop: theme.spacing[2],
+    paddingHorizontal: 24,
+    paddingBottom: 20,
   },
   primaryButton: {
-    marginBottom: theme.spacing[2],
+    marginBottom: 12,
+  },
+  secondaryButton: {
+    // Ghost button styles handled by component
   },
 });

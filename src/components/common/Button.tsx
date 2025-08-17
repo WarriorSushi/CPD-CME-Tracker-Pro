@@ -30,6 +30,7 @@ export const Button: React.FC<ButtonProps> = ({
   disabled = false,
   loading = false,
   style,
+  textStyle,
 }) => {
   const pressAnimation = useSharedValue(0);
 
@@ -226,10 +227,11 @@ export const Button: React.FC<ButtonProps> = ({
     ...(Array.isArray(style) ? style : [style]).filter(Boolean),
   ];
 
-  const textStyle = [
+  const finalTextStyle = [
     styles.text,
     { color: variantStyle.color },
     // Color is now handled in getVariantStyle for disabled state
+    textStyle,
   ];
 
   return (
@@ -244,7 +246,7 @@ export const Button: React.FC<ButtonProps> = ({
       {loading ? (
         <ActivityIndicator size="small" color={variantStyle.color as string} />
       ) : (
-        <Text style={textStyle}>{title}</Text>
+        <Text style={finalTextStyle}>{title}</Text>
       )}
     </AnimatedTouchableOpacity>
   );

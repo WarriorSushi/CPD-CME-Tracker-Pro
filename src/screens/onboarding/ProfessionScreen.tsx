@@ -1,11 +1,22 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TextInput, 
+  KeyboardAvoidingView,
+  Platform,
+  Animated,
+  Keyboard,
+  TouchableWithoutFeedback
+} from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Card, ProgressIndicator } from '../../components';
-import { theme } from '../../constants/theme';
-import { OnboardingStackParamList, Profession } from '../../types';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ProgressIndicator } from '../../components';
+import { OnboardingStackParamList } from '../../types';
 import { userOperations } from '../../services/database';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from './OnboardingComponents';
 
 type ProfessionScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Profession'>;
 
@@ -13,58 +24,64 @@ interface Props {
   navigation: ProfessionScreenNavigationProp;
 }
 
-const PROFESSIONS: { value: Profession; title: string; description: string }[] = [
-  {
-    value: 'Physician',
-    title: 'Physician',
-    description: 'Doctors, specialists, and medical practitioners',
-  },
-  {
-    value: 'Nurse',
-    title: 'Nurse',
-    description: 'All nursing roles and care providers',
-  },
-  {
-    value: 'Pharmacist',
-    title: 'Pharmacist',
-    description: 'Medication and pharmaceutical professionals',
-  },
-  {
-    value: 'Allied Health',
-    title: 'Allied Health Professional',
-    description: 'Therapists, technologists, and support professionals',
-  },
-  {
-    value: 'Other',
-    title: 'Other Healthcare Professional',
-    description: 'All other licensed healthcare workers',
-  },
-];
-
 export const ProfessionScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const [selectedProfession, setSelectedProfession] = useState<Profession | null>(null);
+  const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+  const inputScaleAnim = useRef(new Animated.Value(0.96)).current;
+  const progressAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Entry animations with better timing
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 30,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+      Animated.spring(inputScaleAnim, {
+        toValue: 1,
+        tension: 40,
+        friction: 8,
+        delay: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(progressAnim, {
+        toValue: 1,
+        duration: 600,
+        delay: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const handleContinue = async () => {
-    if (!selectedProfession) return;
+    if (!name.trim()) return;
 
     setIsLoading(true);
     
     try {
-      // Save profession to database
       const result = await userOperations.updateUser({
-        profession: selectedProfession,
+        profileName: name.trim(),
       });
 
       if (result.success) {
         navigation.navigate('CreditSystem');
       } else {
-        // Handle error - in a real app, we'd show an error message
-      __DEV__ && console.error('Failed to save profession:', result.error);
+        __DEV__ && console.error('Failed to save name:', result.error);
       }
     } catch (error) {
-      __DEV__ && console.error('Error saving profession:', error);
+      __DEV__ && console.error('Error saving name:', error);
     } finally {
       setIsLoading(false);
     }
@@ -75,165 +92,236 @@ export const ProfessionScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.content}>
-          <ProgressIndicator currentStep={1} totalSteps={5} />
-          
-          <View style={styles.header}>
-            <Text style={styles.title}>What's your profession?</Text>
-            <Text style={styles.subtitle}>
-              This helps us configure the right CE requirements and categories for your field.
-            </Text>
-          </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <AnimatedGradientBackground />
 
-          <View style={styles.professionList}>
-            {PROFESSIONS.map((profession) => (
-              <TouchableOpacity
-                key={profession.value}
-                onPress={() => setSelectedProfession(profession.value)}
-                activeOpacity={0.7}
-              >
-                <Card 
-                  variant={selectedProfession === profession.value ? 'selected' : 'outline'}
-                  style={styles.compactCard}
+        <KeyboardAvoidingView 
+          style={styles.keyboardView}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <View style={styles.content}>
+            <Animated.View 
+              style={[
+                styles.progressWrapper,
+                {
+                  opacity: progressAnim,
+                  transform: [{ translateY: slideAnim }],
+                },
+              ]}
+            >
+              <ProgressIndicator currentStep={1} totalSteps={5} />
+            </Animated.View>
+            
+            <Animated.View 
+              style={[
+                styles.header,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ translateY: slideAnim }],
+                },
+              ]}
+            >
+              <View style={styles.emojiContainer}>
+                <LinearGradient
+                  colors={['#667EEA', '#764BA2']}
+                  style={styles.emojiGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
                 >
-                  <View style={styles.professionContent}>
-                    <View style={styles.professionTextContent}>
-                      <Text style={[
-                        styles.professionTitle,
-                        selectedProfession === profession.value && styles.selectedProfessionTitle,
-                      ]}>
-                        {profession.title}
-                      </Text>
-                      <Text style={[
-                        styles.professionDescription,
-                        selectedProfession === profession.value && styles.selectedProfessionDescription,
-                      ]}>
-                        {profession.description}
-                      </Text>
-                    </View>
-                    <View style={[
-                      styles.radioButton,
-                      selectedProfession === profession.value && styles.selectedRadioButton,
-                    ]}>
-                      {selectedProfession === profession.value && (
-                        <View style={styles.radioButtonInner} />
-                      )}
-                    </View>
-                  </View>
-                </Card>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      </ScrollView>
+                  <Text style={styles.emoji}>👋</Text>
+                </LinearGradient>
+              </View>
+              <Text style={styles.title}>What should we call you?</Text>
+              <Text style={styles.subtitle}>
+                Let's personalize your experience with a friendly touch
+              </Text>
+            </Animated.View>
 
-      <View style={styles.actions}>
-        <Button
-          title="Continue"
-          onPress={handleContinue}
-          disabled={!selectedProfession}
-          loading={isLoading}
-          style={styles.primaryButton}
-        />
-        
-        <Button
-          title="Back"
-          variant="outline"
-          onPress={handleBack}
-          style={styles.secondaryButton}
-        />
+            <Animated.View 
+              style={[
+                styles.inputContainer,
+                {
+                  opacity: fadeAnim,
+                  transform: [
+                    { scale: inputScaleAnim },
+                    { translateY: slideAnim },
+                  ],
+                },
+              ]}
+            >
+              <PremiumCard style={styles.inputCard}>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your preferred name"
+                    placeholderTextColor="#A0AEC0"
+                    value={name}
+                    onChangeText={setName}
+                    autoCapitalize="words"
+                    autoCorrect={false}
+                    returnKeyType="done"
+                    onSubmitEditing={handleContinue}
+                    maxLength={50}
+                    autoFocus={true}
+                  />
+                  {name.length > 0 && (
+                    <Animated.View style={styles.inputIndicator}>
+                      <LinearGradient
+                        colors={['#48BB78', '#38A169']}
+                        style={styles.checkmarkGradient}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                      >
+                        <Text style={styles.checkmark}>✓</Text>
+                      </LinearGradient>
+                    </Animated.View>
+                  )}
+                </View>
+              </PremiumCard>
+              <Text style={styles.inputHint}>
+                This is how we'll address you throughout the app
+              </Text>
+            </Animated.View>
+          </View>
+
+          <Animated.View 
+            style={[
+              styles.actions,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
+          >
+            <PremiumButton
+              title="Continue"
+              onPress={handleContinue}
+              disabled={!name.trim()}
+              loading={isLoading}
+              variant="primary"
+              style={styles.primaryButton}
+            />
+            
+            <PremiumButton
+              title="Back"
+              variant="ghost"
+              onPress={handleBack}
+              style={styles.secondaryButton}
+            />
+          </Animated.View>
+        </KeyboardAvoidingView>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
-  scrollView: {
+  keyboardView: {
     flex: 1,
   },
   content: {
-    padding: theme.spacing[3],
+    flex: 1,
+    justifyContent: 'center',
+    padding: 24,
+  },
+  progressWrapper: {
+    position: 'absolute',
+    top: 24,
+    left: 24,
+    right: 24,
   },
   header: {
-    marginBottom: theme.spacing[3],
-    marginTop: theme.spacing[1],
+    alignItems: 'center',
+    marginBottom: 48,
+  },
+  emojiContainer: {
+    marginBottom: 24,
+  },
+  emojiGradient: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#667EEA',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  emoji: {
+    fontSize: 40,
   },
   title: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text.primary,
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#1A202C',
     textAlign: 'center',
-    marginBottom: theme.spacing[2],
+    marginBottom: 12,
+    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text.secondary,
+    fontSize: 16,
+    color: '#4A5568',
     textAlign: 'center',
-    lineHeight: 18,
+    lineHeight: 24,
+    paddingHorizontal: 16,
   },
-  professionList: {
-    gap: theme.spacing[1],
+  inputContainer: {
+    marginBottom: 48,
   },
-  compactCard: {
-    padding: theme.spacing[2],
+  inputCard: {
+    padding: 0,
+    overflow: 'hidden',
   },
-  professionContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  inputWrapper: {
+    position: 'relative',
   },
-  professionTextContent: {
-    flex: 1,
-    marginRight: theme.spacing[1],
+  input: {
+    padding: 20,
+    fontSize: 18,
+    color: '#1A202C',
+    textAlign: 'center',
+    fontWeight: '500',
+    backgroundColor: 'transparent',
   },
-  professionTitle: {
-    fontSize: theme.typography.fontSize.sm,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text.primary,
-    marginBottom: 0,
+  inputIndicator: {
+    position: 'absolute',
+    right: 20,
+    top: '50%',
+    transform: [{ translateY: -16 }],
   },
-  selectedProfessionTitle: {
-    color: theme.colors.primary,
-  },
-  professionDescription: {
-    fontSize: 10,
-    color: theme.colors.text.secondary,
-    lineHeight: 12,
-  },
-  selectedProfessionDescription: {
-    color: theme.colors.text.primary,
-  },
-  radioButton: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: theme.colors.border.medium,
-    alignItems: 'center',
+  checkmarkGradient: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: 'center',
+    alignItems: 'center',
   },
-  selectedRadioButton: {
-    borderColor: theme.colors.primary,
+  checkmark: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
-  radioButtonInner: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: theme.colors.primary,
+  inputHint: {
+    fontSize: 14,
+    color: '#718096',
+    textAlign: 'center',
+    marginTop: 12,
+    fontStyle: 'italic',
   },
   actions: {
-    padding: theme.spacing[3],
-    paddingTop: 0,
+    paddingHorizontal: 24,
+    paddingBottom: 20,
   },
   primaryButton: {
-    marginBottom: theme.spacing[2],
+    marginBottom: 12,
   },
   secondaryButton: {
-    // Secondary button styles
+    // Ghost button styles handled by component
   },
 });

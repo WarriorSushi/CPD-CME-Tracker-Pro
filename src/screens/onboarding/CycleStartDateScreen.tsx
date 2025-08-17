@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Card, DatePicker, ProgressIndicator } from '../../components';
-import { theme } from '../../constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { DatePicker, ProgressIndicator } from '../../components';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { userOperations } from '../../services/database';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from './OnboardingComponents';
 
 type CycleStartDateScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'CycleStartDate'>;
 
@@ -27,6 +28,15 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
   const [customDate, setCustomDate] = useState<Date | null>(null);
   const [askAboutLicenseSync, setAskAboutLicenseSync] = useState(false);
   const [licenseSyncSelected, setLicenseSyncSelected] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+  const progressAnim = useRef(new Animated.Value(0)).current;
+  const optionCardsAnim = useRef(QUICK_OPTIONS.map(() => new Animated.Value(0))).current;
+  const customCardAnim = useRef(new Animated.Value(0)).current;
+  const syncCardAnim = useRef(new Animated.Value(0)).current;
 
   const handleQuickSelect = (monthsAgo: number, index: number) => {
     const cycleStartDate = new Date();
@@ -57,11 +67,70 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
     setAskAboutLicenseSync(true);
   };
 
+  useEffect(() => {
+    // Entry animations
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 30,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+      Animated.timing(progressAnim, {
+        toValue: 1,
+        duration: 600,
+        delay: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Staggered card animations
+    Animated.sequence([
+      Animated.delay(300),
+      Animated.stagger(80, [
+        ...optionCardsAnim.map(anim => 
+          Animated.spring(anim, {
+            toValue: 1,
+            tension: 40,
+            friction: 8,
+            useNativeDriver: true,
+          })
+        ),
+        Animated.spring(customCardAnim, {
+          toValue: 1,
+          tension: 40,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+  }, []);
+
+  useEffect(() => {
+    // Animate sync card when it becomes visible
+    if (askAboutLicenseSync && isValid) {
+      Animated.spring(syncCardAnim, {
+        toValue: 1,
+        tension: 40,
+        friction: 8,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      syncCardAnim.setValue(0);
+    }
+  }, [askAboutLicenseSync, isValid]);
+
   const handleContinue = async () => {
     if (selectedOption !== null || customDate) {
       const selectedDate = getSelectedDate();
       if (!selectedDate) return;
 
+      setIsLoading(true);
       try {
         // Get user's requirement period to calculate end date
         const userResult = await userOperations.getCurrentUser();
@@ -78,16 +147,14 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
         });
 
         if (result.success) {
-
-          navigation.navigate('LicenseSetup', {
-            cycleStartDate: selectedDate?.toISOString(),
-            syncWithLicense: licenseSyncSelected === true,
-          });
+          navigation.navigate('SetupComplete');
         } else {
-      __DEV__ && console.error('❌ CycleStartDateScreen: Failed to save cycle dates');
+          __DEV__ && console.error('❌ CycleStartDateScreen: Failed to save cycle dates');
         }
       } catch (error) {
-      __DEV__ && console.error('💥 CycleStartDateScreen: Error saving cycle dates:', error);
+        __DEV__ && console.error('💥 CycleStartDateScreen: Error saving cycle dates:', error);
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -125,159 +192,277 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
   const isValid = selectedOption !== null || customDate !== null;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      <AnimatedGradientBackground />
+
+      <Animated.View 
+        style={[
+          styles.progressWrapper,
+          {
+            opacity: progressAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
+      >
+        <ProgressIndicator currentStep={4} totalSteps={5} />
+      </Animated.View>
+
       <ScrollView 
         style={styles.scrollView}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <ProgressIndicator currentStep={4} totalSteps={5} />
-        
-        <View style={styles.header}>
-          <Text style={styles.title}>When did your cycle start?</Text>
-          <Text style={styles.subtitle}>
-            Rough dates are fine! This helps show accurate progress.
-          </Text>
-        </View>
-
-        <View style={styles.optionsContainer}>
-          <Text style={styles.sectionTitle}>Choose the closest option:</Text>
-          
-          {QUICK_OPTIONS.map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.optionCard,
-                selectedOption === index && styles.selectedCard,
-              ]}
-              onPress={() => handleQuickSelect(option.months, index)}
-            >
-              <View style={styles.optionContent}>
-                <Text style={[
-                  styles.optionText,
-                  selectedOption === index && styles.selectedText,
-                ]}>
-                  {option.label}
-                </Text>
-                {option.months !== 0 && (
-                  <Text style={[
-                    styles.optionDate,
-                    selectedOption === index && styles.selectedDateText,
-                  ]}>
-                    {(() => {
-                      const date = new Date();
-                      date.setMonth(date.getMonth() + option.months);
-                      return `(${formatDateForDisplay(date)})`;
-                    })()}
-                  </Text>
-                )}
-              </View>
-              <View style={[
-                styles.radioButton,
-                selectedOption === index && styles.radioSelected,
-              ]} />
-            </TouchableOpacity>
-          ))}
-
-          <TouchableOpacity
+        <View style={styles.content}>
+          <Animated.View 
             style={[
-              styles.optionCard,
-              selectedOption === -1 && styles.selectedCard,
+              styles.header,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }],
+              },
             ]}
-            onPress={handleCustomDate}
           >
-            <View style={styles.optionContent}>
-              <Text style={[
-                styles.optionText,
-                selectedOption === -1 && styles.selectedText,
-              ]}>
-                Pick a different date
-              </Text>
-              <Text style={styles.optionSubtext}>
-                {customDate ? formatDateForDisplay(customDate) : 'Select any month and year'}
-              </Text>
-            </View>
-            <View style={[
-              styles.radioButton,
-              selectedOption === -1 && styles.radioSelected,
-            ]} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Custom Date Picker */}
-        {selectedOption === -1 && (
-          <View style={styles.datePickerContainer}>
-            <DatePicker
-              value={customDate || new Date(new Date().setFullYear(new Date().getFullYear() - 1))}
-              onDateChange={handleDatePickerChange}
-              maximumDate={new Date()}
-              minimumDate={new Date(2015, 0, 1)}
-              style={styles.customDatePicker}
-            />
-          </View>
-        )}
-
-        {/* License Sync Option */}
-        {askAboutLicenseSync && isValid && (
-          <View style={styles.syncCard}>
-            <View style={styles.syncContent}>
-              <Text style={styles.syncIcon}>🔔</Text>
-              <Text style={styles.syncTitle}>License renewal reminder calculation with same dates?</Text>
-            </View>
-            <View style={styles.syncButtons}>
-              <TouchableOpacity 
-                style={[
-                  styles.syncButtonYes,
-                  licenseSyncSelected === true && styles.syncButtonYesSelected,
-                ]}
-                onPress={handleLicenseSyncYes}
+            <View style={styles.iconContainer}>
+              <LinearGradient
+                colors={['#4FACFE', '#00F2FE']}
+                style={styles.headerIcon}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
               >
-                <Text style={[
-                  styles.syncButtonYesText,
-                  licenseSyncSelected === true && styles.syncButtonYesTextSelected,
-                ]}>
-                  Yes
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[
-                  styles.syncButtonNo,
-                  licenseSyncSelected === false && styles.syncButtonNoSelected,
-                ]}
-                onPress={handleLicenseSyncNo}
-              >
-                <Text style={[
-                  styles.syncButtonNoText,
-                  licenseSyncSelected === false && styles.syncButtonNoTextSelected,
-                ]}>
-                  No
-                </Text>
-              </TouchableOpacity>
+                <Text style={styles.headerEmoji}>📅</Text>
+              </LinearGradient>
             </View>
-          </View>
-        )}
+            <Text style={styles.title}>When did your cycle start?</Text>
+            <Text style={styles.subtitle}>
+              Rough dates are fine! This helps show accurate progress.
+            </Text>
+          </Animated.View>
 
-        <View style={styles.reassurance}>
-          <Text style={styles.reassuranceText}>
-            💡 You can adjust this later in Settings
-          </Text>
+          <View style={styles.optionsContainer}>
+            <Text style={styles.sectionTitle}>Choose the closest option:</Text>
+            
+            {QUICK_OPTIONS.map((option, index) => (
+              <Animated.View
+                key={index}
+                style={[
+                  styles.optionWrapper,
+                  {
+                    opacity: optionCardsAnim[index],
+                    transform: [{
+                      translateY: optionCardsAnim[index].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [15, 0],
+                      }),
+                    }],
+                  },
+                ]}
+              >
+                <PremiumCard
+                  selected={selectedOption === index}
+                  onPress={() => handleQuickSelect(option.months, index)}
+                  style={styles.optionCard}
+                >
+                  <View style={styles.optionContent}>
+                    <View style={styles.optionTextContent}>
+                      <Text style={[
+                        styles.optionText,
+                        selectedOption === index && styles.selectedText,
+                      ]}>
+                        {option.label}
+                      </Text>
+                      {option.months !== 0 && (
+                        <Text style={[
+                          styles.optionDate,
+                          selectedOption === index && styles.selectedDateText,
+                        ]}>
+                          {(() => {
+                            const date = new Date();
+                            date.setMonth(date.getMonth() + option.months);
+                            return `(${formatDateForDisplay(date)})`;
+                          })()}
+                        </Text>
+                      )}
+                    </View>
+                    <View style={[
+                      styles.radioButton,
+                      selectedOption === index && styles.radioSelected,
+                    ]}>
+                      {selectedOption === index && (
+                        <LinearGradient
+                          colors={['#4FACFE', '#00F2FE']}
+                          style={styles.radioButtonInner}
+                        />
+                      )}
+                    </View>
+                  </View>
+                </PremiumCard>
+              </Animated.View>
+            ))}
+
+            <Animated.View
+              style={[
+                styles.optionWrapper,
+                {
+                  opacity: customCardAnim,
+                  transform: [{
+                    translateY: customCardAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [15, 0],
+                    }),
+                  }],
+                },
+              ]}
+            >
+              <PremiumCard
+                selected={selectedOption === -1}
+                onPress={handleCustomDate}
+                style={styles.optionCard}
+              >
+                <View style={styles.optionContent}>
+                  <View style={styles.optionTextContent}>
+                    <Text style={[
+                      styles.optionText,
+                      selectedOption === -1 && styles.selectedText,
+                    ]}>
+                      Pick a different date
+                    </Text>
+                    <Text style={styles.optionSubtext}>
+                      {customDate ? formatDateForDisplay(customDate) : 'Select any month and year'}
+                    </Text>
+                  </View>
+                  <View style={[
+                    styles.radioButton,
+                    selectedOption === -1 && styles.radioSelected,
+                  ]}>
+                    {selectedOption === -1 && (
+                      <LinearGradient
+                        colors={['#4FACFE', '#00F2FE']}
+                        style={styles.radioButtonInner}
+                      />
+                    )}
+                  </View>
+                </View>
+              </PremiumCard>
+            </Animated.View>
+          </View>
+
+          {/* Custom Date Picker */}
+          {selectedOption === -1 && (
+            <View style={styles.datePickerContainer}>
+              <PremiumCard style={styles.datePickerCard}>
+                <DatePicker
+                  value={customDate || new Date(new Date().setFullYear(new Date().getFullYear() - 1))}
+                  onDateChange={handleDatePickerChange}
+                  maximumDate={new Date()}
+                  minimumDate={new Date(2015, 0, 1)}
+                  style={styles.customDatePicker}
+                />
+              </PremiumCard>
+            </View>
+          )}
+
+          {/* License Sync Option */}
+          {askAboutLicenseSync && isValid && (
+            <Animated.View
+              style={[
+                styles.syncWrapper,
+                {
+                  opacity: syncCardAnim,
+                  transform: [{
+                    translateY: syncCardAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [15, 0],
+                    }),
+                  }],
+                },
+              ]}
+            >
+              <PremiumCard style={styles.syncCard}>
+                <View style={styles.syncContent}>
+                  <LinearGradient
+                    colors={['#43E97B', '#38F9D7']}
+                    style={styles.syncIcon}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <Text style={styles.syncEmoji}>🔔</Text>
+                  </LinearGradient>
+                  <Text style={styles.syncTitle}>License renewal reminder calculation with same dates?</Text>
+                </View>
+                <View style={styles.syncButtons}>
+                  <PremiumCard 
+                    selected={licenseSyncSelected === true}
+                    onPress={handleLicenseSyncYes}
+                    style={styles.syncButton}
+                  >
+                    <Text style={[
+                      styles.syncButtonText,
+                      licenseSyncSelected === true && styles.syncButtonTextSelected,
+                    ]}>
+                      Yes
+                    </Text>
+                  </PremiumCard>
+                  <PremiumCard 
+                    selected={licenseSyncSelected === false}
+                    onPress={handleLicenseSyncNo}
+                    style={styles.syncButton}
+                  >
+                    <Text style={[
+                      styles.syncButtonText,
+                      licenseSyncSelected === false && styles.syncButtonTextSelected,
+                    ]}>
+                      No
+                    </Text>
+                  </PremiumCard>
+                </View>
+              </PremiumCard>
+            </Animated.View>
+          )}
+
+          <PremiumCard style={styles.reassurance}>
+            <View style={styles.reassuranceContent}>
+              <LinearGradient
+                colors={['#FA709A', '#FEE140']}
+                style={styles.reassuranceIcon}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Text style={styles.reassuranceEmoji}>💡</Text>
+              </LinearGradient>
+              <Text style={styles.reassuranceText}>
+                You can adjust this later in Settings
+              </Text>
+            </View>
+          </PremiumCard>
         </View>
       </ScrollView>
       
-      <View style={[styles.actions, { paddingBottom: insets.bottom }]}>
-        <Button
+      <Animated.View 
+        style={[
+          styles.actions,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
+      >
+        <PremiumButton
           title="Continue"
           onPress={handleContinue}
-          style={styles.primaryButton}
           disabled={!isValid}
+          loading={isLoading}
+          variant="primary"
+          style={styles.primaryButton}
         />
-        <Button
+        
+        <PremiumButton
           title="Back"
-          variant="outline"
+          variant="ghost"
           onPress={handleBack}
+          style={styles.secondaryButton}
         />
-      </View>
+      </Animated.View>
     </View>
   );
 };
@@ -285,197 +470,212 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+  },
+  progressWrapper: {
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: 10,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    padding: theme.spacing[3],
-    paddingTop: theme.spacing[2],
+    paddingHorizontal: 24,
+    paddingBottom: 100,
+  },
+  content: {
+    paddingVertical: 20,
   },
   header: {
     alignItems: 'center',
-    marginBottom: theme.spacing[3],
+    marginBottom: 32,
+  },
+  iconContainer: {
+    marginBottom: 20,
+  },
+  headerIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#4FACFE',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  headerEmoji: {
+    fontSize: 28,
   },
   title: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text.primary,
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#1A202C',
     textAlign: 'center',
-    marginBottom: theme.spacing[1],
+    marginBottom: 8,
+    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 11,
-    color: theme.colors.text.secondary,
+    fontSize: 16,
+    color: '#4A5568',
     textAlign: 'center',
-    lineHeight: 14,
+    lineHeight: 24,
+    paddingHorizontal: 16,
   },
   optionsContainer: {
-    marginBottom: theme.spacing[2],
+    marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: theme.typography.fontSize.sm,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing[2],
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1A202C',
+    marginBottom: 16,
+  },
+  optionWrapper: {
+    marginBottom: 8,
   },
   optionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: theme.spacing[2],
-    marginBottom: theme.spacing[1],
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.medium,
-    borderWidth: 2,
-    borderColor: theme.colors.border.light,
-  },
-  selectedCard: {
-    borderColor: theme.colors.primary,
-    borderWidth: 2,
-    backgroundColor: theme.colors.surface,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
   },
   optionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  optionTextContent: {
     flex: 1,
+    marginRight: 16,
   },
   optionText: {
-    fontSize: theme.typography.fontSize.sm,
-    fontWeight: theme.typography.fontWeight.medium,
-    color: theme.colors.text.primary,
-    marginBottom: 2,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1A202C',
+    marginBottom: 4,
   },
   selectedText: {
-    color: theme.colors.text.primary,
-    fontWeight: theme.typography.fontWeight.bold,
+    color: '#4FACFE',
   },
   optionDate: {
-    fontSize: 10,
-    color: theme.colors.text.secondary,
+    fontSize: 13,
+    color: '#718096',
   },
   selectedDateText: {
-    color: theme.colors.text.secondary,
+    color: '#4A5568',
   },
   optionSubtext: {
-    fontSize: 10,
-    color: theme.colors.text.secondary,
+    fontSize: 13,
+    color: '#718096',
   },
   radioButton: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     borderWidth: 2,
-    borderColor: theme.colors.border.medium,
-    marginLeft: theme.spacing[2],
+    borderColor: '#CBD5E0',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   radioSelected: {
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primary,
+    borderColor: '#4FACFE',
+  },
+  radioButtonInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
   datePickerContainer: {
-    marginTop: theme.spacing[1],
-    marginBottom: theme.spacing[2],
-    paddingHorizontal: theme.spacing[1],
+    marginTop: 16,
+    marginBottom: 20,
+  },
+  datePickerCard: {
+    paddingVertical: 20,
+    paddingHorizontal: 16,
   },
   customDatePicker: {
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.primary,
+    backgroundColor: 'transparent',
+  },
+  syncWrapper: {
+    marginBottom: 20,
   },
   syncCard: {
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.success,
-    borderWidth: 2,
-    borderRadius: theme.borderRadius.medium,
-    padding: theme.spacing[2],
-    marginBottom: theme.spacing[2],
+    paddingVertical: 20,
+    paddingHorizontal: 20,
   },
   syncContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: theme.spacing[2],
+    marginBottom: 16,
   },
   syncIcon: {
-    fontSize: 18,
-    marginRight: theme.spacing[2],
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  syncEmoji: {
+    fontSize: 16,
   },
   syncTitle: {
-    fontSize: 10,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text.primary,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1A202C',
     flex: 1,
+    lineHeight: 22,
   },
   syncButtons: {
     flexDirection: 'row',
-    gap: theme.spacing[1],
+    gap: 12,
   },
-  syncButtonYes: {
+  syncButton: {
     flex: 1,
-    paddingVertical: theme.spacing[2],
-    backgroundColor: '#ffffff',
-    borderRadius: theme.borderRadius.medium,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#000000',
   },
-  syncButtonYesText: {
-    fontSize: theme.typography.fontSize.xs,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: '#000000',
+  syncButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1A202C',
   },
-  syncButtonYesSelected: {
-    backgroundColor: '#000000',
-    borderWidth: 1,
-    borderColor: '#000000',
-  },
-  syncButtonYesTextSelected: {
-    color: '#ffffff',
-    fontWeight: theme.typography.fontWeight.bold,
-  },
-  syncButtonNo: {
-    flex: 1,
-    paddingVertical: theme.spacing[2],
-    backgroundColor: '#ffffff',
-    borderRadius: theme.borderRadius.medium,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#000000',
-  },
-  syncButtonNoText: {
-    fontSize: theme.typography.fontSize.xs,
-    fontWeight: theme.typography.fontWeight.medium,
-    color: '#000000',
-  },
-  syncButtonNoSelected: {
-    backgroundColor: '#000000',
-    borderColor: '#000000',
-    borderWidth: 1,
-  },
-  syncButtonNoTextSelected: {
-    color: '#ffffff',
-    fontWeight: theme.typography.fontWeight.bold,
+  syncButtonTextSelected: {
+    color: '#4FACFE',
   },
   reassurance: {
-    backgroundColor: theme.colors.surface,
-    padding: theme.spacing[2],
-    borderRadius: theme.borderRadius.medium,
-    borderLeftWidth: 3,
-    borderLeftColor: theme.colors.success,
-    borderWidth: 1,
-    borderColor: theme.colors.border.light,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    marginTop: 12,
+  },
+  reassuranceContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  reassuranceIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  reassuranceEmoji: {
+    fontSize: 12,
   },
   reassuranceText: {
-    fontSize: 9,
-    color: theme.colors.text.secondary,
-    lineHeight: 11,
-    textAlign: 'center',
+    fontSize: 14,
+    color: '#4A5568',
+    flex: 1,
   },
   actions: {
-    padding: theme.spacing[3],
-    paddingTop: theme.spacing[2],
-    backgroundColor: theme.colors.background,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border.light,
+    paddingHorizontal: 24,
+    paddingBottom: 20,
   },
   primaryButton: {
-    marginBottom: theme.spacing[1],
+    marginBottom: 12,
+  },
+  secondaryButton: {
+    // Ghost button styles handled by component
   },
 });
