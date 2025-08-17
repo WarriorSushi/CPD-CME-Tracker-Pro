@@ -15,24 +15,24 @@ This directory contains the audio assets for CME Tracker's comprehensive sound f
 - **Form Integration**: AddCMEScreen with comprehensive audio feedback
 - **SoundSettingsScreen**: User control panel for sound preferences
 
-### 🎯 **Sound Types & Usage**
+### 🎯 **Sound Types & File Mapping**
 
-| Sound Type | Usage | Volume | Duration | Frequency |
-|------------|-------|--------|----------|-----------|
-| `buttonTap` | Light interactions, secondary buttons | 0.2 | 80ms | 1000Hz |
-| `buttonPress` | Primary actions, form submissions | 0.25 | 120ms | 800Hz |
-| `navigationSwipe` | Screen transitions, swipe gestures | 0.15 | 150ms | 600Hz |
-| `success` | Positive confirmations, completions | 0.4 | 300ms | 880Hz (A5) |
-| `error` | Validation errors, failed operations | 0.35 | 250ms | 300Hz |
-| `notification` | Alerts, reminders | 0.3 | 400ms | 1200Hz |
-| `modalOpen` | Dialog/modal appearance | 0.2 | 200ms | 440Hz (A4) |
-| `modalClose` | Dialog/modal dismissal | 0.18 | 150ms | 330Hz |
-| `formSubmit` | Form processing start | 0.25 | 250ms | 660Hz (E5) |
-| `entryAdd` | New entry creation | 0.3 | 300ms | 523Hz (C5) |
-| `entryDelete` | Entry removal | 0.25 | 200ms | 220Hz (A3) |
-| `refresh` | Data refresh operations | 0.2 | 120ms | 1760Hz (A6) |
-| `toggle` | Switch/toggle state changes | 0.22 | 100ms | 880Hz (A5) |
-| `focus` | Input field focus | 0.15 | 60ms | 1320Hz (E6) |
+| Sound Type | Usage | Actual File Used | Volume | Description |
+|------------|-------|------------------|--------|-------------|
+| `buttonTap` | Light interactions, secondary buttons | `button-press.mp3` | 0.15 | Lower volume for light taps |
+| `buttonPress` | Primary actions, form submissions | `button-press.mp3` | 0.25 | Higher volume for primary actions |
+| `navigationSwipe` | Screen transitions, swipe gestures | `navigation-swipe.mp3` | 0.18 | Subtle navigation feedback |
+| `success` | Positive confirmations, completions | `entry-add.mp3` | 0.35 | Positive feedback using entry-add sound |
+| `error` | Validation errors, failed operations | `error.mp3` | 0.3 | Dedicated error sound |
+| `notification` | Alerts, reminders | `notification.mp3` | 0.25 | App notifications |
+| `modalOpen` | Dialog/modal appearance | `navigation-swipe.mp3` | 0.15 | Subtle modal appearance |
+| `modalClose` | Dialog/modal dismissal | `navigation-swipe.mp3` | 0.12 | Even more subtle dismissal |
+| `formSubmit` | Form processing start | `button-press.mp3` | 0.28 | Confirming form submission |
+| `entryAdd` | New entry creation | `entry-add.mp3` | 0.3 | Dedicated entry creation sound |
+| `entryDelete` | Entry removal | `entry-delete.mp3` | 0.25 | Dedicated entry removal sound |
+| `refresh` | Data refresh operations | `button-press.mp3` | 0.15 | Very subtle refresh feedback |
+| `toggle` | Switch/toggle state changes | `button-press.mp3` | 0.18 | Clear but soft toggle feedback |
+| `focus` | Input field focus | `button-press.mp3` | 0.1 | Very subtle input focus |
 
 ### 🔧 **Technical Implementation**
 
@@ -123,27 +123,27 @@ const handleSubmit = async () => {
 5. **Contextual**: Different sounds for different interaction types
 6. **Respectful**: Honors system silent mode settings
 
-### 📁 **Required Audio Files**
+### 📁 **Available Audio Files**
 
-The following MP3 files need to be placed in this directory:
+The following MP3 files are currently available in this directory:
 
 ```
 assets/sounds/
-├── button-tap.mp3          # Light button interactions
-├── button-press.mp3        # Primary button actions
-├── navigation-swipe.mp3    # Screen transitions
-├── success.mp3             # Success confirmations
-├── error.mp3               # Error alerts
-├── notification.mp3        # App notifications
-├── modal-open.mp3          # Modal appearance
-├── modal-close.mp3         # Modal dismissal
-├── form-submit.mp3         # Form submissions
-├── entry-add.mp3           # Entry creation
-├── entry-delete.mp3        # Entry removal
-├── refresh.mp3             # Data refresh
-├── toggle.mp3              # Toggle switches
-└── focus.mp3               # Input focus
+├── button-press.mp3        # Primary button actions (11KB)
+├── entry-add.mp3           # Entry creation (35KB)
+├── entry-delete.mp3        # Entry removal (31KB)
+├── error.mp3               # Error alerts (17KB)
+├── navigation-swipe.mp3    # Screen transitions (27KB)
+└── notification.mp3        # App notifications (98KB)
 ```
+
+**Smart File Mapping**: The sound system intelligently maps these 6 real files to all 14 interaction types using different volume levels:
+- `button-press.mp3` → Used for buttons, form submission, refresh, toggle, focus
+- `entry-add.mp3` → Used for success feedback and entry creation
+- `entry-delete.mp3` → Used for entry deletion
+- `error.mp3` → Used for error feedback
+- `navigation-swipe.mp3` → Used for navigation and modal interactions
+- `notification.mp3` → Used for app notifications
 
 ### 🔗 **Recommended Sound Sources**
 
