@@ -526,12 +526,6 @@ export const NotificationSettingsScreen: React.FC<Props> = ({ navigation }) => {
         />
       )}
 
-      {saving && (
-        <View style={styles.savingOverlay}>
-          <LoadingSpinner size="large" />
-          <Text style={styles.savingText}>Updating notifications...</Text>
-        </View>
-      )}
     </View>
   );
 };
@@ -724,23 +718,6 @@ const styles = StyleSheet.create({
   },
   testButton: {
     marginBottom: theme.spacing[2],
-  },
-
-  // Saving Overlay
-  savingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  savingText: {
-    marginTop: theme.spacing[3],
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.text.secondary,
   },
 
   bottomSpacer: {
