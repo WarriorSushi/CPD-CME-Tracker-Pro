@@ -28,7 +28,7 @@ export const SoundTestComponent: React.FC = () => {
     },
     {
       title: 'Navigation Swipe',
-      description: 'navigation-swipe.mp3 at 50% volume',
+      description: 'navigation-swipe.mp3 at 35% volume',
       action: () => soundManager.play('navigationSwipe'),
     },
     {
@@ -48,12 +48,12 @@ export const SoundTestComponent: React.FC = () => {
     },
     {
       title: 'Modal Open',
-      description: 'navigation-swipe.mp3 at 50% volume',
+      description: 'navigation-swipe.mp3 at 35% volume',
       action: () => soundManager.play('modalOpen'),
     },
     {
       title: 'Modal Close',
-      description: 'navigation-swipe.mp3 at 50% volume',
+      description: 'navigation-swipe.mp3 at 35% volume',
       action: () => soundManager.play('modalClose'),
     },
   ];
@@ -85,7 +85,7 @@ export const SoundTestComponent: React.FC = () => {
         <Text style={styles.infoTitle}>📁 Active Sound Files:</Text>
         <Text style={styles.infoText}>
           • button-press.mp3 (65% volume){'\n'}
-          • navigation-swipe.mp3 (50% volume){'\n'}
+          • navigation-swipe.mp3 (35% volume){'\n'}
           • error.mp3 (70% volume){'\n'}
           • notification.mp3 (100% volume){'\n'}
           {'\n'}

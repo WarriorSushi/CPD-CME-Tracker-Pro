@@ -142,7 +142,7 @@ export const SoundSettingsScreen: React.FC<Props> = ({ navigation }) => {
 
   const testSounds = [
     { name: 'Button Press', action: playButtonTap, description: 'All button interactions (65% volume)' },
-    { name: 'Navigation', action: () => soundManager.play('navigationSwipe'), description: 'Screen transitions (50% volume)' },
+    { name: 'Navigation', action: () => soundManager.play('navigationSwipe'), description: 'Screen transitions (35% volume)' },
     { name: 'Error', action: playError, description: 'Validation errors & failures (70% volume)' },
     { name: 'Notification', action: () => soundManager.play('notification'), description: 'Alerts & notifications (100% volume)' },
   ];

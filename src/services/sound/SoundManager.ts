@@ -65,7 +65,7 @@ class SoundManager {
     // Navigation - using navigation-swipe.mp3
     this.sounds.set('navigationSwipe', {
       source: require('../../../assets/sounds/navigation-swipe.mp3'),
-      volume: 0.5, // 50% volume
+      volume: 0.35, // 35% volume
     });
 
     // Error feedback - using error.mp3
@@ -103,12 +103,12 @@ class SoundManager {
 
     this.sounds.set('modalOpen', {
       source: require('../../../assets/sounds/navigation-swipe.mp3'),
-      volume: 0.5, // 50% volume
+      volume: 0.35, // 35% volume
     });
 
     this.sounds.set('modalClose', {
       source: require('../../../assets/sounds/navigation-swipe.mp3'),
-      volume: 0.5, // 50% volume
+      volume: 0.35, // 35% volume
     });
 
     // Remove deleted sounds - map to existing ones
