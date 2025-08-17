@@ -55,6 +55,11 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   const remindersShadowAnim = useRef(new Animated.Value(0)).current;
   const recentShadowAnim = useRef(new Animated.Value(0)).current;
   const licensesShadowAnim = useRef(new Animated.Value(0)).current;
+  
+  // Progress section animated gradient values
+  const progressGradient1 = useRef(new Animated.Value(0)).current;
+  const progressGradient2 = useRef(new Animated.Value(0)).current;
+  const progressGradient3 = useRef(new Animated.Value(0)).current;
 
   // Debounced refresh data when screen comes into focus
   useFocusEffect(
@@ -131,6 +136,53 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
       });
     }
   }, [isInitializing, user]);
+  
+  // Progress section animated gradient loop
+  useEffect(() => {
+    // Create continuous flowing gradient animations for progress section
+    Animated.loop(
+      Animated.parallel([
+        Animated.sequence([
+          Animated.timing(progressGradient1, {
+            toValue: 1,
+            duration: 6000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(progressGradient1, {
+            toValue: 0,
+            duration: 6000,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.sequence([
+          Animated.timing(progressGradient2, {
+            toValue: 1,
+            duration: 8000,
+            delay: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(progressGradient2, {
+            toValue: 0,
+            duration: 8000,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.sequence([
+          Animated.timing(progressGradient3, {
+            toValue: 1,
+            duration: 10000,
+            delay: 2000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(progressGradient3, {
+            toValue: 0,
+            duration: 10000,
+            useNativeDriver: true,
+          }),
+        ]),
+      ])
+    ).start();
+  }, []);
 
   const getProgressColor = (status: string) => {
     switch (status) {
@@ -212,6 +264,130 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     if (hour < 18) return 'Good afternoon';
     return 'Good evening';
   };
+  
+  // Progress Section Animated Background Component
+  const ProgressAnimatedBackground = () => {
+    return (
+      <View style={StyleSheet.absoluteFillObject}>
+        {/* Base gradient - soft blue/purple theme for progress */}
+        <LinearGradient
+          colors={['#F8FAFF', '#F0F4FF', '#E8F2FF']}
+          style={StyleSheet.absoluteFillObject}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
+        
+        {/* Animated gradient orbs */}
+        <Animated.View
+          style={[
+            styles.progressGradientOrb1,
+            {
+              transform: [
+                {
+                  translateX: progressGradient1.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-80, 120],
+                  }),
+                },
+                {
+                  translateY: progressGradient1.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-30, 40],
+                  }),
+                },
+                {
+                  scale: progressGradient1.interpolate({
+                    inputRange: [0, 0.5, 1],
+                    outputRange: [1, 1.3, 1],
+                  }),
+                },
+              ],
+              opacity: 0.6,
+            },
+          ]}
+        >
+          <LinearGradient
+            colors={['rgba(103, 126, 234, 0.15)', 'rgba(159, 122, 234, 0.08)']}
+            style={styles.progressOrb}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+        </Animated.View>
+
+        <Animated.View
+          style={[
+            styles.progressGradientOrb2,
+            {
+              transform: [
+                {
+                  translateX: progressGradient2.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [100, -80],
+                  }),
+                },
+                {
+                  translateY: progressGradient2.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [60, -60],
+                  }),
+                },
+                {
+                  scale: progressGradient2.interpolate({
+                    inputRange: [0, 0.5, 1],
+                    outputRange: [1, 1.2, 1],
+                  }),
+                },
+              ],
+              opacity: 0.5,
+            },
+          ]}
+        >
+          <LinearGradient
+            colors={['rgba(59, 130, 246, 0.12)', 'rgba(147, 51, 234, 0.06)']}
+            style={styles.progressOrb}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+        </Animated.View>
+
+        <Animated.View
+          style={[
+            styles.progressGradientOrb3,
+            {
+              transform: [
+                {
+                  translateX: progressGradient3.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-60, 100],
+                  }),
+                },
+                {
+                  translateY: progressGradient3.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [40, -40],
+                  }),
+                },
+                {
+                  scale: progressGradient3.interpolate({
+                    inputRange: [0, 0.5, 1],
+                    outputRange: [1, 1.15, 1],
+                  }),
+                },
+              ],
+              opacity: 0.4,
+            },
+          ]}
+        >
+          <LinearGradient
+            colors={['rgba(168, 85, 247, 0.1)', 'rgba(236, 72, 153, 0.05)']}
+            style={styles.progressOrb}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+        </Animated.View>
+      </View>
+    );
+  };
 
   return (
     <ErrorBoundary>
@@ -256,6 +432,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             },
           ]}
         >
+          <ProgressAnimatedBackground />
           <PremiumCard style={[
             styles.progressCard,
             {
@@ -851,17 +1028,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 
-  // ScrollView
+  // ScrollView - background handled by AnimatedGradientBackground
   scrollView: {
     flex: 1,
-    backgroundColor: '#FFF5EE',
+    backgroundColor: 'transparent',
   },
 
-  // Upper Section (Your Progress + Add Entry)
+  // Upper Section (Your Progress + Add Entry) - Animated gradient background
   upperSection: {
     paddingHorizontal: theme.spacing[5],
     paddingTop: theme.spacing[3],
     paddingBottom: theme.spacing[6], // Increased padding below
+    position: 'relative', // Allow absolute positioned background
+    overflow: 'hidden', // Contain the gradient orbs
   },
   // Premium Progress Card
   progressCard: {
@@ -1059,11 +1238,11 @@ const styles = StyleSheet.create({
     color: theme.colors.text.primary,
   },
 
-  // Sections with headers
+  // Sections with headers - transparent for gradient effect
   recentSection: {
     paddingHorizontal: theme.spacing[5], // Increased padding from spacing[4]
     marginBottom: theme.spacing[4],
-    backgroundColor: '#FFF7EC', // Section background
+    backgroundColor: 'transparent', // Let gradient show through
     paddingVertical: theme.spacing[3],
   },
   sectionHeader: {
@@ -1216,7 +1395,7 @@ const styles = StyleSheet.create({
   },
   licenseActionButton: {
     flex: 1,
-    backgroundColor: '#FFF5EE',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)', // Semi-transparent white for readability
     paddingVertical: theme.spacing[1],
     paddingHorizontal: theme.spacing[2],
     borderRadius: theme.spacing[1],
@@ -1259,7 +1438,7 @@ const styles = StyleSheet.create({
 
   // License Renewal Instructions
   licenseRenewalInstructions: {
-    backgroundColor: '#FFF7EC', // Section background
+    backgroundColor: 'rgba(255, 255, 255, 0.9)', // Semi-transparent white for readability
     borderRadius: theme.spacing[2],
     padding: theme.spacing[2],
     marginTop: theme.spacing[3],
@@ -1284,11 +1463,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing[1],
   },
 
-  // Section Container and Card Styles
+  // Section Container and Card Styles - transparent for gradient effect
   sectionContainer: {
     paddingHorizontal: theme.spacing[5], // Increased padding from spacing[3]
     marginBottom: theme.spacing[4], // Reduced from [6]
-    backgroundColor: '#FFF7EC', // Section background
+    backgroundColor: 'transparent', // Let gradient show through
     paddingVertical: theme.spacing[2], // Reduced from [3]
   },
   sectionCard: {
@@ -1323,8 +1502,10 @@ const styles = StyleSheet.create({
     color: theme.colors.white, // White text on gray header
   },
   headerButton: {
-    minHeight: 32,
+    minHeight: 28,
     paddingHorizontal: theme.spacing[2],
+    paddingVertical: theme.spacing[1],
+    marginLeft: theme.spacing[2], // Add space from title
   },
   cardContent: {
     padding: theme.spacing[4],
@@ -1432,10 +1613,11 @@ const styles = StyleSheet.create({
     color: theme.colors.background,
   },
 
-  // No Licenses Section
+  // No Licenses Section - transparent for gradient effect
   noLicensesSection: {
     paddingHorizontal: theme.spacing[5], // Increased padding from spacing[4]
     marginBottom: theme.spacing[4],
+    backgroundColor: 'transparent', // Let gradient show through
   },
   noLicensesCard: {
     padding: theme.spacing[6],
@@ -1514,5 +1696,27 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: theme.spacing[2],
     backgroundColor: theme.colors.gray.light,
+  },
+  
+  // Progress Section Animated Background Styles
+  progressGradientOrb1: {
+    position: 'absolute',
+    top: '15%',
+    left: '5%',
+  },
+  progressGradientOrb2: {
+    position: 'absolute',
+    bottom: '20%',
+    right: '10%',
+  },
+  progressGradientOrb3: {
+    position: 'absolute',
+    top: '60%',
+    right: '25%',
+  },
+  progressOrb: {
+    width: width * 0.6,
+    height: width * 0.6,
+    borderRadius: width * 0.3,
   },
 });

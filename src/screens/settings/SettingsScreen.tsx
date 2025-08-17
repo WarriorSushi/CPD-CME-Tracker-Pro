@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
-  Image
+  Image,
+  Animated
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +18,7 @@ import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 import { Card, Button, LoadingSpinner, StandardHeader, SvgIcon } from '../../components';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../onboarding/OnboardingComponents';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { useOnboardingContext } from '../../contexts/OnboardingContext';
@@ -58,6 +60,20 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
   const [isExporting, setIsExporting] = useState(false);
   const lastRefreshRef = useRef<number>(0);
   const REFRESH_DEBOUNCE_MS = 3000; // Debounce settings refresh to 3 seconds
+  
+  // Premium animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+  const profileCardAnim = useRef(new Animated.Value(0)).current;
+  const licensesCardAnim = useRef(new Animated.Value(0)).current;
+  const dataCardAnim = useRef(new Animated.Value(0)).current;
+  const aboutCardAnim = useRef(new Animated.Value(0)).current;
+  
+  // Shadow animations (to prevent gray flash)
+  const profileShadowAnim = useRef(new Animated.Value(0)).current;
+  const licensesShadowAnim = useRef(new Animated.Value(0)).current;
+  const dataShadowAnim = useRef(new Animated.Value(0)).current;
+  const aboutShadowAnim = useRef(new Animated.Value(0)).current;
 
   // Debounced refresh data when screen comes into focus
   useFocusEffect(
@@ -68,6 +84,60 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
         refreshLicenses();
         refreshUserData();
       }
+      
+      // Premium entrance animations
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          tension: 30,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      // Staggered card animations
+      Animated.sequence([
+        Animated.delay(150),
+        Animated.stagger(120, [
+          Animated.spring(profileCardAnim, {
+            toValue: 1,
+            tension: 40,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+          Animated.spring(licensesCardAnim, {
+            toValue: 1,
+            tension: 40,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+          Animated.spring(dataCardAnim, {
+            toValue: 1,
+            tension: 40,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+          Animated.spring(aboutCardAnim, {
+            toValue: 1,
+            tension: 40,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+        ]),
+      ]).start(() => {
+        // Add shadows after cards finish animating
+        Animated.stagger(80, [
+          Animated.timing(profileShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
+          Animated.timing(licensesShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
+          Animated.timing(dataShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
+          Animated.timing(aboutShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
+        ]).start();
+      });
     }, [refreshLicenses, refreshUserData])
   );
 
@@ -347,21 +417,50 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <AnimatedGradientBackground />
+      
       <StandardHeader
         title="Settings"
         showBackButton={false}
       />
 
-      <ScrollView 
-        style={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+      <Animated.View 
+        style={[
+          styles.scrollContent,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
       >
-        {/* User Profile Card */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionCard}>
+        <ScrollView 
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          {/* User Profile Card */}
+          <Animated.View 
+            style={[
+              styles.sectionContainer,
+              {
+                opacity: profileCardAnim,
+                transform: [{
+                  translateY: profileCardAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
+            <PremiumCard style={[
+              styles.sectionCard,
+              {
+                elevation: profileShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
+                shadowOpacity: profileShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+              }
+            ]}>
             <LinearGradient
               colors={['#36454F', '#000000']}
               start={{ x: 0, y: 0 }}
@@ -369,13 +468,12 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
               style={styles.cardHeader}
             >
               <Text style={styles.cardHeaderTitle}>Profile</Text>
-              <Button
+              <PremiumButton
                 title="Edit"
                 onPress={() => {
                   (navigation as any).navigate('ProfileEdit');
                 }}
-                variant="primary"
-                size="small"
+                variant="secondary"
                 style={styles.headerButton}
               />
             </LinearGradient>
@@ -427,12 +525,31 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
                 <LoadingSpinner size={20} />
               )}
             </LinearGradient>
-          </View>
-        </View>
+            </PremiumCard>
+          </Animated.View>
 
-        {/* Data Management Section */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionCard}>
+          {/* Data Management Section */}
+          <Animated.View 
+            style={[
+              styles.sectionContainer,
+              {
+                opacity: dataCardAnim,
+                transform: [{
+                  translateY: dataCardAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
+            <PremiumCard style={[
+              styles.sectionCard,
+              {
+                elevation: dataShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
+                shadowOpacity: dataShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+              }
+            ]}>
             <LinearGradient
               colors={['#36454F', '#000000']}
               start={{ x: 0, y: 0 }}
@@ -470,12 +587,31 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             </LinearGradient>
-          </View>
-        </View>
+            </PremiumCard>
+          </Animated.View>
 
-        {/* App Settings Section */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionCard}>
+          {/* App Settings Section */}
+          <Animated.View 
+            style={[
+              styles.sectionContainer,
+              {
+                opacity: aboutCardAnim,
+                transform: [{
+                  translateY: aboutCardAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
+            <PremiumCard style={[
+              styles.sectionCard,
+              {
+                elevation: aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
+                shadowOpacity: aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+              }
+            ]}>
             <LinearGradient
               colors={['#36454F', '#000000']}
               start={{ x: 0, y: 0 }}
@@ -527,12 +663,31 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
                 </View>
               </View>
             </LinearGradient>
-          </View>
-        </View>
+            </PremiumCard>
+          </Animated.View>
 
-        {/* About Section */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionCard}>
+          {/* About Section */}
+          <Animated.View 
+            style={[
+              styles.sectionContainer,
+              {
+                opacity: aboutCardAnim,
+                transform: [{
+                  translateY: aboutCardAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
+            <PremiumCard style={[
+              styles.sectionCard,
+              {
+                elevation: aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
+                shadowOpacity: aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+              }
+            ]}>
             <LinearGradient
               colors={['#36454F', '#000000']}
               start={{ x: 0, y: 0 }}
@@ -560,12 +715,12 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
                 </Text>
               </View>
             </LinearGradient>
-          </View>
-        </View>
+            </PremiumCard>
+          </Animated.View>
 
-        {/* Danger Zone Section */}
-        <View style={styles.sectionContainer}>
-          <View style={[styles.sectionCard, styles.dangerCard]}>
+          {/* Danger Zone Section - Keep as regular Card for danger styling */}
+          <View style={styles.sectionContainer}>
+            <Card style={[styles.sectionCard, styles.dangerCard]}>
             <LinearGradient
               colors={['#dc2626', '#991b1b']}
               start={{ x: 0, y: 0 }}
@@ -604,12 +759,13 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
             </TouchableOpacity>
           </View>
           </LinearGradient>
-        </View>
-      </View>
+            </Card>
+          </View>
 
-        {/* Bottom spacing */}
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
+          {/* Bottom spacing */}
+          <View style={styles.bottomSpacing} />
+        </ScrollView>
+      </Animated.View>
     </View>
   );
 };
@@ -617,7 +773,13 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5EE',
+    backgroundColor: 'transparent', // Let AnimatedGradientBackground show through
+  },
+  scrollContent: {
+    flex: 1,
+    paddingHorizontal: theme.spacing[4],
+    paddingTop: theme.spacing[2],
+    backgroundColor: 'transparent', // Let gradient show through
   },
   
   // Beautiful Header
@@ -1124,7 +1286,7 @@ const styles = StyleSheet.create({
   sectionContainer: {
     paddingHorizontal: theme.spacing[2], // Reduced from [4]
     marginBottom: theme.spacing[4], // Reduced from [6]
-    backgroundColor: '#FFF7EC',
+    backgroundColor: 'transparent', // Let gradient show through
     paddingVertical: theme.spacing[2], // Reduced from [3]
   },
   sectionCard: {
