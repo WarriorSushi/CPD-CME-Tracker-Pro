@@ -35,6 +35,7 @@ export const ProfessionScreen: React.FC<Props> = ({ navigation }) => {
   const slideAnim = useRef(new Animated.Value(20)).current;
   const inputScaleAnim = useRef(new Animated.Value(0.96)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
+  const inputShadowAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Entry animations with better timing
@@ -63,7 +64,14 @@ export const ProfessionScreen: React.FC<Props> = ({ navigation }) => {
         delay: 100,
         useNativeDriver: true,
       }),
-    ]).start();
+    ]).start(() => {
+      // Add shadow after input appears
+      Animated.timing(inputShadowAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    });
   }, []);
 
   const handleContinue = async () => {
@@ -144,7 +152,14 @@ export const ProfessionScreen: React.FC<Props> = ({ navigation }) => {
                   },
                 ]}
               >
-                <PremiumCard style={styles.inputCard}>
+                <PremiumCard style={[
+                  styles.inputCard,
+                  styles.inputCardOverride,
+                  {
+                    elevation: inputShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
+                    shadowOpacity: inputShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+                  }
+                ]}>
                   <View style={styles.inputWrapper}>
                     <TextInput
                       style={styles.input}
@@ -279,6 +294,11 @@ const styles = StyleSheet.create({
   inputCard: {
     padding: 0,
     overflow: 'hidden',
+  },
+  inputCardOverride: {
+    elevation: 0,
+    shadowOpacity: 0,
+    borderWidth: 0,
   },
   inputWrapper: {
     position: 'relative',

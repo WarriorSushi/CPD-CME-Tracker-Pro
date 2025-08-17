@@ -50,6 +50,7 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
   const slideAnim = useRef(new Animated.Value(30)).current;
   const celebrationAnim = useRef(new Animated.Value(0)).current;
   const stepCardsAnim = useRef(NEXT_STEPS.map(() => new Animated.Value(0))).current;
+  const stepShadowAnims = useRef(NEXT_STEPS.map(() => new Animated.Value(0))).current;
 
   useEffect(() => {
     // Entry animations
@@ -85,7 +86,16 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
           })
         )
       ),
-    ]).start();
+    ]).start(() => {
+      // Add shadow animations after cards finish appearing
+      Animated.stagger(50, stepShadowAnims.map(anim => 
+        Animated.timing(anim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: false,
+        })
+      )).start();
+    });
   }, []);
 
   const handleStartUsingApp = async () => {
@@ -182,7 +192,26 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
                     },
                   ]}
                 >
-                  <PremiumCard style={styles.stepCard}>
+                  <PremiumCard 
+                    style={[
+                      styles.stepCard,
+                      {
+                        elevation: stepShadowAnims[index].interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0, 4],
+                        }),
+                        shadowOpacity: stepShadowAnims[index].interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0, 0.15],
+                        }),
+                      }
+                    ]}
+                    cardOverride={{
+                      elevation: 0,
+                      shadowOpacity: 0,
+                      borderWidth: 0,
+                    }}
+                  >
                     <View style={styles.stepContent}>
                       <View style={styles.stepIconContainer}>
                         <LinearGradient

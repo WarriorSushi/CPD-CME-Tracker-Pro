@@ -38,6 +38,8 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
   const optionCardsAnim = useRef(QUICK_OPTIONS.map(() => new Animated.Value(0))).current;
   const customCardAnim = useRef(new Animated.Value(0)).current;
   const syncCardAnim = useRef(new Animated.Value(0)).current;
+  const optionShadowAnims = useRef(QUICK_OPTIONS.map(() => new Animated.Value(0))).current;
+  const customShadowAnim = useRef(new Animated.Value(0)).current;
 
   const handleQuickSelect = (monthsAgo: number, index: number) => {
     const cycleStartDate = new Date();
@@ -110,7 +112,23 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
           useNativeDriver: true,
         }),
       ]),
-    ]).start();
+    ]).start(() => {
+      // Add shadow animations after cards finish appearing
+      Animated.parallel([
+        Animated.stagger(50, optionShadowAnims.map(anim => 
+          Animated.timing(anim, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: false,
+          })
+        )),
+        Animated.timing(customShadowAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: false,
+        }),
+      ]).start();
+    });
   }, []);
 
   const isValid = selectedOption !== null || customDate !== null;
@@ -263,7 +281,24 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
                   <PremiumCard
                     selected={selectedOption === index}
                     onPress={() => handleQuickSelect(option.months, index)}
-                    style={styles.gridOptionCard}
+                    style={[
+                      styles.gridOptionCard,
+                      {
+                        elevation: optionShadowAnims[index].interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0, 4],
+                        }),
+                        shadowOpacity: optionShadowAnims[index].interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0, 0.15],
+                        }),
+                      }
+                    ]}
+                    cardOverride={{
+                      elevation: 0,
+                      shadowOpacity: 0,
+                      borderWidth: 0,
+                    }}
                   >
                     <View style={styles.gridOptionContent}>
                       <Text style={[
@@ -308,7 +343,24 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
               <PremiumCard
                 selected={selectedOption === -1}
                 onPress={handleCustomDate}
-                style={styles.customOptionCard}
+                style={[
+                  styles.customOptionCard,
+                  {
+                    elevation: customShadowAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 4],
+                    }),
+                    shadowOpacity: customShadowAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 0.15],
+                    }),
+                  }
+                ]}
+                cardOverride={{
+                  elevation: 0,
+                  shadowOpacity: 0,
+                  borderWidth: 0,
+                }}
               >
                 <View style={styles.customOptionContent}>
                   <View style={styles.customOptionTextContent}>

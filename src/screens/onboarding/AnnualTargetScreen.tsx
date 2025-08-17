@@ -34,6 +34,10 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
   const progressAnim = useRef(new Animated.Value(0)).current;
   const targetCardsAnim = useRef(COMMON_REQUIREMENTS.map(() => new Animated.Value(0))).current;
   const periodCardsAnim = useRef(TIME_PERIODS.map(() => new Animated.Value(0))).current;
+  const targetShadowAnims = useRef(COMMON_REQUIREMENTS.map(() => new Animated.Value(0))).current;
+  const periodShadowAnims = useRef(TIME_PERIODS.map(() => new Animated.Value(0))).current;
+  const customTargetShadowAnim = useRef(new Animated.Value(0)).current;
+  const customPeriodShadowAnim = useRef(new Animated.Value(0)).current;
 
   const terminology = getCreditTerminology(creditSystem);
 
@@ -93,7 +97,35 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
           })
         ),
       ]),
-    ]).start();
+    ]).start(() => {
+      // Add shadow animations after cards finish appearing
+      Animated.parallel([
+        Animated.stagger(50, targetShadowAnims.map(anim => 
+          Animated.timing(anim, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: false,
+          })
+        )),
+        Animated.stagger(50, periodShadowAnims.map(anim => 
+          Animated.timing(anim, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: false,
+          })
+        )),
+        Animated.timing(customTargetShadowAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: false,
+        }),
+        Animated.timing(customPeriodShadowAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: false,
+        }),
+      ]).start();
+    });
   }, []);
 
   const handleQuickSelectTarget = (target: number) => {
@@ -236,7 +268,24 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                 <PremiumCard
                   selected={selectedTarget === target}
                   onPress={() => handleQuickSelectTarget(target)}
-                  style={styles.optionCard}
+                  style={[
+                    styles.optionCard,
+                    {
+                      elevation: targetShadowAnims[index].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 4],
+                      }),
+                      shadowOpacity: targetShadowAnims[index].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 0.15],
+                      }),
+                    }
+                  ]}
+                  cardOverride={{
+                    elevation: 0,
+                    shadowOpacity: 0,
+                    borderWidth: 0,
+                  }}
                 >
                   <Text style={[
                     styles.optionText,
@@ -266,7 +315,25 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
               <PremiumCard
                 selected={selectedTarget === 'custom'}
                 onPress={handleCustomTargetSelect}
-                style={[styles.optionCard, styles.customTileCard]}
+                style={[
+                  styles.optionCard,
+                  styles.customTileCard,
+                  {
+                    elevation: customTargetShadowAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 4],
+                    }),
+                    shadowOpacity: customTargetShadowAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 0.15],
+                    }),
+                  }
+                ]}
+                cardOverride={{
+                  elevation: 0,
+                  shadowOpacity: 0,
+                  borderWidth: 0,
+                }}
               >
                 {selectedTarget === 'custom' ? (
                   <TextInput
@@ -316,7 +383,24 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                 <PremiumCard
                   selected={selectedPeriod === period}
                   onPress={() => handleQuickSelectPeriod(period)}
-                  style={styles.optionCard}
+                  style={[
+                    styles.optionCard,
+                    {
+                      elevation: periodShadowAnims[index].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 4],
+                      }),
+                      shadowOpacity: periodShadowAnims[index].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 0.15],
+                      }),
+                    }
+                  ]}
+                  cardOverride={{
+                    elevation: 0,
+                    shadowOpacity: 0,
+                    borderWidth: 0,
+                  }}
                 >
                   <Text style={[
                     styles.optionText,
@@ -346,7 +430,25 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
               <PremiumCard
                 selected={selectedPeriod === 'custom'}
                 onPress={handleCustomPeriodSelect}
-                style={[styles.optionCard, styles.customTileCard]}
+                style={[
+                  styles.optionCard,
+                  styles.customTileCard,
+                  {
+                    elevation: customPeriodShadowAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 4],
+                    }),
+                    shadowOpacity: customPeriodShadowAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 0.15],
+                    }),
+                  }
+                ]}
+                cardOverride={{
+                  elevation: 0,
+                  shadowOpacity: 0,
+                  borderWidth: 0,
+                }}
               >
                 {selectedPeriod === 'custom' ? (
                   <TextInput

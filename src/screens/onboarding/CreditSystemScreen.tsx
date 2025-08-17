@@ -71,6 +71,7 @@ export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
   const slideAnim = useRef(new Animated.Value(20)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
   const cardAnims = useRef(CREDIT_SYSTEMS.map(() => new Animated.Value(0))).current;
+  const shadowAnims = useRef(CREDIT_SYSTEMS.map(() => new Animated.Value(0))).current;
 
   useEffect(() => {
     // Entry animations
@@ -107,7 +108,18 @@ export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
           })
         )
       ),
-    ]).start();
+    ]).start(() => {
+      // Add shadows after cards finish animating
+      Animated.stagger(50, 
+        shadowAnims.map(anim => 
+          Animated.timing(anim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: false,
+          })
+        )
+      ).start();
+    });
   }, []);
 
   const handleContinue = async () => {
@@ -202,7 +214,14 @@ export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
                 <PremiumCard
                   selected={selectedSystem === system.value}
                   onPress={() => setSelectedSystem(system.value)}
-                  style={styles.optionCard}
+                  style={[
+                    styles.optionCard,
+                    styles.optionCardOverride,
+                    {
+                      elevation: shadowAnims[index].interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
+                      shadowOpacity: shadowAnims[index].interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+                    }
+                  ]}
                 >
                   <View style={styles.optionContent}>
                     <View style={styles.optionIconContainer}>
@@ -341,6 +360,11 @@ const styles = StyleSheet.create({
   optionCard: {
     paddingVertical: 12,
     paddingHorizontal: 16,
+  },
+  optionCardOverride: {
+    elevation: 0,
+    shadowOpacity: 0,
+    borderWidth: 0,
   },
   optionContent: {
     flexDirection: 'row',
