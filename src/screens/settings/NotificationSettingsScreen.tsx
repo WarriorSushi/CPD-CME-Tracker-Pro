@@ -197,7 +197,13 @@ export const NotificationSettingsScreen: React.FC<Props> = ({ navigation }) => {
     const availableIntervals = [90, 60, 30, 14, 7, 1];
 
     return (
-      <Card variant="entry" style={styles.card}>
+      <PremiumCard style={[
+        styles.card,
+        {
+          elevation: cardsShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 6] }),
+          shadowOpacity: cardsShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.12] }),
+        }
+      ]}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>{title}</Text>
           <Switch
