@@ -6,12 +6,18 @@ interface UseSoundOptions {
   volume?: number;
 }
 
+// Initialize sound system only once at the module level
+let soundSystemInitialized = false;
+
 export const useSound = (options: UseSoundOptions = {}) => {
   const { enabled = true, volume } = options;
-
+  
   useEffect(() => {
-    // Initialize sound system when component mounts
-    soundManager.preloadSounds();
+    // Initialize sound system only once
+    if (!soundSystemInitialized) {
+      soundSystemInitialized = true;
+      soundManager.preloadSounds();
+    }
   }, []);
 
   const playSound = useCallback(async (soundType: SoundType, customVolume?: number) => {

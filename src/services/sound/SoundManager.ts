@@ -29,6 +29,7 @@ class SoundManager {
   private isEnabled: boolean = true;
   private globalVolume: number = 1.0; // Full volume for clear feedback
   private isInitialized: boolean = false;
+  private isPreloaded: boolean = false;
 
   constructor() {
     this.loadSettings();
@@ -130,11 +131,14 @@ class SoundManager {
   }
 
   async preloadSounds() {
-    if (!this.isEnabled) return;
+    // Prevent multiple initializations
+    if (this.isPreloaded || !this.isEnabled) return;
+    
+    this.isPreloaded = true;
 
     try {
       // Preload frequently used sounds
-      const frequentSounds: SoundType[] = ['buttonTap', 'buttonPress', 'success'];
+      const frequentSounds: SoundType[] = ['buttonTap', 'buttonPress', 'error'];
       
       for (const soundType of frequentSounds) {
         try {
@@ -150,6 +154,7 @@ class SoundManager {
       __DEV__ && console.warn('Failed to initialize sound system:', error);
       // Disable sounds if initialization fails completely
       this.isEnabled = false;
+      this.isPreloaded = false; // Reset flag on failure
     }
   }
 
