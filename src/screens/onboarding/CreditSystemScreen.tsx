@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, ScrollView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -152,8 +152,11 @@ export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
         <ProgressIndicator currentStep={2} totalSteps={5} />
       </Animated.View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.content}>
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
           <Animated.View 
             style={[
               styles.header,
@@ -242,7 +245,6 @@ export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
               </Animated.View>
             ))}
           </View>
-        </View>
       </ScrollView>
 
       <Animated.View 
@@ -280,26 +282,29 @@ const styles = StyleSheet.create({
   },
   progressWrapper: {
     paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 10,
-  },
-  scrollView: {
-    flex: 1,
+    paddingTop: 12,
+    paddingBottom: 8,
   },
   content: {
-    padding: 24,
+    flex: 1,
+    paddingHorizontal: 24,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'space-between',
+    paddingBottom: 20,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 32,
-  },
-  iconContainer: {
     marginBottom: 20,
   },
+  iconContainer: {
+    marginBottom: 12,
+  },
   headerIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
+    width: 48,
+    height: 48,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#667EEA',
@@ -309,31 +314,32 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   headerEmoji: {
-    fontSize: 28,
+    fontSize: 22,
   },
   title: {
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: '700',
     color: '#1A202C',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#4A5568',
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 20,
     paddingHorizontal: 16,
   },
   optionsList: {
-    gap: 12,
+    gap: 8,
+    marginBottom: 20,
   },
   optionWrapper: {
-    marginBottom: 4,
+    marginBottom: 2,
   },
   optionCard: {
-    paddingVertical: 16,
+    paddingVertical: 12,
     paddingHorizontal: 16,
   },
   optionContent: {
@@ -344,32 +350,32 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   optionIconGradient: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   optionIcon: {
-    fontSize: 20,
+    fontSize: 16,
   },
   optionTextContent: {
     flex: 1,
     marginRight: 12,
   },
   optionTitle: {
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: '600',
     color: '#1A202C',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   selectedOptionTitle: {
     color: '#667EEA',
   },
   optionDescription: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#718096',
-    lineHeight: 18,
+    lineHeight: 16,
   },
   selectedOptionDescription: {
     color: '#4A5568',
@@ -393,7 +399,8 @@ const styles = StyleSheet.create({
   },
   actions: {
     paddingHorizontal: 24,
-    paddingBottom: 20,
+    paddingBottom: 16,
+    paddingTop: 12,
   },
   primaryButton: {
     marginBottom: 12,

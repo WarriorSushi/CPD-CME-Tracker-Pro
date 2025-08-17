@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Animated, ScrollView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Input, ProgressIndicator } from '../../components';
+import { ProgressIndicator } from '../../components';
 import { OnboardingStackParamList } from '../../types/navigation';
-import { Profession, CreditSystem } from '../../types';
+import { CreditSystem } from '../../types';
 import { getCreditTerminology } from '../../utils/creditTerminology';
 import { userOperations } from '../../services/database';
 import { AnimatedGradientBackground, PremiumButton, PremiumCard } from './OnboardingComponents';
@@ -16,24 +16,15 @@ interface Props {
   navigation: AnnualTargetScreenNavigationProp;
 }
 
-const COMMON_REQUIREMENTS = [20, 25, 30, 40, 50, 75];
+const COMMON_REQUIREMENTS = [20, 25, 30, 40, 50];
 const TIME_PERIODS = [1, 2, 3, 5];
-
-// Some common defaults to show as small hints
-const COMMON_EXAMPLES = [
-  { credits: 50, period: 1, example: 'US Physicians' },
-  { credits: 40, period: 2, example: 'UK Doctors' },
-  { credits: 150, period: 5, example: 'Australian Allied Health' },
-];
 
 export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const [customTarget, setCustomTarget] = useState('');
   const [customPeriod, setCustomPeriod] = useState('');
-  const [selectedTarget, setSelectedTarget] = useState<number | null>(null);
-  const [selectedPeriod, setSelectedPeriod] = useState<number | null>(null);
-  const [useCustomTarget, setUseCustomTarget] = useState(false);
-  const [useCustomPeriod, setUseCustomPeriod] = useState(false);
+  const [selectedTarget, setSelectedTarget] = useState<number | 'custom' | null>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState<number | 'custom' | null>(null);
   const [creditSystem, setCreditSystem] = useState<CreditSystem>('CME');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,7 +35,8 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
   const targetCardsAnim = useRef(COMMON_REQUIREMENTS.map(() => new Animated.Value(0))).current;
   const periodCardsAnim = useRef(TIME_PERIODS.map(() => new Animated.Value(0))).current;
 
-  // Load user's selected credit system and setup animations
+  const terminology = getCreditTerminology(creditSystem);
+
   useEffect(() => {
     const loadCreditSystem = async () => {
       try {
@@ -83,7 +75,7 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
     // Staggered card animations
     Animated.sequence([
       Animated.delay(300),
-      Animated.stagger(80, [
+      Animated.stagger(60, [
         ...targetCardsAnim.map(anim => 
           Animated.spring(anim, {
             toValue: 1,
@@ -104,31 +96,66 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
     ]).start();
   }, []);
 
-  // Get dynamic terminology based on selected credit system
-  const terminology = getCreditTerminology(creditSystem);
+  const handleQuickSelectTarget = (target: number) => {
+    if (selectedTarget === target) {
+      // Re-clicking same tile unselects it
+      setSelectedTarget(null);
+    } else {
+      setSelectedTarget(target);
+      setCustomTarget(''); // Clear custom input when selecting preset
+    }
+  };
+
+  const handleQuickSelectPeriod = (period: number) => {
+    if (selectedPeriod === period) {
+      // Re-clicking same tile unselects it
+      setSelectedPeriod(null);
+    } else {
+      setSelectedPeriod(period);
+      setCustomPeriod(''); // Clear custom input when selecting preset
+    }
+  };
+
+  const handleCustomTargetSelect = () => {
+    setSelectedTarget('custom');
+    setCustomTarget('');
+  };
+
+  const handleCustomPeriodSelect = () => {
+    setSelectedPeriod('custom');
+    setCustomPeriod('');
+  };
+
+  const handleCustomTargetInput = (value: string) => {
+    setCustomTarget(value);
+  };
+
+  const handleCustomPeriodInput = (value: string) => {
+    setCustomPeriod(value);
+  };
 
   const handleContinue = async () => {
-    const target = useCustomTarget ? parseInt(customTarget) : selectedTarget;
-    const period = useCustomPeriod ? parseInt(customPeriod) : selectedPeriod;
-    if (target && target > 0 && period && period > 0) {
-      setIsLoading(true);
-      try {
-        // Save both annual requirement and requirement period
-        const result = await userOperations.updateUser({
-          annualRequirement: target,
-          requirementPeriod: period
-        });
+      const targetValue = selectedTarget === 'custom' ? parseInt(customTarget) : (typeof selectedTarget === 'number' ? selectedTarget : null);
+    const periodValue = selectedPeriod === 'custom' ? parseInt(customPeriod) : (typeof selectedPeriod === 'number' ? selectedPeriod : null);
+    
+    if (!targetValue || !periodValue || targetValue <= 0 || periodValue <= 0) return;
 
-        if (result.success) {
-          navigation.navigate('CycleStartDate');
-        } else {
-          __DEV__ && console.error('❌ AnnualTargetScreen: Failed to save target and period');
-        }
-      } catch (error) {
-        __DEV__ && console.error('💥 AnnualTargetScreen: Error saving:', error);
-      } finally {
-        setIsLoading(false);
+    setIsLoading(true);
+    try {
+      const result = await userOperations.updateUser({
+        annualRequirement: targetValue,
+        requirementPeriod: periodValue,
+      });
+
+      if (result.success) {
+        navigation.navigate('CycleStartDate');
+      } else {
+        __DEV__ && console.error('❌ AnnualTargetScreen: Failed to save annual target');
       }
+    } catch (error) {
+      __DEV__ && console.error('💥 AnnualTargetScreen: Error saving annual target:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -136,32 +163,8 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
     navigation.goBack();
   };
 
-  const handleQuickSelectTarget = (target: number) => {
-    setSelectedTarget(target);
-    setUseCustomTarget(false);
-    setCustomTarget('');
-  };
-
-  const handleQuickSelectPeriod = (period: number) => {
-    setSelectedPeriod(period);
-    setUseCustomPeriod(false);
-    setCustomPeriod('');
-  };
-
-  const handleCustomTargetInput = (value: string) => {
-    setCustomTarget(value);
-    setSelectedTarget(null);
-    setUseCustomTarget(true);
-  };
-
-  const handleCustomPeriodInput = (value: string) => {
-    setCustomPeriod(value);
-    setSelectedPeriod(null);
-    setUseCustomPeriod(true);
-  };
-
-  const targetValue = useCustomTarget ? parseInt(customTarget) : selectedTarget;
-  const periodValue = useCustomPeriod ? parseInt(customPeriod) : selectedPeriod;
+  const targetValue = selectedTarget === 'custom' ? parseInt(customTarget) : selectedTarget;
+  const periodValue = selectedPeriod === 'custom' ? parseInt(customPeriod) : selectedPeriod;
   const isValid = targetValue && targetValue > 0 && periodValue && periodValue > 0;
 
   return (
@@ -177,152 +180,226 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
           },
         ]}
       >
-        <ProgressIndicator currentStep={3} totalSteps={5} />
+        <ProgressIndicator currentStep={3} totalSteps={5} showTitle={false} />
       </Animated.View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.content}>
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Animated.View 
+          style={[
+            styles.header,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
+          <View style={styles.iconContainer}>
+            <LinearGradient
+              colors={['#667EEA', '#764BA2']}
+              style={styles.headerIcon}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Text style={styles.headerEmoji}>🎯</Text>
+            </LinearGradient>
+          </View>
+          <Text style={styles.title}>Set Your Target</Text>
+          <Text style={styles.subtitle}>
+            How many {terminology.plural.toLowerCase()} do you need over what period?
+          </Text>
+        </Animated.View>
+
+        {/* Target Credits Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{terminology.label} Required</Text>
+          <View style={styles.optionsRow}>
+            {COMMON_REQUIREMENTS.map((target, index) => (
+              <Animated.View
+                key={target}
+                style={[
+                  styles.optionWrapper,
+                  {
+                    opacity: targetCardsAnim[index],
+                    transform: [{
+                      translateY: targetCardsAnim[index].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [15, 0],
+                      }),
+                    }],
+                  },
+                ]}
+              >
+                <PremiumCard
+                  selected={selectedTarget === target}
+                  onPress={() => handleQuickSelectTarget(target)}
+                  style={styles.optionCard}
+                >
+                  <Text style={[
+                    styles.optionText,
+                    selectedTarget === target && styles.selectedText,
+                  ]}>
+                    {target}
+                  </Text>
+                </PremiumCard>
+              </Animated.View>
+            ))}
+            
+            {/* Custom input as inline tile */}
+            <Animated.View
+              style={[
+                styles.optionWrapper,
+                {
+                  opacity: targetCardsAnim[0], // Use first animation for consistency
+                  transform: [{
+                    translateY: targetCardsAnim[0].interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [15, 0],
+                    }),
+                  }],
+                },
+              ]}
+            >
+              <PremiumCard
+                selected={selectedTarget === 'custom'}
+                onPress={handleCustomTargetSelect}
+                style={[styles.optionCard, styles.customTileCard]}
+              >
+                {selectedTarget === 'custom' ? (
+                  <TextInput
+                    placeholder="#"
+                    placeholderTextColor="#A0AEC0"
+                    value={customTarget}
+                    onChangeText={handleCustomTargetInput}
+                    keyboardType="numeric"
+                    style={styles.customTileInput}
+                    maxLength={4}
+                    autoFocus
+                  />
+                ) : (
+                  <Text style={[
+                    styles.optionText,
+                    selectedTarget === 'custom' && styles.selectedText,
+                  ]}>
+                    Custom
+                  </Text>
+                )}
+              </PremiumCard>
+            </Animated.View>
+          </View>
+        </View>
+
+        {/* Time Period Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Period (Years)</Text>
+          <View style={styles.optionsRow}>
+            {TIME_PERIODS.map((period, index) => (
+              <Animated.View
+                key={period}
+                style={[
+                  styles.optionWrapper,
+                  {
+                    opacity: periodCardsAnim[index],
+                    transform: [{
+                      translateY: periodCardsAnim[index].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [15, 0],
+                      }),
+                    }],
+                  },
+                ]}
+              >
+                <PremiumCard
+                  selected={selectedPeriod === period}
+                  onPress={() => handleQuickSelectPeriod(period)}
+                  style={styles.optionCard}
+                >
+                  <Text style={[
+                    styles.optionText,
+                    selectedPeriod === period && styles.selectedText,
+                  ]}>
+                    {period}
+                  </Text>
+                </PremiumCard>
+              </Animated.View>
+            ))}
+            
+            {/* Custom input as inline tile */}
+            <Animated.View
+              style={[
+                styles.optionWrapper,
+                {
+                  opacity: periodCardsAnim[0], // Use first animation for consistency
+                  transform: [{
+                    translateY: periodCardsAnim[0].interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [15, 0],
+                    }),
+                  }],
+                },
+              ]}
+            >
+              <PremiumCard
+                selected={selectedPeriod === 'custom'}
+                onPress={handleCustomPeriodSelect}
+                style={[styles.optionCard, styles.customTileCard]}
+              >
+                {selectedPeriod === 'custom' ? (
+                  <TextInput
+                    placeholder="#"
+                    placeholderTextColor="#A0AEC0"
+                    value={customPeriod}
+                    onChangeText={handleCustomPeriodInput}
+                    keyboardType="numeric"
+                    style={styles.customTileInput}
+                    maxLength={2}
+                    autoFocus
+                  />
+                ) : (
+                  <Text style={[
+                    styles.optionText,
+                    selectedPeriod === 'custom' && styles.selectedText,
+                  ]}>
+                    Custom
+                  </Text>
+                )}
+              </PremiumCard>
+            </Animated.View>
+          </View>
+        </View>
+
+        {/* Summary */}
+        {isValid && (
           <Animated.View 
             style={[
-              styles.header,
+              styles.summaryContainer,
               {
                 opacity: fadeAnim,
-                transform: [{ translateY: slideAnim }],
               },
             ]}
           >
-            <View style={styles.iconContainer}>
+            <PremiumCard style={styles.summaryCard}>
               <LinearGradient
-                colors={['#667EEA', '#764BA2']}
-                style={styles.headerIcon}
+                colors={['#48BB78', '#38A169']}
+                style={styles.summaryIcon}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Text style={styles.headerEmoji}>🎯</Text>
+                <Text style={styles.summaryEmoji}>✓</Text>
               </LinearGradient>
-            </View>
-            <Text style={styles.title}>{terminology.title}</Text>
-            <Text style={styles.subtitle}>
-              How many {terminology.plural} do you need and over what period?
-            </Text>
-          </Animated.View>
-
-          <View style={styles.sectionsContainer}>
-            {/* Target Credits Section */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{terminology.label}</Text>
-              <View style={styles.optionsGrid}>
-                {COMMON_REQUIREMENTS.map((target, index) => (
-                  <Animated.View
-                    key={target}
-                    style={[
-                      styles.optionWrapper,
-                      {
-                        opacity: targetCardsAnim[index],
-                        transform: [{
-                          translateY: targetCardsAnim[index].interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [15, 0],
-                          }),
-                        }],
-                      },
-                    ]}
-                  >
-                    <PremiumCard
-                      selected={selectedTarget === target}
-                      onPress={() => handleQuickSelectTarget(target)}
-                      style={styles.optionCard}
-                    >
-                      <Text style={[
-                        styles.optionText,
-                        selectedTarget === target && styles.selectedText,
-                      ]}>
-                        {target}
-                      </Text>
-                    </PremiumCard>
-                  </Animated.View>
-                ))}
-              </View>
-              <View style={styles.customInputContainer}>
-                <Input
-                  placeholder="Enter custom amount"
-                  value={customTarget}
-                  onChangeText={handleCustomTargetInput}
-                  keyboardType="numeric"
-                  style={styles.customInputBox}
-                />
-              </View>
-            </View>
-
-            {/* Time Period Section */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Time Period (Years)</Text>
-              <View style={styles.optionsGrid}>
-                {TIME_PERIODS.map((period, index) => (
-                  <Animated.View
-                    key={period}
-                    style={[
-                      styles.optionWrapper,
-                      {
-                        opacity: periodCardsAnim[index],
-                        transform: [{
-                          translateY: periodCardsAnim[index].interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [15, 0],
-                          }),
-                        }],
-                      },
-                    ]}
-                  >
-                    <PremiumCard
-                      selected={selectedPeriod === period}
-                      onPress={() => handleQuickSelectPeriod(period)}
-                      style={styles.optionCard}
-                    >
-                      <Text style={[
-                        styles.optionText,
-                        selectedPeriod === period && styles.selectedText,
-                      ]}>
-                        {period}
-                      </Text>
-                    </PremiumCard>
-                  </Animated.View>
-                ))}
-              </View>
-              <View style={styles.customInputContainer}>
-                <Input
-                  placeholder="Enter custom years"
-                  value={customPeriod}
-                  onChangeText={handleCustomPeriodInput}
-                  keyboardType="numeric"
-                  style={styles.customInputBox}
-                />
-              </View>
-            </View>
-
-            {/* Examples Section */}
-            <PremiumCard style={styles.examplesSection}>
-              <View style={styles.examplesHeader}>
-                <LinearGradient
-                  colors={['#43E97B', '#38F9D7']}
-                  style={styles.examplesIcon}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <Text style={styles.examplesEmoji}>💡</Text>
-                </LinearGradient>
-                <Text style={styles.examplesTitle}>Common Examples</Text>
-              </View>
-              {COMMON_EXAMPLES.map((example, index) => (
-                <Text key={index} style={styles.exampleText}>
-                  • {example.credits} {terminology.plural} / {example.period} year{example.period > 1 ? 's' : ''} ({example.example})
-                </Text>
-              ))}
+              <Text style={styles.summaryText}>
+                <Text style={styles.summaryBold}>{targetValue} {terminology.plural.toLowerCase()}</Text>
+                {' '}over{' '}
+                <Text style={styles.summaryBold}>{periodValue} year{periodValue > 1 ? 's' : ''}</Text>
+              </Text>
             </PremiumCard>
-          </View>
-        </View>
+          </Animated.View>
+        )}
       </ScrollView>
-      
+
       <Animated.View 
         style={[
           styles.actions,
@@ -345,7 +422,6 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
           title="Back"
           variant="ghost"
           onPress={handleBack}
-          style={styles.secondaryButton}
         />
       </Animated.View>
     </View>
@@ -358,26 +434,28 @@ const styles = StyleSheet.create({
   },
   progressWrapper: {
     paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 10,
-  },
-  scrollView: {
-    flex: 1,
+    paddingTop: 8,
   },
   content: {
+    flex: 1,
     padding: 24,
+    paddingTop: 16,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
   },
   header: {
     alignItems: 'center',
     marginBottom: 32,
   },
   iconContainer: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   headerIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#667EEA',
@@ -387,10 +465,10 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   headerEmoji: {
-    fontSize: 28,
+    fontSize: 24,
   },
   title: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '700',
     color: '#1A202C',
     textAlign: 'center',
@@ -398,88 +476,88 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#4A5568',
     textAlign: 'center',
-    lineHeight: 24,
-    paddingHorizontal: 16,
-  },
-  sectionsContainer: {
-    gap: 24,
+    lineHeight: 22,
+    paddingHorizontal: 8,
   },
   section: {
-    marginBottom: 8,
+    marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: '#1A202C',
-    marginBottom: 16,
+    marginBottom: 12,
   },
-  optionsGrid: {
+  optionsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
     gap: 8,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   optionWrapper: {
-    width: '22%',
+    flex: 1,
+    minWidth: 65,
+    maxWidth: 80,
   },
   optionCard: {
     paddingVertical: 12,
     paddingHorizontal: 8,
     alignItems: 'center',
+    minHeight: 44,
     justifyContent: 'center',
-    minHeight: 48,
   },
   optionText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1A202C',
-    textAlign: 'center',
+    color: '#4A5568',
   },
   selectedText: {
     color: '#667EEA',
   },
-  customInputContainer: {
-    marginTop: 8,
+  customTileCard: {
+    // Additional styles for custom tile if needed
   },
-  customInputBox: {
-    textAlign: 'center',
-    fontSize: 16,
-  },
-  examplesSection: {
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    marginTop: 8,
-  },
-  examplesHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  examplesIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  examplesEmoji: {
-    fontSize: 16,
-  },
-  examplesTitle: {
+  customTileInput: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1A202C',
+    color: '#667EEA',
+    textAlign: 'center',
+    minWidth: 30,
+    backgroundColor: 'transparent',
   },
-  exampleText: {
-    fontSize: 14,
+  summaryContainer: {
+    marginTop: -4,
+    marginBottom: 12,
+  },
+  summaryCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  summaryIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  summaryEmoji: {
+    fontSize: 12,
+    color: '#FFFFFF',
+  },
+  summaryText: {
+    fontSize: 13,
     color: '#4A5568',
-    marginBottom: 8,
-    lineHeight: 20,
+    lineHeight: 18,
+  },
+  summaryBold: {
+    fontWeight: '600',
+    color: '#1A202C',
   },
   actions: {
     paddingHorizontal: 24,
@@ -487,8 +565,5 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     marginBottom: 12,
-  },
-  secondaryButton: {
-    // Ghost button styles handled by component
   },
 });

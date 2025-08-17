@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, Animated, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, Animated, Dimensions, Image, ScrollView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -22,9 +22,9 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
-  const feature1Anim = useRef(new Animated.Value(width * 0.5)).current;
-  const feature2Anim = useRef(new Animated.Value(width * 0.5)).current;
-  const feature3Anim = useRef(new Animated.Value(width * 0.5)).current;
+  const feature1Anim = useRef(new Animated.Value(0)).current;
+  const feature2Anim = useRef(new Animated.Value(0)).current;
+  const feature3Anim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Header animations
@@ -53,19 +53,19 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
       Animated.delay(300),
       Animated.stagger(150, [
         Animated.spring(feature1Anim, {
-          toValue: 0,
+          toValue: 1,
           tension: 40,
           friction: 8,
           useNativeDriver: true,
         }),
         Animated.spring(feature2Anim, {
-          toValue: 0,
+          toValue: 1,
           tension: 40,
           friction: 8,
           useNativeDriver: true,
         }),
         Animated.spring(feature3Anim, {
-          toValue: 0,
+          toValue: 1,
           tension: 40,
           friction: 8,
           useNativeDriver: true,
@@ -82,7 +82,11 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <AnimatedGradientBackground />
       
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         <Animated.View 
           style={[
             styles.header,
@@ -114,8 +118,13 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
             style={[
               styles.featureWrapper,
               { 
-                opacity: fadeAnim,
-                transform: [{ translateX: feature1Anim }] 
+                opacity: feature1Anim,
+                transform: [{ 
+                  translateY: feature1Anim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  })
+                }] 
               }
             ]}
           >
@@ -143,8 +152,13 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
             style={[
               styles.featureWrapper,
               { 
-                opacity: fadeAnim,
-                transform: [{ translateX: feature2Anim }] 
+                opacity: feature2Anim,
+                transform: [{ 
+                  translateY: feature2Anim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  })
+                }] 
               }
             ]}
           >
@@ -172,8 +186,13 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
             style={[
               styles.featureWrapper,
               { 
-                opacity: fadeAnim,
-                transform: [{ translateX: feature3Anim }] 
+                opacity: feature3Anim,
+                transform: [{ 
+                  translateY: feature3Anim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  })
+                }] 
               }
             ]}
           >
@@ -222,84 +241,87 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollView: {
-    flex: 1,
-  },
   content: {
-    padding: 24,
-    paddingBottom: 16,
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 20,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'space-between',
+    paddingBottom: 20,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
-    marginTop: 20,
+    marginBottom: 20,
   },
   logoContainer: {
-    marginBottom: 24,
+    marginBottom: 16,
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
   },
   appName: {
-    fontSize: 32,
+    fontSize: 26,
     fontWeight: '700',
     color: '#1A202C',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#4A5568',
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 20,
     fontWeight: '500',
   },
   
   // Features section
   featuresSection: {
-    marginBottom: 32,
+    flex: 1,
   },
   featureWrapper: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   featureCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: 16,
     paddingHorizontal: 20,
   },
   featureIconContainer: {
     marginRight: 16,
   },
   iconGradient: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
   featureIcon: {
-    fontSize: 22,
+    fontSize: 18,
   },
   featureContent: {
     flex: 1,
   },
   featureHeading: {
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: '600',
     color: '#1A202C',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   featureSubtext: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#718096',
-    lineHeight: 20,
+    lineHeight: 18,
   },
   
   actions: {
     paddingHorizontal: 24,
-    paddingVertical: 20,
+    paddingBottom: 16,
+    paddingTop: 12,
   },
 });

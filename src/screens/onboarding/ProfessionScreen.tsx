@@ -8,7 +8,8 @@ import {
   Platform,
   Animated,
   Keyboard,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
+  ScrollView
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -96,94 +97,102 @@ export const ProfessionScreen: React.FC<Props> = ({ navigation }) => {
       <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <AnimatedGradientBackground />
 
+        <Animated.View 
+          style={[
+            styles.progressWrapper,
+            {
+              opacity: progressAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
+          <ProgressIndicator currentStep={1} totalSteps={5} showTitle={false} />
+        </Animated.View>
+
         <KeyboardAvoidingView 
           style={styles.keyboardView}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
         >
-          <View style={styles.content}>
-            <Animated.View 
-              style={[
-                styles.progressWrapper,
-                {
-                  opacity: progressAnim,
-                  transform: [{ translateY: slideAnim }],
-                },
-              ]}
-            >
-              <ProgressIndicator currentStep={1} totalSteps={5} />
-            </Animated.View>
-            
-            <Animated.View 
-              style={[
-                styles.header,
-                {
-                  opacity: fadeAnim,
-                  transform: [{ translateY: slideAnim }],
-                },
-              ]}
-            >
-              <View style={styles.emojiContainer}>
-                <LinearGradient
-                  colors={['#667EEA', '#764BA2']}
-                  style={styles.emojiGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <Text style={styles.emoji}>👋</Text>
-                </LinearGradient>
-              </View>
-              <Text style={styles.title}>What should we call you?</Text>
-              <Text style={styles.subtitle}>
-                Let's personalize your experience with a friendly touch
-              </Text>
-            </Animated.View>
-
-            <Animated.View 
-              style={[
-                styles.inputContainer,
-                {
-                  opacity: fadeAnim,
-                  transform: [
-                    { scale: inputScaleAnim },
-                    { translateY: slideAnim },
-                  ],
-                },
-              ]}
-            >
-              <PremiumCard style={styles.inputCard}>
-                <View style={styles.inputWrapper}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter your preferred name"
-                    placeholderTextColor="#A0AEC0"
-                    value={name}
-                    onChangeText={setName}
-                    autoCapitalize="words"
-                    autoCorrect={false}
-                    returnKeyType="done"
-                    onSubmitEditing={handleContinue}
-                    maxLength={50}
-                    autoFocus={true}
-                  />
-                  {name.length > 0 && (
-                    <Animated.View style={styles.inputIndicator}>
-                      <LinearGradient
-                        colors={['#48BB78', '#38A169']}
-                        style={styles.checkmarkGradient}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                      >
-                        <Text style={styles.checkmark}>✓</Text>
-                      </LinearGradient>
-                    </Animated.View>
-                  )}
+          <ScrollView 
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.content}>
+              <Animated.View 
+                style={[
+                  styles.header,
+                  {
+                    opacity: fadeAnim,
+                    transform: [{ translateY: slideAnim }],
+                  },
+                ]}
+              >
+                <View style={styles.emojiContainer}>
+                  <LinearGradient
+                    colors={['#667EEA', '#764BA2']}
+                    style={styles.emojiGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <Text style={styles.emoji}>👋</Text>
+                  </LinearGradient>
                 </View>
-              </PremiumCard>
-              <Text style={styles.inputHint}>
-                This is how we'll address you throughout the app
-              </Text>
-            </Animated.View>
-          </View>
+                <Text style={styles.title}>What should we call you?</Text>
+                <Text style={styles.subtitle}>
+                  Let's personalize your experience with a friendly touch
+                </Text>
+              </Animated.View>
+
+              <Animated.View 
+                style={[
+                  styles.inputContainer,
+                  {
+                    opacity: fadeAnim,
+                    transform: [
+                      { scale: inputScaleAnim },
+                      { translateY: slideAnim },
+                    ],
+                  },
+                ]}
+              >
+                <PremiumCard style={styles.inputCard}>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Enter your preferred name"
+                      placeholderTextColor="#A0AEC0"
+                      value={name}
+                      onChangeText={setName}
+                      autoCapitalize="words"
+                      autoCorrect={false}
+                      returnKeyType="done"
+                      onSubmitEditing={handleContinue}
+                      maxLength={50}
+                      autoFocus={false}
+                    />
+                    {name.length > 0 && (
+                      <Animated.View style={styles.inputIndicator}>
+                        <LinearGradient
+                          colors={['#48BB78', '#38A169']}
+                          style={styles.checkmarkGradient}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 1 }}
+                        >
+                          <Text style={styles.checkmark}>✓</Text>
+                        </LinearGradient>
+                      </Animated.View>
+                    )}
+                  </View>
+                </PremiumCard>
+                <Text style={styles.inputHint}>
+                  This is how we'll address you throughout the app
+                </Text>
+              </Animated.View>
+            </View>
+          </ScrollView>
 
           <Animated.View 
             style={[
@@ -220,31 +229,37 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  progressWrapper: {
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
   keyboardView: {
     flex: 1,
   },
-  content: {
+  scrollView: {
     flex: 1,
-    justifyContent: 'center',
-    padding: 24,
   },
-  progressWrapper: {
-    position: 'absolute',
-    top: 24,
-    left: 24,
-    right: 24,
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+  },
+  content: {
+    alignItems: 'center',
   },
   header: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: 40,
   },
   emojiContainer: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   emojiGradient: {
-    width: 80,
-    height: 80,
-    borderRadius: 20,
+    width: 64,
+    height: 64,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#667EEA',
@@ -254,10 +269,10 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   emoji: {
-    fontSize: 40,
+    fontSize: 32,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '700',
     color: '#1A202C',
     textAlign: 'center',
@@ -272,7 +287,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   inputContainer: {
-    marginBottom: 48,
+    width: '100%',
+    marginBottom: 40,
   },
   inputCard: {
     padding: 0,

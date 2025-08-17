@@ -40,41 +40,41 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    paddingVertical: theme.spacing[3],
-    marginBottom: theme.spacing[4],
+    paddingVertical: 8,
+    marginBottom: 8,
   },
   title: {
-    fontSize: theme.typography.fontSize.sm,
+    fontSize: 12,
     fontWeight: theme.typography.fontWeight.medium,
-    color: theme.colors.text.secondary,
+    color: '#718096',
     textAlign: 'center',
-    marginBottom: theme.spacing[3],
-    lineHeight: 18,
+    marginBottom: 8,
+    lineHeight: 16,
   },
   dotsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: theme.spacing[2],
+    marginBottom: 6,
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginHorizontal: 4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginHorizontal: 3,
   },
   completedDot: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: '#667EEA',
   },
   currentDot: {
-    backgroundColor: theme.colors.primary,
-    transform: [{ scale: 1.2 }],
+    backgroundColor: '#667EEA',
+    transform: [{ scale: 1.3 }],
   },
   pendingDot: {
-    backgroundColor: theme.colors.border.light,
+    backgroundColor: '#E2E8F0',
   },
   stepText: {
-    fontSize: theme.typography.fontSize.xs,
-    color: theme.colors.text.secondary,
+    fontSize: 11,
+    color: '#718096',
     fontWeight: theme.typography.fontWeight.medium,
   },
 });

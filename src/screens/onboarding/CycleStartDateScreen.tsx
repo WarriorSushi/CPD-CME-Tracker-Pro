@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, ScrollView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -26,6 +26,7 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [customDate, setCustomDate] = useState<Date | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [askAboutLicenseSync, setAskAboutLicenseSync] = useState(false);
   const [licenseSyncSelected, setLicenseSyncSelected] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,9 +58,14 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
     setSelectedOption(-1);
     setAskAboutLicenseSync(true);
     // Initialize with a reasonable default if not set
+    const defaultDate = new Date(new Date().setFullYear(new Date().getFullYear() - 1));
     if (!customDate) {
-      setCustomDate(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
+      setCustomDate(defaultDate);
     }
+    // Use setTimeout to ensure state is updated before showing picker
+    setTimeout(() => {
+      setShowDatePicker(true);
+    }, 10);
   };
 
   const handleDatePickerChange = (selectedDate: Date) => {
@@ -110,6 +116,8 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
       ]),
     ]).start();
   }, []);
+
+  const isValid = selectedOption !== null || customDate !== null;
 
   useEffect(() => {
     // Animate sync card when it becomes visible
@@ -189,8 +197,6 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
     });
   };
 
-  const isValid = selectedOption !== null || customDate !== null;
-
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <AnimatedGradientBackground />
@@ -208,12 +214,10 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
       </Animated.View>
 
       <ScrollView 
-        style={styles.scrollView}
+        style={styles.content}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.content}>
           <Animated.View 
             style={[
               styles.header,
@@ -346,96 +350,20 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
               </PremiumCard>
             </Animated.View>
           </View>
-
-          {/* Custom Date Picker */}
-          {selectedOption === -1 && (
-            <View style={styles.datePickerContainer}>
-              <PremiumCard style={styles.datePickerCard}>
-                <DatePicker
-                  value={customDate || new Date(new Date().setFullYear(new Date().getFullYear() - 1))}
-                  onDateChange={handleDatePickerChange}
-                  maximumDate={new Date()}
-                  minimumDate={new Date(2015, 0, 1)}
-                  style={styles.customDatePicker}
-                />
-              </PremiumCard>
-            </View>
+          
+          {/* Date Picker Modal */}
+          {showDatePicker && customDate && (
+            <DatePicker
+              value={customDate}
+              onDateChange={(date) => {
+                setCustomDate(date);
+                setShowDatePicker(false);
+              }}
+              maximumDate={new Date()}
+              minimumDate={new Date(new Date().setFullYear(new Date().getFullYear() - 10))}
+            />
           )}
 
-          {/* License Sync Option */}
-          {askAboutLicenseSync && isValid && (
-            <Animated.View
-              style={[
-                styles.syncWrapper,
-                {
-                  opacity: syncCardAnim,
-                  transform: [{
-                    translateY: syncCardAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [15, 0],
-                    }),
-                  }],
-                },
-              ]}
-            >
-              <PremiumCard style={styles.syncCard}>
-                <View style={styles.syncContent}>
-                  <LinearGradient
-                    colors={['#43E97B', '#38F9D7']}
-                    style={styles.syncIcon}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    <Text style={styles.syncEmoji}>🔔</Text>
-                  </LinearGradient>
-                  <Text style={styles.syncTitle}>License renewal reminder calculation with same dates?</Text>
-                </View>
-                <View style={styles.syncButtons}>
-                  <PremiumCard 
-                    selected={licenseSyncSelected === true}
-                    onPress={handleLicenseSyncYes}
-                    style={styles.syncButton}
-                  >
-                    <Text style={[
-                      styles.syncButtonText,
-                      licenseSyncSelected === true && styles.syncButtonTextSelected,
-                    ]}>
-                      Yes
-                    </Text>
-                  </PremiumCard>
-                  <PremiumCard 
-                    selected={licenseSyncSelected === false}
-                    onPress={handleLicenseSyncNo}
-                    style={styles.syncButton}
-                  >
-                    <Text style={[
-                      styles.syncButtonText,
-                      licenseSyncSelected === false && styles.syncButtonTextSelected,
-                    ]}>
-                      No
-                    </Text>
-                  </PremiumCard>
-                </View>
-              </PremiumCard>
-            </Animated.View>
-          )}
-
-          <PremiumCard style={styles.reassurance}>
-            <View style={styles.reassuranceContent}>
-              <LinearGradient
-                colors={['#FA709A', '#FEE140']}
-                style={styles.reassuranceIcon}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <Text style={styles.reassuranceEmoji}>💡</Text>
-              </LinearGradient>
-              <Text style={styles.reassuranceText}>
-                You can adjust this later in Settings
-              </Text>
-            </View>
-          </PremiumCard>
-        </View>
       </ScrollView>
       
       <Animated.View 
@@ -473,30 +401,29 @@ const styles = StyleSheet.create({
   },
   progressWrapper: {
     paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 10,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 100,
+    paddingTop: 12,
+    paddingBottom: 8,
   },
   content: {
-    paddingVertical: 20,
+    flex: 1,
+    paddingHorizontal: 24,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'space-between',
+    paddingBottom: 20,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 16,
   },
   iconContainer: {
-    marginBottom: 20,
+    marginBottom: 12,
   },
   headerIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
+    width: 48,
+    height: 48,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#4FACFE',
@@ -506,37 +433,37 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   headerEmoji: {
-    fontSize: 28,
+    fontSize: 22,
   },
   title: {
-    fontSize: 26,
+    fontSize: 20,
     fontWeight: '700',
     color: '#1A202C',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#4A5568',
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 20,
     paddingHorizontal: 16,
   },
   optionsContainer: {
-    marginBottom: 20,
+    flex: 1,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: '#1A202C',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   optionWrapper: {
-    marginBottom: 8,
+    marginBottom: 4,
   },
   optionCard: {
-    paddingVertical: 16,
+    paddingVertical: 10,
     paddingHorizontal: 16,
   },
   optionContent: {
@@ -548,23 +475,23 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   optionText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#1A202C',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   selectedText: {
     color: '#4FACFE',
   },
   optionDate: {
-    fontSize: 13,
+    fontSize: 11,
     color: '#718096',
   },
   selectedDateText: {
     color: '#4A5568',
   },
   optionSubtext: {
-    fontSize: 13,
+    fontSize: 11,
     color: '#718096',
   },
   radioButton: {
@@ -584,93 +511,10 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
   },
-  datePickerContainer: {
-    marginTop: 16,
-    marginBottom: 20,
-  },
-  datePickerCard: {
-    paddingVertical: 20,
-    paddingHorizontal: 16,
-  },
-  customDatePicker: {
-    backgroundColor: 'transparent',
-  },
-  syncWrapper: {
-    marginBottom: 20,
-  },
-  syncCard: {
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-  },
-  syncContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  syncIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  syncEmoji: {
-    fontSize: 16,
-  },
-  syncTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1A202C',
-    flex: 1,
-    lineHeight: 22,
-  },
-  syncButtons: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  syncButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-  },
-  syncButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1A202C',
-  },
-  syncButtonTextSelected: {
-    color: '#4FACFE',
-  },
-  reassurance: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    marginTop: 12,
-  },
-  reassuranceContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  reassuranceIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  reassuranceEmoji: {
-    fontSize: 12,
-  },
-  reassuranceText: {
-    fontSize: 14,
-    color: '#4A5568',
-    flex: 1,
-  },
   actions: {
     paddingHorizontal: 24,
-    paddingBottom: 20,
+    paddingBottom: 16,
+    paddingTop: 12,
   },
   primaryButton: {
     marginBottom: 12,

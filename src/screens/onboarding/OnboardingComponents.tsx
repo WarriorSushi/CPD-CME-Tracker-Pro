@@ -31,119 +31,98 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
   loading = false,
   style,
 }) => {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-  const opacityAnim = useRef(new Animated.Value(1)).current;
+  const [isPressed, setIsPressed] = React.useState(false);
 
   const handlePressIn = () => {
-    Animated.parallel([
-      Animated.spring(scaleAnim, {
-        toValue: 0.95,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: 0.8,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    setIsPressed(true);
   };
 
   const handlePressOut = () => {
-    Animated.parallel([
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        friction: 3,
-        tension: 40,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    setIsPressed(false);
   };
 
   if (variant === 'primary') {
     return (
-      <Animated.View
-        style={[
-          {
-            transform: [{ scale: scaleAnim }],
-            opacity: disabled ? 0.5 : opacityAnim,
-          },
-          style,
-        ]}
-      >
-        <TouchableOpacity
-          onPress={onPress}
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-          disabled={disabled || loading}
-          activeOpacity={1}
-        >
-          <LinearGradient
-            colors={disabled ? ['#CBD5E0', '#A0AEC0'] : ['#667EEA', '#764BA2']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.primaryButton}
-          >
-            <Text style={styles.primaryButtonText}>{title}</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      </Animated.View>
-    );
-  }
-
-  if (variant === 'secondary') {
-    return (
-      <Animated.View
-        style={[
-          {
-            transform: [{ scale: scaleAnim }],
-            opacity: disabled ? 0.5 : opacityAnim,
-          },
-          style,
-        ]}
-      >
-        <TouchableOpacity
-          onPress={onPress}
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-          disabled={disabled || loading}
-          activeOpacity={1}
-          style={styles.secondaryButton}
-        >
-          <View style={styles.secondaryButtonInner}>
-            <Text style={styles.secondaryButtonText}>{title}</Text>
-          </View>
-        </TouchableOpacity>
-      </Animated.View>
-    );
-  }
-
-  // Ghost variant
-  return (
-    <Animated.View
-      style={[
-        {
-          transform: [{ scale: scaleAnim }],
-          opacity: disabled ? 0.5 : opacityAnim,
-        },
-        style,
-      ]}
-    >
       <TouchableOpacity
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         disabled={disabled || loading}
         activeOpacity={1}
-        style={styles.ghostButton}
+        style={[
+          styles.newPrimaryButton,
+          isPressed && styles.newPrimaryButtonPressed,
+          disabled && styles.newPrimaryButtonDisabled,
+          style,
+        ]}
       >
-        <Text style={styles.ghostButtonText}>{title}</Text>
+        <LinearGradient
+          colors={disabled ? ['#E2E8F0', '#CBD5E0'] : ['#667EEA', '#764BA2']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={[
+            styles.newPrimaryButtonGradient,
+            isPressed && styles.newPrimaryButtonGradientPressed,
+          ]}
+        >
+          <Text style={[
+            styles.newPrimaryButtonText,
+            disabled && styles.newPrimaryButtonTextDisabled,
+          ]}>
+            {title}
+          </Text>
+        </LinearGradient>
       </TouchableOpacity>
-    </Animated.View>
+    );
+  }
+
+  if (variant === 'secondary') {
+    return (
+      <TouchableOpacity
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        disabled={disabled || loading}
+        activeOpacity={1}
+        style={[
+          styles.newSecondaryButton,
+          isPressed && styles.newSecondaryButtonPressed,
+          disabled && styles.newSecondaryButtonDisabled,
+          style,
+        ]}
+      >
+        <Text style={[
+          styles.newSecondaryButtonText,
+          disabled && styles.newSecondaryButtonTextDisabled,
+        ]}>
+          {title}
+        </Text>
+      </TouchableOpacity>
+    );
+  }
+
+  // Ghost variant
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      disabled={disabled || loading}
+      activeOpacity={1}
+      style={[
+        styles.newGhostButton,
+        isPressed && styles.newGhostButtonPressed,
+        disabled && styles.newGhostButtonDisabled,
+        style,
+      ]}
+    >
+      <Text style={[
+        styles.newGhostButtonText,
+        disabled && styles.newGhostButtonTextDisabled,
+      ]}>
+        {title}
+      </Text>
+    </TouchableOpacity>
   );
 };
 
@@ -362,14 +341,6 @@ export const PremiumCard: React.FC<PremiumCardProps> = ({
         style,
       ]}
     >
-      {selected && (
-        <LinearGradient
-          colors={['rgba(102, 126, 234, 0.08)', 'rgba(118, 75, 162, 0.04)']}
-          style={StyleSheet.absoluteFillObject}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        />
-      )}
       {children}
     </Animated.View>
   );
@@ -391,51 +362,99 @@ export const PremiumCard: React.FC<PremiumCardProps> = ({
 };
 
 const styles = StyleSheet.create({
-  // Button styles
-  primaryButton: {
+  // New Button styles - clean design following user's pressed effect specs
+  newPrimaryButton: {
+    borderRadius: 5,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 5,
+    borderBottomColor: 'rgba(102, 126, 234, 0.3)',
+    overflow: 'hidden',
+  },
+  newPrimaryButtonPressed: {
+    borderBottomWidth: 0,
+    borderTopWidth: 2,
+    borderLeftWidth: 2,
+    borderRightWidth: 2,
+    borderTopColor: 'rgba(102, 126, 234, 0.2)',
+    borderLeftColor: 'rgba(102, 126, 234, 0.2)',
+    borderRightColor: 'rgba(102, 126, 234, 0.2)',
+  },
+  newPrimaryButtonDisabled: {
+    borderBottomColor: '#E2E8F0',
+  },
+  newPrimaryButtonGradient: {
     paddingVertical: 16,
     paddingHorizontal: 32,
-    borderRadius: 16,
     alignItems: 'center',
-    shadowColor: '#667EEA',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
+    justifyContent: 'center',
   },
-  primaryButtonText: {
+  newPrimaryButtonGradientPressed: {
+    // Gradient remains the same when pressed
+  },
+  newPrimaryButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
     letterSpacing: 0.5,
   },
-  secondaryButton: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(102, 126, 234, 0.2)',
+  newPrimaryButtonTextDisabled: {
+    color: '#A0AEC0',
   },
-  secondaryButtonInner: {
+  
+  newSecondaryButton: {
+    borderRadius: 5,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 5,
+    borderBottomColor: 'rgba(102, 126, 234, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(102, 126, 234, 0.3)',
     paddingVertical: 16,
     paddingHorizontal: 32,
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
   },
-  secondaryButtonText: {
-    color: '#4C51BF',
+  newSecondaryButtonPressed: {
+    borderBottomWidth: 0,
+    borderTopWidth: 2,
+    borderLeftWidth: 2,
+    borderRightWidth: 2,
+    borderTopColor: 'rgba(102, 126, 234, 0.2)',
+    borderLeftColor: 'rgba(102, 126, 234, 0.2)',
+    borderRightColor: 'rgba(102, 126, 234, 0.2)',
+  },
+  newSecondaryButtonDisabled: {
+    borderBottomColor: '#E2E8F0',
+    borderColor: '#E2E8F0',
+  },
+  newSecondaryButtonText: {
+    color: '#667EEA',
     fontSize: 16,
     fontWeight: '600',
     letterSpacing: 0.5,
   },
-  ghostButton: {
+  newSecondaryButtonTextDisabled: {
+    color: '#A0AEC0',
+  },
+  
+  newGhostButton: {
+    borderRadius: 5,
+    backgroundColor: 'transparent',
     paddingVertical: 16,
     paddingHorizontal: 32,
     alignItems: 'center',
   },
-  ghostButtonText: {
+  newGhostButtonPressed: {
+    backgroundColor: 'rgba(102, 126, 234, 0.05)',
+  },
+  newGhostButtonDisabled: {
+    // No special disabled styling for ghost
+  },
+  newGhostButtonText: {
     color: '#718096',
     fontSize: 16,
     fontWeight: '500',
+  },
+  newGhostButtonTextDisabled: {
+    color: '#CBD5E0',
   },
   
   // Gradient background styles
@@ -462,20 +481,27 @@ const styles = StyleSheet.create({
   
   // Card styles
   card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.04)',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 0.5,
+    borderColor: 'rgba(0, 0, 0, 0.06)',
     overflow: 'hidden',
   },
   selectedCard: {
-    borderColor: 'rgba(102, 126, 234, 0.3)',
+    backgroundColor: '#FFFFFF',
+    borderColor: '#667EEA',
     borderWidth: 2,
+    shadowColor: '#667EEA',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
+    transform: [{ scale: 1.02 }],
   },
 });
