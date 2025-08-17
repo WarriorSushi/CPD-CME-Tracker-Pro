@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { 
   View, 
   Text, 
@@ -7,13 +7,16 @@ import {
   TouchableOpacity,
   Alert,
   Image,
-  Dimensions
+  Dimensions,
+  Animated
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 
 import { Card, Button, Input, LoadingSpinner, StandardHeader, SvgIcon } from '../../components';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../onboarding/OnboardingComponents';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { User } from '../../types';
@@ -33,6 +36,87 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
   const [profilePicturePath, setProfilePicturePath] = useState(user?.profilePicturePath || '');
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  
+  // Premium animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+  const profileCardAnim = useRef(new Animated.Value(0)).current;
+  const infoCardAnim = useRef(new Animated.Value(0)).current;
+  const previewCardAnim = useRef(new Animated.Value(0)).current;
+  const actionsAnim = useRef(new Animated.Value(0)).current;
+  
+  // Shadow animations (to prevent gray flash)
+  const profileShadowAnim = useRef(new Animated.Value(0)).current;
+  const infoShadowAnim = useRef(new Animated.Value(0)).current;
+  const previewShadowAnim = useRef(new Animated.Value(0)).current;
+
+  // Premium entrance animations
+  useFocusEffect(
+    useCallback(() => {
+      // Premium entrance animations
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          tension: 30,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      // Staggered content animations
+      Animated.sequence([
+        Animated.delay(150),
+        Animated.spring(profileCardAnim, {
+          toValue: 1,
+          tension: 40,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.spring(infoCardAnim, {
+          toValue: 1,
+          tension: 40,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.spring(previewCardAnim, {
+          toValue: 1,
+          tension: 40,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.spring(actionsAnim, {
+          toValue: 1,
+          tension: 40,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        // Add shadows after animations finish
+        Animated.parallel([
+          Animated.timing(profileShadowAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: false,
+          }),
+          Animated.timing(infoShadowAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: false,
+          }),
+          Animated.timing(previewShadowAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: false,
+          }),
+        ]).start();
+      });
+    }, [])
+  );
 
   const handleImagePicker = () => {
     Alert.alert(
@@ -207,19 +291,49 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <AnimatedGradientBackground />
+      
       <StandardHeader
         title="Edit Profile"
         showBackButton={true}
         onBackPress={() => navigation.goBack()}
       />
 
-      <ScrollView 
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+      <Animated.View 
+        style={[
+          styles.content,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
       >
-        {/* Profile Picture Section */}
-        <Card variant="entry" style={styles.profilePictureCard}>
+        <ScrollView 
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Profile Picture Section */}
+          <Animated.View 
+            style={[
+              {
+                opacity: profileCardAnim,
+                transform: [{
+                  translateY: profileCardAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
+            <PremiumCard style={[
+              styles.profilePictureCard,
+              {
+                elevation: profileShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] }),
+                shadowOpacity: profileShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] }),
+              }
+            ]}>
           <Text style={styles.sectionTitle}>Profile Picture</Text>
           
           <View style={styles.profilePictureContainer}>
@@ -242,30 +356,51 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
             </View>
             
             <View style={styles.profilePictureActions}>
-              <Button
+              <PremiumButton
                 title={isUploadingImage ? "Uploading..." : profilePicturePath ? "Change Photo" : "Add Photo"}
                 onPress={handleImagePicker}
                 variant="primary"
                 size="small"
                 disabled={isUploadingImage}
+                loading={isUploadingImage}
                 style={styles.changePhotoButton}
               />
               
               {profilePicturePath && (
-                <Button
+                <PremiumButton
                   title="Remove"
                   onPress={handleRemoveProfilePicture}
-                  variant="outline"
+                  variant="secondary"
                   size="small"
                   style={styles.removePhotoButton}
                 />
               )}
             </View>
           </View>
-        </Card>
+            </PremiumCard>
+          </Animated.View>
 
-        {/* Profile Information Section */}
-        <Card variant="entry" style={styles.profileInfoCard}>
+          {/* Profile Information Section */}
+          <Animated.View 
+            style={[
+              {
+                opacity: infoCardAnim,
+                transform: [{
+                  translateY: infoCardAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
+            <PremiumCard style={[
+              styles.profileInfoCard,
+              {
+                elevation: infoShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] }),
+                shadowOpacity: infoShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] }),
+              }
+            ]}>
           <Text style={styles.sectionTitle}>Personal Information</Text>
           
           <View style={styles.inputGroup}>
@@ -296,10 +431,30 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
               Used for personalized recommendations and statistics
             </Text>
           </View>
-        </Card>
+            </PremiumCard>
+          </Animated.View>
 
-        {/* Current Profile Preview */}
-        <Card variant="entry" style={styles.previewCard}>
+          {/* Current Profile Preview */}
+          <Animated.View 
+            style={[
+              {
+                opacity: previewCardAnim,
+                transform: [{
+                  translateY: previewCardAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
+            <PremiumCard style={[
+              styles.previewCard,
+              {
+                elevation: previewShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
+                shadowOpacity: previewShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+              }
+            ]}>
           <Text style={styles.sectionTitle}>Preview</Text>
           <View style={styles.previewContent}>
             <Text style={styles.previewText}>
@@ -309,22 +464,38 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
               "Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, {profileName.trim() || user?.profession || 'Professional'}"
             </Text>
           </View>
-        </Card>
+            </PremiumCard>
+          </Animated.View>
 
-        {/* Save Button */}
-        <View style={styles.saveButtonContainer}>
-          <Button
-            title={isSaving ? "Saving..." : "Save Profile"}
-            onPress={handleSave}
-            variant="primary"
-            disabled={isSaving}
-            style={styles.saveButton}
-          />
-        </View>
+          {/* Save Button */}
+          <Animated.View 
+            style={[
+              styles.saveButtonContainer,
+              {
+                opacity: actionsAnim,
+                transform: [{
+                  translateY: actionsAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
+            <PremiumButton
+              title={isSaving ? "Saving..." : "Save Profile"}
+              onPress={handleSave}
+              variant="primary"
+              disabled={isSaving}
+              loading={isSaving}
+              style={styles.saveButton}
+            />
+          </Animated.View>
 
-        {/* Bottom spacer */}
-        <View style={styles.bottomSpacer} />
-      </ScrollView>
+          {/* Bottom spacer */}
+          <View style={styles.bottomSpacer} />
+        </ScrollView>
+      </Animated.View>
     </View>
   );
 };
@@ -332,11 +503,13 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: 'transparent', // Let AnimatedGradientBackground show through
+  },
+  content: {
+    flex: 1,
   },
   scrollView: {
     flex: 1,
-    backgroundColor: '#FFF5EE',
   },
   scrollContent: {
     padding: theme.spacing[4],
@@ -345,7 +518,15 @@ const styles = StyleSheet.create({
   // Profile Picture Section
   profilePictureCard: {
     marginBottom: theme.spacing[4],
-    padding: theme.spacing[4],
+    padding: theme.spacing[5],
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    // Shadow will be handled by animation interpolation
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 16,
+    elevation: 0, // Start with no elevation, will be animated
+    shadowOpacity: 0, // Start with no shadow, will be animated
   },
   profilePictureContainer: {
     alignItems: 'center',
@@ -387,7 +568,15 @@ const styles = StyleSheet.create({
   // Form Sections
   profileInfoCard: {
     marginBottom: theme.spacing[4],
-    padding: theme.spacing[4],
+    padding: theme.spacing[5],
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    // Shadow will be handled by animation interpolation
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 16,
+    elevation: 0, // Start with no elevation, will be animated
+    shadowOpacity: 0, // Start with no shadow, will be animated
   },
   sectionTitle: {
     fontSize: theme.typography.fontSize.lg,
@@ -417,7 +606,16 @@ const styles = StyleSheet.create({
   previewCard: {
     marginBottom: theme.spacing[4],
     padding: theme.spacing[4],
-    backgroundColor: '#FFF7EC',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: theme.colors.primary,
+    // Shadow will be handled by animation interpolation
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 12,
+    elevation: 0, // Start with no elevation, will be animated
+    shadowOpacity: 0, // Start with no shadow, will be animated
   },
   previewContent: {
     marginTop: theme.spacing[2],

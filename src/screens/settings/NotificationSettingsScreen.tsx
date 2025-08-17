@@ -248,7 +248,7 @@ export const NotificationSettingsScreen: React.FC<Props> = ({ navigation }) => {
             </View>
           </View>
         )}
-      </Card>
+      </PremiumCard>
     );
   };
 

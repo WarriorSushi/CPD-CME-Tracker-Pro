@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,14 +8,17 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Animated
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { StandardHeader } from '../../components/common/StandardHeader';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../onboarding/OnboardingComponents';
 import { ModernDatePicker } from '../../components/common/ModernDatePicker';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
@@ -43,6 +46,67 @@ export const AddReminderScreen: React.FC<Props> = ({ navigation }) => {
     new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000) // Default to 1 week from now
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Premium animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+  const formCardAnim = useRef(new Animated.Value(0)).current;
+  const infoCardAnim = useRef(new Animated.Value(0)).current;
+  
+  // Shadow animations (to prevent gray flash)
+  const formShadowAnim = useRef(new Animated.Value(0)).current;
+  const infoShadowAnim = useRef(new Animated.Value(0)).current;
+
+  // Premium entrance animations
+  useFocusEffect(
+    useCallback(() => {
+      // Premium entrance animations
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          tension: 30,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      // Staggered content animations
+      Animated.sequence([
+        Animated.delay(150),
+        Animated.spring(formCardAnim, {
+          toValue: 1,
+          tension: 40,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.spring(infoCardAnim, {
+          toValue: 1,
+          tension: 40,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        // Add shadows after animations finish
+        Animated.parallel([
+          Animated.timing(formShadowAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: false,
+          }),
+          Animated.timing(infoShadowAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: false,
+          }),
+        ]).start();
+      });
+    }, [])
+  );
 
   const isFormValid = eventName.trim() !== '' && eventDate instanceof Date;
 
@@ -85,22 +149,49 @@ export const AddReminderScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={[styles.container, { paddingTop: insets.top }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <View style={styles.container}>
+      <AnimatedGradientBackground />
+      
       <StandardHeader
         title="Add Event Reminder"
         onBackPress={() => navigation.goBack()}
         showBackButton={true}
       />
 
-      <ScrollView 
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+      <Animated.View 
+        style={[
+          styles.content,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
       >
-        <Card style={styles.formCard}>
+        <ScrollView 
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Animated.View 
+            style={[
+              {
+                opacity: formCardAnim,
+                transform: [{
+                  translateY: formCardAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
+            <PremiumCard style={[
+              styles.formCard,
+              {
+                elevation: formShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] }),
+                shadowOpacity: formShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] }),
+              }
+            ]}>
           <View style={styles.formHeader}>
             <Text style={styles.formTitle}>Event Details</Text>
             <Text style={styles.formSubtitle}>
@@ -137,25 +228,46 @@ export const AddReminderScreen: React.FC<Props> = ({ navigation }) => {
 
           {/* Form Actions */}
           <View style={styles.formActions}>
-            <Button
+            <PremiumButton
               title="Cancel"
               onPress={() => navigation.goBack()}
-              variant="outline"
+              variant="secondary"
               style={styles.button}
             />
             
-            <Button
+            <PremiumButton
               title={isSubmitting ? 'Adding...' : 'Add Reminder'}
               onPress={handleSubmit}
               disabled={!isFormValid || isSubmitting}
               variant="primary"
               style={styles.button}
+              loading={isSubmitting}
             />
           </View>
-        </Card>
+            </PremiumCard>
+          </Animated.View>
 
-        {/* Info Card */}
-        <Card style={styles.infoCard}>
+          {/* Info Card */}
+          <Animated.View 
+            style={[
+              {
+                opacity: infoCardAnim,
+                transform: [{
+                  translateY: infoCardAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
+            <PremiumCard style={[
+              styles.infoCard,
+              {
+                elevation: infoShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
+                shadowOpacity: infoShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+              }
+            ]}>
           <View style={styles.infoHeader}>
             <Text style={styles.infoIcon}>📅</Text>
             <Text style={styles.infoTitle}>Event Reminders</Text>
@@ -167,19 +279,24 @@ export const AddReminderScreen: React.FC<Props> = ({ navigation }) => {
           <Text style={styles.infoNote}>
             Note: Push notifications for reminders will be available in a future update.
           </Text>
-        </Card>
+            </PremiumCard>
+          </Animated.View>
 
-        {/* Bottom spacer */}
-        <View style={styles.bottomSpacer} />
-      </ScrollView>
-    </KeyboardAvoidingView>
+          {/* Bottom spacer */}
+          <View style={styles.bottomSpacer} />
+        </ScrollView>
+      </Animated.View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5EE',
+    backgroundColor: 'transparent', // Let AnimatedGradientBackground show through
+  },
+  content: {
+    flex: 1,
   },
 
   // Header styles removed - using StandardHeader
@@ -190,7 +307,15 @@ const styles = StyleSheet.create({
   },
   formCard: {
     margin: theme.spacing[4],
-    padding: theme.spacing[4],
+    padding: theme.spacing[5],
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    // Shadow will be handled by animation interpolation
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 16,
+    elevation: 0, // Start with no elevation, will be animated
+    shadowOpacity: 0, // Start with no shadow, will be animated
   },
   formHeader: {
     marginBottom: theme.spacing[6],
@@ -252,9 +377,16 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.spacing[4],
     marginBottom: theme.spacing[4],
     padding: theme.spacing[4],
-    backgroundColor: '#FFF7EC', // Section background
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
     borderLeftWidth: 4,
     borderLeftColor: theme.colors.primary,
+    // Shadow will be handled by animation interpolation
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 12,
+    elevation: 0, // Start with no elevation, will be animated
+    shadowOpacity: 0, // Start with no shadow, will be animated
   },
   infoHeader: {
     flexDirection: 'row',

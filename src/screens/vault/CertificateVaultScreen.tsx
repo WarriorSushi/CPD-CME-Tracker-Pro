@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { 
   View, 
   Text, 
@@ -8,7 +8,8 @@ import {
   RefreshControl,
   Alert,
   Image,
-  Dimensions
+  Dimensions,
+  Animated
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -18,6 +19,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Camera } from 'expo-camera';
 
 import { Card, Button, LoadingSpinner, Input, StandardHeader, SvgIcon } from '../../components';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../onboarding/OnboardingComponents';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { Certificate } from '../../types';
@@ -40,12 +42,60 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [cameraPermission, setCameraPermission] = useState<boolean | null>(null);
   const [isScanning, setIsScanning] = useState(false);
+  
+  // Premium animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+  const headerCardAnim = useRef(new Animated.Value(0)).current;
+  const gridAnim = useRef(new Animated.Value(0)).current;
+  
+  // Shadow animations (to prevent gray flash)
+  const headerShadowAnim = useRef(new Animated.Value(0)).current;
 
   // Check camera permissions on mount
   useFocusEffect(
     useCallback(() => {
       refreshCertificates();
       checkCameraPermissions();
+      
+      // Premium entrance animations
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          tension: 30,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      // Staggered content animations
+      Animated.sequence([
+        Animated.delay(150),
+        Animated.spring(headerCardAnim, {
+          toValue: 1,
+          tension: 40,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.spring(gridAnim, {
+          toValue: 1,
+          tension: 40,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        // Add shadows after animations finish
+        Animated.timing(headerShadowAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: false,
+        }).start();
+      });
     }, [refreshCertificates])
   );
 
@@ -405,7 +455,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         style={[styles.masonryCard, { height: cardHeight }]}
         onPress={() => handleViewCertificate(item)}
       >
-        <Card variant="entry" style={[styles.masonryContent, { height: cardHeight }]}>
+        <PremiumCard style={[styles.masonryContent, { height: cardHeight }]}>
           {/* Certificate Preview */}
           <View style={[styles.masonryPreview, { height: imageHeight }]}>
             {isImage ? (
@@ -454,25 +504,55 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
               </Text>
             </View>
           </View>
-        </Card>
+        </PremiumCard>
       </TouchableOpacity>
     );
   };
 
   return (
     <View style={styles.container}>
+      <AnimatedGradientBackground />
+      
       <StandardHeader
         title="Certificate Vault"
         showBackButton={false}
       />
       
-      {/* Subtitle */}
-      <View style={styles.subtitleSection}>
-        <Text style={styles.subtitle}>Store and manage your certificates securely</Text>
-      </View>
+      <Animated.View 
+        style={[
+          styles.content,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
+      >
+        {/* Subtitle */}
+        <View style={styles.subtitleSection}>
+          <Text style={styles.subtitle}>Store and manage your certificates securely</Text>
+        </View>
 
-      {/* Prominent Add Section */}
-      <View style={styles.prominentAddSection}>
+        {/* Prominent Add Section */}
+        <Animated.View 
+          style={[
+            {
+              opacity: headerCardAnim,
+              transform: [{
+                translateY: headerCardAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [20, 0],
+                }),
+              }],
+            },
+          ]}
+        >
+          <PremiumCard style={[
+            styles.prominentAddSection,
+            {
+              elevation: headerShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
+              shadowOpacity: headerShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+            }
+          ]}>
         <View style={styles.addSectionTitleContainer}>
           <Text style={styles.addSectionTitle}>Add Certificate</Text>
         </View>
@@ -528,9 +608,23 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
             {certificates?.length || 0} certificates • {((certificates || []).reduce((sum, cert) => sum + cert.fileSize, 0) / 1024 / 1024).toFixed(1)}MB used
           </Text>
         </View>
-      </View>
+          </PremiumCard>
+        </Animated.View>
 
-      {/* Certificates Grid */}
+        {/* Certificates Grid */}
+        <Animated.View 
+          style={[
+            {
+              opacity: gridAnim,
+              transform: [{
+                translateY: gridAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [20, 0],
+                }),
+              }],
+            },
+          ]}
+        >
       {isLoadingCertificates ? (
         <View style={styles.loadingContainer}>
           <LoadingSpinner size={40} />
@@ -552,7 +646,9 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
           columnWrapperStyle={styles.masonryRow}
         />
       )}
+        </Animated.View>
 
+      </Animated.View>
     </View>
   );
 };
@@ -560,7 +656,11 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: 'transparent', // Let AnimatedGradientBackground show through
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: theme.spacing[2],
   },
   
   // Subtitle

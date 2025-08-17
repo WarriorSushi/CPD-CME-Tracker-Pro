@@ -49,6 +49,15 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
 
   const lastRefreshRef = useRef<number>(0);
   const REFRESH_DEBOUNCE_MS = 3000; // Debounce CME data refresh to 3 seconds
+  
+  // Premium animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+  const searchCardAnim = useRef(new Animated.Value(0)).current;
+  const listAnim = useRef(new Animated.Value(0)).current;
+  
+  // Shadow animations (to prevent gray flash)
+  const searchShadowAnim = useRef(new Animated.Value(0)).current;
 
   // Debounced refresh data when screen comes into focus (e.g., returning from edit)
   useFocusEffect(
@@ -73,6 +82,45 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
         
         refreshAllData();
       }
+      
+      // Premium entrance animations
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          tension: 30,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      // Staggered content animations
+      Animated.sequence([
+        Animated.delay(150),
+        Animated.spring(searchCardAnim, {
+          toValue: 1,
+          tension: 40,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.spring(listAnim, {
+          toValue: 1,
+          tension: 40,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        // Add shadows after animations finish
+        Animated.timing(searchShadowAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: false,
+        }).start();
+      });
     }, [refreshCMEData, showAllEntries, loadAllCMEEntries])
   );
 
@@ -306,13 +354,43 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <AnimatedGradientBackground />
+      
       <StandardHeader
         title="Education History"
         showBackButton={false}
       />
 
-      {/* Search and Stats */}
-      <View style={styles.controls}>
+      <Animated.View 
+        style={[
+          styles.content,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
+      >
+        {/* Search and Stats */}
+        <Animated.View 
+          style={[
+            {
+              opacity: searchCardAnim,
+              transform: [{
+                translateY: searchCardAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [20, 0],
+                }),
+              }],
+            },
+          ]}
+        >
+          <PremiumCard style={[
+            styles.controls,
+            {
+              elevation: searchShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
+              shadowOpacity: searchShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+            }
+          ]}>
         {/* 1. Search bar */}
         <Input
           value={searchQuery}
@@ -346,11 +424,10 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* 3. Add Entry Button */}
         <View style={styles.addButtonContainer}>
-          <Button
+          <PremiumButton
             title="Add Entry"
             onPress={() => navigation.navigate('AddCME', {})}
             variant="primary"
-            size="medium"
             style={styles.addEntryButton}
           />
         </View>
@@ -364,16 +441,43 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
             </View>
           </View>
         )}
-      </View>
+          </PremiumCard>
+        </Animated.View>
 
-      {/* Entries List */}
+        {/* Entries List */}
+        <Animated.View 
+          style={[
+            {
+              opacity: listAnim,
+              transform: [{
+                translateY: listAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [20, 0],
+                }),
+              }],
+            },
+          ]}
+        >
       {isLoadingCME ? (
         <View style={styles.loadingContainer}>
           <LoadingSpinner size={40} />
           <Text style={styles.loadingText}>Loading your entries...</Text>
         </View>
       ) : (
-        <FlatList
+        <Animated.View 
+          style={[
+            {
+              opacity: listAnim,
+              transform: [{
+                translateY: listAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [20, 0],
+                }),
+              }],
+            },
+          ]}
+        >
+          <FlatList
           data={filteredEntries}
           renderItem={renderEntry}
           keyExtractor={(item) => item.id.toString()}
@@ -386,11 +490,11 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
           ListFooterComponent={() => 
             canLoadMore ? (
               <View style={styles.loadMoreContainer}>
-                <Button
+                <PremiumButton
                   title={isLoadingAll ? "Loading..." : "Load All Entries"}
                   onPress={handleLoadAllEntries}
                   disabled={isLoadingAll}
-                  variant="outline"
+                  variant="secondary"
                   style={styles.loadMoreButton}
                 />
                 <Text style={styles.loadMoreText}>
@@ -400,8 +504,11 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
             ) : null
           }
         />
+        </Animated.View>
       )}
+        </Animated.View>
 
+      </Animated.View>
     </View>
   );
 };
@@ -409,7 +516,12 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5EE',
+    backgroundColor: 'transparent', // Let AnimatedGradientBackground show through
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: theme.spacing[3],
+    paddingTop: theme.spacing[2],
   },
   
   // Header
@@ -478,11 +590,20 @@ const styles = StyleSheet.create({
 
   // Controls - More compact
   controls: {
-    paddingHorizontal: theme.spacing[3],
-    paddingTop: theme.spacing[1], // Reduced top padding to close gap
-    paddingBottom: theme.spacing[3],
-    gap: theme.spacing[2],
-    backgroundColor: '#FFF7EC', // Section background
+    paddingHorizontal: theme.spacing[4],
+    paddingTop: theme.spacing[3],
+    paddingBottom: theme.spacing[4],
+    gap: theme.spacing[3],
+    backgroundColor: '#FFFFFF', // Premium card background
+    borderRadius: 20,
+    marginHorizontal: theme.spacing[1],
+    marginBottom: theme.spacing[3],
+    // Shadow will be handled by animation interpolation
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 12,
+    elevation: 0, // Start with no elevation, will be animated
+    shadowOpacity: 0, // Start with no shadow, will be animated
   },
   searchInput: {
     // Input styles applied by component
