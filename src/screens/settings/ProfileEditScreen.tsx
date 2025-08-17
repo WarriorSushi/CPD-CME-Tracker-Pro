@@ -316,19 +316,7 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
           contentContainerStyle={styles.scrollContent}
         >
           {/* Profile Picture Section */}
-          <Animated.View 
-            style={[
-              {
-                opacity: profileCardAnim,
-                transform: [{
-                  translateY: profileCardAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0],
-                  }),
-                }],
-              },
-            ]}
-          >
+          <View>
             <PremiumCard style={[
               styles.profilePictureCard,
               {
@@ -380,22 +368,10 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
             </View>
           </View>
             </PremiumCard>
-          </Animated.View>
+          </View>
 
           {/* Profile Information Section */}
-          <Animated.View 
-            style={[
-              {
-                opacity: infoCardAnim,
-                transform: [{
-                  translateY: infoCardAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0],
-                  }),
-                }],
-              },
-            ]}
-          >
+          <View>
             <PremiumCard style={[
               styles.profileInfoCard,
               {
@@ -460,22 +436,10 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
             </Text>
           </View>
             </PremiumCard>
-          </Animated.View>
+          </View>
 
           {/* Current Profile Preview */}
-          <Animated.View 
-            style={[
-              {
-                opacity: previewCardAnim,
-                transform: [{
-                  translateY: previewCardAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0],
-                  }),
-                }],
-              },
-            ]}
-          >
+          <View>
             <PremiumCard style={[
               styles.previewCard,
               {
@@ -496,23 +460,10 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
             </Text>
           </View>
             </PremiumCard>
-          </Animated.View>
+          </View>
 
           {/* Save Button */}
-          <Animated.View 
-            style={[
-              styles.saveButtonContainer,
-              {
-                opacity: actionsAnim,
-                transform: [{
-                  translateY: actionsAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0],
-                  }),
-                }],
-              },
-            ]}
-          >
+          <View style={styles.saveButtonContainer}>
             <PremiumButton
               title={isSaving ? "Saving..." : "Save Profile"}
               onPress={handleSave}
@@ -521,7 +472,7 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
               loading={isSaving}
               style={styles.saveButton}
             />
-          </Animated.View>
+          </View>
 
           {/* Bottom spacer */}
           <View style={styles.bottomSpacer} />

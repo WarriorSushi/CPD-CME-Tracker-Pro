@@ -51,12 +51,12 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
   const REFRESH_DEBOUNCE_MS = 3000; // Debounce CME data refresh to 3 seconds
   
   // Premium animation values
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(1)).current; // Start visible to prevent flash
   const slideAnim = useRef(new Animated.Value(30)).current;
-  const searchCardAnim = useRef(new Animated.Value(0)).current;
-  const listAnim = useRef(new Animated.Value(0)).current;
+  const searchCardAnim = useRef(new Animated.Value(1)).current; // Start visible
+  const listAnim = useRef(new Animated.Value(1)).current; // Start visible
   
-  // Shadow animations (to prevent gray flash)
+  // Shadow animations (start with subtle shadow to prevent flash)
   const searchShadowAnim = useRef(new Animated.Value(0)).current;
 
   // Debounced refresh data when screen comes into focus (e.g., returning from edit)
@@ -83,38 +83,14 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
         refreshAllData();
       }
       
-      // Premium entrance animations
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.spring(slideAnim, {
-          toValue: 0,
-          tension: 30,
-          friction: 8,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      // Staggered content animations
-      Animated.sequence([
-        Animated.delay(150),
-        Animated.spring(searchCardAnim, {
-          toValue: 1,
-          tension: 40,
-          friction: 8,
-          useNativeDriver: true,
-        }),
-        Animated.spring(listAnim, {
-          toValue: 1,
-          tension: 40,
-          friction: 8,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        // Add shadows after animations finish
+      // Premium entrance animations - only animate slide since cards start visible
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 30,
+        friction: 8,
+        useNativeDriver: true,
+      }).start(() => {
+        // Add shadows after slide animation finishes
         Animated.timing(searchShadowAnim, {
           toValue: 1,
           duration: 300,
@@ -376,19 +352,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
         ]}
       >
         {/* Search and Stats */}
-        <Animated.View 
-          style={[
-            {
-              opacity: searchCardAnim,
-              transform: [{
-                translateY: searchCardAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [20, 0],
-                }),
-              }],
-            },
-          ]}
-        >
+        <View>
           <PremiumCard style={[
             styles.controls,
             {
@@ -447,41 +411,17 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         )}
           </PremiumCard>
-        </Animated.View>
+        </View>
 
         {/* Entries List */}
-        <Animated.View 
-          style={[
-            {
-              opacity: listAnim,
-              transform: [{
-                translateY: listAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [20, 0],
-                }),
-              }],
-            },
-          ]}
-        >
+        <View>
       {isLoadingCME ? (
         <View style={styles.loadingContainer}>
           <LoadingSpinner size={40} />
           <Text style={styles.loadingText}>Loading your entries...</Text>
         </View>
       ) : (
-        <Animated.View 
-          style={[
-            {
-              opacity: listAnim,
-              transform: [{
-                translateY: listAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [20, 0],
-                }),
-              }],
-            },
-          ]}
-        >
+        <View>
           <FlatList
           data={filteredEntries}
           renderItem={renderEntry}
@@ -509,9 +449,9 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
             ) : null
           }
         />
-        </Animated.View>
+        </View>
       )}
-        </Animated.View>
+        </View>
 
       </Animated.View>
     </View>

@@ -62,14 +62,14 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
   const REFRESH_DEBOUNCE_MS = 3000; // Debounce settings refresh to 3 seconds
   
   // Premium animation values
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(1)).current; // Start visible to prevent flash
   const slideAnim = useRef(new Animated.Value(30)).current;
-  const profileCardAnim = useRef(new Animated.Value(0)).current;
-  const licensesCardAnim = useRef(new Animated.Value(0)).current;
-  const dataCardAnim = useRef(new Animated.Value(0)).current;
-  const aboutCardAnim = useRef(new Animated.Value(0)).current;
+  const profileCardAnim = useRef(new Animated.Value(1)).current; // Start visible
+  const licensesCardAnim = useRef(new Animated.Value(1)).current; // Start visible
+  const dataCardAnim = useRef(new Animated.Value(1)).current; // Start visible
+  const aboutCardAnim = useRef(new Animated.Value(1)).current; // Start visible
   
-  // Shadow animations (to prevent gray flash)
+  // Shadow animations (start with subtle shadow to prevent flash)
   const profileShadowAnim = useRef(new Animated.Value(0)).current;
   const licensesShadowAnim = useRef(new Animated.Value(0)).current;
   const dataShadowAnim = useRef(new Animated.Value(0)).current;
@@ -85,52 +85,14 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
         refreshUserData();
       }
       
-      // Premium entrance animations
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.spring(slideAnim, {
-          toValue: 0,
-          tension: 30,
-          friction: 8,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      // Staggered card animations
-      Animated.sequence([
-        Animated.delay(150),
-        Animated.stagger(120, [
-          Animated.spring(profileCardAnim, {
-            toValue: 1,
-            tension: 40,
-            friction: 8,
-            useNativeDriver: true,
-          }),
-          Animated.spring(licensesCardAnim, {
-            toValue: 1,
-            tension: 40,
-            friction: 8,
-            useNativeDriver: true,
-          }),
-          Animated.spring(dataCardAnim, {
-            toValue: 1,
-            tension: 40,
-            friction: 8,
-            useNativeDriver: true,
-          }),
-          Animated.spring(aboutCardAnim, {
-            toValue: 1,
-            tension: 40,
-            friction: 8,
-            useNativeDriver: true,
-          }),
-        ]),
-      ]).start(() => {
-        // Add shadows after cards finish animating
+      // Premium entrance animations - only animate slide since cards start visible
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 30,
+        friction: 8,
+        useNativeDriver: true,
+      }).start(() => {
+        // Add shadows after slide animation finishes with stagger
         Animated.stagger(80, [
           Animated.timing(profileShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
           Animated.timing(licensesShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
@@ -440,20 +402,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
           }
         >
           {/* User Profile Card */}
-          <Animated.View 
-            style={[
-              styles.sectionContainer,
-              {
-                opacity: profileCardAnim,
-                transform: [{
-                  translateY: profileCardAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0],
-                  }),
-                }],
-              },
-            ]}
-          >
+          <View style={styles.sectionContainer}>
             <PremiumCard style={[
               styles.sectionCard,
               {
@@ -516,23 +465,10 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
               )}
             </View>
             </PremiumCard>
-          </Animated.View>
+          </View>
 
           {/* Data Management Section */}
-          <Animated.View 
-            style={[
-              styles.sectionContainer,
-              {
-                opacity: dataCardAnim,
-                transform: [{
-                  translateY: dataCardAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0],
-                  }),
-                }],
-              },
-            ]}
-          >
+          <View style={styles.sectionContainer}>
             <PremiumCard style={[
               styles.sectionCard,
               {
@@ -568,23 +504,10 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
               </View>
             </View>
             </PremiumCard>
-          </Animated.View>
+          </View>
 
           {/* App Settings Section */}
-          <Animated.View 
-            style={[
-              styles.sectionContainer,
-              {
-                opacity: aboutCardAnim,
-                transform: [{
-                  translateY: aboutCardAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0],
-                  }),
-                }],
-              },
-            ]}
-          >
+          <View style={styles.sectionContainer}>
             <PremiumCard style={[
               styles.sectionCard,
               {
@@ -634,23 +557,10 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
               </View>
             </View>
             </PremiumCard>
-          </Animated.View>
+          </View>
 
           {/* About Section */}
-          <Animated.View 
-            style={[
-              styles.sectionContainer,
-              {
-                opacity: aboutCardAnim,
-                transform: [{
-                  translateY: aboutCardAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0],
-                  }),
-                }],
-              },
-            ]}
-          >
+          <View style={styles.sectionContainer}>
             <PremiumCard style={[
               styles.sectionCard,
               {
@@ -676,7 +586,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
               </View>
             </View>
             </PremiumCard>
-          </Animated.View>
+          </View>
 
           {/* Danger Zone Section - Keep as regular Card for danger styling */}
           <View style={styles.sectionContainer}>

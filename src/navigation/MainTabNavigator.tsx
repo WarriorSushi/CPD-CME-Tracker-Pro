@@ -1,12 +1,15 @@
-import React from 'react';
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { Text, View, StyleSheet, TouchableOpacity, Animated, Easing, Dimensions } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator, StackNavigationOptions, TransitionPresets } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { theme } from '../constants/theme';
 import { MainTabParamList, TabParamList } from '../types/navigation';
 import { SvgIcon } from '../components';
 import { HapticsUtils } from '../utils/HapticsUtils';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 // Import screens and navigators
 import { DashboardScreen } from '../screens/dashboard/DashboardScreen';
@@ -23,57 +26,235 @@ import { NotificationSettingsScreen } from '../screens/settings/NotificationSett
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createStackNavigator<MainTabParamList>();
 
+// Custom slide-in transition for smooth animations
+const slideInTransition: StackNavigationOptions = {
+  gestureEnabled: true,
+  gestureDirection: 'horizontal',
+  cardStyleInterpolator: ({ current, next, layouts }) => {
+    return {
+      cardStyle: {
+        transform: [
+          {
+            translateX: current.progress.interpolate({
+              inputRange: [0, 1],
+              outputRange: [layouts.screen.width, 0],
+              extrapolate: 'clamp',
+            }),
+          },
+        ],
+      },
+      overlayStyle: {
+        opacity: current.progress.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, 0.5],
+          extrapolate: 'clamp',
+        }),
+      },
+    };
+  },
+  transitionSpec: {
+    open: {
+      animation: 'timing',
+      config: {
+        duration: 300,
+        easing: Easing.out(Easing.cubic),
+      },
+    },
+    close: {
+      animation: 'timing',
+      config: {
+        duration: 250,
+        easing: Easing.in(Easing.cubic),
+      },
+    },
+  },
+};
+
+// Modal transition for form screens
+const modalTransition: StackNavigationOptions = {
+  gestureEnabled: true,
+  gestureDirection: 'vertical',
+  cardStyleInterpolator: ({ current, layouts }) => {
+    return {
+      cardStyle: {
+        transform: [
+          {
+            translateY: current.progress.interpolate({
+              inputRange: [0, 1],
+              outputRange: [layouts.screen.height, 0],
+              extrapolate: 'clamp',
+            }),
+          },
+        ],
+      },
+      overlayStyle: {
+        opacity: current.progress.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, 0.6],
+          extrapolate: 'clamp',
+        }),
+      },
+    };
+  },
+  transitionSpec: {
+    open: {
+      animation: 'timing',
+      config: {
+        duration: 350,
+        easing: Easing.bezier(0.25, 0.46, 0.45, 0.94), // CSS ease-out
+      },
+    },
+    close: {
+      animation: 'timing',
+      config: {
+        duration: 300,
+        easing: Easing.bezier(0.55, 0.06, 0.68, 0.19), // CSS ease-in
+      },
+    },
+  },
+};
+
+// Custom Animated Tab Bar Component
+const AnimatedTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
+  const insets = useSafeAreaInsets();
+  const translateX = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const opacityAnim = useRef(new Animated.Value(1)).current;
+  
+  const tabWidth = screenWidth / state.routes.length;
+  const indicatorWidth = 40; // Width of the blob indicator
+  const indicatorOffset = (tabWidth - indicatorWidth) / 2; // Center the indicator
+
+  useEffect(() => {
+    // Animate the blob to the active tab position with blob-like effect
+    const toValue = state.index * tabWidth + indicatorOffset;
+    
+    Animated.parallel([
+      // Main translation with overshoot for blob effect
+      Animated.spring(translateX, {
+        toValue,
+        tension: 100,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+      // Scale animation for blob squish effect
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 1.2,
+          duration: 100,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 150,
+          friction: 6,
+          useNativeDriver: true,
+        }),
+      ]),
+      // Subtle opacity pulse
+      Animated.sequence([
+        Animated.timing(opacityAnim, {
+          toValue: 0.8,
+          duration: 80,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 120,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+  }, [state.index, tabWidth, indicatorOffset, translateX, scaleAnim, opacityAnim]);
+
+  return (
+    <View style={[
+      styles.tabBar, 
+      { 
+        height: 70 + insets.bottom,
+        paddingBottom: Math.max(insets.bottom, 0),
+      }
+    ]}>
+      {/* Animated Blob Indicator */}
+      <Animated.View
+        style={[
+          styles.blobIndicator,
+          {
+            width: indicatorWidth,
+            transform: [
+              { translateX },
+              { scaleX: scaleAnim },
+              { scaleY: scaleAnim },
+            ],
+            opacity: opacityAnim,
+          },
+        ]}
+      />
+      
+      {/* Tab Buttons */}
+      {state.routes.map((route, index) => {
+        const { options } = descriptors[route.key];
+        const label = options.tabBarLabel !== undefined 
+          ? options.tabBarLabel 
+          : options.title !== undefined 
+          ? options.title 
+          : route.name;
+        
+        const isFocused = state.index === index;
+        
+        const onPress = () => {
+          HapticsUtils.light();
+          const event = navigation.emit({
+            type: 'tabPress',
+            target: route.key,
+            canPreventDefault: true,
+          });
+          
+          if (!isFocused && !event.defaultPrevented) {
+            navigation.navigate(route.name);
+          }
+        };
+        
+        const IconComponent = options.tabBarIcon;
+        
+        return (
+          <TouchableOpacity
+            key={route.key}
+            onPress={onPress}
+            style={styles.tabButton}
+            activeOpacity={0.7}
+          >
+            <View style={styles.tabContent}>
+              {IconComponent && (
+                <IconComponent
+                  focused={isFocused}
+                  color={isFocused ? '#003087' : '#374151'}
+                  size={isFocused ? 26 : 20}
+                />
+              )}
+              <Text style={[
+                styles.tabLabel,
+                { color: isFocused ? '#003087' : '#374151' }
+              ]}>
+                {label}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+};
+
 // Tab Navigator Component
 const TabNavigator: React.FC = () => {
-  const insets = useSafeAreaInsets();
-  
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
+      tabBar={(props) => <AnimatedTabBar {...props} />}
+      screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: '#FFFFFF',
-          borderTopWidth: 1,
-          borderTopColor: '#e5e7eb',
-          elevation: 20,
-          shadowColor: '#000000',
-          shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: 0.1,
-          shadowRadius: 12,
-          height: 70 + insets.bottom,
-          paddingTop: 0,
-          paddingBottom: Math.max(insets.bottom, 0),
-          paddingHorizontal: 0,
-        },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '500',
-          marginTop: 2,
-          marginBottom: 4,
-        },
-        tabBarIconStyle: {
-          marginBottom: 0,
-          marginTop: 8,
-        },
-        tabBarActiveTintColor: '#003087', // Blue color from top bar
-        tabBarInactiveTintColor: '#374151', // Charcoal color
-        tabBarLabelPosition: 'below-icon',
-        tabBarButton: (props) => {
-          const { delayLongPress, ...restProps } = props;
-          return (
-            <TouchableOpacity
-              {...restProps}
-              style={[props.style, { flex: 1 }]}
-              activeOpacity={0.7} // Add press effect for better feedback
-              delayLongPress={delayLongPress || undefined}
-              onPress={(e) => {
-                HapticsUtils.light(); // Add haptic feedback for tab navigation
-                props.onPress?.(e);
-              }}
-            />
-          );
-        },
-      })}
+      }}
     >
       <Tab.Screen
         name="Dashboard"
@@ -103,11 +284,6 @@ const TabNavigator: React.FC = () => {
               accessibilityLabel="History"
             />
           ),
-        }}
-        listeners={{
-          tabPress: (e) => {
-            // Let the CMENavigator handle the initial route logic
-          },
         }}
       />
       <Tab.Screen
@@ -144,64 +320,114 @@ const TabNavigator: React.FC = () => {
   );
 };
 
+const styles = StyleSheet.create({
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+    elevation: 20,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    paddingTop: 0,
+    paddingHorizontal: 0,
+    position: 'relative',
+  },
+  blobIndicator: {
+    position: 'absolute',
+    top: 4,
+    height: 3,
+    backgroundColor: '#003087',
+    borderRadius: 1.5,
+    zIndex: 1,
+  },
+  tabButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  tabContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabLabel: {
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 2,
+    marginBottom: 4,
+  },
+});
+
 export const MainTabNavigator: React.FC = () => {
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
+        ...slideInTransition, // Default slide transition for all screens
       }}
     >
       <Stack.Screen
         name="Tabs"
         component={TabNavigator}
-        options={{ headerShown: false }}
+        options={{ 
+          headerShown: false,
+          cardStyleInterpolator: ({ current }) => ({
+            cardStyle: {
+              opacity: current.progress, // Simple fade for main tabs
+            },
+          }),
+        }}
       />
       <Stack.Screen
         name="AddCME"
         component={AddCMEScreen}
         options={{
-          presentation: 'modal',
           headerShown: false,
+          ...modalTransition, // Modal slide-up transition
         }}
       />
       <Stack.Screen
         name="AddLicense"
         component={AddLicenseScreen}
         options={{
-          presentation: 'modal',
           headerShown: false,
+          ...modalTransition, // Modal slide-up transition
         }}
       />
       <Stack.Screen
         name="AddReminder"
         component={AddReminderScreen}
         options={{
-          presentation: 'modal',
           headerShown: false,
+          ...modalTransition, // Modal slide-up transition
         }}
       />
       <Stack.Screen
         name="CertificateViewer"
         component={CertificateViewerScreen}
         options={{
-          presentation: 'modal',
           headerShown: false,
+          ...slideInTransition, // Horizontal slide for viewer
         }}
       />
       <Stack.Screen
         name="ProfileEdit"
         component={ProfileEditScreen}
         options={{
-          presentation: 'modal',
           headerShown: false,
+          ...modalTransition, // Modal slide-up transition
         }}
       />
       <Stack.Screen
         name="NotificationSettings"
         component={NotificationSettingsScreen}
         options={{
-          presentation: 'modal',
           headerShown: false,
+          ...slideInTransition, // Horizontal slide for settings
         }}
       />
     </Stack.Navigator>
