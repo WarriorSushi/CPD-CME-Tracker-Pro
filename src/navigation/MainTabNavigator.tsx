@@ -8,6 +8,7 @@ import { theme } from '../constants/theme';
 import { MainTabParamList, TabParamList } from '../types/navigation';
 import { SvgIcon } from '../components';
 import { HapticsUtils } from '../utils/HapticsUtils';
+import { useNavigationSounds } from '../hooks/useNavigationSounds';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -363,6 +364,9 @@ const styles = StyleSheet.create({
 });
 
 export const MainTabNavigator: React.FC = () => {
+  // Enable navigation sounds for main navigation
+  useNavigationSounds({ enabled: true });
+  
   return (
     <Stack.Navigator
       screenOptions={{

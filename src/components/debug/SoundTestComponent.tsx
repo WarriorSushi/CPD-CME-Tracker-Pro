@@ -18,53 +18,43 @@ export const SoundTestComponent: React.FC = () => {
   const soundTests = [
     {
       title: 'Button Press',
-      description: 'button-press.mp3 at 0.25 volume',
+      description: 'button-press.mp3 at 65% volume',
       action: playButtonPress,
     },
     {
-      title: 'Button Tap (Light)',
-      description: 'button-press.mp3 at 0.15 volume',
+      title: 'Button Tap',
+      description: 'button-press.mp3 at 65% volume',
       action: playButtonTap,
     },
     {
       title: 'Navigation Swipe',
-      description: 'navigation-swipe.mp3 at 0.18 volume',
+      description: 'navigation-swipe.mp3 at 50% volume',
       action: () => soundManager.play('navigationSwipe'),
     },
     {
-      title: 'Success (Entry Add)',
-      description: 'entry-add.mp3 at 0.35 volume',
-      action: playSuccess,
-    },
-    {
       title: 'Error',
-      description: 'error.mp3 at 0.3 volume',
+      description: 'error.mp3 at 70% volume',
       action: playError,
     },
     {
-      title: 'Entry Added',
-      description: 'entry-add.mp3 at 0.3 volume',
-      action: playEntryAdd,
-    },
-    {
-      title: 'Entry Deleted',
-      description: 'entry-delete.mp3 at 0.25 volume',
-      action: () => soundManager.play('entryDelete'),
-    },
-    {
       title: 'Notification',
-      description: 'notification.mp3 at 0.25 volume',
+      description: 'notification.mp3 at 100% volume',
       action: () => soundManager.play('notification'),
     },
     {
       title: 'Form Submit',
-      description: 'button-press.mp3 at 0.28 volume',
+      description: 'button-press.mp3 at 65% volume',
       action: playFormSubmit,
     },
     {
       title: 'Modal Open',
-      description: 'navigation-swipe.mp3 at 0.15 volume',
+      description: 'navigation-swipe.mp3 at 50% volume',
       action: () => soundManager.play('modalOpen'),
+    },
+    {
+      title: 'Modal Close',
+      description: 'navigation-swipe.mp3 at 50% volume',
+      action: () => soundManager.play('modalClose'),
     },
   ];
 
@@ -92,14 +82,14 @@ export const SoundTestComponent: React.FC = () => {
       ))}
       
       <View style={styles.info}>
-        <Text style={styles.infoTitle}>📁 Available Files:</Text>
+        <Text style={styles.infoTitle}>📁 Active Sound Files:</Text>
         <Text style={styles.infoText}>
-          • button-press.mp3 (11KB){'\n'}
-          • entry-add.mp3 (35KB){'\n'}
-          • entry-delete.mp3 (31KB){'\n'}
-          • error.mp3 (17KB){'\n'}
-          • navigation-swipe.mp3 (27KB){'\n'}
-          • notification.mp3 (98KB)
+          • button-press.mp3 (65% volume){'\n'}
+          • navigation-swipe.mp3 (50% volume){'\n'}
+          • error.mp3 (70% volume){'\n'}
+          • notification.mp3 (100% volume){'\n'}
+          {'\n'}
+          All button interactions use button-press.mp3 at 65% volume.
         </Text>
       </View>
     </ScrollView>

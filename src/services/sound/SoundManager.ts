@@ -27,7 +27,7 @@ interface SoundConfig {
 class SoundManager {
   private sounds: Map<SoundType, SoundConfig> = new Map();
   private isEnabled: boolean = true;
-  private globalVolume: number = 0.3; // Low volume by default for aesthetic experience
+  private globalVolume: number = 1.0; // Full volume for clear feedback
   private isInitialized: boolean = false;
 
   constructor() {
@@ -41,92 +41,89 @@ class SoundManager {
       const soundVolume = await AsyncStorage.getItem('sound_volume');
       
       this.isEnabled = soundEnabled !== 'false'; // Default to true
-      this.globalVolume = soundVolume ? parseFloat(soundVolume) : 0.3;
+      this.globalVolume = soundVolume ? parseFloat(soundVolume) : 1.0;
     } catch (error) {
       __DEV__ && console.warn('Failed to load sound settings:', error);
     }
   }
 
   private initializeSounds() {
-    // Using available sound files with intelligent mapping for different interaction types
+    // Only keeping 4 essential sounds as requested
     
-    // Button interactions - using button-press.mp3
+    // Button interactions - using button-press.mp3 for ALL button interactions
     this.sounds.set('buttonTap', {
       source: require('../../../assets/sounds/button-press.mp3'),
-      volume: 0.15, // Lower volume for light taps
+      volume: 0.65, // 65% volume
     });
 
     this.sounds.set('buttonPress', {
       source: require('../../../assets/sounds/button-press.mp3'),
-      volume: 0.25, // Higher volume for primary actions
+      volume: 0.65, // 65% volume
     });
 
     // Navigation - using navigation-swipe.mp3
     this.sounds.set('navigationSwipe', {
       source: require('../../../assets/sounds/navigation-swipe.mp3'),
-      volume: 0.18, // Subtle for navigation
-    });
-
-    // Success/positive feedback - using entry-add.mp3 (sounds positive)
-    this.sounds.set('success', {
-      source: require('../../../assets/sounds/entry-add.mp3'),
-      volume: 0.35, // More noticeable for positive feedback
+      volume: 0.5, // 50% volume
     });
 
     // Error feedback - using error.mp3
     this.sounds.set('error', {
       source: require('../../../assets/sounds/error.mp3'),
-      volume: 0.3, // Noticeable but not harsh
+      volume: 0.7, // 70% volume
     });
 
     // Notifications - using notification.mp3
     this.sounds.set('notification', {
       source: require('../../../assets/sounds/notification.mp3'),
-      volume: 0.25, // Balanced for alerts
+      volume: 1.0, // 100% volume
     });
 
-    // Modal interactions - using navigation-swipe.mp3 with different volumes
-    this.sounds.set('modalOpen', {
-      source: require('../../../assets/sounds/navigation-swipe.mp3'),
-      volume: 0.15, // Subtle for modal appearance
-    });
-
-    this.sounds.set('modalClose', {
-      source: require('../../../assets/sounds/navigation-swipe.mp3'),
-      volume: 0.12, // Even more subtle for dismissal
-    });
-
-    // Form submission - using button-press.mp3 with higher volume
+    // Map all other interactions to button-press for consistency
     this.sounds.set('formSubmit', {
       source: require('../../../assets/sounds/button-press.mp3'),
-      volume: 0.28, // Confirming but not overwhelming
+      volume: 0.65, // 65% volume
     });
 
-    // Entry management - using dedicated entry sounds
-    this.sounds.set('entryAdd', {
-      source: require('../../../assets/sounds/entry-add.mp3'),
-      volume: 0.3, // Positive reinforcement
-    });
-
-    this.sounds.set('entryDelete', {
-      source: require('../../../assets/sounds/entry-delete.mp3'),
-      volume: 0.25, // Subtle for destructive actions
-    });
-
-    // System interactions - using button-press.mp3 with low volume
     this.sounds.set('refresh', {
       source: require('../../../assets/sounds/button-press.mp3'),
-      volume: 0.15, // Very subtle for data refresh
+      volume: 0.65, // 65% volume
     });
 
     this.sounds.set('toggle', {
       source: require('../../../assets/sounds/button-press.mp3'),
-      volume: 0.18, // Clear but soft for switches
+      volume: 0.65, // 65% volume
     });
 
     this.sounds.set('focus', {
       source: require('../../../assets/sounds/button-press.mp3'),
-      volume: 0.1, // Very subtle for input focus
+      volume: 0.65, // 65% volume
+    });
+
+    this.sounds.set('modalOpen', {
+      source: require('../../../assets/sounds/navigation-swipe.mp3'),
+      volume: 0.5, // 50% volume
+    });
+
+    this.sounds.set('modalClose', {
+      source: require('../../../assets/sounds/navigation-swipe.mp3'),
+      volume: 0.5, // 50% volume
+    });
+
+    // Remove deleted sounds - map to existing ones
+    this.sounds.set('success', {
+      source: require('../../../assets/sounds/button-press.mp3'),
+      volume: 0.65, // 65% volume
+    });
+
+    this.sounds.set('entryAdd', {
+      source: require('../../../assets/sounds/button-press.mp3'),
+      volume: 0.65, // 65% volume
+    });
+
+    this.sounds.set('entryDelete', {
+      source: require('../../../assets/sounds/button-press.mp3'),
+      volume: 0.65, // 65% volume
     });
 
     this.isInitialized = true;

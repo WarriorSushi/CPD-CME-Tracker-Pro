@@ -21,6 +21,7 @@ import { useAppContext } from '../../contexts/AppContext';
 import { CMEStackParamList } from '../../types/navigation';
 import { CMEEntry } from '../../types';
 import { getCreditUnit, getCreditPlural } from '../../utils/creditTerminology';
+import { useSound } from '../../hooks/useSound';
 
 type CMEHistoryScreenNavigationProp = StackNavigationProp<CMEStackParamList, 'CMEHistory'>;
 
@@ -39,6 +40,8 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
     loadAllCMEEntries,
     user 
   } = useAppContext();
+  
+  const { playEntryDelete, playSuccess, playError, playRefresh } = useSound();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -102,6 +105,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
+    await playRefresh();
     await refreshCMEData();
     // If showing all entries, refresh them too
     if (showAllEntries) {
@@ -190,6 +194,8 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
               const success = await deleteCMEEntry(entry.id);
               
               if (success) {
+                // Play delete sound
+                await playEntryDelete();
 
                 // Update local state immediately for better UX
                 if (showAllEntries) {
@@ -202,12 +208,15 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
                 
                 // Show success message
                 Alert.alert('Success', 'Entry deleted successfully.');
+                await playSuccess();
               } else {
       __DEV__ && console.error('❌ Delete operation returned false');
+                await playError();
                 Alert.alert('Error', 'Failed to delete entry. Please try again.');
               }
             } catch (error) {
       __DEV__ && console.error('💥 Error during delete operation:', error);
+              await playError();
               Alert.alert('Error', 'An unexpected error occurred while deleting the entry.');
             }
           },

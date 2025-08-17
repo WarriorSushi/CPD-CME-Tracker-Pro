@@ -7,6 +7,7 @@ import { useOnboardingContext } from '../contexts/OnboardingContext';
 import { useAppContext } from '../contexts/AppContext';
 import { LoadingSpinner } from '../components';
 import { AnimatedGradientBackground } from '../screens/onboarding/OnboardingComponents';
+import { useNavigationSounds } from '../hooks/useNavigationSounds';
 import { theme } from '../constants/theme';
 
 // Enhanced loading screen component

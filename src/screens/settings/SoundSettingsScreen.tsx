@@ -141,13 +141,10 @@ export const SoundSettingsScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const testSounds = [
-    { name: 'Button Press', action: playButtonTap, description: 'Button interactions & taps' },
-    { name: 'Navigation', action: () => soundManager.play('navigationSwipe'), description: 'Screen transitions & navigation' },
-    { name: 'Success', action: playSuccess, description: 'Positive confirmations (using entry-add sound)' },
-    { name: 'Error', action: playError, description: 'Validation errors & failures' },
-    { name: 'Entry Added', action: playEntryAdd, description: 'New entry creation' },
-    { name: 'Entry Deleted', action: () => soundManager.play('entryDelete'), description: 'Entry removal' },
-    { name: 'Notification', action: () => soundManager.play('notification'), description: 'App notifications & alerts' },
+    { name: 'Button Press', action: playButtonTap, description: 'All button interactions (65% volume)' },
+    { name: 'Navigation', action: () => soundManager.play('navigationSwipe'), description: 'Screen transitions (50% volume)' },
+    { name: 'Error', action: playError, description: 'Validation errors & failures (70% volume)' },
+    { name: 'Notification', action: () => soundManager.play('notification'), description: 'Alerts & notifications (100% volume)' },
   ];
 
   const handleTestSound = async (action: () => Promise<void>, name: string) => {

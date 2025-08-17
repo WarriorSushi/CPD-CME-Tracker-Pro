@@ -21,6 +21,7 @@ import {
   PermissionStatus 
 } from '../../services/notifications';
 import { useAppContext } from '../../contexts/AppContext';
+import { useSound } from '../../hooks/useSound';
 
 interface Props {
   navigation: any;
@@ -29,6 +30,7 @@ interface Props {
 export const NotificationSettingsScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { user, licenses, eventReminders, recentCMEEntries } = useAppContext();
+  const { playToggle } = useSound();
 
   const [settings, setSettings] = useState<NotificationSettings>(DEFAULT_NOTIFICATION_SETTINGS);
   const [permissionStatus, setPermissionStatus] = useState<PermissionStatus>('undetermined');
@@ -87,6 +89,7 @@ export const NotificationSettingsScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleMasterToggle = async (enabled: boolean) => {
+    await playToggle();
     if (enabled && permissionStatus !== 'granted') {
       const granted = await NotificationService.ensurePermissions();
       if (!granted) {
@@ -202,7 +205,8 @@ export const NotificationSettingsScreen: React.FC<Props> = ({ navigation }) => {
           <Text style={styles.sectionTitle}>{title}</Text>
           <Switch
             value={settings[section].enabled}
-            onValueChange={(enabled) => {
+            onValueChange={async (enabled) => {
+              await playToggle();
               const updatedSettings = {
                 ...settings,
                 [section]: {
@@ -345,7 +349,8 @@ export const NotificationSettingsScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.sectionTitle}>CME Event Reminders</Text>
                 <Switch
                   value={settings.eventReminders.enabled}
-                  onValueChange={(enabled) => {
+                  onValueChange={async (enabled) => {
+                    await playToggle();
                     const updatedSettings = {
                       ...settings,
                       eventReminders: {
@@ -408,7 +413,8 @@ export const NotificationSettingsScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.sectionTitle}>Quiet Hours</Text>
                 <Switch
                   value={settings.quietHours.enabled}
-                  onValueChange={(enabled) => {
+                  onValueChange={async (enabled) => {
+                    await playToggle();
                     const updatedSettings = {
                       ...settings,
                       quietHours: {
