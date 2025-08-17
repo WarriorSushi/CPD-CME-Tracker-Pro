@@ -9,6 +9,10 @@ dist/
 web-build/
 expo-env.d.ts
 
+# Native folders (using CNG/Prebuild workflow)
+/android
+/ios
+
 # Native
 .kotlin/
 *.orig.*
