@@ -48,9 +48,9 @@ export const Input: React.FC<InputProps> = ({
   // Initialize height for auto-expanding inputs
   const getInitialHeight = () => {
     if (!autoExpand) return undefined;
-    const lineHeight = 24;
-    const containerPadding = theme.spacing[3] * 2;
-    return (lineHeight * minLines) + containerPadding;
+    const lineHeight = theme.typography.fontSize.base * theme.typography.lineHeight.normal;
+    const verticalPadding = theme.spacing[3] * 2;
+    return (lineHeight * minLines) + verticalPadding;
   };
   
   const [inputHeight, setInputHeight] = useState<number | undefined>(getInitialHeight());
@@ -85,17 +85,26 @@ export const Input: React.FC<InputProps> = ({
     if (!autoExpand) return;
     
     const { height } = event.nativeEvent.contentSize;
-    const lineHeight = 24; // Approximate line height for base font size
-    const containerPadding = theme.spacing[3] * 2; // Top + bottom padding
+    const verticalPadding = theme.spacing[3] * 2; // Top + bottom container padding
+    const lineHeight = theme.typography.fontSize.base * theme.typography.lineHeight.normal;
     
-    // Calculate minimum and maximum heights
-    const minHeight = (lineHeight * minLines) + containerPadding;
-    const maxHeight = (lineHeight * maxLines) + containerPadding;
+    // Calculate boundaries
+    const minContentHeight = lineHeight * minLines;
+    const maxContentHeight = lineHeight * maxLines;
     
-    // Use content height directly, constrained by min/max
-    const newHeight = Math.max(minHeight, Math.min(height + containerPadding, maxHeight));
+    // Constrain content height to boundaries
+    const constrainedContentHeight = Math.max(
+      minContentHeight, 
+      Math.min(height, maxContentHeight)
+    );
     
-    setInputHeight(newHeight);
+    // Calculate total container height
+    const newHeight = constrainedContentHeight + verticalPadding;
+    
+    // Only update if height changed significantly
+    if (Math.abs(newHeight - (inputHeight || 0)) > 2) {
+      setInputHeight(newHeight);
+    }
   };
 
   const animatedBorderStyle = useAnimatedStyle(() => {
@@ -128,11 +137,13 @@ export const Input: React.FC<InputProps> = ({
       fontSize: theme.typography.fontSize.base,
       color: theme.colors.text.primary,
       paddingVertical: 0, // Let container handle padding
+      lineHeight: theme.typography.fontSize.base * theme.typography.lineHeight.normal,
     };
 
     if (autoExpand) {
       baseStyle.textAlignVertical = 'top';
-      // Don't set height here, let it expand naturally
+      // Ensure text input fills the container height
+      baseStyle.minHeight = '100%';
     }
 
     return baseStyle;
@@ -145,16 +156,18 @@ export const Input: React.FC<InputProps> = ({
       paddingVertical: autoExpand ? theme.spacing[3] : theme.spacing[0],
     };
 
-    // Apply dynamic height only if auto-expanding
-    if (autoExpand && inputHeight) {
-      baseStyle.height = inputHeight;
-    } else if (!autoExpand) {
-      baseStyle.height = theme.layout.inputHeight;
+    // Apply dynamic height for auto-expanding inputs
+    if (autoExpand) {
+      if (inputHeight) {
+        baseStyle.height = inputHeight;
+      } else {
+        // Initial height calculation
+        const lineHeight = theme.typography.fontSize.base * theme.typography.lineHeight.normal;
+        const verticalPadding = theme.spacing[3] * 2;
+        baseStyle.height = (lineHeight * minLines) + verticalPadding;
+      }
     } else {
-      // Initial height for auto-expand inputs
-      const lineHeight = 24;
-      const containerPadding = theme.spacing[3] * 2;
-      baseStyle.height = (lineHeight * minLines) + containerPadding;
+      baseStyle.height = theme.layout.inputHeight;
     }
 
     return baseStyle;
