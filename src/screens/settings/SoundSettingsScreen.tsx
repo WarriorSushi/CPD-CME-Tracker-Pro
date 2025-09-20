@@ -81,18 +81,10 @@ export const SoundSettingsScreen: React.FC<Props> = ({ navigation }) => {
         }),
       ]).start(() => {
         // Add shadows after animations finish
-        Animated.parallel([
-          Animated.timing(settingsShadowAnim, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: false,
-          }),
-          Animated.timing(testShadowAnim, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: false,
-          }),
-        ]).start();
+        setTimeout(() => {
+          settingsShadowAnim.setValue(1);
+          testShadowAnim.setValue(1);
+        }, 100);
       });
     }, [])
   );

@@ -77,12 +77,12 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
         }),
       ]),
     ]).start(() => {
-      // Add shadows after cards finish animating
-      Animated.stagger(100, [
-        Animated.timing(shadow1Anim, { toValue: 1, duration: 300, useNativeDriver: false }),
-        Animated.timing(shadow2Anim, { toValue: 1, duration: 300, useNativeDriver: false }),
-        Animated.timing(shadow3Anim, { toValue: 1, duration: 300, useNativeDriver: false }),
-      ]).start();
+      // Add shadows after cards finish animating (using setValue to avoid conflicts)
+      setTimeout(() => {
+        shadow1Anim.setValue(1);
+        shadow2Anim.setValue(1);
+        shadow3Anim.setValue(1);
+      }, 100);
     });
   }, []);
 

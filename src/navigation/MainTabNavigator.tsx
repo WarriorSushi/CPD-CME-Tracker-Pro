@@ -3,6 +3,7 @@ import { Text, View, StyleSheet, TouchableOpacity, Animated, Easing, Dimensions 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator, StackNavigationOptions, TransitionPresets } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { theme } from '../constants/theme';
 import { MainTabParamList, TabParamList } from '../types/navigation';
@@ -118,12 +119,17 @@ const modalTransition: StackNavigationOptions = {
 // Custom Animated Tab Bar Component
 const AnimatedTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
   const insets = useSafeAreaInsets();
+  const responsive = useResponsiveLayout();
   const translateX = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(1)).current;
   
-  const tabWidth = screenWidth / state.routes.length;
-  const indicatorWidth = 40; // Width of the blob indicator
+  // Responsive tab calculations
+  const effectiveWidth = responsive.isTablet
+    ? Math.min(responsive.width, 800) // Max width for tablets
+    : responsive.width;
+  const tabWidth = effectiveWidth / state.routes.length;
+  const indicatorWidth = responsive.isTablet ? 48 : 40; // Larger indicator for tablets
   const indicatorOffset = (tabWidth - indicatorWidth) / 2; // Center the indicator
 
   useEffect(() => {
@@ -169,14 +175,19 @@ const AnimatedTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navig
     ]).start();
   }, [state.index, tabWidth, indicatorOffset, translateX, scaleAnim, opacityAnim]);
 
+  // Dynamic styles for responsive tab bar
+  const dynamicTabBarStyle = {
+    ...styles.tabBar,
+    height: (responsive.isTablet ? 80 : 70) + Math.max(insets.bottom, responsive.edgeToEdgeStyles.paddingBottom),
+    paddingBottom: Math.max(insets.bottom, responsive.edgeToEdgeStyles.paddingBottom),
+    maxWidth: responsive.isTablet ? 800 : '100%',
+    alignSelf: 'center' as const,
+    width: responsive.isTablet ? Math.min(responsive.width, 800) : '100%',
+    marginHorizontal: responsive.isTablet ? 'auto' : 0,
+  };
+
   return (
-    <View style={[
-      styles.tabBar, 
-      { 
-        height: 70 + insets.bottom,
-        paddingBottom: Math.max(insets.bottom, 0),
-      }
-    ]}>
+    <View style={dynamicTabBarStyle}>
       {/* Animated Blob Indicator */}
       <Animated.View
         style={[

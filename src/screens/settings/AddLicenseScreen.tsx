@@ -94,18 +94,10 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
         }),
       ]).start(() => {
         // Add shadows after animations finish
-        Animated.parallel([
-          Animated.timing(formShadowAnim, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: false,
-          }),
-          Animated.timing(infoShadowAnim, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: false,
-          }),
-        ]).start();
+        setTimeout(() => {
+          formShadowAnim.setValue(1);
+          infoShadowAnim.setValue(1);
+        }, 100);
       });
     }, [])
   );

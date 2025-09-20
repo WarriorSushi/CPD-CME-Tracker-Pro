@@ -98,33 +98,13 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
         ),
       ]),
     ]).start(() => {
-      // Add shadow animations after cards finish appearing
-      Animated.parallel([
-        Animated.stagger(50, targetShadowAnims.map(anim => 
-          Animated.timing(anim, {
-            toValue: 1,
-            duration: 200,
-            useNativeDriver: false,
-          })
-        )),
-        Animated.stagger(50, periodShadowAnims.map(anim => 
-          Animated.timing(anim, {
-            toValue: 1,
-            duration: 200,
-            useNativeDriver: false,
-          })
-        )),
-        Animated.timing(customTargetShadowAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: false,
-        }),
-        Animated.timing(customPeriodShadowAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: false,
-        }),
-      ]).start();
+      // Add shadow animations after cards finish appearing (using setValue to avoid conflicts)
+      setTimeout(() => {
+        targetShadowAnims.forEach(anim => anim.setValue(1));
+        periodShadowAnims.forEach(anim => anim.setValue(1));
+        customTargetShadowAnim.setValue(1);
+        customPeriodShadowAnim.setValue(1);
+      }, 100);
     });
   }, []);
 

@@ -109,16 +109,10 @@ export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
         )
       ),
     ]).start(() => {
-      // Add shadows after cards finish animating
-      Animated.stagger(50, 
-        shadowAnims.map(anim => 
-          Animated.timing(anim, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: false,
-          })
-        )
-      ).start();
+      // Add shadows after cards finish animating (using setValue to avoid conflicts)
+      setTimeout(() => {
+        shadowAnims.forEach(anim => anim.setValue(1));
+      }, 100);
     });
   }, []);
 

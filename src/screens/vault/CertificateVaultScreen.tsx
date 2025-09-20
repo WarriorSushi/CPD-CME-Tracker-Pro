@@ -66,11 +66,9 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         useNativeDriver: true,
       }).start(() => {
         // Add shadows after slide animation finishes
-        Animated.timing(headerShadowAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: false,
-        }).start();
+        setTimeout(() => {
+          headerShadowAnim.setValue(1);
+        }, 100);
       });
     }, [refreshCertificates])
   );

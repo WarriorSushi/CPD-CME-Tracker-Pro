@@ -2,6 +2,7 @@ import React, { useCallback, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Dimensions, Image, Alert, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useResponsiveLayout } from '../../hooks/useResponsiveLayout';
 import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { Card, Button, LoadingSpinner, SvgIcon, StandardHeader, LoadingState, ErrorBoundary } from '../../components';
@@ -11,6 +12,8 @@ import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { MainTabParamList } from '../../types/navigation';
 import { getCreditUnit } from '../../utils/creditTerminology';
+import { NotificationService } from '../../services/notifications';
+import { useSound } from '../../hooks/useSound';
 
 const { width, height } = Dimensions.get('window');
 
@@ -22,10 +25,13 @@ interface Props {
 
 export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const responsive = useResponsiveLayout();
+  const { playButtonTap, playSuccess, playError, playRefresh } = useSound();
   const {
     user,
     currentYearProgress,
     recentCMEEntries,
+    totalCredits,
     licenses,
     eventReminders,
     isInitializing,
@@ -74,9 +80,10 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
+    await playRefresh();
     await refreshAllData();
     setRefreshing(false);
-  }, [refreshAllData]);
+  }, [refreshAllData, playRefresh]);
 
   // Premium entrance animations
   useEffect(() => {
@@ -126,13 +133,13 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           }),
         ]),
       ]).start(() => {
-        // Stage 3: Add shadows after cards finish
-        Animated.stagger(100, [
-          Animated.timing(progressShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
-          Animated.timing(remindersShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
-          Animated.timing(recentShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
-          Animated.timing(licensesShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
-        ]).start();
+        // Stage 3: Add shadows after cards finish (using separate timing to avoid conflicts)
+        setTimeout(() => {
+          progressShadowAnim.setValue(1);
+          remindersShadowAnim.setValue(1);
+          recentShadowAnim.setValue(1);
+          licensesShadowAnim.setValue(1);
+        }, 100);
       });
     }
   }, [isInitializing, user]);
@@ -216,19 +223,95 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
   const getUpcomingRenewals = () => {
     if (!licenses || licenses.length === 0) return [];
-    
+
     const today = new Date();
     const threeMonthsFromNow = new Date();
     threeMonthsFromNow.setMonth(today.getMonth() + 3);
-    
+
     return licenses.filter(license => {
       const expirationDate = new Date(license.expirationDate);
       return expirationDate <= threeMonthsFromNow && expirationDate >= today;
     }).sort((a, b) => new Date(a.expirationDate).getTime() - new Date(b.expirationDate).getTime());
   };
 
+  // Handle setting license reminders
+  const handleSetLicenseReminders = async (license: any) => {
+    try {
+      // First check if notifications are enabled and request permissions
+      const hasPermissions = await NotificationService.ensurePermissions();
+
+      if (!hasPermissions) {
+        Alert.alert(
+          'Notifications Required',
+          'Please enable notifications in Settings to receive license renewal reminders.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Open Settings',
+              onPress: () => (navigation.getParent() as any).navigate('NotificationSettings')
+            }
+          ]
+        );
+        return;
+      }
+
+      // Enable license reminders with default intervals
+      const currentSettings = await NotificationService.getSettings();
+      const updatedSettings = {
+        ...currentSettings,
+        enabled: true,
+        licenseReminders: {
+          enabled: true,
+          intervals: [90, 60, 30, 14, 7, 1] // Default recommended intervals
+        }
+      };
+
+      await NotificationService.updateSettings(updatedSettings);
+
+      // Refresh all notifications to include this license
+      await NotificationService.refreshAllNotifications(
+        user || undefined,
+        licenses,
+        eventReminders,
+        totalCredits
+      );
+
+      await playSuccess();
+      Alert.alert(
+        'Reminders Set! 🔔',
+        `You'll receive notifications for ${license.licenseType} renewal:\n\n• 90 days before\n• 60 days before\n• 30 days before\n• 14 days before\n• 7 days before\n• 1 day before\n\nYou can customize these in Settings > Notifications.`,
+        [{ text: 'Got it!', style: 'default' }]
+      );
+
+    } catch (error) {
+      __DEV__ && console.error('Error setting license reminders:', error);
+      await playError();
+      Alert.alert(
+        'Error',
+        'Failed to set license reminders. Please try again or check Settings > Notifications.',
+        [{ text: 'OK', style: 'default' }]
+      );
+    }
+  };
+
   const recentEntries = recentCMEEntries.slice(0, 2);
   const upcomingRenewals = getUpcomingRenewals().slice(0, 2);
+
+  // Get urgent license renewals (expiring within 60 days)
+  const getUrgentLicenseRenewals = () => {
+    if (!licenses || licenses.length === 0) return [];
+
+    const today = new Date();
+    const sixtyDaysFromNow = new Date();
+    sixtyDaysFromNow.setDate(today.getDate() + 60);
+
+    return licenses.filter(license => {
+      const expirationDate = new Date(license.expirationDate);
+      return expirationDate <= sixtyDaysFromNow && expirationDate >= today;
+    }).sort((a, b) => new Date(a.expirationDate).getTime() - new Date(b.expirationDate).getTime());
+  };
+
+  const urgentRenewals = getUrgentLicenseRenewals();
 
   if (isInitializing || isLoadingUser) {
     return (
@@ -389,9 +472,49 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     );
   };
 
+  // Dynamic styles based on responsive layout
+  const dynamicStyles = {
+    container: {
+      ...styles.container,
+      paddingTop: responsive.edgeToEdgeStyles.paddingTop,
+    },
+    upperSection: {
+      ...styles.upperSection,
+      paddingHorizontal: responsive.isTablet ? theme.spacing[8] : theme.spacing[5],
+      maxWidth: responsive.isTablet ? 800 : '100%',
+      alignSelf: 'center' as const,
+      width: '100%',
+    },
+    progressCard: {
+      ...styles.progressCard,
+      padding: responsive.isTablet ? theme.spacing[6] : theme.spacing[5],
+    },
+    sectionContainer: {
+      ...styles.sectionContainer,
+      paddingHorizontal: responsive.isTablet ? theme.spacing[8] : theme.spacing[5],
+      maxWidth: responsive.isTablet ? 800 : '100%',
+      alignSelf: 'center' as const,
+      width: '100%',
+    },
+    recentSection: {
+      ...styles.recentSection,
+      paddingHorizontal: responsive.isTablet ? theme.spacing[8] : theme.spacing[5],
+      maxWidth: responsive.isTablet ? 800 : '100%',
+      alignSelf: 'center' as const,
+      width: '100%',
+    },
+    noLicensesSection: {
+      ...styles.noLicensesSection,
+      paddingHorizontal: responsive.isTablet ? theme.spacing[8] : theme.spacing[5],
+      maxWidth: responsive.isTablet ? 800 : '100%',
+      alignSelf: 'center' as const,
+      width: '100%',
+    },
+  };
+
   return (
     <ErrorBoundary>
-      <View style={styles.container}>
+      <View style={dynamicStyles.container}>
         <AnimatedGradientBackground />
         
         <StandardHeader
@@ -412,9 +535,9 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           >
         {/* Upper Section - Premium Progress Card */}
-        <Animated.View 
+        <Animated.View
           style={[
-            styles.upperSection,
+            dynamicStyles.upperSection,
             {
               opacity: progressCardAnim,
               transform: [{
@@ -428,7 +551,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         >
           <ProgressAnimatedBackground />
           <PremiumCard style={[
-            styles.progressCard,
+            dynamicStyles.progressCard,
             {
               elevation: progressShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 6] }),
               shadowOpacity: progressShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.12] }),
@@ -504,7 +627,10 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.addEntryInUpperSection}>
               <PremiumButton
                 title="+ Add New Entry"
-                onPress={() => (navigation.getParent() as any).navigate('AddCME', { editEntry: undefined })}
+                onPress={async () => {
+                  await playButtonTap();
+                  (navigation.getParent() as any).navigate('AddCME', { editEntry: undefined });
+                }}
                 variant="primary"
                 style={styles.addEntryButton}
               />
@@ -512,13 +638,109 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           </PremiumCard>
         </Animated.View>
 
+        {/* Urgent License Renewal Warnings */}
+        {urgentRenewals.length > 0 && (
+          <Animated.View
+            style={[
+              dynamicStyles.sectionContainer,
+              {
+                opacity: remindersCardAnim,
+                transform: [{
+                  translateY: remindersCardAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
+            <PremiumCard style={[
+              styles.urgentWarningCard,
+              {
+                elevation: remindersShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 6] }),
+                shadowOpacity: remindersShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] }),
+              }
+            ]}>
+              <View style={styles.urgentWarningHeader}>
+                <View style={styles.urgentWarningIcon}>
+                  <Text style={styles.urgentWarningEmoji}>⚠️</Text>
+                </View>
+                <View style={styles.urgentWarningTitleContainer}>
+                  <Text style={styles.urgentWarningTitle}>License Renewal Required</Text>
+                  <Text style={styles.urgentWarningSubtitle}>
+                    {urgentRenewals.length} license{urgentRenewals.length > 1 ? 's' : ''} expiring soon
+                  </Text>
+                </View>
+              </View>
+
+              {urgentRenewals.slice(0, 2).map((license) => {
+                const daysUntil = Math.ceil((new Date(license.expirationDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                let urgencyColor = theme.colors.error;
+                let urgencyText = 'Overdue';
+
+                if (daysUntil < 0) {
+                  urgencyColor = theme.colors.error;
+                  urgencyText = 'Expired';
+                } else if (daysUntil <= 7) {
+                  urgencyColor = theme.colors.error;
+                  urgencyText = `${daysUntil} days left`;
+                } else if (daysUntil <= 30) {
+                  urgencyColor = theme.colors.warning;
+                  urgencyText = `${daysUntil} days left`;
+                } else {
+                  urgencyColor = theme.colors.primary;
+                  urgencyText = `${daysUntil} days left`;
+                }
+
+                return (
+                  <View key={license.id} style={styles.urgentLicenseItem}>
+                    <View style={styles.urgentLicenseInfo}>
+                      <Text style={styles.urgentLicenseType} numberOfLines={1}>
+                        {license.licenseType}
+                      </Text>
+                      <Text style={styles.urgentLicenseAuthority} numberOfLines={1}>
+                        {license.issuingAuthority}
+                      </Text>
+                      <Text style={styles.urgentLicenseExpiry}>
+                        Expires: {new Date(license.expirationDate).toLocaleDateString()}
+                      </Text>
+                    </View>
+                    <View style={styles.urgentLicenseActions}>
+                      <View style={[styles.urgentLicenseStatus, { backgroundColor: urgencyColor }]}>
+                        <Text style={styles.urgentLicenseStatusText}>{urgencyText}</Text>
+                      </View>
+                      <TouchableOpacity
+                        style={styles.urgentLicenseButton}
+                        onPress={() => (navigation.getParent() as any).navigate('AddLicense', { editLicense: license })}
+                      >
+                        <Text style={styles.urgentLicenseButtonText}>Renew</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                );
+              })}
+
+              {urgentRenewals.length > 2 && (
+                <TouchableOpacity
+                  style={styles.viewAllUrgentButton}
+                  onPress={() => navigation.navigate('Settings')}
+                >
+                  <Text style={styles.viewAllUrgentText}>
+                    View all {urgentRenewals.length} expiring licenses
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </PremiumCard>
+          </Animated.View>
+        )}
+
         {/* Dividing Line */}
         <View style={styles.dividerLine} />
 
         {/* CME Event Reminders Section */}
-        <Animated.View 
+        <Animated.View
           style={[
-            styles.sectionContainer,
+            dynamicStyles.sectionContainer,
             {
               opacity: remindersCardAnim,
               transform: [{
@@ -538,7 +760,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             }
           ]}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardHeaderTitle}>CME Event Reminders</Text>
+            <Text style={styles.cardHeaderTitle}>Event Reminders</Text>
             <PremiumButton
               title="+ Add Reminder"
               onPress={() => (navigation as any).navigate('AddReminder')}
@@ -628,9 +850,9 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* License Management Section */}
         {licenses && licenses.length > 0 && (
-          <Animated.View 
+          <Animated.View
             style={[
-              styles.sectionContainer,
+              dynamicStyles.sectionContainer,
               {
                 opacity: licensesCardAnim,
                 transform: [{
@@ -757,16 +979,18 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                         </View>
                       </TouchableOpacity>
                       
-                      <TouchableOpacity 
+                      <TouchableOpacity
                         style={styles.licenseActionButton}
                         onPress={() => {
-                          
                           Alert.alert(
                             'Set Reminder',
                             `Would you like to set renewal reminders for ${license.licenseType}?\n\nRecommended reminder schedule:\n• 90 days before\n• 60 days before\n• 30 days before\n• 14 days before\n• 7 days before\n• 1 day before`,
                             [
                               { text: 'Later', style: 'cancel' },
-                              { text: 'Set Reminders', onPress: () => {} }
+                              {
+                                text: 'Set Reminders',
+                                onPress: () => handleSetLicenseReminders(license)
+                              }
                             ]
                           );
                         }}
@@ -816,9 +1040,9 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* Show Add License Prompt if no licenses */}
         {(!licenses || licenses.length === 0) && (
-          <Animated.View 
+          <Animated.View
             style={[
-              styles.noLicensesSection,
+              dynamicStyles.noLicensesSection,
               {
                 opacity: licensesCardAnim,
                 transform: [{
@@ -861,9 +1085,9 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* Recent Activity */}
         {recentEntries.length > 0 && (
-          <Animated.View 
+          <Animated.View
             style={[
-              styles.recentSection,
+              dynamicStyles.recentSection,
               {
                 opacity: recentCardAnim,
                 transform: [{
@@ -1668,6 +1892,108 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: theme.spacing[2],
     backgroundColor: theme.colors.gray.light,
+  },
+
+  // Urgent License Renewal Warning Styles
+  urgentWarningCard: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.spacing[3],
+    padding: theme.spacing[4],
+    borderLeftWidth: 4,
+    borderLeftColor: theme.colors.error,
+  },
+  urgentWarningHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing[3],
+  },
+  urgentWarningIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.colors.error + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: theme.spacing[3],
+  },
+  urgentWarningEmoji: {
+    fontSize: 20,
+  },
+  urgentWarningTitleContainer: {
+    flex: 1,
+  },
+  urgentWarningTitle: {
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.error,
+    marginBottom: theme.spacing[1],
+  },
+  urgentWarningSubtitle: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+  },
+  urgentLicenseItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: theme.spacing[3],
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border.light,
+  },
+  urgentLicenseInfo: {
+    flex: 1,
+    marginRight: theme.spacing[3],
+  },
+  urgentLicenseType: {
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[1],
+  },
+  urgentLicenseAuthority: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    marginBottom: theme.spacing[1],
+  },
+  urgentLicenseExpiry: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.secondary,
+  },
+  urgentLicenseActions: {
+    alignItems: 'flex-end',
+  },
+  urgentLicenseStatus: {
+    paddingHorizontal: theme.spacing[2],
+    paddingVertical: theme.spacing[1],
+    borderRadius: theme.spacing[2],
+    marginBottom: theme.spacing[2],
+  },
+  urgentLicenseStatusText: {
+    fontSize: theme.typography.fontSize.xs,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.background,
+  },
+  urgentLicenseButton: {
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: theme.spacing[3],
+    paddingVertical: theme.spacing[1],
+    borderRadius: theme.spacing[2],
+  },
+  urgentLicenseButtonText: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.medium,
+    color: theme.colors.background,
+  },
+  viewAllUrgentButton: {
+    alignItems: 'center',
+    paddingTop: theme.spacing[3],
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border.light,
+    marginTop: theme.spacing[3],
+  },
+  viewAllUrgentText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.primary,
+    fontWeight: theme.typography.fontWeight.medium,
   },
   
   // Progress Section Animated Background Styles

@@ -65,12 +65,10 @@ export const ProfessionScreen: React.FC<Props> = ({ navigation }) => {
         useNativeDriver: true,
       }),
     ]).start(() => {
-      // Add shadow after input appears
-      Animated.timing(inputShadowAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
+      // Add shadow after input appears (using setValue to avoid conflicts)
+      setTimeout(() => {
+        inputShadowAnim.setValue(1);
+      }, 100);
     });
   }, []);
 

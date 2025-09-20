@@ -85,10 +85,12 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
             isPressed && styles.newPrimaryButtonGradientPressed,
           ]}
         >
-          <Text style={[
-            styles.newPrimaryButtonText,
-            disabled && styles.newPrimaryButtonTextDisabled,
-          ]}>
+          <Text
+            style={[
+              styles.newPrimaryButtonText,
+              disabled && styles.newPrimaryButtonTextDisabled,
+            ]}
+          >
             {title}
           </Text>
         </LinearGradient>
@@ -111,10 +113,12 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
           style,
         ]}
       >
-        <Text style={[
-          styles.newSecondaryButtonText,
-          disabled && styles.newSecondaryButtonTextDisabled,
-        ]}>
+        <Text
+          style={[
+            styles.newSecondaryButtonText,
+            disabled && styles.newSecondaryButtonTextDisabled,
+          ]}
+        >
           {title}
         </Text>
       </TouchableOpacity>
@@ -136,10 +140,12 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
         style,
       ]}
     >
-      <Text style={[
-        styles.newGhostButtonText,
-        disabled && styles.newGhostButtonTextDisabled,
-      ]}>
+      <Text
+        style={[
+          styles.newGhostButtonText,
+          disabled && styles.newGhostButtonTextDisabled,
+        ]}
+      >
         {title}
       </Text>
     </TouchableOpacity>
@@ -403,8 +409,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E2E8F0',
   },
   newPrimaryButtonGradient: {
-    paddingVertical: 16,
-    paddingHorizontal: 32,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 16,
@@ -414,9 +420,10 @@ const styles = StyleSheet.create({
   },
   newPrimaryButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     letterSpacing: 0.5,
+    textAlign: 'center',
   },
   newPrimaryButtonTextDisabled: {
     color: '#A0AEC0',
@@ -429,8 +436,8 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(102, 126, 234, 0.2)',
     borderWidth: 1,
     borderColor: 'rgba(102, 126, 234, 0.3)',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
     alignItems: 'center',
   },
   newSecondaryButtonPressed: {
@@ -448,9 +455,10 @@ const styles = StyleSheet.create({
   },
   newSecondaryButtonText: {
     color: '#667EEA',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     letterSpacing: 0.5,
+    textAlign: 'center',
   },
   newSecondaryButtonTextDisabled: {
     color: '#A0AEC0',
@@ -459,8 +467,8 @@ const styles = StyleSheet.create({
   newGhostButton: {
     borderRadius: 16,
     backgroundColor: 'transparent',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
     alignItems: 'center',
   },
   newGhostButtonPressed: {
@@ -471,8 +479,9 @@ const styles = StyleSheet.create({
   },
   newGhostButtonText: {
     color: '#718096',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
+    textAlign: 'center',
   },
   newGhostButtonTextDisabled: {
     color: '#CBD5E0',

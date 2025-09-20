@@ -98,23 +98,11 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
         }),
       ]).start(() => {
         // Add shadows after animations finish
-        Animated.parallel([
-          Animated.timing(profileShadowAnim, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: false,
-          }),
-          Animated.timing(infoShadowAnim, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: false,
-          }),
-          Animated.timing(previewShadowAnim, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: false,
-          }),
-        ]).start();
+        setTimeout(() => {
+          profileShadowAnim.setValue(1);
+          infoShadowAnim.setValue(1);
+          previewShadowAnim.setValue(1);
+        }, 100);
       });
     }, [])
   );

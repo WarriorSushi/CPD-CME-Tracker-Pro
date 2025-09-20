@@ -113,21 +113,11 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
         }),
       ]),
     ]).start(() => {
-      // Add shadow animations after cards finish appearing
-      Animated.parallel([
-        Animated.stagger(50, optionShadowAnims.map(anim => 
-          Animated.timing(anim, {
-            toValue: 1,
-            duration: 200,
-            useNativeDriver: false,
-          })
-        )),
-        Animated.timing(customShadowAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: false,
-        }),
-      ]).start();
+      // Add shadow animations after cards finish appearing (using setValue to avoid conflicts)
+      setTimeout(() => {
+        optionShadowAnims.forEach(anim => anim.setValue(1));
+        customShadowAnim.setValue(1);
+      }, 100);
     });
   }, []);
 

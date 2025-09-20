@@ -194,12 +194,10 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
           useNativeDriver: true,
         }),
       ]).start(() => {
-        // Add shadow after form finishes animating
-        Animated.timing(formShadowAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: false,
-        }).start();
+        // Add shadow after form finishes animating (using setValue to avoid conflicts)
+        setTimeout(() => {
+          formShadowAnim.setValue(1);
+        }, 100);
       });
     }, [route.params?.editEntry, formData.title, formData.provider])
   );

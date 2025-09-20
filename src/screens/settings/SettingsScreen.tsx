@@ -98,13 +98,13 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
         friction: 8,
         useNativeDriver: true,
       }).start(() => {
-        // Add shadows after slide animation finishes with stagger
-        Animated.stagger(80, [
-          Animated.timing(profileShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
-          Animated.timing(licensesShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
-          Animated.timing(dataShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
-          Animated.timing(aboutShadowAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
-        ]).start();
+        // Add shadows after slide animation finishes (using setValue to avoid conflicts)
+        setTimeout(() => {
+          profileShadowAnim.setValue(1);
+          licensesShadowAnim.setValue(1);
+          dataShadowAnim.setValue(1);
+          aboutShadowAnim.setValue(1);
+        }, 100);
       });
     }, [refreshLicenses, refreshUserData])
   );

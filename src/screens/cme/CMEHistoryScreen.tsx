@@ -94,11 +94,9 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
         useNativeDriver: true,
       }).start(() => {
         // Add shadows after slide animation finishes
-        Animated.timing(searchShadowAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: false,
-        }).start();
+        setTimeout(() => {
+          searchShadowAnim.setValue(1);
+        }, 100);
       });
     }, [refreshCMEData, showAllEntries, loadAllCMEEntries])
   );

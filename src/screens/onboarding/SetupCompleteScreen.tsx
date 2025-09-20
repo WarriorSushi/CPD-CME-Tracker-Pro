@@ -87,14 +87,10 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
         )
       ),
     ]).start(() => {
-      // Add shadow animations after cards finish appearing
-      Animated.stagger(50, stepShadowAnims.map(anim => 
-        Animated.timing(anim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: false,
-        })
-      )).start();
+      // Add shadow animations after cards finish appearing (using setValue to avoid conflicts)
+      setTimeout(() => {
+        stepShadowAnims.forEach(anim => anim.setValue(1));
+      }, 100);
     });
   }, []);
 
