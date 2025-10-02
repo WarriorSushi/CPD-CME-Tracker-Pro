@@ -1,5 +1,8 @@
 import { registerRootComponent } from 'expo';
 
+// CRITICAL: Import theme FIRST to ensure it's initialized before any components load
+import './src/constants/theme';
+
 import App from './App';
 
 // registerRootComponent calls AppRegistry.registerComponent('main', () => App);
