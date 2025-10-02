@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, Animated, Easing, Dimensions } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity, Animated, Easing, Dimensions, Pressable } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator, StackNavigationOptions, TransitionPresets } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -231,28 +231,35 @@ const AnimatedTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navig
         const IconComponent = options.tabBarIcon;
         
         return (
-          <TouchableOpacity
+          <Pressable
             key={route.key}
             onPress={onPress}
-            style={styles.tabButton}
-            activeOpacity={0.7}
+            style={({ pressed }) => [
+              styles.tabButton,
+              pressed && styles.tabButtonPressed
+            ]}
           >
-            <View style={styles.tabContent}>
-              {IconComponent && (
-                <IconComponent
-                  focused={isFocused}
-                  color={isFocused ? '#003087' : '#374151'}
-                  size={isFocused ? 26 : 20}
-                />
-              )}
-              <Text style={[
-                styles.tabLabel,
-                { color: isFocused ? '#003087' : '#374151' }
+            {({ pressed }) => (
+              <Animated.View style={[
+                styles.tabContent,
+                pressed && { transform: [{ scale: 0.92 }] }
               ]}>
-                {label}
-              </Text>
-            </View>
-          </TouchableOpacity>
+                {IconComponent && (
+                  <IconComponent
+                    focused={isFocused}
+                    color={isFocused ? '#003087' : '#374151'}
+                    size={isFocused ? 26 : 20}
+                  />
+                )}
+                <Text style={[
+                  styles.tabLabel,
+                  { color: isFocused ? '#003087' : '#374151' }
+                ]}>
+                  {label}
+                </Text>
+              </Animated.View>
+            )}
+          </Pressable>
         );
       })}
     </View>
@@ -361,6 +368,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingTop: 8,
     paddingBottom: 4,
+  },
+  tabButtonPressed: {
+    opacity: 0.7,
   },
   tabContent: {
     alignItems: 'center',
