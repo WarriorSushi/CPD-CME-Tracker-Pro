@@ -51,7 +51,7 @@ export const LicenseSetupScreen: React.FC<Props> = ({ navigation }) => {
     <>
       <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <View style={styles.content}>
-          <ProgressIndicator currentStep={5} totalSteps={5} />
+          <ProgressIndicator currentStep={5} totalSteps={6} />
           
           <View style={styles.header}>
             <Text style={styles.title}>License Management</Text>

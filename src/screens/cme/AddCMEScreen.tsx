@@ -558,8 +558,18 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
           await playEntryAdd(); // Special sound for new entries
         }
         HapticsUtils.success();
-        // Navigate back to close modal - this will automatically return to whatever screen called it
-        navigation.goBack();
+
+        // Show success confirmation
+        Alert.alert(
+          isEditing ? 'Entry Updated' : 'Entry Added',
+          isEditing
+            ? `${formData.title} has been updated successfully.`
+            : `${formData.title} has been added successfully.`,
+          [{
+            text: 'OK',
+            onPress: () => navigation.goBack()
+          }]
+        );
       } else {
         // Play error sound for operation failure
         await playError();
