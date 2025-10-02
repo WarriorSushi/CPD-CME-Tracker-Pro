@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, StyleProp, ViewStyle } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { theme } from '../../constants/theme';
 
@@ -8,7 +8,7 @@ interface ModernDatePickerProps {
   onDateChange: (date: Date) => void;
   maximumDate?: Date;
   minimumDate?: Date;
-  style?: any;
+  style?: StyleProp<ViewStyle>;
 }
 
 export const ModernDatePicker: React.FC<ModernDatePickerProps> = ({

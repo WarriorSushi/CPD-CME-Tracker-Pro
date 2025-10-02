@@ -19,7 +19,7 @@ import {
 
 // Development logging helper
 const isDevelopment = __DEV__;
-const devLog = (...args: any[]) => {
+const devLog = (...args: unknown[]) => {
   if (isDevelopment) {
 
   }
@@ -40,7 +40,7 @@ export const userOperations = {
       return dbMutex.runDatabaseRead('getCurrentUser', async () => {
         // First check which columns exist to build safe query
         const columns = await db.getAllAsync('PRAGMA table_info(users)');
-        const columnNames = columns.map((col: any) => col.name);
+        const columnNames = columns.map((col: { name: string }) => col.name);
         
         const hasProfileColumns = columnNames.includes('profile_name') && columnNames.includes('age') && columnNames.includes('profile_picture_path');
         
@@ -100,7 +100,7 @@ export const userOperations = {
       return dbMutex.runDatabaseWrite('updateUser', async () => {
         // Check which columns exist to avoid SQL errors
         const columns = await db.getAllAsync('PRAGMA table_info(users)');
-        const columnNames = columns.map((col: any) => col.name);
+        const columnNames = columns.map((col: { name: string }) => col.name);
         const hasProfileColumns = columnNames.includes('profile_name') && columnNames.includes('age') && columnNames.includes('profile_picture_path');
         
         // First, check if user exists

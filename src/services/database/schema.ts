@@ -36,7 +36,7 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
     if (tableExists) {
       // Check if we need migration (either country column exists or profile columns are missing)
       const columns = await db.getAllAsync('PRAGMA table_info(users)');
-      const columnNames = columns.map((col: any) => col.name);
+      const columnNames = columns.map((col: { name: string }) => col.name);
       
       const countryColumnExists = columnNames.includes('country');
       const profileColumnsExist = columnNames.includes('profile_name') && columnNames.includes('age') && columnNames.includes('profile_picture_path');
@@ -279,9 +279,9 @@ export const migrateDatabase = async (
 
       // Check if users table exists and add missing columns if needed
       const tableInfo = await db.getAllAsync(`PRAGMA table_info(users)`);
-      const hasRequirementPeriod = tableInfo.some((col: any) => col.name === 'requirement_period');
-      const hasCycleStartDate = tableInfo.some((col: any) => col.name === 'cycle_start_date');
-      const hasCycleEndDate = tableInfo.some((col: any) => col.name === 'cycle_end_date');
+      const hasRequirementPeriod = tableInfo.some((col: { name: string }) => col.name === 'requirement_period');
+      const hasCycleStartDate = tableInfo.some((col: { name: string }) => col.name === 'cycle_start_date');
+      const hasCycleEndDate = tableInfo.some((col: { name: string }) => col.name === 'cycle_end_date');
       
       if (tableInfo.length > 0) {
         // Table exists, add missing columns

@@ -15,7 +15,7 @@ import { AuditTrailService } from '../services/AuditTrailService';
 
 // Development logging helper
 const isDevelopment = __DEV__;
-const devLog = (...args: any[]) => {
+const devLog = (...args: unknown[]) => {
   if (isDevelopment) {
 
   }

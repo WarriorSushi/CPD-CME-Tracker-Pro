@@ -51,7 +51,7 @@ export interface FormContainerProps {
   /**
    * Scroll view content container style
    */
-  contentContainerStyle?: any;
+  contentContainerStyle?: StyleProp<ViewStyle>;
 
   /**
    * Callback when back button pressed

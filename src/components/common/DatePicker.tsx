@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView, StyleProp, ViewStyle } from 'react-native';
 import { theme } from '../../constants/theme';
 
 interface DatePickerProps {
@@ -8,7 +8,7 @@ interface DatePickerProps {
   maximumDate?: Date;
   minimumDate?: Date;
   placeholder?: string;
-  style?: any;
+  style?: StyleProp<ViewStyle>;
 }
 
 export const DatePicker: React.FC<DatePickerProps> = ({

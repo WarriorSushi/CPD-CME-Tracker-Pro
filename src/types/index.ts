@@ -158,6 +158,8 @@ export interface AnimationConfig {
 }
 
 // Theme related types (extending the theme.ts types)
+import { StyleProp, ViewStyle, TextStyle } from 'react-native';
+
 export interface ButtonProps {
   title: string;
   onPress: () => void;
@@ -165,8 +167,8 @@ export interface ButtonProps {
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
   loading?: boolean;
-  style?: any;
-  textStyle?: any;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 }
 
 // Export utility types

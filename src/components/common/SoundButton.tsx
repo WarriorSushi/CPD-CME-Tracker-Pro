@@ -22,7 +22,7 @@ export const SoundButton: React.FC<SoundButtonProps> = ({
 }) => {
   const { playSound } = useSound({ enabled: enableSound, volume: soundVolume });
 
-  const handlePress = async (event: any) => {
+  const handlePress = async (event: GestureResponderEvent) => {
     // Play sound first for immediate feedback
     if (enableSound) {
       await playSound(soundType, soundVolume);

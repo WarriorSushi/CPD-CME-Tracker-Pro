@@ -8,6 +8,9 @@ import {
   ViewStyle,
   TextStyle,
   LayoutChangeEvent,
+  NativeSyntheticEvent,
+  TextInputFocusEventData,
+  TextInputContentSizeChangeEventData,
 } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -65,7 +68,7 @@ export const Input = React.memo<InputProps>(({
   const focusAnimation = useSharedValue(0);
   const errorAnimation = useSharedValue(0);
 
-  const handleFocus = async (e: any) => {
+  const handleFocus = async (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
     setIsFocused(true);
     
     // Play subtle focus sound
@@ -79,7 +82,7 @@ export const Input = React.memo<InputProps>(({
     onFocus?.(e);
   };
 
-  const handleBlur = (e: any) => {
+  const handleBlur = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
     setIsFocused(false);
     focusAnimation.value = withTiming(0, {
       duration: theme.animation.duration.fast,
@@ -94,7 +97,7 @@ export const Input = React.memo<InputProps>(({
   }, [error]);
 
   // Auto-expansion logic for multiline inputs
-  const handleContentSizeChange = (event: any) => {
+  const handleContentSizeChange = (event: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) => {
     if (!autoExpand) return;
     
     const { height } = event.nativeEvent.contentSize;

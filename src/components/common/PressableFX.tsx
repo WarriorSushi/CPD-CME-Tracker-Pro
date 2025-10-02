@@ -31,7 +31,7 @@ export const PressableFX: React.FC<PressableFXProps> = ({
 }) => {
   const pressAnimation = useSharedValue(0);
 
-  const handlePressIn = (event: any) => {
+  const handlePressIn = (event: GestureResponderEvent) => {
     pressAnimation.value = withTiming(1, { 
       duration: 100, 
       easing: Easing.out(Easing.quad) 
@@ -39,7 +39,7 @@ export const PressableFX: React.FC<PressableFXProps> = ({
     onPressIn?.(event);
   };
 
-  const handlePressOut = (event: any) => {
+  const handlePressOut = (event: GestureResponderEvent) => {
     pressAnimation.value = withSpring(0, {
       damping: 12,
       stiffness: 200,
