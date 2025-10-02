@@ -1073,13 +1073,13 @@ const styles = StyleSheet.create({
   },
   
   cameraButtonTiny: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: theme.colors.blue,
   },
   galleryButtonTiny: {
-    backgroundColor: '#10b981',
+    backgroundColor: theme.colors.emerald,
   },
   filesButtonTiny: {
-    backgroundColor: '#f59e0b',
+    backgroundColor: theme.colors.orange,
   },
   
   uploadButtonIconTiny: {
@@ -1110,7 +1110,7 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing[1],
     paddingHorizontal: theme.spacing[2],
     borderRadius: 5,
-    backgroundColor: '#ef4444',
+    backgroundColor: theme.colors.error,
     // Button pressing effect
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
