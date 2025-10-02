@@ -9,7 +9,7 @@ import { OnboardingStackParamList } from '../../types/navigation';
 import { CreditSystem } from '../../types';
 import { userOperations } from '../../services/database';
 import { useAppContext } from '../../contexts/AppContext';
-import { AnimatedGradientBackground, PremiumButton, PremiumCard } from './OnboardingComponents';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../../components/common/OnboardingComponents';
 
 type CreditSystemScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'CreditSystem'>;
 

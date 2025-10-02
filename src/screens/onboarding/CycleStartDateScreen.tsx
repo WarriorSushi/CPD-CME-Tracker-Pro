@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { DatePicker, ProgressIndicator } from '../../components';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { userOperations } from '../../services/database';
-import { AnimatedGradientBackground, PremiumButton, PremiumCard } from './OnboardingComponents';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../../components/common/OnboardingComponents';
 
 type CycleStartDateScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'CycleStartDate'>;
 

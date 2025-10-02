@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SvgIcon } from '../../components/common/SvgIcon';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { useOnboardingContext } from '../../contexts/OnboardingContext';
-import { AnimatedGradientBackground, PremiumButton, PremiumCard } from './OnboardingComponents';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../../components/common/OnboardingComponents';
 
 type SetupCompleteScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'SetupComplete'>;
 

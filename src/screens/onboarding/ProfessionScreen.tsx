@@ -17,7 +17,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ProgressIndicator } from '../../components';
 import { OnboardingStackParamList } from '../../types';
 import { userOperations } from '../../services/database';
-import { AnimatedGradientBackground, PremiumButton, PremiumCard } from './OnboardingComponents';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../../components/common/OnboardingComponents';
 
 type ProfessionScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'Profession'>;
 

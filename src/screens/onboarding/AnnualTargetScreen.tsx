@@ -8,7 +8,7 @@ import { OnboardingStackParamList } from '../../types/navigation';
 import { CreditSystem } from '../../types';
 import { getCreditTerminology } from '../../utils/creditTerminology';
 import { userOperations } from '../../services/database';
-import { AnimatedGradientBackground, PremiumButton, PremiumCard } from './OnboardingComponents';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../../components/common/OnboardingComponents';
 
 type AnnualTargetScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'AnnualTarget'>;
 
