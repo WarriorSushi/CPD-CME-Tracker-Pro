@@ -122,14 +122,14 @@ export const ProfessionScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.content}>
               {/* Fixed Header - no animation to prevent moving */}
               <View style={styles.header}>
-                <View style={styles.emojiContainer}>
+                <View style={styles.iconContainer}>
                   <LinearGradient
                     colors={['#667EEA', '#764BA2']}
-                    style={styles.emojiGradient}
+                    style={styles.iconGradient}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                   >
-                    <Text style={styles.emoji}>👋</Text>
+                    <SvgIcon name="user" size={48} color="#FFFFFF" />
                   </LinearGradient>
                 </View>
                 <Text style={styles.title}>What should we call you?</Text>
@@ -180,7 +180,7 @@ export const ProfessionScreen: React.FC<Props> = ({ navigation }) => {
                           start={{ x: 0, y: 0 }}
                           end={{ x: 1, y: 1 }}
                         >
-                          <Text style={styles.checkmark}>✓</Text>
+                          <SvgIcon name="check" size={16} color="#FFFFFF" />
                         </LinearGradient>
                       </Animated.View>
                     )}
@@ -252,10 +252,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 40,
   },
-  emojiContainer: {
+  iconContainer: {
     marginBottom: 20,
   },
-  emojiGradient: {
+  iconGradient: {
     width: 64,
     height: 64,
     borderRadius: 16,
@@ -266,9 +266,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 16,
     elevation: 8,
-  },
-  emoji: {
-    fontSize: 32,
   },
   title: {
     fontSize: 24,
