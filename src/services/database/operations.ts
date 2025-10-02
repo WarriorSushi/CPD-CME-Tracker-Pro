@@ -328,17 +328,15 @@ export const cmeOperations = {
 
       return dbMutex.runDatabaseWrite('addEntry', async () => {
         
-        // Ensure user exists
-
+        // Ensure user exists - should have been created during onboarding
         const userCheck = await getFirstSafe<any>(db, 'SELECT id FROM users WHERE id = 1');
 
         if (!userCheck) {
-
-          await runSafe(db, `
-            INSERT OR IGNORE INTO users (id, profession, credit_system, annual_requirement, requirement_period)
-            VALUES (1, 'Healthcare Professional', 'Credits', 50, 1)
-          `);
-
+          __DEV__ && console.error('[ERROR] No user found - onboarding may not have completed properly');
+          return {
+            success: false,
+            error: 'User profile not found. Please complete onboarding first.',
+          };
         }
 
         const result = await runSafe(db, `

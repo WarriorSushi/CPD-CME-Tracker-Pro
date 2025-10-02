@@ -97,7 +97,7 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleStartUsingApp = async () => {
     setIsLoading(true);
-    
+
     try {
       const success = await completeOnboarding();
 
@@ -110,9 +110,43 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
         // in AppNavigator based on onboarding status
       } else {
         __DEV__ && console.error('[ERROR] Failed to complete onboarding');
+
+        // Show retry option if onboarding completion fails
+        Alert.alert(
+          'Setup Error',
+          'Unable to complete setup. Would you like to try again?',
+          [
+            {
+              text: 'Go Back',
+              style: 'cancel',
+              onPress: () => navigation.goBack(),
+            },
+            {
+              text: 'Retry',
+              onPress: () => handleStartUsingApp(),
+            },
+          ]
+        );
       }
     } catch (error) {
       __DEV__ && console.error('[ERROR] Error completing onboarding:', error);
+
+      // Show retry option on error
+      Alert.alert(
+        'Setup Error',
+        'An error occurred during setup. Would you like to try again?',
+        [
+          {
+            text: 'Go Back',
+            style: 'cancel',
+            onPress: () => navigation.goBack(),
+          },
+          {
+            text: 'Retry',
+            onPress: () => handleStartUsingApp(),
+          },
+        ]
+      );
     } finally {
       setIsLoading(false);
     }
