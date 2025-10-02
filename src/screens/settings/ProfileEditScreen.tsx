@@ -20,6 +20,7 @@ import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../../co
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { User, Profession } from '../../types';
+import { useUnsavedChanges } from '../../hooks/useUnsavedChanges';
 
 const { width } = Dimensions.get('window');
 
@@ -37,7 +38,28 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
   const [profilePicturePath, setProfilePicturePath] = useState(user?.profilePicturePath || '');
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
-  
+
+  // Track unsaved changes
+  const initialFormData = useRef({
+    profileName: user?.profileName || '',
+    age: user?.age?.toString() || '',
+    profession: user?.profession || 'Physician',
+    profilePicturePath: user?.profilePicturePath || '',
+  });
+
+  const hasUnsavedChanges =
+    profileName !== initialFormData.current.profileName ||
+    age !== initialFormData.current.age ||
+    profession !== initialFormData.current.profession ||
+    profilePicturePath !== initialFormData.current.profilePicturePath;
+
+  // Warn user about unsaved changes
+  useUnsavedChanges({
+    hasChanges: hasUnsavedChanges && !isSaving,
+    title: 'Unsaved Changes',
+    message: 'You have unsaved changes to your profile. Are you sure you want to leave?',
+  });
+
   // Premium animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;

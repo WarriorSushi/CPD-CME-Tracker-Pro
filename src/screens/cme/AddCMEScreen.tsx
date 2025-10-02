@@ -31,6 +31,7 @@ import { ThumbnailService } from '../../services/thumbnailService';
 import { databaseOperations } from '../../services/database';
 import { HapticsUtils } from '../../utils/HapticsUtils';
 import { useSound } from '../../hooks/useSound';
+import { useUnsavedChanges } from '../../hooks/useUnsavedChanges';
 
 type AddCMEScreenNavigationProp = StackNavigationProp<MainTabParamList, 'AddCME'>;
 type AddCMEScreenRouteProp = RouteProp<MainTabParamList, 'AddCME'>;
@@ -97,7 +98,20 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [cameraPermission, setCameraPermission] = useState<boolean | null>(null);
   const [isUploadingCertificate, setIsUploadingCertificate] = useState(false);
-  
+
+  // Track if form has unsaved changes
+  const initialFormData = useRef<FormData>(formData);
+  const hasUnsavedChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData.current);
+
+  // Warn user about unsaved changes
+  useUnsavedChanges({
+    hasChanges: hasUnsavedChanges && !isLoading,
+    title: isEditing ? 'Unsaved Edits' : 'Discard Entry?',
+    message: isEditing
+      ? 'You have unsaved edits. Are you sure you want to leave?'
+      : 'You have not saved this entry. Are you sure you want to discard it?',
+  });
+
   // Premium animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;

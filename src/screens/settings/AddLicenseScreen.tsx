@@ -20,6 +20,7 @@ import { ModernDatePicker } from '../../components/common/ModernDatePicker';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { LicenseRenewal } from '../../types';
+import { useUnsavedChanges } from '../../hooks/useUnsavedChanges';
 
 type RootStackParamList = {
   AddLicense: { editLicense?: LicenseRenewal };
@@ -54,6 +55,29 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
     licenseType?: string;
     issuingAuthority?: string;
   }>({});
+
+  // Track unsaved changes
+  const initialFormData = useRef({
+    licenseType,
+    issuingAuthority,
+    licenseNumber,
+    expirationDate: expirationDate.toISOString(),
+  });
+
+  const hasUnsavedChanges =
+    licenseType !== initialFormData.current.licenseType ||
+    issuingAuthority !== initialFormData.current.issuingAuthority ||
+    licenseNumber !== initialFormData.current.licenseNumber ||
+    expirationDate.toISOString() !== initialFormData.current.expirationDate;
+
+  // Warn user about unsaved changes
+  useUnsavedChanges({
+    hasChanges: hasUnsavedChanges && !isSubmitting,
+    title: isEditing ? 'Unsaved Edits' : 'Discard License?',
+    message: isEditing
+      ? 'You have unsaved edits. Are you sure you want to leave?'
+      : 'You have not saved this license. Are you sure you want to discard it?',
+  });
 
   // Premium animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
