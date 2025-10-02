@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionCard: {
-    padding: 20,
+    padding: theme.spacing[5], // Primary card padding
     backgroundColor: '#FFFFFF',
   },
   cardHeader: {
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   licenseCard: {
-    padding: 16,
+    padding: theme.spacing[4], // List item card padding
     marginTop: 12,
     backgroundColor: '#FAFBFC',
   },

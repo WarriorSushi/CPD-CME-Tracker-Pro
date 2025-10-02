@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionCard: {
-    padding: 20,
+    padding: theme.spacing[5], // Primary card padding
     backgroundColor: '#FFFFFF',
   },
   cardHeader: {
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   reminderCard: {
-    padding: 12,
+    padding: theme.spacing[3], // Nested card padding
     backgroundColor: '#FAFBFC',
   },
   reminderCardHeader: {

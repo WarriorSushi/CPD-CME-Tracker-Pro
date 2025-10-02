@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   urgentWarningCard: {
-    padding: 20,
+    padding: theme.spacing[5], // Primary card padding
     backgroundColor: '#FEF2F2',
     borderWidth: 2,
     borderColor: theme.colors.error + '40',

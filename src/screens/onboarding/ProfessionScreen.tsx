@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   input: {
-    padding: 20,
+    padding: theme.spacing[5], // Primary card padding
     fontSize: 18,
     color: '#1A202C',
     textAlign: 'center',

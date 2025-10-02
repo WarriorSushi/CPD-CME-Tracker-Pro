@@ -107,7 +107,7 @@ export const CardTitle: React.FC<CardTitleProps> = ({
 const styles = StyleSheet.create({
   base: {
     borderRadius: theme.borderRadius.base, // Standardized to 5px
-    padding: 16, // tokens.space[4]
+    padding: theme.spacing[4], // List item card padding (16px)
   },
   title: {
     fontSize: 16, // tokens.fontSize.base

@@ -146,7 +146,7 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
             height: modalHeight,
             backgroundColor: '#FFF5EE',
             borderRadius: 16,
-            padding: 20,
+            padding: theme.spacing[5], // Primary card padding
             elevation: 12,
             shadowColor: '#000',
             shadowOpacity: 0.25,

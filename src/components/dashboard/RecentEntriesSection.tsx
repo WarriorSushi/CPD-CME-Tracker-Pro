@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
   },
   activityItem: {
-    padding: 16,
+    padding: theme.spacing[4], // List item card padding
     marginBottom: 12,
     backgroundColor: '#FFFFFF',
   },

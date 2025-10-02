@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   progressCard: {
-    padding: 20,
+    padding: theme.spacing[5], // Primary card padding
     backgroundColor: '#FFFFFF',
   },
   progressHeader: {
