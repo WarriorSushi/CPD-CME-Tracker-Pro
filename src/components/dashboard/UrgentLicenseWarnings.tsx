@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   urgentWarningIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: theme.borderRadius.full, // Circular icon
     backgroundColor: theme.colors.error,
     justifyContent: 'center',
     alignItems: 'center',
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    borderRadius: theme.borderRadius.xl,
     marginBottom: 12,
     borderWidth: 1,
     borderColor: theme.colors.border.light,
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   urgentLicenseStatus: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: theme.borderRadius.xl,
   },
   urgentLicenseStatusText: {
     fontSize: 11,

@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   reminderStatusBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: theme.borderRadius.xl,
   },
   reminderStatusText: {
     fontSize: 10,

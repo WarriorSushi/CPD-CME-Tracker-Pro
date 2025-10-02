@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
   iconGradient: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: theme.borderRadius.xl,
     justifyContent: 'center',
     alignItems: 'center',
   },

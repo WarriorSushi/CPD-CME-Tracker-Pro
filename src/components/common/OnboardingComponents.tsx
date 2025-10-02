@@ -511,8 +511,8 @@ const styles = StyleSheet.create({
   // Card styles - fixed to prevent rectangular flash
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: theme.borderRadius.xl, // Premium card
+    padding: theme.spacing[5],
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,

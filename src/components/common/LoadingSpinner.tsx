@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   spinner: {
-    borderRadius: 12,
+    borderRadius: theme.borderRadius.xl,
   },
 });
 

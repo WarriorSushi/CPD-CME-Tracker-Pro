@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
   headerIcon: {
     width: 48,
     height: 48,
-    borderRadius: 12,
+    borderRadius: theme.borderRadius.xl,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#667EEA',
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
   radioButtonInner: {
     width: 10,
     height: 10,
-    borderRadius: 5,
+    borderRadius: theme.borderRadius.base,
   },
   actions: {
     paddingHorizontal: 24,

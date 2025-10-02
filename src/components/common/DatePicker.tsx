@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 20,
+    borderRadius: theme.borderRadius.full, // Circular button
     backgroundColor: theme.colors.gray.light,
   },
   navButtonText: {
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
   // Day cell states
   selectedDayCell: {
     backgroundColor: theme.colors.primary,
-    borderRadius: 20,
+    borderRadius: theme.borderRadius.full, // Circular selected day
   },
   selectedDayText: {
     color: theme.colors.background,
@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
   },
   todayDayCell: {
     backgroundColor: theme.colors.gray.light,
-    borderRadius: 20,
+    borderRadius: theme.borderRadius.full, // Circular today indicator
     borderWidth: 2,
     borderColor: theme.colors.primary,
   },

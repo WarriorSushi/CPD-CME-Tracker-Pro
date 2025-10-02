@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
   licenseStatusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: theme.borderRadius.xl,
   },
   licenseStatusText: {
     fontSize: 11,

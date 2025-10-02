@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     margin: theme.spacing[4],
     padding: theme.spacing[5],
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: theme.borderRadius.xl, // Premium card
     // Shadow will be handled by animation interpolation
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },

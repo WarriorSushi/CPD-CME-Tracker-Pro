@@ -959,7 +959,7 @@ const styles = StyleSheet.create({
     padding: theme.spacing[5],
     marginBottom: theme.spacing[4],
     backgroundColor: theme.colors.surface,
-    borderRadius: 20,
+    borderRadius: theme.borderRadius.xl, // 12px for premium cards
     // Shadow will be handled by animation interpolation
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
@@ -1075,7 +1075,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: theme.spacing[2],
     paddingHorizontal: theme.spacing[3],
-    borderRadius: 5,
+    borderRadius: theme.borderRadius.base,
     minWidth: 70,
     minHeight: 44, // Accessibility: minimum touch target size
     // Button pressing effect - unpressed state (elevated)
@@ -1118,13 +1118,13 @@ const styles = StyleSheet.create({
   certificateImageCompact: {
     width: 60,
     height: 40,
-    borderRadius: 5,
+    borderRadius: theme.borderRadius.base,
     backgroundColor: theme.colors.gray.light,
   },
   removeCertButtonCompact: {
     paddingVertical: theme.spacing[1],
     paddingHorizontal: theme.spacing[2],
-    borderRadius: 5,
+    borderRadius: theme.borderRadius.base,
     backgroundColor: theme.colors.error,
     // Button pressing effect
     shadowColor: '#000',

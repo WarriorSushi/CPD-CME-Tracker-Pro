@@ -551,7 +551,7 @@ const styles = StyleSheet.create({
     paddingBottom: theme.spacing[4],
     gap: theme.spacing[3],
     backgroundColor: theme.colors.surface,
-    borderRadius: 20,
+    borderRadius: theme.borderRadius.xl, // Premium card
     marginHorizontal: theme.spacing[1],
     marginBottom: theme.spacing[3],
     // Shadow will be handled by animation interpolation
@@ -725,7 +725,7 @@ const styles = StyleSheet.create({
   actionButton: {
     paddingHorizontal: theme.spacing[2],
     paddingVertical: theme.spacing[1],
-    borderRadius: 5,
+    borderRadius: theme.borderRadius.base,
     minWidth: 50,
     alignItems: 'center',
   },

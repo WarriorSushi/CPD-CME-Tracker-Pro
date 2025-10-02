@@ -951,7 +951,7 @@ const styles = StyleSheet.create({
   settingIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: theme.borderRadius.full, // Circular icon
     backgroundColor: theme.colors.primary + '20',
     justifyContent: 'center',
     alignItems: 'center',
@@ -983,7 +983,7 @@ const styles = StyleSheet.create({
   appIconContainer: {
     width: 80,
     height: 80,
-    borderRadius: 20,
+    borderRadius: theme.borderRadius.xl, // Large rounded icon container
     backgroundColor: theme.colors.primary + '20',
     justifyContent: 'center',
     alignItems: 'center',

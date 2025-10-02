@@ -515,7 +515,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[4],
     padding: theme.spacing[5],
     backgroundColor: theme.colors.surface,
-    borderRadius: 20,
+    borderRadius: theme.borderRadius.xl, // Premium card
     // Shadow will be handled by animation interpolation
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
@@ -565,7 +565,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[4],
     padding: theme.spacing[5],
     backgroundColor: theme.colors.surface,
-    borderRadius: 20,
+    borderRadius: theme.borderRadius.xl, // Premium card
     // Shadow will be handled by animation interpolation
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
