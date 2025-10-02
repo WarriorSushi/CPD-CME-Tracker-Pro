@@ -803,7 +803,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
                   {isUploadingCertificate && <LoadingSpinner size={10} />}
                 </TouchableOpacity>
                 
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.uploadButtonTiny, styles.galleryButtonTiny, getPressedButtonStyle('gallery')]}
                   onPress={handleChooseFromGallery}
                   onPressIn={() => handlePressIn('gallery')}
@@ -812,10 +812,11 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
                   activeOpacity={1}
                 >
                   <Text style={styles.uploadButtonIconTiny}>🖼️</Text>
-                  <Text style={styles.uploadButtonTextTiny}>Gallery</Text>
+                  <Text style={styles.uploadButtonTextTiny}>{isUploadingCertificate ? 'Loading...' : 'Gallery'}</Text>
+                  {isUploadingCertificate && <LoadingSpinner size={10} />}
                 </TouchableOpacity>
                 
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.uploadButtonTiny, styles.filesButtonTiny, getPressedButtonStyle('files')]}
                   onPress={handleChooseFiles}
                   onPressIn={() => handlePressIn('files')}
@@ -824,7 +825,8 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
                   activeOpacity={1}
                 >
                   <Text style={styles.uploadButtonIconTiny}>📎</Text>
-                  <Text style={styles.uploadButtonTextTiny}>Files</Text>
+                  <Text style={styles.uploadButtonTextTiny}>{isUploadingCertificate ? 'Loading...' : 'Files'}</Text>
+                  {isUploadingCertificate && <LoadingSpinner size={10} />}
                 </TouchableOpacity>
               </View>
             )}
