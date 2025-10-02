@@ -48,7 +48,13 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
     editLicense ? new Date(editLicense.expirationDate) : new Date(new Date().setFullYear(new Date().getFullYear() + 1))
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
+  // Form validation errors
+  const [errors, setErrors] = useState<{
+    licenseType?: string;
+    issuingAuthority?: string;
+  }>({});
+
   // Premium animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
@@ -246,7 +252,14 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
               <Text style={styles.fieldLabel}>License Type *</Text>
               <Input
                 value={licenseType}
-                onChangeText={setLicenseType}
+                onChangeText={(text) => {
+                  setLicenseType(text);
+                  if (text.trim()) {
+                    setErrors(prev => ({ ...prev, licenseType: undefined }));
+                  } else {
+                    setErrors(prev => ({ ...prev, licenseType: 'License type is required' }));
+                  }
+                }}
                 placeholder="e.g., Medical License, RN License, PharmD"
                 autoExpand={true}
                 minLines={1}
@@ -254,6 +267,7 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
                 style={styles.input}
                 autoCapitalize="words"
                 returnKeyType="next"
+                error={errors.licenseType}
               />
             </View>
 
@@ -262,7 +276,14 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
               <Text style={styles.fieldLabel}>Issuing Authority *</Text>
               <Input
                 value={issuingAuthority}
-                onChangeText={setIssuingAuthority}
+                onChangeText={(text) => {
+                  setIssuingAuthority(text);
+                  if (text.trim()) {
+                    setErrors(prev => ({ ...prev, issuingAuthority: undefined }));
+                  } else {
+                    setErrors(prev => ({ ...prev, issuingAuthority: 'Issuing authority is required' }));
+                  }
+                }}
                 placeholder="e.g., State Medical Board, College of Physicians"
                 autoExpand={true}
                 minLines={1}
@@ -270,6 +291,7 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
                 style={styles.input}
                 autoCapitalize="words"
                 returnKeyType="next"
+                error={errors.issuingAuthority}
               />
             </View>
 
