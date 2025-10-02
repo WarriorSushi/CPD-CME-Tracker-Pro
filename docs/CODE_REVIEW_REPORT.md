@@ -17,8 +17,8 @@ The CME Tracker codebase demonstrates strong architecture, thoughtful UX design,
 - ✅ 1 CRITICAL compilation error - **FIXED** (commit 0677e05)
 - ✅ 4 CRITICAL data integrity issues - **ALL FIXED** (commit fdf9fcc)
 - ✅ 4 HIGH priority issues - **ALL FIXED** (commits 376cb6a, ff0366f, fbabede)
-- ✅ 7 MEDIUM priority issues - **ALL FIXED** (commits 5c2ace3, 076ade9, 4a22590, cac199c)
-- ⚠️ 2 MEDIUM optimization issues - **DEFERRED** (non-critical: #10, #16)
+- ✅ 8 MEDIUM priority issues - **ALL FIXED** (commits 5c2ace3, 076ade9, 4a22590, cac199c, 9ec49de)
+- ⚠️ 1 MEDIUM optimization - **DEFERRED** (non-critical: #10 duplicate detection)
 - 💡 14 LOW priority improvements - **TRACKED FOR FUTURE**
 
 ---
@@ -500,12 +500,20 @@ Mix of border radius values: 5px (spec), 12px, and 20px created visual inconsist
 
 ---
 
-### 16. Input Auto-Expansion - Performance
-**File:** `src/components/common/Input.tsx:99-124`
+### ✅ 16. Input Auto-Expansion - Performance [FIXED]
+**Status:** FIXED in commit 9ec49de
+**File:** `src/components/common/Input.tsx:99-128`
 **Priority:** MEDIUM
 **Impact:** Rendering performance
 
-Complex height calculation logic may cause jank. Consider using Animated.Value for smoother transitions.
+Complex height calculation logic caused potential jank during typing.
+
+**Fix Applied:** Performance optimizations for smooth auto-expansion:
+- Memoized static calculations (moved outside event handler)
+- Added useSharedValue for animated height tracking
+- Uses withTiming() for smooth 150ms transitions
+- Simplified constraint logic to single calculation
+- Eliminates visual jank during expansion/contraction
 
 ---
 
