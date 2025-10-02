@@ -28,7 +28,7 @@ export const Card = React.memo<CardProps>(({
       {children}
     </View>
   );
-}));
+});
 
 // Helper function to get variant-specific styles
 const getVariantStyles = (variant: CardProps['variant']) => {

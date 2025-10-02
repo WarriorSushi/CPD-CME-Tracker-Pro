@@ -250,7 +250,7 @@ export const Button = React.memo<ButtonProps>(({
       )}
     </AnimatedTouchableOpacity>
   );
-}));
+});
 
 const styles = StyleSheet.create({
   button: {

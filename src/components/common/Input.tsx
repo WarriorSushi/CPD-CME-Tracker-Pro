@@ -222,7 +222,7 @@ export const Input = React.memo<InputProps>(({
       )}
     </View>
   );
-}));
+});
 
 const styles = StyleSheet.create({
   container: {
