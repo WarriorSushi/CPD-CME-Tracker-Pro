@@ -261,7 +261,7 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
     }
 
   } catch (error) {
-      __DEV__ && console.error('💥 createTables: Error creating database tables:', error);
+      __DEV__ && console.error('[ERROR] createTables: Error creating database tables:', error);
     throw error;
   }
 };
@@ -342,7 +342,7 @@ export const migrateDatabase = async (
 
     }
   } catch (error) {
-      __DEV__ && console.error('💥 Migration failed:', error);
+      __DEV__ && console.error('[ERROR] Migration failed:', error);
     throw error;
   }
 };
@@ -392,7 +392,7 @@ export const setupDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
 
     return db;
   } catch (error) {
-      __DEV__ && console.error('💥 setupDatabase: Error setting up database:', error);
+      __DEV__ && console.error('[ERROR] setupDatabase: Error setting up database:', error);
     throw error;
   }
 };
@@ -412,7 +412,7 @@ const ensureTablesExist = async (db: SQLite.SQLiteDatabase): Promise<void> => {
       // Tables already exist
     }
   } catch (error) {
-      __DEV__ && console.error('💥 ensureTablesExist: Error checking tables:', error);
+      __DEV__ && console.error('[ERROR] ensureTablesExist: Error checking tables:', error);
     // If there's any error, try to create tables anyway
     await createTables(db);
   }

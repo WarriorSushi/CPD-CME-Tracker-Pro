@@ -59,7 +59,7 @@ export const LicenseSetupScreen: React.FC<Props> = ({ navigation }) => {
             
             {/* Privacy-friendly guidance */}
             <View style={styles.privacyTip}>
-              <Text style={styles.privacyIcon}>🔒</Text>
+              <SvgIcon name="lock" size={18} color={theme.colors.primary} />
               <View style={styles.privacyTextContainer}>
                 <Text style={styles.privacyText}>
                   <Text style={styles.privacyBold}>Pro tip:</Text> Just use license types like "RN License" or "Medical License" instead of license numbers. 

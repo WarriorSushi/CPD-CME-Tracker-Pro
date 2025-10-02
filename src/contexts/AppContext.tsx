@@ -225,7 +225,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         setUser(userData);
       }
     } catch (error) {
-      __DEV__ && console.error('💥 AppContext: Error refreshing user data:', error);
+      __DEV__ && console.error('[ERROR] AppContext: Error refreshing user data:', error);
     } finally {
       setIsLoadingUser(false);
     }
@@ -457,7 +457,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       await AuditTrailService.logCMEAction('add_entry', 0, { title: entry.title }, false, 'Database operation failed');
       return false;
     } catch (error) {
-      __DEV__ && console.error('💥 AppContext.addCMEEntry: Exception occurred:', error);
+      __DEV__ && console.error('[ERROR] AppContext.addCMEEntry: Exception occurred:', error);
       await AuditTrailService.logCMEAction('add_entry', 0, { title: entry.title }, false, String(error));
       return false;
     }
@@ -611,7 +611,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       );
 
     } catch (error) {
-      __DEV__ && console.error('💥 AppContext: Error refreshing notifications:', error);
+      __DEV__ && console.error('[ERROR] AppContext: Error refreshing notifications:', error);
     }
   }, [user, licenses, eventReminders, totalCredits]);
 
@@ -670,7 +670,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         
         // Initialize notification service in background (non-blocking)
         NotificationService.initialize().catch(error => {
-          __DEV__ && console.error('💥 AppContext: Failed to initialize notifications:', error);
+          __DEV__ && console.error('[ERROR] AppContext: Failed to initialize notifications:', error);
         });
         
         // Load user first (essential for everything else)
@@ -708,7 +708,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         timeoutRefs.current.secondary = secondaryTimeout;
         
       } catch (error) {
-      __DEV__ && console.error('💥 AppContext: Error during initial load:', error); // Keep error logs
+      __DEV__ && console.error('[ERROR] AppContext: Error during initial load:', error); // Keep error logs
         setError('Failed to load app data. Please restart the app.');
       } finally {
         if (mounted) {

@@ -43,12 +43,12 @@ export const useOnboardingStatus = () => {
 
         setTimeout(() => checkOnboardingStatus(), 100);
       } else {
-      __DEV__ && console.error('❌ Database setSetting failed:', result.error);
+      __DEV__ && console.error('[ERROR] Database setSetting failed:', result.error);
       }
       
       return result.success;
     } catch (error) {
-      __DEV__ && console.error('💥 Exception in completeOnboarding:', error);
+      __DEV__ && console.error('[ERROR] Exception in completeOnboarding:', error);
       return false;
     }
   };

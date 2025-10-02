@@ -22,7 +22,7 @@ export class NotificationPermissions {
 
       return granted;
     } catch (error) {
-      __DEV__ && console.error('💥 NotificationPermissions: Error requesting permissions:', error);
+      __DEV__ && console.error('[ERROR] NotificationPermissions: Error requesting permissions:', error);
       return false;
     }
   }
@@ -35,7 +35,7 @@ export class NotificationPermissions {
       const settings = await Notifications.getPermissionsAsync();
       return settings.status as PermissionStatus;
     } catch (error) {
-      __DEV__ && console.error('💥 NotificationPermissions: Error getting permission status:', error);
+      __DEV__ && console.error('[ERROR] NotificationPermissions: Error getting permission status:', error);
       return 'undetermined';
     }
   }
@@ -115,7 +115,7 @@ export class NotificationPermissions {
         await Linking.openSettings();
       }
     } catch (error) {
-      __DEV__ && console.error('💥 NotificationPermissions: Error opening settings:', error);
+      __DEV__ && console.error('[ERROR] NotificationPermissions: Error opening settings:', error);
     }
   }
 

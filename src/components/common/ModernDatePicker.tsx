@@ -128,7 +128,7 @@ export const ModernDatePicker: React.FC<ModernDatePickerProps> = ({
         <Text style={styles.dateButtonText}>
           {formatDate(value)}
         </Text>
-        <Text style={styles.dateButtonIcon}>📅</Text>
+        <SvgIcon name="calendar" size={16} color={theme.colors.primary} />
       </TouchableOpacity>
 
       {/* Modern Date Picker Modal */}

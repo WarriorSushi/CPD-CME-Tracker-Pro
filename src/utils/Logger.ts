@@ -23,7 +23,7 @@ export class Logger {
 
   static warn(message: string, ...args: any[]) {
     if (IS_DEVELOPMENT) {
-      console.warn(`⚠️ ${message}`, ...args);
+      console.warn(`[WARN] ${message}`, ...args);
     }
   }
 
@@ -33,7 +33,7 @@ export class Logger {
    */
   static error(message: string, error?: any) {
     if (IS_DEVELOPMENT) {
-      __DEV__ && console.error(`💥 ${message}`, error);
+      __DEV__ && console.error(`[ERROR] ${message}`, error);
     } else {
       // In production, could send to crash reporting service
       // For now, just use console.error for critical issues

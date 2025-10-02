@@ -162,10 +162,10 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
       if (result.success) {
         navigation.navigate('CycleStartDate');
       } else {
-        __DEV__ && console.error('❌ AnnualTargetScreen: Failed to save annual target');
+        __DEV__ && console.error('[ERROR] AnnualTargetScreen: Failed to save annual target');
       }
     } catch (error) {
-      __DEV__ && console.error('💥 AnnualTargetScreen: Error saving annual target:', error);
+      __DEV__ && console.error('[ERROR] AnnualTargetScreen: Error saving annual target:', error);
     } finally {
       setIsLoading(false);
     }
@@ -216,7 +216,7 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
-              <Text style={styles.headerEmoji}>🎯</Text>
+              <SvgIcon name="target" size={32} color="#FFFFFF" />
             </LinearGradient>
           </View>
           <Text style={styles.title}>Set Your Target</Text>

@@ -69,7 +69,7 @@ export class ThumbnailService {
       };
 
     } catch (error) {
-      __DEV__ && console.error('💥 ThumbnailService: Failed to generate thumbnail:', error);
+      __DEV__ && console.error('[ERROR] ThumbnailService: Failed to generate thumbnail:', error);
       throw new Error('Failed to generate thumbnail');
     }
   }
@@ -130,7 +130,7 @@ export class ThumbnailService {
       };
 
     } catch (error) {
-      __DEV__ && console.error('💥 ThumbnailService: Failed to generate PDF thumbnail:', error);
+      __DEV__ && console.error('[ERROR] ThumbnailService: Failed to generate PDF thumbnail:', error);
       throw new Error('Failed to generate PDF thumbnail');
     }
   }
@@ -146,7 +146,7 @@ export class ThumbnailService {
 
       }
     } catch (error) {
-      __DEV__ && console.error('💥 ThumbnailService: Failed to delete thumbnail:', error);
+      __DEV__ && console.error('[ERROR] ThumbnailService: Failed to delete thumbnail:', error);
     }
   }
 
@@ -171,7 +171,7 @@ export class ThumbnailService {
         }
       }
     } catch (error) {
-      __DEV__ && console.error('💥 ThumbnailService: Failed to cleanup orphaned thumbnails:', error);
+      __DEV__ && console.error('[ERROR] ThumbnailService: Failed to cleanup orphaned thumbnails:', error);
     }
   }
 
@@ -201,7 +201,7 @@ export class ThumbnailService {
         totalSize,
       };
     } catch (error) {
-      __DEV__ && console.error('💥 ThumbnailService: Failed to get storage stats:', error);
+      __DEV__ && console.error('[ERROR] ThumbnailService: Failed to get storage stats:', error);
       return { count: 0, totalSize: 0 };
     }
   }

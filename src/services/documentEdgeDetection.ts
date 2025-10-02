@@ -26,7 +26,7 @@ export class DocumentEdgeDetectionService {
       
       return processedResult;
     } catch (error) {
-      __DEV__ && console.error('💥 DocumentEdgeDetection: Failed to detect edges:', error);
+      __DEV__ && console.error('[ERROR] DocumentEdgeDetection: Failed to detect edges:', error);
       throw new Error('Failed to detect document edges');
     }
   }
@@ -64,7 +64,7 @@ export class DocumentEdgeDetectionService {
         confidence: 0.85, // Estimated confidence for basic processing
       };
     } catch (error) {
-      __DEV__ && console.error('💥 DocumentEdgeDetection: Image processing failed:', error);
+      __DEV__ && console.error('[ERROR] DocumentEdgeDetection: Image processing failed:', error);
       throw error;
     }
   }
@@ -89,7 +89,7 @@ export class DocumentEdgeDetectionService {
 
       return enhanced.uri;
     } catch (error) {
-      __DEV__ && console.error('💥 DocumentEdgeDetection: Image enhancement failed:', error);
+      __DEV__ && console.error('[ERROR] DocumentEdgeDetection: Image enhancement failed:', error);
       // Return original image if enhancement fails
       return imageUri;
     }
@@ -120,7 +120,7 @@ export class DocumentEdgeDetectionService {
 
       return corrected.uri;
     } catch (error) {
-      __DEV__ && console.error('💥 DocumentEdgeDetection: Perspective correction failed:', error);
+      __DEV__ && console.error('[ERROR] DocumentEdgeDetection: Perspective correction failed:', error);
       return imageUri;
     }
   }

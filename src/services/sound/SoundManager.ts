@@ -149,7 +149,7 @@ class SoundManager {
         }
       }
 
-      __DEV__ && console.log('✅ Sound system initialized successfully with expo-audio');
+      __DEV__ && console.log('[INFO] Sound system initialized successfully with expo-audio');
     } catch (error) {
       __DEV__ && console.warn('Failed to initialize sound system:', error);
       // Disable sounds if initialization fails completely

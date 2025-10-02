@@ -24,7 +24,7 @@ export class NotificationStorage {
       );
 
     } catch (error) {
-      __DEV__ && console.error('💥 NotificationStorage: Error saving notification:', error);
+      __DEV__ && console.error('[ERROR] NotificationStorage: Error saving notification:', error);
       throw error;
     }
   }
@@ -46,7 +46,7 @@ export class NotificationStorage {
         createdAt: new Date(notification.createdAt),
       }));
     } catch (error) {
-      __DEV__ && console.error('💥 NotificationStorage: Error getting notifications:', error);
+      __DEV__ && console.error('[ERROR] NotificationStorage: Error getting notifications:', error);
       return [];
     }
   }
@@ -65,7 +65,7 @@ export class NotificationStorage {
       );
 
     } catch (error) {
-      __DEV__ && console.error('💥 NotificationStorage: Error removing notification:', error);
+      __DEV__ && console.error('[ERROR] NotificationStorage: Error removing notification:', error);
       throw error;
     }
   }
@@ -78,7 +78,7 @@ export class NotificationStorage {
       await AsyncStorage.removeItem(STORAGE_KEYS.SCHEDULED_NOTIFICATIONS);
 
     } catch (error) {
-      __DEV__ && console.error('💥 NotificationStorage: Error clearing notifications:', error);
+      __DEV__ && console.error('[ERROR] NotificationStorage: Error clearing notifications:', error);
       throw error;
     }
   }
@@ -119,7 +119,7 @@ export class NotificationStorage {
 
       }
     } catch (error) {
-      __DEV__ && console.error('💥 NotificationStorage: Error cleaning notifications:', error);
+      __DEV__ && console.error('[ERROR] NotificationStorage: Error cleaning notifications:', error);
     }
   }
 
@@ -134,7 +134,7 @@ export class NotificationStorage {
       );
 
     } catch (error) {
-      __DEV__ && console.error('💥 NotificationStorage: Error saving settings:', error);
+      __DEV__ && console.error('[ERROR] NotificationStorage: Error saving settings:', error);
       throw error;
     }
   }
@@ -177,7 +177,7 @@ export class NotificationStorage {
       
       return merged;
     } catch (error) {
-      __DEV__ && console.error('💥 NotificationStorage: Error getting settings:', error);
+      __DEV__ && console.error('[ERROR] NotificationStorage: Error getting settings:', error);
       return DEFAULT_NOTIFICATION_SETTINGS;
     }
   }
@@ -192,7 +192,7 @@ export class NotificationStorage {
         new Date().toISOString()
       );
     } catch (error) {
-      __DEV__ && console.error('💥 NotificationStorage: Error saving last refresh:', error);
+      __DEV__ && console.error('[ERROR] NotificationStorage: Error saving last refresh:', error);
     }
   }
 
@@ -204,7 +204,7 @@ export class NotificationStorage {
       const stored = await AsyncStorage.getItem(STORAGE_KEYS.LAST_REFRESH);
       return stored ? new Date(stored) : null;
     } catch (error) {
-      __DEV__ && console.error('💥 NotificationStorage: Error getting last refresh:', error);
+      __DEV__ && console.error('[ERROR] NotificationStorage: Error getting last refresh:', error);
       return null;
     }
   }

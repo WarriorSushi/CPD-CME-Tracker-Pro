@@ -264,7 +264,7 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
             {/* Info Card */}
             <Card style={styles.infoCard}>
               <View style={styles.infoHeader}>
-                <Text style={styles.infoIcon}>💡</Text>
+                <SvgIcon name="info" size={20} color={theme.colors.primary} />
                 <Text style={styles.infoTitle}>Quick Setup</Text>
               </View>
               <Text style={styles.infoText}>

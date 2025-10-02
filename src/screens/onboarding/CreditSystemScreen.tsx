@@ -129,10 +129,10 @@ export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
           await refreshUserData();
           navigation.navigate('AnnualTarget');
         } else {
-          __DEV__ && console.error('❌ CreditSystemScreen: Failed to save credit system:', result.error);
+          __DEV__ && console.error('[ERROR] CreditSystemScreen: Failed to save credit system:', result.error);
         }
       } catch (error) {
-        __DEV__ && console.error('💥 CreditSystemScreen: Error saving credit system:', error);
+        __DEV__ && console.error('[ERROR] CreditSystemScreen: Error saving credit system:', error);
       } finally {
         setIsLoading(false);
       }

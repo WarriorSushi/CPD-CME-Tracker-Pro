@@ -165,31 +165,31 @@ export class AuditTrailService {
     lines.push(`Success Rate: ${stats.successRate.toFixed(1)}%`);
     lines.push('');
     
-    lines.push('📊 ENTITY BREAKDOWN:');
+    lines.push('[DATA] ENTITY BREAKDOWN:');
     Object.entries(stats.entityBreakdown).forEach(([entity, count]) => {
       lines.push(`  ${entity}: ${count}`);
     });
     lines.push('');
     
-    lines.push('📋 ACTION BREAKDOWN:');
+    lines.push('[LIST] ACTION BREAKDOWN:');
     Object.entries(stats.actionBreakdown).forEach(([action, count]) => {
       lines.push(`  ${action}: ${count}`);
     });
     lines.push('');
     
     if (stats.recentErrors.length > 0) {
-      lines.push('❌ RECENT ERRORS:');
+      lines.push('[ERROR] RECENT ERRORS:');
       stats.recentErrors.forEach(error => {
         lines.push(`  [${error.timestamp}] ${error.action} on ${error.entityType} - ${error.error}`);
       });
       lines.push('');
     }
     
-    lines.push('📝 DETAILED EVENTS:');
+    lines.push('[DETAILS] DETAILED EVENTS:');
     events
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .forEach(event => {
-        const status = event.success ? '✅' : '❌';
+        const status = event.success ? '[OK]' : '[ERROR]';
         const entityInfo = event.entityId ? ` [${event.entityId}]` : '';
         lines.push(`${status} [${event.timestamp}] ${event.action} ${event.entityType}${entityInfo}`);
         if (event.error) {

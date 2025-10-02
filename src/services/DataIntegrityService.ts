@@ -303,10 +303,10 @@ export class DataIntegrityService {
     const lines: string[] = [];
     
     lines.push('=== DATA INTEGRITY REPORT ===');
-    lines.push(`Status: ${result.isValid ? '✅ HEALTHY' : '❌ ISSUES FOUND'}`);
+    lines.push(`Status: ${result.isValid ? '[OK] HEALTHY' : '[ERROR] ISSUES FOUND'}`);
     lines.push('');
     
-    lines.push('📊 STATISTICS:');
+    lines.push('[DATA] STATISTICS:');
     lines.push(`Total CME Entries: ${result.stats.totalEntries}`);
     lines.push(`Total Credits: ${result.stats.totalCredits}`);
     lines.push(`Orphaned Certificates: ${result.stats.orphanedCertificates}`);
@@ -316,19 +316,19 @@ export class DataIntegrityService {
     lines.push('');
 
     if (result.errors.length > 0) {
-      lines.push('❌ ERRORS:');
+      lines.push('[ERROR] ERRORS:');
       result.errors.forEach(error => lines.push(`  • ${error}`));
       lines.push('');
     }
 
     if (result.warnings.length > 0) {
-      lines.push('⚠️ WARNINGS:');
+      lines.push('[WARN] WARNINGS:');
       result.warnings.forEach(warning => lines.push(`  • ${warning}`));
       lines.push('');
     }
 
     if (result.errors.length === 0 && result.warnings.length === 0) {
-      lines.push('✅ No issues found. Your data is healthy!');
+      lines.push('[OK] No issues found. Your data is healthy!');
     }
 
     lines.push(`Generated: ${new Date().toLocaleString()}`);

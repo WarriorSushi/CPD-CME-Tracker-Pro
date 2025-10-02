@@ -170,7 +170,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
       (navigation as any).navigate('AddCME', { editEntry: entry });
 
     } catch (error) {
-      __DEV__ && console.error('💥 Error navigating to edit screen:', error);
+      __DEV__ && console.error('[ERROR] Error navigating to edit screen:', error);
       Alert.alert('Error', 'Failed to open edit screen. Please try again.');
     }
   };
@@ -209,12 +209,12 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
                 Alert.alert('Success', 'Entry deleted successfully.');
                 await playSuccess();
               } else {
-      __DEV__ && console.error('❌ Delete operation returned false');
+      __DEV__ && console.error('[ERROR] Delete operation returned false');
                 await playError();
                 Alert.alert('Error', 'Failed to delete entry. Please try again.');
               }
             } catch (error) {
-      __DEV__ && console.error('💥 Error during delete operation:', error);
+      __DEV__ && console.error('[ERROR] Error during delete operation:', error);
               await playError();
               Alert.alert('Error', 'An unexpected error occurred while deleting the entry.');
             }
@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: theme.spacing[3],
+    paddingHorizontal: theme.spacing[4],
     paddingTop: theme.spacing[2],
   },
   

@@ -62,7 +62,7 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
         
         return true;
       } else {
-      __DEV__ && console.error('❌ Database setSetting failed:', result.error);
+      __DEV__ && console.error('[ERROR] Database setSetting failed:', result.error);
         
         // Fallback: Set the state anyway and let the user continue
 
@@ -71,7 +71,7 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
         return true;
       }
     } catch (error) {
-      __DEV__ && console.error('💥 Exception in completeOnboarding:', error);
+      __DEV__ && console.error('[ERROR] Exception in completeOnboarding:', error);
       
       // Fallback: Set the state anyway and let the user continue
 
@@ -95,7 +95,7 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
 
       return result.success;
     } catch (error) {
-      __DEV__ && console.error('💥 Error resetting onboarding:', error);
+      __DEV__ && console.error('[ERROR] Error resetting onboarding:', error);
       // Even if DB fails, allow navigation to onboarding
       setIsOnboardingComplete(false);
       setIsLoading(false);
@@ -117,13 +117,13 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
         setIsLoading(false);
         return true;
       } else {
-      __DEV__ && console.error('❌ resetCompleteApp: Database reset failed, but allowing navigation anyway');
+      __DEV__ && console.error('[ERROR] resetCompleteApp: Database reset failed, but allowing navigation anyway');
         setIsOnboardingComplete(false);
         setIsLoading(false);
         return false;
       }
     } catch (error) {
-      __DEV__ && console.error('💥 Error resetting complete app:', error);
+      __DEV__ && console.error('[ERROR] Error resetting complete app:', error);
       // Even if DB fails, allow navigation to onboarding
       setIsOnboardingComplete(false);
       setIsLoading(false);

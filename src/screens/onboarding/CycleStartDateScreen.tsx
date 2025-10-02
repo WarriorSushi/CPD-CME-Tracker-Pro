@@ -161,10 +161,10 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
         if (result.success) {
           navigation.navigate('SetupComplete');
         } else {
-          __DEV__ && console.error('❌ CycleStartDateScreen: Failed to save cycle dates');
+          __DEV__ && console.error('[ERROR] CycleStartDateScreen: Failed to save cycle dates');
         }
       } catch (error) {
-        __DEV__ && console.error('💥 CycleStartDateScreen: Error saving cycle dates:', error);
+        __DEV__ && console.error('[ERROR] CycleStartDateScreen: Error saving cycle dates:', error);
       } finally {
         setIsLoading(false);
       }
@@ -238,7 +238,7 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Text style={styles.headerEmoji}>📅</Text>
+                <SvgIcon name="calendar" size={32} color="#FFFFFF" />
               </LinearGradient>
             </View>
             <Text style={styles.title}>When did your cycle start?</Text>

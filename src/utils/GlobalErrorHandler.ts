@@ -99,7 +99,7 @@ class GlobalErrorHandler {
 
     // Log error in development
     if (__DEV__) {
-      console.error(`💥 GlobalErrorHandler [${errorInfo.source}]:`, errorInfo.error);
+      console.error(`[ERROR] GlobalErrorHandler [${errorInfo.source}]:`, errorInfo.error);
       if (errorInfo.stack) {
         console.error('Stack:', errorInfo.stack);
       }
@@ -111,7 +111,7 @@ class GlobalErrorHandler {
         handler(errorInfo);
       } catch (handlerError) {
         if (__DEV__) {
-          console.error('💥 Error in error handler:', handlerError);
+          console.error('[ERROR] Error in error handler:', handlerError);
         }
       }
     });

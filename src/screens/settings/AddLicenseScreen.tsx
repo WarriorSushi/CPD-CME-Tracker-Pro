@@ -402,7 +402,7 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
               }
             ]}>
           <View style={styles.infoHeader}>
-            <Text style={styles.infoIcon}>💡</Text>
+            <SvgIcon name="info" size={20} color={theme.colors.primary} />
             <Text style={styles.infoTitle}>License Tracking</Text>
           </View>
           <Text style={styles.infoText}>

@@ -146,7 +146,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleResetCompleteApp = async () => {
     Alert.alert(
-      '⚠️ DANGER: Reset Complete App',
+      'DANGER: Reset Complete App',
       'This will permanently delete ALL your data including:\n\n• All CME entries\n• All certificates\n• All license information\n• All settings\n• User profile\n\nThis action CANNOT be undone!',
       [
         {
@@ -159,7 +159,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
           onPress: () => {
             // Double confirmation for complete reset
             Alert.alert(
-              '🚨 FINAL WARNING',
+              'FINAL WARNING',
               'Are you absolutely sure you want to delete ALL app data? This cannot be reversed.',
               [
                 {

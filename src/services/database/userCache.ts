@@ -44,7 +44,7 @@ export async function getUserCached(): Promise<User | null> {
 
       return userData || null;
     } catch (error) {
-      __DEV__ && console.error('💥 getUserCached: Error fetching user:', error);
+      __DEV__ && console.error('[ERROR] getUserCached: Error fetching user:', error);
       return null;
     }
   })().finally(() => {

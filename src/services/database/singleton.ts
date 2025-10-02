@@ -29,7 +29,7 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
         if (isHealthy) {
           lastHealthOkAt = now;
         } else {
-      __DEV__ && console.error('💥 Database health check failed - this should never happen');
+      __DEV__ && console.error('[ERROR] Database health check failed - this should never happen');
           // In production, we might want to restart the app or show error
         }
       }).catch(() => {
@@ -62,7 +62,7 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 
       return handle;
     } catch (error) {
-      __DEV__ && console.error('💥 getDatabase: Failed to open database:', error);
+      __DEV__ && console.error('[ERROR] getDatabase: Failed to open database:', error);
       throw error;
     }
   })().finally(() => {
@@ -129,7 +129,7 @@ export async function recoverFromCorruption(): Promise<void> {
     // Force fresh database creation on next access
 
   } catch (error) {
-      __DEV__ && console.error('💥 recoverFromCorruption: Recovery failed:', error);
+      __DEV__ && console.error('[ERROR] recoverFromCorruption: Recovery failed:', error);
     throw error;
   }
 }
@@ -176,7 +176,7 @@ export async function checkDatabaseHealth(): Promise<boolean> {
       try {
         await recoverFromCorruption();
       } catch (recoveryError) {
-      __DEV__ && console.error('💥 checkDatabaseHealth: Recovery failed:', recoveryError);
+      __DEV__ && console.error('[ERROR] checkDatabaseHealth: Recovery failed:', recoveryError);
       }
     }
     

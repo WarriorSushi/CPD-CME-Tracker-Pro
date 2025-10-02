@@ -34,7 +34,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-      __DEV__ && console.error('💥 ErrorBoundary: Caught error:', error, errorInfo);
+      __DEV__ && console.error('[ERROR] ErrorBoundary: Caught error:', error, errorInfo);
     
     this.setState({
       error,
@@ -66,7 +66,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <View style={styles.container}>
           <View style={styles.errorContainer}>
-            <Text style={styles.errorIcon}>💥</Text>
+            <SvgIcon name="alert" size={48} color="#EF4444" />
             <Text style={styles.errorTitle}>Oops! Something went wrong</Text>
             <Text style={styles.errorMessage}>
               We encountered an unexpected error. Don't worry, your data is safe.

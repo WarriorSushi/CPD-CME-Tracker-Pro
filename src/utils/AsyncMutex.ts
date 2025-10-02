@@ -38,7 +38,7 @@ export class AsyncMutex {
 
       return result;
     } catch (error) {
-      __DEV__ && console.error(`💥 ${this.name}: Operation ${currentLockId} failed:`, error);
+      __DEV__ && console.error(`[ERROR] ${this.name}: Operation ${currentLockId} failed:`, error);
       throw error;
     } finally {
       this.locked = false;

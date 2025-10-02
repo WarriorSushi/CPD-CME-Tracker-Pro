@@ -261,7 +261,7 @@ export const AddReminderScreen: React.FC<Props> = ({ navigation }) => {
               }
             ]}>
           <View style={styles.infoHeader}>
-            <Text style={styles.infoIcon}>📅</Text>
+            <SvgIcon name="calendar" size={20} color={theme.colors.primary} />
             <Text style={styles.infoTitle}>Event Reminders</Text>
           </View>
           <Text style={styles.infoText}>

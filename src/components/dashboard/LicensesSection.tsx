@@ -31,7 +31,7 @@ export const LicensesSection: React.FC<LicensesSectionProps> = ({
 
     const expDate = new Date(expirationDateString);
     if (isNaN(expDate.getTime())) {
-      __DEV__ && console.error('🚨 Invalid date string:', expirationDateString);
+      __DEV__ && console.error('[ERROR] Invalid date string:', expirationDateString);
       return 0;
     }
     expDate.setHours(0, 0, 0, 0);
@@ -195,8 +195,9 @@ export const LicensesSection: React.FC<LicensesSectionProps> = ({
 
                 {/* Renewal Instructions */}
                 <View style={styles.licenseRenewalInstructions}>
+                  <SvgIcon name="info" size={14} color={theme.colors.text.secondary} />
                   <Text style={styles.renewalInstructionsText}>
-                    💡 Already renewed? Tap "Edit" and update the expiration date.
+                    Already renewed? Tap "Edit" and update the expiration date.
                   </Text>
                 </View>
               </PremiumCard>

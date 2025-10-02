@@ -109,10 +109,10 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
         // Navigation will automatically switch to main app due to the navigation logic
         // in AppNavigator based on onboarding status
       } else {
-        __DEV__ && console.error('❌ Failed to complete onboarding');
+        __DEV__ && console.error('[ERROR] Failed to complete onboarding');
       }
     } catch (error) {
-      __DEV__ && console.error('💥 Error completing onboarding:', error);
+      __DEV__ && console.error('[ERROR] Error completing onboarding:', error);
     } finally {
       setIsLoading(false);
     }

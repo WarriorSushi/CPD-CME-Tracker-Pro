@@ -307,7 +307,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
         const thumbnailResult = await ThumbnailService.generateThumbnail(imageAsset.uri, newFileName);
         thumbnailPath = thumbnailResult.thumbnailUri;
       } catch (thumbnailError) {
-        console.warn('⚠️ Thumbnail generation failed:', thumbnailError);
+        console.warn('[WARN] Thumbnail generation failed:', thumbnailError);
       }
 
       // Get file info for certificate vault storage
@@ -331,10 +331,10 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
           // Refresh certificates in AppContext so vault shows the new certificate
           await refreshCertificates();
         } else {
-          console.warn('⚠️ Failed to add certificate to vault:', addResult.error);
+          console.warn('[WARN] Failed to add certificate to vault:', addResult.error);
         }
       } catch (certError) {
-      __DEV__ && console.error('💥 Error adding certificate to vault:', certError);
+      __DEV__ && console.error('[ERROR] Error adding certificate to vault:', certError);
       }
 
       // Update form data with certificate path
@@ -346,7 +346,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       Alert.alert('Success', 'Certificate added to entry and saved to vault!');
 
     } catch (error) {
-      __DEV__ && console.error('💥 Error processing certificate:', error);
+      __DEV__ && console.error('[ERROR] Error processing certificate:', error);
       Alert.alert('Error', 'Failed to process certificate. Please try again.');
     }
   };
@@ -420,7 +420,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
 
         }
       } catch (thumbnailError) {
-        console.warn('⚠️ Thumbnail generation failed:', thumbnailError);
+        console.warn('[WARN] Thumbnail generation failed:', thumbnailError);
       }
 
       // Automatically add certificate to vault
@@ -440,10 +440,10 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
           // Refresh certificates in AppContext so vault shows the new certificate
           await refreshCertificates();
         } else {
-          console.warn('⚠️ Failed to add document to vault:', addResult.error);
+          console.warn('[WARN] Failed to add document to vault:', addResult.error);
         }
       } catch (certError) {
-      __DEV__ && console.error('💥 Error adding document to vault:', certError);
+      __DEV__ && console.error('[ERROR] Error adding document to vault:', certError);
       }
 
       // Update form data with certificate path
@@ -455,7 +455,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       Alert.alert('Success', 'Document added to entry and saved to vault!');
 
     } catch (error) {
-      __DEV__ && console.error('💥 Error processing document:', error);
+      __DEV__ && console.error('[ERROR] Error processing document:', error);
       Alert.alert('Error', 'Failed to process document. Please try again.');
     }
   };
@@ -600,7 +600,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
     } catch (error) {
       // Play error sound for exceptions
       await playError();
-      __DEV__ && console.error('💥 handleSubmit: Exception occurred:', error);
+      __DEV__ && console.error('[ERROR] handleSubmit: Exception occurred:', error);
       Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
@@ -802,7 +802,10 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
                   onPressOut={() => handlePressOut('remove')}
                   activeOpacity={1}
                 >
-                  <Text style={styles.removeCertButtonTextCompact}>🗑️ Remove</Text>
+                  <View style={styles.removeCertButtonContent}>
+                    <SvgIcon name="trash" size={14} color={theme.colors.error} />
+                    <Text style={styles.removeCertButtonTextCompact}>Remove</Text>
+                  </View>
                 </TouchableOpacity>
               </View>
             ) : (
@@ -816,7 +819,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
                   disabled={isUploadingCertificate}
                   activeOpacity={1}
                 >
-                  <Text style={styles.uploadButtonIconTiny}>📷</Text>
+                  <SvgIcon name="camera" size={16} color={theme.colors.primary} />
                   <Text style={styles.uploadButtonTextTiny}>Take</Text>
                   {isUploadingCertificate && <LoadingSpinner size={10} />}
                 </TouchableOpacity>
@@ -829,7 +832,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
                   disabled={isUploadingCertificate}
                   activeOpacity={1}
                 >
-                  <Text style={styles.uploadButtonIconTiny}>🖼️</Text>
+                  <SvgIcon name="gallery" size={16} color={theme.colors.primary} />
                   <Text style={styles.uploadButtonTextTiny}>{isUploadingCertificate ? 'Loading...' : 'Gallery'}</Text>
                   {isUploadingCertificate && <LoadingSpinner size={10} />}
                 </TouchableOpacity>
@@ -842,7 +845,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
                   disabled={isUploadingCertificate}
                   activeOpacity={1}
                 >
-                  <Text style={styles.uploadButtonIconTiny}>📎</Text>
+                  <SvgIcon name="document" size={16} color={theme.colors.primary} />
                   <Text style={styles.uploadButtonTextTiny}>{isUploadingCertificate ? 'Loading...' : 'Files'}</Text>
                   {isUploadingCertificate && <LoadingSpinner size={10} />}
                 </TouchableOpacity>
@@ -884,16 +887,20 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
           </Animated.View>
 
           {/* Compact Helper */}
-          <Animated.Text 
+          <Animated.View
             style={[
-              styles.helperText,
+              styles.helperTextContainer,
               {
                 opacity: actionsAnim,
               },
             ]}
           >
-            * Required fields • 💡 Be specific for better tracking
-          </Animated.Text>
+            <Text style={styles.helperText}>* Required fields</Text>
+            <View style={styles.helperTip}>
+              <SvgIcon name="info" size={14} color={theme.colors.text.secondary} />
+              <Text style={styles.helperText}>Be specific for better tracking</Text>
+            </View>
+          </Animated.View>
         </ScrollView>
       </Animated.View>
     </View>
@@ -1000,12 +1007,22 @@ const styles = StyleSheet.create({
   },
   
   // Compact Helper
+  helperTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    paddingHorizontal: theme.spacing[4],
+    marginBottom: theme.spacing[4],
+  },
+  helperTip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   helperText: {
     fontSize: theme.typography.fontSize.xs,
     color: theme.colors.text.secondary,
-    textAlign: 'center',
-    paddingHorizontal: theme.spacing[4],
-    marginBottom: theme.spacing[4],
   },
 
   // Certificate Section - Compact merged into main form
@@ -1078,6 +1095,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 3,
     elevation: 5,
+  },
+  removeCertButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   removeCertButtonTextCompact: {
     fontSize: 11,

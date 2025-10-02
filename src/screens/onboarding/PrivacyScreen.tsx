@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Card } from '../../components';
+import { Button, Card, SvgIcon } from '../../components';
 import { theme } from '../../constants/theme';
 import { tokens } from '../../theme/tokens';
 import { OnboardingStackParamList } from '../../types/navigation';
@@ -27,7 +27,9 @@ export const PrivacyScreen: React.FC<Props> = ({ navigation }) => {
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.icon}>🔒</Text>
+          <View style={styles.iconContainer}>
+            <SvgIcon name="lock" size={48} color={theme.colors.primary} />
+          </View>
           <Text style={styles.title}>Your Privacy is Our Priority</Text>
           <Text style={styles.description}>
             Built to protect your professional information
@@ -36,33 +38,34 @@ export const PrivacyScreen: React.FC<Props> = ({ navigation }) => {
 
         <View style={styles.featuresGrid}>
           <Card style={styles.featureCard}>
-            <Text style={styles.featureIcon}>📱</Text>
+            <SvgIcon name="shield" size={32} color={theme.colors.primary} />
             <Text style={styles.featureTitle}>100% Offline</Text>
             <Text style={styles.featureDescription}>Data never leaves your device</Text>
           </Card>
 
           <Card style={styles.featureCard}>
-            <Text style={styles.featureIcon}>🚫</Text>
+            <SvgIcon name="lock" size={32} color={theme.colors.primary} />
             <Text style={styles.featureTitle}>No Collection</Text>
             <Text style={styles.featureDescription}>We don't collect your data</Text>
           </Card>
 
           <Card style={styles.featureCard}>
-            <Text style={styles.featureIcon}>🔐</Text>
+            <SvgIcon name="shield" size={32} color={theme.colors.primary} />
             <Text style={styles.featureTitle}>Encrypted</Text>
             <Text style={styles.featureDescription}>Sensitive data is encrypted</Text>
           </Card>
 
           <Card style={styles.featureCard}>
-            <Text style={styles.featureIcon}>👤</Text>
+            <SvgIcon name="user" size={32} color={theme.colors.primary} />
             <Text style={styles.featureTitle}>You Control</Text>
             <Text style={styles.featureDescription}>Export or delete anytime</Text>
           </Card>
         </View>
 
         <View style={styles.assurance}>
+          <SvgIcon name="shield" size={20} color={theme.colors.primary} />
           <Text style={styles.assuranceText}>
-            🏥 Built specifically for healthcare professionals who value privacy and compliance
+            Built specifically for healthcare professionals who value privacy and compliance
           </Text>
         </View>
       </View>
@@ -99,8 +102,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: theme.spacing[8],
   },
-  icon: {
-    fontSize: 48,
+  iconContainer: {
     marginBottom: theme.spacing[3],
   },
   title: {
@@ -151,8 +153,12 @@ const styles = StyleSheet.create({
     padding: theme.spacing[4],
     borderLeftWidth: 4,
     borderLeftColor: theme.colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   assuranceText: {
+    flex: 1,
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.primary,
     textAlign: 'center',

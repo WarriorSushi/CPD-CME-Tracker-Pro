@@ -300,13 +300,13 @@ Completion Rate: ${badgeStats.completionRate.toFixed(1)}%
 Earned Badges:
 ${badgeProgress
   .filter(bp => bp.earned)
-  .map(bp => `✅ ${bp.badge.name} - ${bp.badge.description}`)
+  .map(bp => `[OK] ${bp.badge.name} - ${bp.badge.description}`)
   .join('\n')}
 
 Next Badge Progress:
 ${badgeStats.nextBadge 
-  ? `🎯 ${badgeStats.nextBadge.badge.name} - ${(badgeStats.nextBadge.progress * 100).toFixed(1)}% complete`
-  : 'All badges earned! 🎉'
+  ? `[GOAL] ${badgeStats.nextBadge.badge.name} - ${(badgeStats.nextBadge.progress * 100).toFixed(1)}% complete`
+  : 'All badges earned! [SUCCESS]'
 }
 
 LICENSE MANAGEMENT
@@ -324,7 +324,7 @@ ${licenses.map((license, index) =>
 
 DATA INTEGRITY STATUS
 =====================
-Overall Status: ${integrityResult.isValid ? '✅ HEALTHY' : '❌ ISSUES FOUND'}
+Overall Status: ${integrityResult.isValid ? '[OK] HEALTHY' : '[ERROR] ISSUES FOUND'}
 Total Entries Checked: ${integrityResult.stats.totalEntries}
 Total Credits Verified: ${integrityResult.stats.totalCredits}
 
@@ -337,7 +337,7 @@ Issues Summary:
 
 ${integrityResult.errors.length > 0 ? `
 Critical Errors:
-${integrityResult.errors.slice(0, 5).map(error => `❌ ${error}`).join('\n')}
+${integrityResult.errors.slice(0, 5).map(error => `[ERROR] ${error}`).join('\n')}
 ${integrityResult.errors.length > 5 ? `... and ${integrityResult.errors.length - 5} more` : ''}
 ` : ''}
 
@@ -365,7 +365,7 @@ ${currentYearEntries
     ${creditUnit}: ${entry.creditsEarned}
     Category: ${entry.category}
     ${entry.notes ? `Notes: ${entry.notes}` : ''}
-    ${entry.certificatePath ? '📋 Certificate attached' : ''}
+    ${entry.certificatePath ? '[CERT] Certificate attached' : ''}
 `
   ).join('\n')}
 
@@ -491,9 +491,9 @@ function generateRecommendations(
     : 0;
   
   if (progressPercentage < 50) {
-    recommendations.push("📈 You're behind on your annual requirement. Consider scheduling more CME activities.");
+    recommendations.push("[PROGRESS] You're behind on your annual requirement. Consider scheduling more CME activities.");
   } else if (progressPercentage >= 100) {
-    recommendations.push("🎉 Congratulations! You've met your annual requirement. Consider pursuing additional learning for professional growth.");
+    recommendations.push("[SUCCESS] Congratulations! You've met your annual requirement. Consider pursuing additional learning for professional growth.");
   }
   
   // License recommendations
@@ -506,27 +506,27 @@ function generateRecommendations(
   });
   
   if (expiringLicenses.length > 0) {
-    recommendations.push(`⚠️ ${expiringLicenses.length} license(s) expiring within 3 months. Plan your renewal activities.`);
+    recommendations.push(`[WARN] ${expiringLicenses.length} license(s) expiring within 3 months. Plan your renewal activities.`);
   }
   
   // Badge recommendations
   if (badgeStats.nextBadge && badgeStats.nextBadge.progress > 0.5) {
-    recommendations.push(`🎯 You're ${((1 - badgeStats.nextBadge.progress) * 100).toFixed(0)}% away from earning "${badgeStats.nextBadge.badge.name}" badge!`);
+    recommendations.push(`[GOAL] You're ${((1 - badgeStats.nextBadge.progress) * 100).toFixed(0)}% away from earning "${badgeStats.nextBadge.badge.name}" badge!`);
   }
   
   // Data integrity recommendations
   if (!integrityResult.isValid) {
-    recommendations.push("🔧 Data integrity issues detected. Review and fix errors to ensure accurate reporting.");
+    recommendations.push("[FIX] Data integrity issues detected. Review and fix errors to ensure accurate reporting.");
   }
   
   // Category diversification
   const categories = new Set(entries.map(entry => entry.category));
   if (categories.size < 3) {
-    recommendations.push("🌟 Consider diversifying your learning across different categories for well-rounded professional development.");
+    recommendations.push("[TIP] Consider diversifying your learning across different categories for well-rounded professional development.");
   }
   
   if (recommendations.length === 0) {
-    recommendations.push("✅ Your CME tracking looks excellent! Keep up the great work with your professional development.");
+    recommendations.push("[OK] Your CME tracking looks excellent! Keep up the great work with your professional development.");
   }
   
   return recommendations.join('\n\n');

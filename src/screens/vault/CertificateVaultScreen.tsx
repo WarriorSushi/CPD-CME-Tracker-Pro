@@ -172,7 +172,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         thumbnailPath = thumbnailResult.thumbnailUri;
 
       } catch (thumbnailError) {
-        console.warn('⚠️ Thumbnail generation failed:', thumbnailError);
+        console.warn('[WARN] Thumbnail generation failed:', thumbnailError);
       }
 
       // Save certificate to database with thumbnail path
@@ -190,12 +190,12 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         Alert.alert('Success', 'Certificate saved to your vault!');
         await refreshCertificates();
       } else {
-      __DEV__ && console.error('❌ Failed to save certificate to database:', addResult.error);
+      __DEV__ && console.error('[ERROR] Failed to save certificate to database:', addResult.error);
         Alert.alert('Error', 'Certificate saved to device but failed to add to vault database.');
       }
 
     } catch (error) {
-      __DEV__ && console.error('💥 Error processing certificate:', error);
+      __DEV__ && console.error('[ERROR] Error processing certificate:', error);
       Alert.alert('Error', 'Failed to process certificate. Please try again.');
     }
   };
@@ -262,7 +262,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
 
         }
       } catch (thumbnailError) {
-        console.warn('⚠️ Thumbnail generation failed for uploaded file:', thumbnailError);
+        console.warn('[WARN] Thumbnail generation failed for uploaded file:', thumbnailError);
       }
 
       // Add certificate to database
@@ -283,7 +283,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         // Refresh the list
         await refreshCertificates();
       } else {
-      __DEV__ && console.error('❌ Failed to add certificate to database:', addResult.error);
+      __DEV__ && console.error('[ERROR] Failed to add certificate to database:', addResult.error);
         Alert.alert('Error', 'Failed to save certificate to vault. Please try again.');
       }
 
@@ -329,7 +329,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
                   }
                 }
               } catch (updateError) {
-                console.warn('⚠️ Could not clear certificate references from CME entries:', updateError);
+                console.warn('[WARN] Could not clear certificate references from CME entries:', updateError);
               }
 
               // Delete from database
@@ -461,7 +461,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
                   handleDeleteCertificate(item);
                 }}
               >
-                <Text style={styles.overlayDeleteText}>🗑️</Text>
+                <SvgIcon name="trash" size={20} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
           </View>

@@ -20,7 +20,7 @@ export class OCRService {
         extractedData: parsedData,
       };
     } catch (error) {
-      __DEV__ && console.error('💥 OCRService: Text extraction failed:', error);
+      __DEV__ && console.error('[ERROR] OCRService: Text extraction failed:', error);
       throw new Error('Failed to extract text from image');
     }
   }

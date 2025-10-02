@@ -362,7 +362,7 @@ export const cmeOperations = {
         };
       });
     } catch (error) {
-      __DEV__ && console.error('💥 cmeOperations.addEntry: Database error occurred:', error);
+      __DEV__ && console.error('[ERROR] cmeOperations.addEntry: Database error occurred:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to add CME entry',
@@ -422,7 +422,7 @@ export const cmeOperations = {
 
         return { success: true };
       } catch (error) {
-      __DEV__ && console.error('💥 cmeOperations.updateEntry: Database error occurred:', error);
+      __DEV__ && console.error('[ERROR] cmeOperations.updateEntry: Database error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to update CME entry',
@@ -456,7 +456,7 @@ export const cmeOperations = {
 
         return { success: true };
       } catch (error) {
-      __DEV__ && console.error('💥 cmeOperations.deleteEntry: Database error occurred:', error);
+      __DEV__ && console.error('[ERROR] cmeOperations.deleteEntry: Database error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to delete CME entry',
@@ -838,7 +838,7 @@ export const settingsOperations = {
         return { success: true };
         
       } catch (error) {
-      __DEV__ && console.error('💥 settingsOperations.setSetting: Error occurred:', error);
+      __DEV__ && console.error('[ERROR] settingsOperations.setSetting: Error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to set setting',
@@ -881,7 +881,7 @@ export const settingsOperations = {
 
         return { success: true };
       } catch (error) {
-      __DEV__ && console.error('💥 settingsOperations.resetAllData: Error occurred:', error);
+      __DEV__ && console.error('[ERROR] settingsOperations.resetAllData: Error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to reset app data',
@@ -960,7 +960,7 @@ export const eventReminderOperations = {
       return { success: true };
       
     } catch (error) {
-      __DEV__ && console.error('💥 eventReminderOperations.ensureTableExists: Error occurred:', error);
+      __DEV__ && console.error('[ERROR] eventReminderOperations.ensureTableExists: Error occurred:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to ensure table exists',
@@ -997,7 +997,7 @@ export const eventReminderOperations = {
           };
           
         } catch (error) {
-      __DEV__ && console.error('💥 eventReminderOperations.getAllReminders: Error occurred:', error);
+      __DEV__ && console.error('[ERROR] eventReminderOperations.getAllReminders: Error occurred:', error);
           return {
             success: false,
             error: error instanceof Error ? error.message : 'Failed to fetch event reminders',
@@ -1006,7 +1006,7 @@ export const eventReminderOperations = {
       });
       
     } catch (error) {
-      __DEV__ && console.error('💥 eventReminderOperations.getAllReminders: Outer error occurred:', error);
+      __DEV__ && console.error('[ERROR] eventReminderOperations.getAllReminders: Outer error occurred:', error);
       // Return empty array if table creation fails
       return {
         success: true,
@@ -1035,7 +1035,7 @@ export const eventReminderOperations = {
         };
         
       } catch (error) {
-      __DEV__ && console.error('💥 eventReminderOperations.addReminder: Error occurred:', error);
+      __DEV__ && console.error('[ERROR] eventReminderOperations.addReminder: Error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to add event reminder',
@@ -1079,7 +1079,7 @@ export const eventReminderOperations = {
         return { success: true };
         
       } catch (error) {
-      __DEV__ && console.error('💥 eventReminderOperations.updateReminder: Error occurred:', error);
+      __DEV__ && console.error('[ERROR] eventReminderOperations.updateReminder: Error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to update event reminder',
@@ -1103,7 +1103,7 @@ export const eventReminderOperations = {
         return { success: true };
         
       } catch (error) {
-      __DEV__ && console.error('💥 eventReminderOperations.deleteReminder: Error occurred:', error);
+      __DEV__ && console.error('[ERROR] eventReminderOperations.deleteReminder: Error occurred:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to delete event reminder',
