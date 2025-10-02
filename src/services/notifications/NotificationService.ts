@@ -357,6 +357,54 @@ export class NotificationService {
   }
 
   /**
+   * Cancel all notifications for a specific license
+   */
+  static async cancelLicenseNotifications(licenseId: number): Promise<void> {
+    try {
+      const allNotifications = await Notifications.getAllScheduledNotificationsAsync();
+
+      // Filter notifications for this license
+      const licenseNotifs = allNotifications.filter(n =>
+        n.content.data?.type === 'license_renewal' &&
+        n.content.data?.licenseId === licenseId
+      );
+
+      // Cancel each notification
+      for (const notif of licenseNotifs) {
+        await Notifications.cancelScheduledNotificationAsync(notif.identifier);
+      }
+
+      __DEV__ && console.log(`[INFO] Cancelled ${licenseNotifs.length} notifications for license ${licenseId}`);
+    } catch (error) {
+      __DEV__ && console.error('[ERROR] NotificationService: Failed to cancel license notifications:', error);
+    }
+  }
+
+  /**
+   * Cancel notification for a specific event reminder
+   */
+  static async cancelEventNotification(reminderId: number): Promise<void> {
+    try {
+      const allNotifications = await Notifications.getAllScheduledNotificationsAsync();
+
+      // Filter notifications for this event
+      const eventNotifs = allNotifications.filter(n =>
+        n.content.data?.type === 'cme_event' &&
+        n.content.data?.reminderId === reminderId
+      );
+
+      // Cancel each notification
+      for (const notif of eventNotifs) {
+        await Notifications.cancelScheduledNotificationAsync(notif.identifier);
+      }
+
+      __DEV__ && console.log(`[INFO] Cancelled ${eventNotifs.length} notifications for reminder ${reminderId}`);
+    } catch (error) {
+      __DEV__ && console.error('[ERROR] NotificationService: Failed to cancel event notifications:', error);
+    }
+  }
+
+  /**
    * Get category identifier for notification type
    */
   private static getCategoryForType(type: NotificationType): string {

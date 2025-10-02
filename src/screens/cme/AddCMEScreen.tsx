@@ -469,7 +469,29 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
         {
           text: 'Remove',
           style: 'destructive',
-          onPress: () => {
+          onPress: async () => {
+            const certPath = formData.certificatePath;
+
+            // Delete from filesystem and database
+            if (certPath) {
+              try {
+                // Delete physical file
+                await FileSystem.deleteAsync(certPath, { idempotent: true });
+
+                // Find and delete from certificates table
+                const certificates = await databaseOperations.certificates.getAllCertificates();
+                const cert = certificates.data?.find(c => c.filePath === certPath);
+                if (cert) {
+                  await databaseOperations.certificates.deleteCertificate(cert.id);
+                  // Refresh certificates in context
+                  await refreshCertificates();
+                }
+              } catch (error) {
+                __DEV__ && console.error('[ERROR] Error deleting certificate:', error);
+                // Continue anyway - worst case is orphaned file
+              }
+            }
+
             setFormData(prev => ({
               ...prev,
               certificatePath: undefined,

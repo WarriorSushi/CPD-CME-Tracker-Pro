@@ -776,9 +776,20 @@ export const licenseOperations = {
   deleteLicense: async (id: number): Promise<DatabaseOperationResult> => {
     try {
       const db = await getDatabase();
-      
+
+      // Get license before deletion to cancel notifications
+      const license = await getFirstSafe<LicenseRenewal>(db,
+        'SELECT * FROM license_renewals WHERE id = ? AND user_id = 1', [id]);
+
+      // Delete from database
       await db.runAsync('DELETE FROM license_renewals WHERE id = ? AND user_id = 1', [id]);
-      
+
+      // Cancel all associated notifications
+      if (license) {
+        const { NotificationService } = await import('../notifications/NotificationService');
+        await NotificationService.cancelLicenseNotifications(license.id);
+      }
+
       return { success: true };
     } catch (error) {
       return {
@@ -1092,16 +1103,26 @@ export const eventReminderOperations = {
   deleteReminder: async (id: number): Promise<DatabaseOperationResult> => {
     return dbMutex.runDatabaseWrite('deleteReminder', async () => {
       try {
-
         const db = await getDatabase();
-        
+
+        // Get reminder before deletion to cancel notification
+        const reminder = await getFirstSafe<CMEEventReminder>(db,
+          'SELECT * FROM cme_event_reminders WHERE id = ? AND user_id = 1', [id]);
+
+        // Delete from database
         await runSafe(db, `
-          DELETE FROM cme_event_reminders 
+          DELETE FROM cme_event_reminders
           WHERE id = ? AND user_id = 1
         `, [id]);
 
+        // Cancel associated notification
+        if (reminder) {
+          const { NotificationService } = await import('../notifications/NotificationService');
+          await NotificationService.cancelEventNotification(reminder.id);
+        }
+
         return { success: true };
-        
+
       } catch (error) {
       __DEV__ && console.error('[ERROR] eventReminderOperations.deleteReminder: Error occurred:', error);
         return {

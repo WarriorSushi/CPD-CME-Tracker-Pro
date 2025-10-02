@@ -231,10 +231,18 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
           text: 'CME Entries',
           onPress: async () => {
             setIsExporting(true);
-            const success = await exportCMEToCSV(recentCMEEntries, user);
+
+            // Load ALL entries for export, not just recent 10
+            const allEntriesResult = await databaseOperations.cme.getAllEntries();
+            const allEntries = allEntriesResult.success && allEntriesResult.data
+              ? allEntriesResult.data
+              : [];
+
+            const success = await exportCMEToCSV(allEntries, user);
             setIsExporting(false);
+
             if (success) {
-              Alert.alert('Success', 'CME entries exported successfully!');
+              Alert.alert('Success', `${allEntries.length} CME entries exported successfully!`);
             } else {
               Alert.alert('Error', 'Failed to export CME entries.');
             }
@@ -244,8 +252,16 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
           text: 'Summary Report',
           onPress: async () => {
             setIsExporting(true);
-            const success = await generateSummaryReport(user, recentCMEEntries, licenses);
+
+            // Load ALL entries for comprehensive report
+            const allEntriesResult = await databaseOperations.cme.getAllEntries();
+            const allEntries = allEntriesResult.success && allEntriesResult.data
+              ? allEntriesResult.data
+              : [];
+
+            const success = await generateSummaryReport(user, allEntries, licenses);
             setIsExporting(false);
+
             if (success) {
               Alert.alert('Success', 'Summary report generated successfully!');
             } else {
