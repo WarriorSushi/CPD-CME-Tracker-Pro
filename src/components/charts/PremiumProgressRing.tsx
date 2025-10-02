@@ -27,13 +27,16 @@ export const PremiumProgressRing: React.FC<PremiumProgressRingProps> = ({
   size = 160,
   strokeWidth = 12,
   progress,
-  color = theme.colors.primary,
-  backgroundColor = theme.colors.gray.light,
+  color,
+  backgroundColor,
   duration = 1500,
   children,
   showGlow = true,
   pulseOnComplete = true,
 }) => {
+  // Use theme colors as defaults, evaluated inside component
+  const ringColor = color || theme.colors.primary;
+  const ringBackgroundColor = backgroundColor || theme.colors.gray.light;
   const animatedProgress = useSharedValue(0);
   const scaleValue = useSharedValue(1);
   const glowOpacity = useSharedValue(0);
@@ -103,7 +106,7 @@ export const PremiumProgressRing: React.FC<PremiumProgressRingProps> = ({
           ]}
         >
           <LinearGradient
-            colors={[color + '30', color + '10', 'transparent']}
+            colors={[ringColor + '30', ringColor + '10', 'transparent']}
             style={{
               width: '100%',
               height: '100%',
@@ -124,7 +127,7 @@ export const PremiumProgressRing: React.FC<PremiumProgressRingProps> = ({
               height: size,
               borderRadius: size / 2,
               borderWidth: strokeWidth,
-              borderColor: backgroundColor,
+              borderColor: ringBackgroundColor,
             },
           ]}
         />
@@ -139,7 +142,7 @@ export const PremiumProgressRing: React.FC<PremiumProgressRingProps> = ({
               borderRadius: (size - strokeWidth + 2) / 2,
               borderWidth: strokeWidth,
               borderColor: 'transparent',
-              borderTopColor: color,
+              borderTopColor: ringColor,
               transform: [
                 { rotate: '-90deg' },
                 { 
@@ -155,7 +158,7 @@ export const PremiumProgressRing: React.FC<PremiumProgressRingProps> = ({
       <View style={styles.content}>
         {children || (
           <View style={styles.defaultContent}>
-            <Text style={[styles.percentageText, { color }]}>{percentage}%</Text>
+            <Text style={[styles.percentageText, { color: ringColor }]}>{percentage}%</Text>
             {progress >= 0.99 && (
               <Text style={styles.completeText}>Complete!</Text>
             )}

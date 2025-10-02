@@ -50,24 +50,24 @@ export const AppNavigator: React.FC = () => {
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: '#FAFBFC', // theme.colors.background - hardcoded to avoid load-time issues
   },
   loadingContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing[6],
+    paddingHorizontal: 24, // theme.spacing[6]
   },
   loadingTitle: {
-    fontSize: theme.typography.fontSize.xl,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text.primary,
-    marginTop: theme.spacing[4],
-    marginBottom: theme.spacing[2],
+    fontSize: 20, // theme.typography.fontSize.xl
+    fontWeight: '700', // theme.typography.fontWeight.bold
+    color: '#111827', // theme.colors.text.primary
+    marginTop: 16, // theme.spacing[4]
+    marginBottom: 8, // theme.spacing[2]
   },
   loadingSubtitle: {
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.text.secondary,
+    fontSize: 16, // theme.typography.fontSize.base
+    color: '#6B7280', // theme.colors.text.secondary
     textAlign: 'center',
     fontStyle: 'italic',
   },

@@ -17,9 +17,11 @@ interface LoadingSpinnerProps {
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 24,
-  color = theme.colors.primary,
+  color,
   thickness = 2,
 }) => {
+  // Use theme color as default, but evaluate inside component to avoid module load-time issues
+  const spinnerColor = color || theme.colors.primary;
   const rotation = useSharedValue(0);
 
   useEffect(() => {
@@ -50,8 +52,8 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
             width: size,
             height: size,
             borderWidth: thickness,
-            borderTopColor: color,
-            borderRightColor: color,
+            borderTopColor: spinnerColor,
+            borderRightColor: spinnerColor,
             borderBottomColor: 'transparent',
             borderLeftColor: 'transparent',
             borderRadius: size / 2,
@@ -69,7 +71,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   spinner: {
-    borderRadius: theme.borderRadius.xl,
+    // borderRadius is set inline in the component
   },
 });
 

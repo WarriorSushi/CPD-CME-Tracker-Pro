@@ -34,15 +34,19 @@ export const ProgressCircle: React.FC<ProgressCircleProps> = ({
   strokeWidth = 8,
   progress,
   showPercentage = true,
-  color = theme.colors.primary,
-  backgroundColor = theme.colors.gray[200],
+  color,
+  backgroundColor,
   duration = 1000,
   children,
   showGlow = true,
-  gradientColors = [theme.colors.primary, theme.colors.secondary],
+  gradientColors,
   pulseOnComplete = true,
   showShadow = true,
 }) => {
+  // Use theme colors as defaults, evaluated inside component
+  const circleColor = color || theme.colors.primary;
+  const circleBackgroundColor = backgroundColor || theme.colors.gray[200];
+  const circleGradientColors = gradientColors || [theme.colors.primary, theme.colors.secondary];
   const animatedProgress = useSharedValue(0);
   const pulseScale = useSharedValue(1);
   const glowOpacity = useSharedValue(0);
@@ -107,7 +111,7 @@ export const ProgressCircle: React.FC<ProgressCircleProps> = ({
               width: size + 20,
               height: size + 20,
               borderRadius: (size + 20) / 2,
-              backgroundColor: `${color}15`,
+              backgroundColor: `${circleColor}15`,
             },
             glowAnimatedStyle,
           ]}
@@ -122,8 +126,8 @@ export const ProgressCircle: React.FC<ProgressCircleProps> = ({
         <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
           <Defs>
             <LinearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <Stop offset="0%" stopColor={gradientColors[0]} />
-              <Stop offset="100%" stopColor={gradientColors[1]} />
+              <Stop offset="0%" stopColor={circleGradientColors[0]} />
+              <Stop offset="100%" stopColor={circleGradientColors[1]} />
             </LinearGradient>
           </Defs>
           
@@ -132,7 +136,7 @@ export const ProgressCircle: React.FC<ProgressCircleProps> = ({
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke={backgroundColor}
+            stroke={circleBackgroundColor}
             strokeWidth={strokeWidth}
             fill="none"
           />
@@ -156,7 +160,7 @@ export const ProgressCircle: React.FC<ProgressCircleProps> = ({
       <View style={styles.content}>
         {children || (showPercentage && (
           <View style={styles.percentageContainer}>
-            <Text style={[styles.percentageText, { color: color }]}>
+            <Text style={[styles.percentageText, { color: circleColor }]}>
               {percentage}%
             </Text>
             {progress >= 1 && (

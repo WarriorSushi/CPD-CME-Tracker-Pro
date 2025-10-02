@@ -28,7 +28,7 @@ export const StandardHeader: React.FC<StandardHeaderProps> = ({
   onBackPress,
   rightIcon,
   rightIconPress,
-  rightIconColor = theme.colors.background,
+  rightIconColor,
   rightIconSize = 24,
   rightText,
   rightTextPress,
@@ -39,6 +39,8 @@ export const StandardHeader: React.FC<StandardHeaderProps> = ({
   titleAlign = 'center',
   titleSize = 'xl',
 }) => {
+  // Use theme color as default, evaluated inside component
+  const iconColor = rightIconColor || theme.colors.background;
   const insets = useSafeAreaInsets();
 
   return (
@@ -93,10 +95,10 @@ export const StandardHeader: React.FC<StandardHeaderProps> = ({
               accessibilityLabel={`${rightIcon} button`}
               accessibilityRole="button"
             >
-              <SvgIcon 
+              <SvgIcon
                 name={rightIcon}
                 size={rightIconSize}
-                color={rightIconColor}
+                color={iconColor}
               />
             </TouchableOpacity>
           )}

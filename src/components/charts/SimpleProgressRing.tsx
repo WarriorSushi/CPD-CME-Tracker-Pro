@@ -24,11 +24,14 @@ export const SimpleProgressRing: React.FC<SimpleProgressRingProps> = ({
   size = 160,
   strokeWidth = 12,
   progress,
-  color = theme.colors.primary,
-  backgroundColor = theme.colors.gray.light,
+  color,
+  backgroundColor,
   duration = 1500,
   children,
 }) => {
+  // Use theme colors as defaults, evaluated inside component
+  const ringColor = color || theme.colors.primary;
+  const ringBackgroundColor = backgroundColor || theme.colors.gray.light;
   const scaleValue = useSharedValue(1);
   const glowOpacity = useSharedValue(0);
 
@@ -80,7 +83,7 @@ export const SimpleProgressRing: React.FC<SimpleProgressRingProps> = ({
               position: 'absolute',
               width: 4.5, // Slightly wider to reduce gaps
               height: strokeWidth,
-              backgroundColor: isActive ? color : backgroundColor,
+              backgroundColor: isActive ? ringColor : ringBackgroundColor,
               borderRadius: 2,
               transform: [
                 { rotate: `${angle}deg` },
@@ -112,7 +115,7 @@ export const SimpleProgressRing: React.FC<SimpleProgressRingProps> = ({
         ]}
       >
         <LinearGradient
-          colors={[color + '30', color + '10', 'transparent']}
+          colors={[ringColor + '30', ringColor + '10', 'transparent']}
           style={{
             width: '100%',
             height: '100%',
