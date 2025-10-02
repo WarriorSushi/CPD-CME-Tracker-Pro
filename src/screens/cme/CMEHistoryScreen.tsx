@@ -153,7 +153,8 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
   // Debug: log final filtered entries (should maintain database order)
 
   // Check if we need to show "Load More" button
-  const canLoadMore = !showAllEntries && recentCMEEntries.length > 0;
+  // Show if: not showing all entries AND there are recent entries displayed
+  const canLoadMore = !showAllEntries && filteredEntries.length > 0;
 
   // Calculate total credits for filtered entries
   const totalCredits = filteredEntries.reduce((sum, entry) => sum + entry.creditsEarned, 0);
