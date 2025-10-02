@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { PremiumButton } from '../../screens/onboarding/OnboardingComponents';
+import { PremiumButton } from '../common/OnboardingComponents';
 import { useSound } from '../../hooks/useSound';
 import { soundManager } from '../../services/sound/SoundManager';
 import { theme } from '../../constants/theme';
