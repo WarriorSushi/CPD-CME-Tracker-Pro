@@ -22,7 +22,7 @@ import { HapticsUtils } from '../../utils/HapticsUtils';
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
-export const Button: React.FC<ButtonProps> = ({
+export const Button = React.memo<ButtonProps>(({
   title,
   onPress,
   variant = 'primary',
@@ -250,7 +250,7 @@ export const Button: React.FC<ButtonProps> = ({
       )}
     </AnimatedTouchableOpacity>
   );
-};
+}));
 
 const styles = StyleSheet.create({
   button: {

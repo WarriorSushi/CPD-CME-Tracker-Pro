@@ -31,7 +31,7 @@ interface InputProps extends TextInputProps {
   soundVolume?: number; // Custom volume for this input
 }
 
-export const Input: React.FC<InputProps> = ({
+export const Input = React.memo<InputProps>(({
   label,
   error,
   helperText,
@@ -219,7 +219,7 @@ export const Input: React.FC<InputProps> = ({
       )}
     </View>
   );
-};
+}));
 
 const styles = StyleSheet.create({
   container: {

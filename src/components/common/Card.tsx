@@ -9,7 +9,7 @@ export interface CardProps {
   titleStyle?: TextStyle | TextStyle[];
 }
 
-export const Card: React.FC<CardProps> = ({
+export const Card = React.memo<CardProps>(({
   children,
   variant = 'base',
   style,
@@ -28,7 +28,7 @@ export const Card: React.FC<CardProps> = ({
       {children}
     </View>
   );
-};
+}));
 
 // Helper function to get variant-specific styles
 const getVariantStyles = (variant: CardProps['variant']) => {
