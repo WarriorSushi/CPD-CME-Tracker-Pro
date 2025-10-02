@@ -155,6 +155,17 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
       return;
     }
 
+    // Additional validation: expiration date must be in the future
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const expDateOnly = new Date(expirationDate);
+    expDateOnly.setHours(0, 0, 0, 0);
+
+    if (expDateOnly <= today) {
+      Alert.alert('Invalid Date', 'License expiration date must be in the future.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {

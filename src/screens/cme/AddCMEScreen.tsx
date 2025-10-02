@@ -547,9 +547,12 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       newErrors.creditsEarned = `${creditUnit} earned is required`;
     } else {
       const credits = parseFloat(formData.creditsEarned);
+      const creditUnit = user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits';
+
       if (isNaN(credits) || credits <= 0) {
-        const creditUnit = user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits';
         newErrors.creditsEarned = `${creditUnit} must be a positive number`;
+      } else if (credits > 500) {
+        newErrors.creditsEarned = `${creditUnit} cannot exceed 500`;
       }
     }
 
@@ -661,6 +664,8 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
         const credits = parseFloat(value);
         if (isNaN(credits) || credits <= 0) {
           newErrors.creditsEarned = 'Credits must be a positive number';
+        } else if (credits > 500) {
+          newErrors.creditsEarned = 'Credits cannot exceed 500';
         } else if (credits > 100) {
           newErrors.creditsEarned = 'Credits seem unusually high. Please verify.';
         }

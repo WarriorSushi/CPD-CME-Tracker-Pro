@@ -632,19 +632,20 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       if (notificationRefreshTimeoutRef.current) {
         clearTimeout(notificationRefreshTimeoutRef.current);
       }
-      
+
       // Set new timeout with longer debounce for better performance
       notificationRefreshTimeoutRef.current = setTimeout(() => {
         refreshNotifications();
       }, 2000); // Increased debounce to 2 seconds
-      
+
       return () => {
         if (notificationRefreshTimeoutRef.current) {
           clearTimeout(notificationRefreshTimeoutRef.current);
         }
       };
     }
-  }, [user, licenses, eventReminders, totalCredits, refreshNotifications, isInitializing]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, licenses, eventReminders, totalCredits, isInitializing]);
 
   // Smart initial data loading - prioritize essential data
   // Use ref to prevent double execution in React 18 StrictMode
