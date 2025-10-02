@@ -18,7 +18,7 @@ import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { StandardHeader } from '../../components/common/StandardHeader';
-import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../onboarding/OnboardingComponents';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../../components/common/OnboardingComponents';
 import { ModernDatePicker } from '../../components/common/ModernDatePicker';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';

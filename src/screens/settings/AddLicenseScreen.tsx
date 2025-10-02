@@ -15,7 +15,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { Card, Button, Input, LoadingSpinner, StandardHeader } from '../../components';
-import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../onboarding/OnboardingComponents';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../../components/common/OnboardingComponents';
 import { ModernDatePicker } from '../../components/common/ModernDatePicker';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';

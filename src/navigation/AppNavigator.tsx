@@ -6,7 +6,7 @@ import { MainTabNavigator } from './MainTabNavigator';
 import { useOnboardingContext } from '../contexts/OnboardingContext';
 import { useAppContext } from '../contexts/AppContext';
 import { LoadingSpinner } from '../components';
-import { AnimatedGradientBackground } from '../screens/onboarding/OnboardingComponents';
+import { AnimatedGradientBackground } from '../components/common/OnboardingComponents';
 import { useNavigationSounds } from '../hooks/useNavigationSounds';
 import { theme } from '../constants/theme';
 

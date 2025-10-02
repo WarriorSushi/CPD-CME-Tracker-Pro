@@ -7,7 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { Card, Button, LoadingSpinner, SvgIcon, StandardHeader, LoadingState, ErrorBoundary } from '../../components';
 import { SimpleProgressRing } from '../../components/charts/SimpleProgressRing';
-import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../onboarding/OnboardingComponents';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../../components/common/OnboardingComponents';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { MainTabParamList } from '../../types/navigation';

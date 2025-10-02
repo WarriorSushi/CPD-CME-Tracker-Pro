@@ -14,7 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
 
 import { StandardHeader } from '../../components';
-import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../onboarding/OnboardingComponents';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../../components/common/OnboardingComponents';
 import { theme } from '../../constants/theme';
 import { soundManager } from '../../services/sound/SoundManager';
 import { useSound } from '../../hooks/useSound';

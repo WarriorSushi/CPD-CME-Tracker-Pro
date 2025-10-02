@@ -20,7 +20,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { Camera } from 'expo-camera';
 
 import { Button, Card, Input, LoadingSpinner, DatePicker, StandardHeader } from '../../components';
-import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../onboarding/OnboardingComponents';
+import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../../components/common/OnboardingComponents';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { MainTabParamList } from '../../types/navigation';
