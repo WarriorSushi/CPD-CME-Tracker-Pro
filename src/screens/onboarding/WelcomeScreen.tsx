@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Animated, Dimensions, Image, ScrollView } from 
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { SvgIcon } from '../../components/common/SvgIcon';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { AnimatedGradientBackground, PremiumButton, PremiumCard } from './OnboardingComponents';
@@ -155,7 +156,7 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                 >
-                  <Text style={styles.featureIcon}>📊</Text>
+                  <SvgIcon name="chart" size={32} color="#FFFFFF" />
                 </LinearGradient>
               </View>
               <View style={styles.featureContent}>

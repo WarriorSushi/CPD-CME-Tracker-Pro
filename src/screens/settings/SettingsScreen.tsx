@@ -360,7 +360,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
               Alert.alert('Reminder Setup', 'License reminder notifications will be available in a future update.');
             }}
           >
-            <Text style={styles.remindButtonText}>🔔 Remind Me</Text>
+            <Text style={styles.remindButtonText}>Remind Me</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 

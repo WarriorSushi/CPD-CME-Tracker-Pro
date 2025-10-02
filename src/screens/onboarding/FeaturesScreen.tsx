@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card } from '../../components';
+import { SvgIcon } from '../../components/common/SvgIcon';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
 
@@ -32,25 +33,25 @@ export const FeaturesScreen: React.FC<Props> = ({ navigation }) => {
 
         <View style={styles.featuresGrid}>
           <Card style={styles.featureCard}>
-            <Text style={styles.featureIcon}>📊</Text>
+            <SvgIcon name="chart" size={32} color={theme.colors.primary} />
             <Text style={styles.featureTitle}>Track Progress</Text>
             <Text style={styles.featureDescription}>Visual progress tracking</Text>
           </Card>
 
           <Card style={styles.featureCard}>
-            <Text style={styles.featureIcon}>📷</Text>
+            <SvgIcon name="camera" size={32} color={theme.colors.primary} />
             <Text style={styles.featureTitle}>Smart Scanner</Text>
             <Text style={styles.featureDescription}>Auto-extract certificate data</Text>
           </Card>
 
           <Card style={styles.featureCard}>
-            <Text style={styles.featureIcon}>🗂️</Text>
+            <SvgIcon name="vault" size={32} color={theme.colors.primary} />
             <Text style={styles.featureTitle}>Digital Vault</Text>
             <Text style={styles.featureDescription}>Store certificates securely</Text>
           </Card>
 
           <Card style={styles.featureCard}>
-            <Text style={styles.featureIcon}>⏰</Text>
+            <SvgIcon name="clock" size={32} color={theme.colors.primary} />
             <Text style={styles.featureTitle}>Smart Reminders</Text>
             <Text style={styles.featureDescription}>Never miss renewals</Text>
           </Card>

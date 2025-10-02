@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Animated, ScrollView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { SvgIcon } from '../../components/common/SvgIcon';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { useOnboardingContext } from '../../contexts/OnboardingContext';
 import { AnimatedGradientBackground, PremiumButton, PremiumCard } from './OnboardingComponents';
@@ -15,25 +16,25 @@ interface Props {
 
 const NEXT_STEPS = [
   {
-    icon: '📝',
+    icon: 'pencil' as const,
     title: 'Start tracking your activities',
     description: 'Log your CME sessions, conferences, and learning',
     colors: ['#667EEA', '#764BA2'],
   },
   {
-    icon: '📸',
+    icon: 'camera' as const,
     title: 'Scan and store certificates',
     description: 'Upload completion certificates for secure storage',
     colors: ['#F093FB', '#F5576C'],
   },
   {
-    icon: '📅',
+    icon: 'calendar' as const,
     title: 'Set up license renewal reminders',
     description: 'Never miss important renewal deadlines',
     colors: ['#4FACFE', '#00F2FE'],
   },
   {
-    icon: '📊',
+    icon: 'chart' as const,
     title: 'Monitor your progress',
     description: 'Track completion toward your annual goals',
     colors: ['#43E97B', '#38F9D7'],
@@ -150,7 +151,7 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Text style={styles.celebrationEmoji}>🎉</Text>
+                <SvgIcon name="celebration" size={48} color="#FFFFFF" />
               </LinearGradient>
             </View>
             
@@ -216,7 +217,7 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
                           start={{ x: 0, y: 0 }}
                           end={{ x: 1, y: 1 }}
                         >
-                          <Text style={styles.stepEmoji}>{step.icon}</Text>
+                          <SvgIcon name={step.icon} size={32} color="#FFFFFF" />
                         </LinearGradient>
                       </View>
                       <View style={styles.stepTextContent}>

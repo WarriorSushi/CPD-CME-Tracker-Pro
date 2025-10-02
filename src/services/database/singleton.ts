@@ -1,6 +1,6 @@
 // True singleton database - opens once per app lifetime, never closes
 import * as SQLite from 'expo-sqlite';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { setupDatabase } from './schema';
 import { testDatabaseHealthSafe } from '../../utils/DatabaseUtils';
 

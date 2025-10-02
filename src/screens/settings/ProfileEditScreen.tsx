@@ -13,7 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 import { Card, Button, Input, LoadingSpinner, StandardHeader, SvgIcon } from '../../components';
 import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../onboarding/OnboardingComponents';

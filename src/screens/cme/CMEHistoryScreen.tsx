@@ -280,7 +280,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
               style={styles.certificateThumbnail}
               resizeMode="cover"
             />
-            <Text style={styles.certificateLabel}>📄</Text>
+            <SvgIcon name="document" size={16} color="#FFFFFF" style={styles.certificateIcon} />
           </TouchableOpacity>
         )}
         

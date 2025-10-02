@@ -213,11 +213,11 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
       case 'on_track':
         return <SvgIcon name="checkmark" size={16} color={color} />;
       case 'behind':
-        return <Text style={{ fontSize: 16 }}>⚠️</Text>;
+        return <SvgIcon name="warning" size={16} color={color} />;
       case 'overdue':
-        return <Text style={{ fontSize: 16 }}>🚨</Text>;
+        return <SvgIcon name="warning" size={16} color={color} />;
       default:
-        return <Text style={{ fontSize: 16 }}>🎯</Text>;
+        return <SvgIcon name="target" size={16} color={color} />;
     }
   };
 
@@ -278,7 +278,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
       await playSuccess();
       Alert.alert(
-        'Reminders Set! 🔔',
+        'Reminders Set!',
         `You'll receive notifications for ${license.licenseType} renewal:\n\n• 90 days before\n• 60 days before\n• 30 days before\n• 14 days before\n• 7 days before\n• 1 day before\n\nYou can customize these in Settings > Notifications.`,
         [{ text: 'Got it!', style: 'default' }]
       );
@@ -328,7 +328,10 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   if (error && !user) {
     return (
       <View style={[styles.container, styles.centerContent]}>
-        <Text style={styles.errorText}>⚠️ {error}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <SvgIcon name="warning" size={20} color="#EF4444" />
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
         <Button
           title="Retry"
           onPress={() => {
@@ -663,7 +666,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             ]}>
               <View style={styles.urgentWarningHeader}>
                 <View style={styles.urgentWarningIcon}>
-                  <Text style={styles.urgentWarningEmoji}>⚠️</Text>
+                  <SvgIcon name="warning" size={24} color="#FFF" />
                 </View>
                 <View style={styles.urgentWarningTitleContainer}>
                   <Text style={styles.urgentWarningTitle}>License Renewal Required</Text>
@@ -784,20 +787,20 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 
                 let statusColor = theme.colors.primary;
                 let statusText = 'Upcoming';
-                let statusIcon = '📅';
+                let statusIcon: JSX.Element = <SvgIcon name="calendar" size={16} color={statusColor} />;
 
                 if (daysUntil < 0) {
                   statusColor = theme.colors.gray.medium;
                   statusText = 'Past';
-                  statusIcon = '📋';
+                  statusIcon = <SvgIcon name="clipboard" size={16} color={statusColor} />;
                 } else if (daysUntil === 0) {
                   statusColor = theme.colors.error;
                   statusText = 'Today';
-                  statusIcon = '🔥';
+                  statusIcon = <SvgIcon name="fire" size={16} color={statusColor} />;
                 } else if (daysUntil <= 7) {
                   statusColor = theme.colors.warning;
                   statusText = `${daysUntil} days`;
-                  statusIcon = '⏰';
+                  statusIcon = <SvgIcon name="clock" size={16} color={statusColor} />;
                 } else {
                   statusText = `${daysUntil} days`;
                 }
@@ -924,15 +927,15 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 if (daysUntil < 0) {
                   statusColor = theme.colors.error;
                   statusText = 'Expired';
-                  statusIcon = <Text style={{ fontSize: 16 }}>🚨</Text>;
+                  statusIcon = <SvgIcon name="alert" size={20} color={theme.colors.error} />;
                 } else if (daysUntil <= 30) {
                   statusColor = theme.colors.error;
                   statusText = `${daysUntil} days left`;
-                  statusIcon = <Text style={{ fontSize: 16 }}>⚠️</Text>;
+                  statusIcon = <SvgIcon name="warning" size={20} color={theme.colors.error} />;
                 } else if (daysUntil <= 90) {
                   statusColor = theme.colors.warning;
                   statusText = `${daysUntil} days left`;
-                  statusIcon = <Text style={{ fontSize: 16 }}>⏰</Text>;
+                  statusIcon = <SvgIcon name="clock" size={20} color={theme.colors.warning} />;
                 } else {
                   statusText = `${daysUntil} days left`;
                 }

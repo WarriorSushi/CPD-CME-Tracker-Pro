@@ -160,7 +160,7 @@ export const ProgressCircle: React.FC<ProgressCircleProps> = ({
               {percentage}%
             </Text>
             {progress >= 1 && (
-              <Text style={styles.completeText}>Complete! 🎉</Text>
+              <Text style={styles.completeText}>Complete!</Text>
             )}
           </View>
         ))}

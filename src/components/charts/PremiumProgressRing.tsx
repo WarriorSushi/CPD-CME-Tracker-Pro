@@ -157,7 +157,7 @@ export const PremiumProgressRing: React.FC<PremiumProgressRingProps> = ({
           <View style={styles.defaultContent}>
             <Text style={[styles.percentageText, { color }]}>{percentage}%</Text>
             {progress >= 0.99 && (
-              <Text style={styles.completeText}>Complete! 🎉</Text>
+              <Text style={styles.completeText}>Complete!</Text>
             )}
           </View>
         )}

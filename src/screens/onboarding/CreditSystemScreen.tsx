@@ -4,6 +4,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ProgressIndicator } from '../../components';
+import { SvgIcon } from '../../components/common/SvgIcon';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { CreditSystem } from '../../types';
 import { userOperations } from '../../services/database';
@@ -179,7 +180,7 @@ export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Text style={styles.headerEmoji}>📊</Text>
+                <SvgIcon name="chart" size={40} color="#FFFFFF" />
               </LinearGradient>
             </View>
             <Text style={styles.title}>Choose Your Credit System</Text>

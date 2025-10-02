@@ -15,7 +15,7 @@ import { RouteProp } from '@react-navigation/native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as DocumentPicker from 'expo-document-picker';
 import { Camera } from 'expo-camera';
 
@@ -757,7 +757,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
 
           {/* Row 5: Certificate (Optional) - Merged into main form */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.label}>📄 Certificate (Optional)</Text>
+            <Text style={styles.label}>Certificate (Optional)</Text>
             
             {formData.certificatePath ? (
               // Show certificate preview - compact
