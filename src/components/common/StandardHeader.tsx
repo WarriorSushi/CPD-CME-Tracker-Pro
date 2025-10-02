@@ -135,8 +135,8 @@ const styles = StyleSheet.create({
     // backgroundColor removed - using LinearGradient
     paddingHorizontal: theme.spacing[4],
     paddingBottom: theme.spacing[2],
-    borderBottomLeftRadius: theme.spacing[3],
-    borderBottomRightRadius: theme.spacing[3],
+    borderBottomLeftRadius: theme.borderRadius.base, // Standardized to 5px
+    borderBottomRightRadius: theme.borderRadius.base, // Standardized to 5px
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

@@ -106,7 +106,7 @@ export const CardTitle: React.FC<CardTitleProps> = ({
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: 12, // tokens.radius.card
+    borderRadius: theme.borderRadius.base, // Standardized to 5px
     padding: 16, // tokens.space[4]
   },
   title: {

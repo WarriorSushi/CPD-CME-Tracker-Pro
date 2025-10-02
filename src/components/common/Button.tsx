@@ -154,7 +154,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   const getBaseStyle = (): ViewStyle => {
     const baseStyle: ViewStyle = {
-      borderRadius: theme.borderRadius.small,
+      borderRadius: theme.borderRadius.base, // Standardized to 5px
       alignItems: 'center',
       justifyContent: 'center',
       minHeight: 48,
