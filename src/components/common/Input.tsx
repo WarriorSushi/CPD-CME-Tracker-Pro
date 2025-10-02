@@ -96,29 +96,33 @@ export const Input = React.memo<InputProps>(({
     });
   }, [error]);
 
-  // Auto-expansion logic for multiline inputs
+  // Optimized auto-expansion using shared values for better performance
+  const animatedHeight = useSharedValue<number | null>(null);
+
+  // Memoize calculations to avoid recalculating on every render
+  const verticalPadding = theme.spacing[3] * 2;
+  const lineHeight = theme.typography.fontSize.base * theme.typography.lineHeight.normal;
+  const minContentHeight = lineHeight * minLines;
+  const maxContentHeight = lineHeight * maxLines;
+
   const handleContentSizeChange = (event: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) => {
     if (!autoExpand) return;
-    
+
     const { height } = event.nativeEvent.contentSize;
-    const verticalPadding = theme.spacing[3] * 2; // Top + bottom container padding
-    const lineHeight = theme.typography.fontSize.base * theme.typography.lineHeight.normal;
-    
-    // Calculate boundaries
-    const minContentHeight = lineHeight * minLines;
-    const maxContentHeight = lineHeight * maxLines;
-    
-    // Constrain content height to boundaries
+
+    // Constrain content height to boundaries (single calculation)
     const constrainedContentHeight = Math.max(
-      minContentHeight, 
+      minContentHeight,
       Math.min(height, maxContentHeight)
     );
-    
-    // Calculate total container height
+
     const newHeight = constrainedContentHeight + verticalPadding;
-    
-    // Only update if height changed significantly
-    if (Math.abs(newHeight - (inputHeight || 0)) > 2) {
+
+    // Use animated value for smooth transitions
+    if (animatedHeight.value === null || Math.abs(newHeight - animatedHeight.value) > 2) {
+      animatedHeight.value = withTiming(newHeight, {
+        duration: 150, // Smooth but quick animation
+      });
       setInputHeight(newHeight);
     }
   };
