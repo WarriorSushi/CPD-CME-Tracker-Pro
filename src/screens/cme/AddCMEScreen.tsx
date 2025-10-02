@@ -338,10 +338,15 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       }
 
       // Update form data with certificate path
-      setFormData(prev => ({
-        ...prev,
+      const updatedFormData = {
+        ...formData,
         certificatePath: newFilePath,
-      }));
+      };
+      setFormData(updatedFormData);
+
+      // Update initialFormData to prevent false unsaved changes warning
+      // Certificate is already saved to vault, so this is the new baseline
+      initialFormData.current = updatedFormData;
 
       Alert.alert('Success', 'Certificate added to entry and saved to vault!');
 
@@ -447,10 +452,14 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       }
 
       // Update form data with certificate path
-      setFormData(prev => ({
-        ...prev,
+      const updatedFormData = {
+        ...formData,
         certificatePath: newFilePath,
-      }));
+      };
+      setFormData(updatedFormData);
+
+      // Update initialFormData to prevent false unsaved changes warning
+      initialFormData.current = updatedFormData;
 
       Alert.alert('Success', 'Document added to entry and saved to vault!');
 
@@ -1062,7 +1071,8 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing[2],
     paddingHorizontal: theme.spacing[3],
     borderRadius: 5,
-    minWidth: 60,
+    minWidth: 70,
+    minHeight: 44, // Accessibility: minimum touch target size
     // Button pressing effect - unpressed state (elevated)
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },

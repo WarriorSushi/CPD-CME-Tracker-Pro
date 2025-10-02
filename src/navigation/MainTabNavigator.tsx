@@ -368,6 +368,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingTop: 8,
     paddingBottom: 4,
+    minHeight: 56, // Accessibility: minimum touch target (standard tab bar height)
   },
   tabButtonPressed: {
     opacity: 0.7,
