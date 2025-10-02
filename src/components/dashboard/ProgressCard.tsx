@@ -116,7 +116,7 @@ export const ProgressCard: React.FC<ProgressCardProps> = ({
           />
         </View>
       </PremiumCard>
-    </Animated.View>
+    </View>
   );
 };
 
