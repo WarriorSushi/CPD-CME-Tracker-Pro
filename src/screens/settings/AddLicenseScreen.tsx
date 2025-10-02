@@ -64,11 +64,13 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
     expirationDate: expirationDate.toISOString(),
   });
 
+  const [wasSaved, setWasSaved] = React.useState(false);
   const hasUnsavedChanges =
-    licenseType !== initialFormData.current.licenseType ||
+    !wasSaved &&
+    (licenseType !== initialFormData.current.licenseType ||
     issuingAuthority !== initialFormData.current.issuingAuthority ||
     licenseNumber !== initialFormData.current.licenseNumber ||
-    expirationDate.toISOString() !== initialFormData.current.expirationDate;
+    expirationDate.toISOString() !== initialFormData.current.expirationDate);
 
   // Warn user about unsaved changes
   useUnsavedChanges({
@@ -168,6 +170,7 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
         const success = await updateLicense(editLicense.id, updateData);
 
         if (success) {
+          setWasSaved(true);
           Alert.alert(
             'Success',
             'License updated successfully!',
@@ -197,6 +200,7 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
         const success = await addLicense(licenseData);
 
         if (success) {
+          setWasSaved(true);
           Alert.alert(
             'Success',
             'License added successfully!',

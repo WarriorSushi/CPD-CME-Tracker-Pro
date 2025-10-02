@@ -101,7 +101,8 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
 
   // Track if form has unsaved changes
   const initialFormData = useRef<FormData>(formData);
-  const hasUnsavedChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData.current);
+  const [wasSaved, setWasSaved] = useState(false);
+  const hasUnsavedChanges = !wasSaved && JSON.stringify(formData) !== JSON.stringify(initialFormData.current);
 
   // Warn user about unsaved changes
   useUnsavedChanges({
@@ -572,6 +573,9 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
           await playEntryAdd(); // Special sound for new entries
         }
         HapticsUtils.success();
+
+        // Mark as saved to prevent unsaved changes warning
+        setWasSaved(true);
 
         // Show success confirmation
         Alert.alert(

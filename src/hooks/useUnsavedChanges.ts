@@ -111,7 +111,21 @@ export function useUnsavedChanges({
         showAlert(() => {
           // Remove the listener and navigate
           navigation.removeListener('beforeRemove', beforeRemoveListener);
-          navigation.dispatch(e.data.action);
+          try {
+            if (e.data.action) {
+              navigation.dispatch(e.data.action);
+            } else {
+              navigation.goBack();
+            }
+          } catch (error) {
+            console.error('Navigation error:', error);
+            // Fallback to goBack if dispatch fails
+            try {
+              navigation.goBack();
+            } catch (backError) {
+              console.error('GoBack error:', backError);
+            }
+          }
         });
       };
 
@@ -138,7 +152,11 @@ export function useUnsavedChanges({
 
         // Show confirmation
         showAlert(() => {
-          navigation.goBack();
+          try {
+            navigation.goBack();
+          } catch (error) {
+            console.error('Hardware back navigation error:', error);
+          }
         });
 
         // Prevent default back behavior

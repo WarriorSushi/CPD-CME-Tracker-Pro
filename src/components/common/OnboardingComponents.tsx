@@ -391,7 +391,6 @@ const styles = StyleSheet.create({
   // Button styles - original border radius with grey overlay fix
   newPrimaryButton: {
     borderRadius: 16,
-    backgroundColor: '#FFFFFF',
     borderBottomWidth: 5,
     borderBottomColor: 'rgba(102, 126, 234, 0.3)',
     overflow: 'hidden',
