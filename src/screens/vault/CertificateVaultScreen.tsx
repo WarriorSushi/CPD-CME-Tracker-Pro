@@ -28,7 +28,7 @@ import { ThumbnailService } from '../../services/thumbnailService';
 import { databaseOperations } from '../../services/database';
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = (width - theme.spacing[5] * 3) / 2;
+const CARD_WIDTH = (width - 20 * 3) / 2; // theme.spacing[5] = 20px
 
 interface Props {
   navigation?: any; // We'll need navigation to go to AddCME screen
