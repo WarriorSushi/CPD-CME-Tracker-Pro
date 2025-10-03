@@ -20,7 +20,7 @@ export { AppProvider, useAppContext } from './AppContext';
  * AppProviders - Composes all context providers
  *
  * Wrap your app with this to get access to all contexts.
- * Contexts are ordered by dependency: User → CME → License → Certificate
+ * Contexts are ordered by dependency: User -> CME -> License -> Certificate
  */
 interface AppProvidersProps {
   children: ReactNode;

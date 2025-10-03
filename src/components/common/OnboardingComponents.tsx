@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSound } from '../../hooks/useSound';
+import { theme } from '../../constants/theme';
 
 const { width, height } = Dimensions.get('window');
 

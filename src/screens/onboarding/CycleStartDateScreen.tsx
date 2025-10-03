@@ -4,9 +4,11 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { DatePicker, ProgressIndicator } from '../../components';
+import { SvgIcon } from '../../components/common/SvgIcon';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { userOperations } from '../../services/database';
 import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../../components/common/OnboardingComponents';
+import { theme } from '../../constants/theme';
 
 type CycleStartDateScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'CycleStartDate'>;
 

@@ -50,7 +50,7 @@ export const PressableFX: React.FC<PressableFXProps> = ({
 
   const animatedStyle = useAnimatedStyle(() => {
     // Enhanced overtravel with bounce-back
-    const travelDistance = pressTranslateY * 1.2; // 1.2× overtravel
+    const travelDistance = pressTranslateY * 1.2; // 1.2x overtravel
     const translateY = interpolate(
       pressAnimation.value,
       [0, 1],

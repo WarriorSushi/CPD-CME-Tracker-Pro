@@ -4,12 +4,14 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ProgressIndicator } from '../../components';
+import { SvgIcon, IconName } from '../../components/common/SvgIcon';
 import { SvgIcon } from '../../components/common/SvgIcon';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { CreditSystem } from '../../types';
 import { userOperations } from '../../services/database';
 import { useAppContext } from '../../contexts/AppContext';
 import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../../components/common/OnboardingComponents';
+import { theme } from '../../constants/theme';
 
 type CreditSystemScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'CreditSystem'>;
 
@@ -21,42 +23,42 @@ const CREDIT_SYSTEMS: {
   value: CreditSystem; 
   title: string; 
   description: string;
-  icon: string;
+  icon: IconName;
   colors: string[];
 }[] = [
   { 
     value: 'CME', 
     title: 'CME Credits', 
     description: 'Continuing Medical Education for physicians and healthcare providers',
-    icon: '🩺',
+    icon: 'medical',
     colors: ['#667EEA', '#764BA2']
   },
   { 
     value: 'CPD', 
     title: 'CPD Points', 
     description: 'Continuing Professional Development for all healthcare professionals',
-    icon: '📚',
+    icon: 'book',
     colors: ['#F093FB', '#F5576C']
   },
   { 
     value: 'CE', 
     title: 'CE Units', 
     description: 'Continuing Education units for various healthcare disciplines',
-    icon: '🎓',
+    icon: 'graduation',
     colors: ['#4FACFE', '#00F2FE']
   },
   { 
     value: 'Hours', 
     title: 'Contact Hours', 
     description: 'Direct contact or learning hours for skill development',
-    icon: '⏱️',
+    icon: 'clock',
     colors: ['#43E97B', '#38F9D7']
   },
   { 
     value: 'Points', 
     title: 'Credit Points', 
     description: 'General professional credit points for career advancement',
-    icon: '⭐',
+    icon: 'target',
     colors: ['#FA709A', '#FEE140']
   },
 ];
@@ -226,7 +228,11 @@ export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
                       >
-                        <Text style={styles.optionIcon}>{system.icon}</Text>
+                        <SvgIcon
+                          name={system.icon}
+                          size={32}
+                          color={theme.colors.white}
+                        />
                       </LinearGradient>
                     </View>
                     <View style={styles.optionTextContent}>
@@ -374,9 +380,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  optionIcon: {
-    fontSize: 16,
   },
   optionTextContent: {
     flex: 1,

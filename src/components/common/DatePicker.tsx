@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView, StyleProp, ViewStyle } from 'react-native';
 import { theme } from '../../constants/theme';
+import { SvgIcon } from './SvgIcon';
 
 interface DatePickerProps {
   value: Date;
@@ -167,7 +168,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                 style={styles.navButton} 
                 onPress={() => navigateMonth('prev')}
               >
-                <Text style={styles.navButtonText}>‹</Text>
+                <SvgIcon name="chevron-left" size={16} color={theme.colors.gray[700]} />
               </TouchableOpacity>
               
               <View style={styles.monthYearContainer}>
@@ -179,7 +180,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                 style={styles.navButton} 
                 onPress={() => navigateMonth('next')}
               >
-                <Text style={styles.navButtonText}>›</Text>
+                <SvgIcon name="chevron-right" size={16} color={theme.colors.gray[700]} />
               </TouchableOpacity>
             </View>
 
@@ -318,11 +319,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: theme.borderRadius.full, // Circular button
     backgroundColor: theme.colors.gray.light,
-  },
-  navButtonText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: theme.colors.primary,
   },
   monthYearContainer: {
     alignItems: 'center',

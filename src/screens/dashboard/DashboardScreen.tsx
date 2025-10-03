@@ -238,7 +238,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
       await playSuccess();
       Alert.alert(
         'Reminders Set!',
-        `You'll receive notifications for ${license.licenseType} renewal:\n\n• 90 days before\n• 60 days before\n• 30 days before\n• 14 days before\n• 7 days before\n• 1 day before\n\nYou can customize these in Settings > Notifications.`,
+        `You'll receive notifications for ${license.licenseType} renewal:\n\n- 90 days before\n- 60 days before\n- 30 days before\n- 14 days before\n- 7 days before\n- 1 day before\n\nYou can customize these in Settings > Notifications.`,
         [{ text: 'Got it!', style: 'default' }]
       );
 

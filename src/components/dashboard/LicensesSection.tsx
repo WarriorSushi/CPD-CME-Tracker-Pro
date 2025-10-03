@@ -44,7 +44,7 @@ export const LicensesSection: React.FC<LicensesSectionProps> = ({
   const handleSetReminder = (license: any) => {
     Alert.alert(
       'Set Reminder',
-      `Would you like to set renewal reminders for ${license.licenseType}?\n\nRecommended reminder schedule:\n• 90 days before\n• 60 days before\n• 30 days before\n• 14 days before\n• 7 days before\n• 1 day before`,
+      `Would you like to set renewal reminders for ${license.licenseType}?\n\nRecommended reminder schedule:\n- 90 days before\n- 60 days before\n- 30 days before\n- 14 days before\n- 7 days before\n- 1 day before`,
       [
         { text: 'Later', style: 'cancel' },
         {

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, StyleProp, ViewStyle } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { theme } from '../../constants/theme';
+import { SvgIcon } from './SvgIcon';
 
 interface ModernDatePickerProps {
   value: Date;

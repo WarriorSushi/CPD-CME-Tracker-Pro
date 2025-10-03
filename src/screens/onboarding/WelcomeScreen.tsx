@@ -238,7 +238,7 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                 >
-                  <Text style={styles.featureIcon}>✨</Text>
+                  <SvgIcon name="celebration" size={24} color={theme.colors.primary} style={styles.featureIcon} />
                 </LinearGradient>
               </View>
               <View style={styles.featureContent}>

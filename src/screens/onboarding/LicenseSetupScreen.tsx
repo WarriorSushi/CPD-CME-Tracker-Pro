@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Card, ProgressIndicator } from '../../components';
+import { Button, Card, ProgressIndicator, SvgIcon } from '../../components';
 import { FloatingLicenseModal } from '../../components/onboarding/FloatingLicenseModal';
 import { theme } from '../../constants/theme';
 import { tokens } from '../../theme/tokens';
@@ -76,14 +76,14 @@ export const LicenseSetupScreen: React.FC<Props> = ({ navigation }) => {
             >
               <View style={styles.optionLeft}>
                 <View style={styles.iconContainer}>
-                  <Text style={styles.optionIcon}>🏅</Text>
+                  <SvgIcon name="trophy" size={28} color={theme.colors.white} />
                 </View>
                 <View style={styles.optionContent}>
                   <Text style={styles.optionTitle}>Add My Licenses</Text>
                   <Text style={styles.optionDescription}>Set up renewal tracking</Text>
                 </View>
               </View>
-              <Text style={styles.arrow}>›</Text>
+              <SvgIcon name="chevron-right" size={20} color={theme.colors.gray[500]} />
             </TouchableOpacity>
 
             <TouchableOpacity 
@@ -92,29 +92,29 @@ export const LicenseSetupScreen: React.FC<Props> = ({ navigation }) => {
             >
               <View style={styles.optionLeft}>
                 <View style={styles.iconContainer}>
-                  <Text style={styles.optionIcon}>⏭️</Text>
+                  <SvgIcon name="reminder" size={28} color={theme.colors.white} />
                 </View>
                 <View style={styles.optionContent}>
                   <Text style={styles.optionTitle}>Skip for Now</Text>
                   <Text style={styles.optionDescription}>Add later in settings</Text>
                 </View>
               </View>
-              <Text style={styles.arrow}>›</Text>
+              <SvgIcon name="chevron-right" size={20} color={theme.colors.gray[500]} />
             </TouchableOpacity>
           </View>
 
           <View style={styles.benefitsList}>
             <Text style={styles.benefitsTitle}>Why track licenses?</Text>
             <View style={styles.benefitItem}>
-              <Text style={styles.benefitIcon}>•</Text>
+              <SvgIcon name="checkmark" size={16} color={theme.colors.success} style={styles.benefitIcon} />
               <Text style={styles.benefitText}>Automatic renewal reminders</Text>
             </View>
             <View style={styles.benefitItem}>
-              <Text style={styles.benefitIcon}>•</Text>
+              <SvgIcon name="checkmark" size={16} color={theme.colors.success} style={styles.benefitIcon} />
               <Text style={styles.benefitText}>Track CE requirements per license</Text>
             </View>
             <View style={styles.benefitItem}>
-              <Text style={styles.benefitIcon}>•</Text>
+              <SvgIcon name="checkmark" size={16} color={theme.colors.success} style={styles.benefitIcon} />
               <Text style={styles.benefitText}>Never miss critical deadlines</Text>
             </View>
           </View>
@@ -214,16 +214,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   iconContainer: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: tokens.color.selectedBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: theme.spacing[2],
-  },
-  optionIcon: {
-    fontSize: 16,
   },
   optionContent: {
     flex: 1,
@@ -237,11 +234,6 @@ const styles = StyleSheet.create({
   optionDescription: {
     fontSize: 10,
     color: theme.colors.text.secondary,
-  },
-  arrow: {
-    fontSize: 24,
-    color: theme.colors.text.secondary,
-    fontWeight: theme.typography.fontWeight.bold,
   },
   benefitsList: {
     backgroundColor: theme.colors.surface,
@@ -262,8 +254,6 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[2],
   },
   benefitIcon: {
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.secondary,
     marginRight: theme.spacing[2],
     marginTop: 2,
   },

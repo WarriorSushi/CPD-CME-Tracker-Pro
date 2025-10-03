@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Card, Input, ProgressIndicator } from '../../components';
+import { Button, Card, Input, ProgressIndicator, SvgIcon } from '../../components';
 import { theme } from '../../constants/theme';
 import { OnboardingStackParamList } from '../../types/navigation';
 
@@ -104,7 +104,7 @@ export const CountryScreen: React.FC<Props> = ({ navigation }) => {
                       {country}
                     </Text>
                     {selectedCountry === country && (
-                      <Text style={styles.checkmark}>✓</Text>
+                      <SvgIcon name="checkmark" size={16} color={theme.colors.white} style={styles.checkmark} />
                     )}
                   </View>
                 </Card>
@@ -201,9 +201,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: theme.spacing[2],
     right: theme.spacing[2],
-    fontSize: 16,
-    color: theme.colors.primary,
-    fontWeight: theme.typography.fontWeight.bold,
   },
   actions: {
     padding: theme.spacing[5],

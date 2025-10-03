@@ -56,9 +56,9 @@ export class NotificationPermissions {
       Alert.alert(
         'Enable Notifications',
         'Stay on top of your CME requirements with timely reminders for:\n\n' +
-        '• Cycle ending deadlines\n' +
-        '• License renewal dates\n' +
-        '• Upcoming CME events\n\n' +
+        '- Cycle ending deadlines\n' +
+        '- License renewal dates\n' +
+        '- Upcoming CME events\n\n' +
         'You can always change this later in Settings.',
         [
           {

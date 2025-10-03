@@ -2,6 +2,7 @@ import React, { Component, ReactNode, ErrorInfo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { theme } from '../../constants/theme';
 import { HapticsUtils } from '../../utils/HapticsUtils';
+import { SvgIcon } from './SvgIcon';
 
 interface Props {
   children: ReactNode;

@@ -16,6 +16,7 @@ import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { LoadingSpinner } from '../common/LoadingSpinner';
 import { ModernDatePicker } from '../common/ModernDatePicker';
+import { SvgIcon } from '../common/SvgIcon';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { LicenseRenewal } from '../../types';
@@ -164,7 +165,7 @@ export const FloatingLicenseModal: React.FC<FloatingLicenseModalProps> = ({
               onPress={handleClose}
               disabled={isSubmitting}
             >
-              <Text style={styles.closeButtonText}>×</Text>
+            <SvgIcon name="close" size={20} color={theme.colors.gray[600]} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Add License</Text>
             <View style={styles.headerSpacer} />
@@ -301,12 +302,6 @@ const styles = StyleSheet.create({
   closeButton: {
     paddingVertical: theme.spacing[1],
     paddingHorizontal: theme.spacing[2],
-  },
-  closeButtonText: {
-    color: theme.colors.background,
-    fontSize: 28,
-    fontWeight: theme.typography.fontWeight.bold,
-    lineHeight: 28,
   },
   headerTitle: {
     color: theme.colors.background,

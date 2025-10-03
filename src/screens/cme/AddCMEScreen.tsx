@@ -19,7 +19,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as DocumentPicker from 'expo-document-picker';
 import { Camera } from 'expo-camera';
 
-import { Button, Card, Input, LoadingSpinner, DatePicker, StandardHeader } from '../../components';
+import { Button, Card, Input, LoadingSpinner, DatePicker, StandardHeader, SvgIcon } from '../../components';
 import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../../components/common/OnboardingComponents';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';

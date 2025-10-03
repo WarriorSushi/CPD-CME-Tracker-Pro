@@ -2,12 +2,13 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
+import { SvgIcon, IconName } from './SvgIcon';
 
 export interface BadgeLevel {
   id: string;
   name: string;
   description: string;
-  icon: string;
+  icon: IconName;
   colors: [string, string];
   requirement: number;
   type: 'credits' | 'streak' | 'milestone' | 'special';
@@ -28,7 +29,7 @@ export const CERTIFICATION_BADGES: BadgeLevel[] = [
     id: 'first_steps',
     name: 'First Steps',
     description: 'Complete your first CME activity',
-    icon: '🎯',
+    icon: 'target',
     colors: ['#4F46E5', '#7C3AED'],
     requirement: 1,
     type: 'credits'
@@ -37,7 +38,7 @@ export const CERTIFICATION_BADGES: BadgeLevel[] = [
     id: 'dedicated_learner',
     name: 'Dedicated Learner',
     description: 'Earn 25 CME credits',
-    icon: '📚',
+    icon: 'book',
     colors: ['#059669', '#10B981'],
     requirement: 25,
     type: 'credits'
@@ -46,7 +47,7 @@ export const CERTIFICATION_BADGES: BadgeLevel[] = [
     id: 'knowledge_seeker',
     name: 'Knowledge Seeker',
     description: 'Earn 50 CME credits',
-    icon: '🔍',
+    icon: 'search',
     colors: ['#DC2626', '#EF4444'],
     requirement: 50,
     type: 'credits'
@@ -55,7 +56,7 @@ export const CERTIFICATION_BADGES: BadgeLevel[] = [
     id: 'expert_practitioner',
     name: 'Expert Practitioner',
     description: 'Earn 100 CME credits',
-    icon: '⭐',
+    icon: 'trophy',
     colors: ['#D97706', '#F59E0B'],
     requirement: 100,
     type: 'credits'
@@ -64,7 +65,7 @@ export const CERTIFICATION_BADGES: BadgeLevel[] = [
     id: 'master_educator',
     name: 'Master Educator',
     description: 'Earn 200 CME credits',
-    icon: '👑',
+    icon: 'graduation',
     colors: ['#7C2D12', '#EA580C'],
     requirement: 200,
     type: 'credits'
@@ -75,7 +76,7 @@ export const CERTIFICATION_BADGES: BadgeLevel[] = [
     id: 'annual_achiever',
     name: 'Annual Achiever',
     description: 'Complete your annual requirement',
-    icon: '🏆',
+    icon: 'celebration',
     colors: ['#1E40AF', '#3B82F6'],
     requirement: 1,
     type: 'milestone'
@@ -84,7 +85,7 @@ export const CERTIFICATION_BADGES: BadgeLevel[] = [
     id: 'early_bird',
     name: 'Early Bird',
     description: 'Complete requirement 6 months early',
-    icon: '🐦',
+    icon: 'calendar',
     colors: ['#0D9488', '#14B8A6'],
     requirement: 1,
     type: 'milestone'
@@ -93,7 +94,7 @@ export const CERTIFICATION_BADGES: BadgeLevel[] = [
     id: 'overachiever',
     name: 'Overachiever',
     description: 'Complete 150% of requirement',
-    icon: '🚀',
+    icon: 'chart',
     colors: ['#BE185D', '#EC4899'],
     requirement: 1.5,
     type: 'milestone'
@@ -104,7 +105,7 @@ export const CERTIFICATION_BADGES: BadgeLevel[] = [
     id: 'consistent_learner',
     name: 'Consistent Learner',
     description: '7-day learning streak',
-    icon: '🔥',
+    icon: 'fire',
     colors: ['#DC2626', '#F87171'],
     requirement: 7,
     type: 'streak'
@@ -113,7 +114,7 @@ export const CERTIFICATION_BADGES: BadgeLevel[] = [
     id: 'learning_machine',
     name: 'Learning Machine',
     description: '30-day learning streak',
-    icon: '⚡',
+    icon: 'target',
     colors: ['#7C2D12', '#F97316'],
     requirement: 30,
     type: 'streak'
@@ -124,7 +125,7 @@ export const CERTIFICATION_BADGES: BadgeLevel[] = [
     id: 'category_explorer',
     name: 'Category Explorer',
     description: 'Complete activities in 5 different categories',
-    icon: '🧭',
+    icon: 'clipboard',
     colors: ['#581C87', '#8B5CF6'],
     requirement: 5,
     type: 'special'
@@ -133,7 +134,7 @@ export const CERTIFICATION_BADGES: BadgeLevel[] = [
     id: 'certificate_collector',
     name: 'Certificate Collector',
     description: 'Upload 10 certificates',
-    icon: '📋',
+    icon: 'document',
     colors: ['#166534', '#22C55E'],
     requirement: 10,
     type: 'special'
@@ -178,9 +179,11 @@ export const CertificationBadge: React.FC<CertificationBadgeProps> = ({
           )}
           
           {/* Badge Icon */}
-          <Text style={[styles.badgeIcon, sizeStyles.icon]}>
-            {earned ? badge.icon : '🔒'}
-          </Text>
+          <SvgIcon
+            name={earned ? badge.icon : 'lock'}
+            size={sizeStyles.iconSize}
+            color={earned ? theme.colors.white : theme.colors.gray[500]}
+          />
         </LinearGradient>
       </View>
 
@@ -238,7 +241,7 @@ const getSizeStyles = (size: 'small' | 'medium' | 'large') => {
       return {
         container: { maxWidth: 80 },
         badge: { width: 40, height: 40 },
-        icon: { fontSize: 16 },
+        iconSize: 18,
         name: { fontSize: 10 },
         description: { fontSize: 8 },
         progressRing: { width: 44, height: 44 },
@@ -250,7 +253,7 @@ const getSizeStyles = (size: 'small' | 'medium' | 'large') => {
       return {
         container: { maxWidth: 160 },
         badge: { width: 80, height: 80 },
-        icon: { fontSize: 32 },
+        iconSize: 32,
         name: { fontSize: 16 },
         description: { fontSize: 12 },
         progressRing: { width: 84, height: 84 },
@@ -262,7 +265,7 @@ const getSizeStyles = (size: 'small' | 'medium' | 'large') => {
       return {
         container: { maxWidth: 120 },
         badge: { width: 60, height: 60 },
-        icon: { fontSize: 24 },
+        iconSize: 24,
         name: { fontSize: 13 },
         description: { fontSize: 10 },
         progressRing: { width: 64, height: 64 },
@@ -306,9 +309,6 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 50,
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
     transformOrigin: '0 50%',
-  },
-  badgeIcon: {
-    textAlign: 'center',
   },
   badgeInfo: {
     alignItems: 'center',

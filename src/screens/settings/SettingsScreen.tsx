@@ -147,7 +147,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
   const handleResetCompleteApp = async () => {
     Alert.alert(
       'DANGER: Reset Complete App',
-      'This will permanently delete ALL your data including:\n\n• All CME entries\n• All certificates\n• All license information\n• All settings\n• User profile\n\nThis action CANNOT be undone!',
+      'This will permanently delete ALL your data including:\n\n- All CME entries\n- All certificates\n- All license information\n- All settings\n- User profile\n\nThis action CANNOT be undone!',
       [
         {
           text: 'Cancel',
@@ -465,7 +465,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
                   </Text>
                   <Text style={styles.profileRole}>
                     {user?.profession || 'Profession not set'}
-                    {user?.age && ` • ${user.age} years old`}
+                    {user?.age && ` - ${user.age} years old`}
                   </Text>
                 </View>
               </View>

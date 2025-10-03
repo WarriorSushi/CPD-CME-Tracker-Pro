@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
 
-import { StandardHeader } from '../../components';
+import { StandardHeader, SvgIcon } from '../../components';
 import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../../components/common/OnboardingComponents';
 import { theme } from '../../constants/theme';
 import { soundManager } from '../../services/sound/SoundManager';
@@ -330,12 +330,15 @@ export const SoundSettingsScreen: React.FC<Props> = ({ navigation }) => {
                       {sound.description}
                     </Text>
                   </View>
-                  <Text style={[
-                    styles.testButtonIcon,
-                    !isEnabled && styles.testButtonIconDisabled
-                  ]}>
-                    ▶️
-                  </Text>
+                  <SvgIcon
+                    name="play"
+                    size={18}
+                    color={isEnabled ? theme.colors.primary : theme.colors.text.disabled}
+                    style={[
+                      styles.testButtonIcon,
+                      !isEnabled && styles.testButtonIconDisabled
+                    ]}
+                  />
                 </TouchableOpacity>
               ))}
             </PremiumCard>
@@ -489,7 +492,6 @@ const styles = StyleSheet.create({
     color: theme.colors.text.disabled,
   },
   testButtonIcon: {
-    fontSize: 18,
     marginLeft: theme.spacing[2],
   },
   testButtonIconDisabled: {

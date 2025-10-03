@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Image } from 'react-native';
 import { PremiumCard } from '../common/OnboardingComponents';
+import { SvgIcon } from '../common/SvgIcon';
 import { theme } from '../../constants/theme';
 import { getCreditUnit } from '../../utils/creditTerminology';
 
@@ -60,7 +61,7 @@ export const RecentEntriesSection: React.FC<RecentEntriesSectionProps> = ({
         >
           <View style={styles.activityContent}>
             <TouchableOpacity
-              style={styles.activityIcon}
+              style={styles.activityIconWrapper}
               onPress={() => {
                 if (entry.certificatePath) {
                   onViewCertificate(entry.certificatePath);
@@ -75,7 +76,7 @@ export const RecentEntriesSection: React.FC<RecentEntriesSectionProps> = ({
                   resizeMode="cover"
                 />
               ) : (
-                <Text style={styles.activityEmoji}>📖</Text>
+                <SvgIcon name="book" size={24} color={theme.colors.primary} style={styles.activityIcon} />
               )}
             </TouchableOpacity>
             <View style={styles.activityDetails}>
@@ -132,7 +133,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
-  activityIcon: {
+  activityIconWrapper: {
     width: 56,
     height: 56,
     borderRadius: 8,
@@ -146,8 +147,8 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 8,
   },
-  activityEmoji: {
-    fontSize: 24,
+  activityIcon: {
+    marginRight: theme.spacing[3],
   },
   activityDetails: {
     flex: 1,

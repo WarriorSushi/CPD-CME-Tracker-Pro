@@ -66,6 +66,14 @@ const iconSources = {
   delete: `<svg viewBox="0 0 1024 1024" fill="currentColor">
     <path d="M352 192V95.936a32 32 0 0 1 32-32h256a32 32 0 0 1 32 32V192h256a32 32 0 1 1 0 64H96a32 32 0 0 1 0-64h256zm64 0h192v-64H416v64zM192 960a32 32 0 0 1-32-32V256h704v672a32 32 0 0 1-32 32H192zm224-192a32 32 0 0 0 32-32V416a32 32 0 0 0-64 0v320a32 32 0 0 0 32 32zm192 0a32 32 0 0 0 32-32V416a32 32 0 0 0-64 0v320a32 32 0 0 0 32 32z"/>
   </svg>`,
+
+  close: `<svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/>
+  </svg>`,
+
+  play: `<svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M8 5v14l11-7-11-7Z"/>
+  </svg>`,
   
   reminder: `<svg viewBox="0 0 24 24" fill="currentColor">
     <path d="M10,21H14A2,2 0 0,1 12,23A2,2 0 0,1 10,21M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M17,11A5,5 0 0,0 12,6A5,5 0 0,0 7,11V18H17V11Z"/>
@@ -214,6 +222,10 @@ const iconSources = {
 
   alert: `<svg viewBox="0 0 24 24" fill="currentColor">
     <path d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z"/>
+  </svg>`,
+
+  lock: `<svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12,1A5,5 0 0,1 17,6V9H18A2,2 0 0,1 20,11V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V11A2,2 0 0,1 6,9H7V6A5,5 0 0,1 12,1M12,3A3,3 0 0,0 9,6V9H15V6A3,3 0 0,0 12,3M12,13A2,2 0 0,0 10,15A2,2 0 0,0 11,16.73V19H13V16.73A2,2 0 0,0 14,15A2,2 0 0,0 12,13Z"/>
   </svg>`,
 
   fire: `<svg viewBox="0 0 24 24" fill="currentColor">

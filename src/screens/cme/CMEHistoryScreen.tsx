@@ -263,7 +263,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
             <Text style={styles.entryDate}>
               {new Date(item.dateAttended).toLocaleDateString()}
             </Text>
-            <Text style={styles.entryCategory}>• {item.category}</Text>
+            <Text style={styles.entryCategory}>- {item.category}</Text>
           </View>
         </View>
 

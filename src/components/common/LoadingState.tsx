@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { theme } from '../../constants/theme';
+import { SvgIcon } from './SvgIcon';
 
 export interface LoadingStateProps {
   loading: boolean;
@@ -149,4 +150,3 @@ const styles = StyleSheet.create({
     width: '80%',
   },
 });
-

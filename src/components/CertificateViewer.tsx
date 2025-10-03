@@ -13,6 +13,7 @@ import {
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { theme } from '../constants/theme';
+import { SvgIcon } from './common/SvgIcon';
 
 const { width, height } = Dimensions.get('window');
 
@@ -56,13 +57,13 @@ export const CertificateViewer: React.FC<Props> = ({ visible, imageUri, onClose 
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.headerButton} onPress={onClose}>
-            <Text style={styles.headerButtonText}>✕</Text>
+            <SvgIcon name="close" size={18} color={theme.colors.white} />
           </TouchableOpacity>
           
           <Text style={styles.headerTitle}>Certificate</Text>
           
           <TouchableOpacity style={styles.headerButton} onPress={handleShare}>
-            <Text style={styles.headerButtonText}>📤</Text>
+            <SvgIcon name="share" size={18} color={theme.colors.white} />
           </TouchableOpacity>
         </View>
 
@@ -78,7 +79,7 @@ export const CertificateViewer: React.FC<Props> = ({ visible, imageUri, onClose 
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Pinch to zoom • Tap outside to close
+            Pinch to zoom, tap outside to close
           </Text>
         </View>
       </SafeAreaView>

@@ -445,7 +445,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
               />
             ) : (
               <View style={styles.masonryPdfPreview}>
-                <Text style={styles.masonryPdfIcon}>📄</Text>
+                <SvgIcon name="document" size={28} color={theme.colors.primary} style={styles.masonryPdfIcon} />
                 <Text style={styles.masonryPdfLabel}>
                   {item.mimeType === 'application/pdf' ? 'PDF' : 'DOC'}
                 </Text>
@@ -572,7 +572,7 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
         {/* Tiny stats moved to bottom right */}
         <View style={styles.tinyStats}>
           <Text style={styles.tinyStatsText}>
-            {certificates?.length || 0} certificates • {((certificates || []).reduce((sum, cert) => sum + cert.fileSize, 0) / 1024 / 1024).toFixed(1)}MB used
+            {certificates?.length || 0} certificates - {((certificates || []).reduce((sum, cert) => sum + cert.fileSize, 0) / 1024 / 1024).toFixed(1)}MB used
           </Text>
         </View>
           </PremiumCard>
@@ -754,7 +754,6 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.accent,
   },
   masonryPdfIcon: {
-    fontSize: 28,
     marginBottom: theme.spacing[1],
   },
   masonryPdfLabel: {

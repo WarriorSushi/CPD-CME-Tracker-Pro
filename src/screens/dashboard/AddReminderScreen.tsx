@@ -20,6 +20,7 @@ import { Input } from '../../components/common/Input';
 import { StandardHeader } from '../../components/common/StandardHeader';
 import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../../components/common/OnboardingComponents';
 import { ModernDatePicker } from '../../components/common/ModernDatePicker';
+import { SvgIcon } from '../../components/common/SvgIcon';
 import { theme } from '../../constants/theme';
 import { useAppContext } from '../../contexts/AppContext';
 import { CMEEventReminder } from '../../types';

@@ -4,6 +4,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ProgressIndicator } from '../../components';
+import { SvgIcon } from '../../components/common/SvgIcon';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { CreditSystem } from '../../types';
 import { getCreditTerminology } from '../../utils/creditTerminology';
@@ -472,7 +473,7 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Text style={styles.summaryEmoji}>✓</Text>
+                <SvgIcon name="checkmark" size={24} color={theme.colors.success} />
               </LinearGradient>
               <Text style={styles.summaryText}>
                 <Text style={styles.summaryBold}>{String(targetValue || '')} {terminology.plural.toLowerCase()}</Text>
@@ -633,10 +634,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 10,
-  },
-  summaryEmoji: {
-    fontSize: 12,
-    color: '#FFFFFF',
   },
   summaryText: {
     fontSize: 13,

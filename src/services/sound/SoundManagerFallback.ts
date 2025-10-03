@@ -43,14 +43,14 @@ class SoundManagerFallback {
 
   async preloadSounds() {
     // No-op in fallback mode
-    __DEV__ && console.log('🔇 Sound system running in fallback mode (no audio)');
+    __DEV__ && console.log('[SOUND] Sound system running in fallback mode (no audio)');
   }
 
   async play(soundType: SoundType, options?: { volume?: number; rate?: number }) {
     if (!this.isEnabled || !this.isInitialized) return;
     
     // Log the sound that would have been played
-    __DEV__ && console.log(`🔇 Would play sound: ${soundType} at volume ${(options?.volume ?? 0.3) * this.globalVolume}`);
+    __DEV__ && console.log(`[SOUND MUTED] Would play sound: ${soundType} at volume ${(options?.volume ?? 0.3) * this.globalVolume}`);
   }
 
   // Convenience methods for common interactions

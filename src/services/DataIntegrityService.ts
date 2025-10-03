@@ -317,13 +317,13 @@ export class DataIntegrityService {
 
     if (result.errors.length > 0) {
       lines.push('[ERROR] ERRORS:');
-      result.errors.forEach(error => lines.push(`  • ${error}`));
+      result.errors.forEach(error => lines.push(`  - ${error}`));
       lines.push('');
     }
 
     if (result.warnings.length > 0) {
       lines.push('[WARN] WARNINGS:');
-      result.warnings.forEach(warning => lines.push(`  • ${warning}`));
+      result.warnings.forEach(warning => lines.push(`  - ${warning}`));
       lines.push('');
     }
 

@@ -60,7 +60,7 @@ export const SoundTestComponent: React.FC = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>🎵 Sound System Test</Text>
+      <Text style={styles.title}>Sound System Test</Text>
       <Text style={styles.subtitle}>
         Testing all sound mappings with your audio files
       </Text>
@@ -82,12 +82,12 @@ export const SoundTestComponent: React.FC = () => {
       ))}
       
       <View style={styles.info}>
-        <Text style={styles.infoTitle}>📁 Active Sound Files:</Text>
+        <Text style={styles.infoTitle}>Active Sound Files:</Text>
         <Text style={styles.infoText}>
-          • button-press.mp3 (65% volume){'\n'}
-          • navigation-swipe.mp3 (35% volume){'\n'}
-          • error.mp3 (70% volume){'\n'}
-          • notification.mp3 (100% volume){'\n'}
+          - button-press.mp3 (65% volume){'\n'}
+          - navigation-swipe.mp3 (35% volume){'\n'}
+          - error.mp3 (70% volume){'\n'}
+          - notification.mp3 (100% volume){'\n'}
           {'\n'}
           All button interactions use button-press.mp3 at 65% volume.
         </Text>
