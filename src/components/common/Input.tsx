@@ -133,17 +133,18 @@ export const Input = React.memo<InputProps>(({
   };
 
   const animatedBorderStyle = useAnimatedStyle(() => {
-    const borderColor = error
-      ? theme.colors.error
-      : focusAnimation.value > 0
-      ? theme.colors.primary
-      : theme.colors.border.light;
+    // Error state takes priority over focus state
+    let borderColor = theme.colors.border.light;
 
-    const borderWidth = focusAnimation.value > 0 ? 2 : 1;
+    if (errorAnimation.value > 0) {
+      borderColor = theme.colors.error;
+    } else if (focusAnimation.value > 0) {
+      borderColor = theme.colors.primary;
+    }
 
     return {
       borderColor,
-      borderWidth,
+      borderWidth: 2,
     };
   });
 
@@ -245,8 +246,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF', // Pure white for input fields
     borderRadius: theme.borderRadius.base,
     paddingHorizontal: theme.spacing[4],
-    borderWidth: 1,
-    borderColor: theme.colors.border.light,
+    // Border will be set by animatedBorderStyle
   },
   leftIcon: {
     marginRight: theme.spacing[2],
