@@ -132,7 +132,7 @@ export const EventRemindersSection: React.FC<EventRemindersSectionProps> = ({
 
 const styles = StyleSheet.create({
   sectionContainer: {
-    marginHorizontal: 16,
+    marginHorizontal: 0,
     marginBottom: 16,
   },
   sectionCard: {

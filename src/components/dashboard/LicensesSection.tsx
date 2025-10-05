@@ -211,7 +211,7 @@ export const LicensesSection: React.FC<LicensesSectionProps> = ({
 
 const styles = StyleSheet.create({
   sectionContainer: {
-    marginHorizontal: 16,
+    marginHorizontal: 0,
     marginBottom: 16,
   },
   sectionCard: {

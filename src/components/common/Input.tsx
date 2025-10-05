@@ -105,6 +105,8 @@ export const Input = React.memo<InputProps>(({
   const minContentHeight = lineHeight * minLines;
   const maxContentHeight = lineHeight * maxLines;
 
+  const [shouldScroll, setShouldScroll] = useState(false);
+
   const handleContentSizeChange = (event: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) => {
     if (!autoExpand) return;
 
@@ -117,6 +119,9 @@ export const Input = React.memo<InputProps>(({
     );
 
     const newHeight = constrainedContentHeight + verticalPadding;
+
+    // Enable scrolling when content reaches max height
+    setShouldScroll(height >= maxContentHeight);
 
     // Use animated value for smooth transitions
     if (animatedHeight.value === null || Math.abs(newHeight - animatedHeight.value) > 2) {
@@ -207,7 +212,7 @@ export const Input = React.memo<InputProps>(({
           onBlur={handleBlur}
           onContentSizeChange={handleContentSizeChange}
           multiline={autoExpand || multiline}
-          scrollEnabled={false}
+          scrollEnabled={autoExpand ? shouldScroll : (props.scrollEnabled ?? true)}
           placeholderTextColor={theme.colors.text.disabled}
           {...props}
         />

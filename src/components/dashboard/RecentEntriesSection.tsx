@@ -103,7 +103,7 @@ export const RecentEntriesSection: React.FC<RecentEntriesSectionProps> = ({
 
 const styles = StyleSheet.create({
   recentSection: {
-    marginHorizontal: 16,
+    marginHorizontal: 0,
     marginBottom: 16,
   },
   sectionHeader: {
