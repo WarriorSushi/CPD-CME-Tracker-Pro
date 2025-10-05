@@ -744,9 +744,9 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
                 autoExpand={true}
                 minLines={1}
                 maxLines={3}
-                style={[styles.compactInput, errors.title ? styles.inputError : undefined]}
+                error={errors.title}
+                style={styles.compactInput}
               />
-              {errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
             </View>
 
             <View style={[styles.fieldContainer, styles.fieldHalf]}>
@@ -758,9 +758,9 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
                 autoExpand={true}
                 minLines={1}
                 maxLines={3}
-                style={[styles.compactInput, errors.provider ? styles.inputError : undefined]}
+                error={errors.provider}
+                style={styles.compactInput}
               />
-              {errors.provider && <Text style={styles.errorText}>{errors.provider}</Text>}
             </View>
           </View>
 
@@ -783,9 +783,9 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
                 onChangeText={(value) => updateFormData('creditsEarned', value)}
                 placeholder="2.5"
                 keyboardType="numeric"
-                style={[styles.compactInput, errors.creditsEarned ? styles.inputError : undefined]}
+                error={errors.creditsEarned}
+                style={styles.compactInput}
               />
-              {errors.creditsEarned && <Text style={styles.errorText}>{errors.creditsEarned}</Text>}
             </View>
           </View>
 
@@ -1002,11 +1002,7 @@ const styles = StyleSheet.create({
     // Auto-expanding Input will handle height automatically
     textAlignVertical: 'top',
   },
-  
-  inputError: {
-    borderColor: theme.colors.error,
-    borderWidth: 1.5,
-  },
+
   errorText: {
     fontSize: theme.typography.fontSize.xs,
     color: theme.colors.error,

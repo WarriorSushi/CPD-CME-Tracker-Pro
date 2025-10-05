@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { PremiumCard, PremiumButton } from '../common/OnboardingComponents';
 import { SimpleProgressRing } from '../charts/SimpleProgressRing';
 import { ProgressAnimatedBackground } from './ProgressAnimatedBackground';
@@ -17,6 +18,36 @@ interface ProgressCardProps {
   onAddEntry: () => void;
 }
 
+// Premium stat capsule component
+interface StatCapsuleProps {
+  value: string | number;
+  label: string;
+  accentColor?: string;
+  gradientColors?: string[];
+}
+
+const StatCapsule: React.FC<StatCapsuleProps> = ({
+  value,
+  label,
+  accentColor = theme.colors.primary,
+  gradientColors = ['#F8F9FA', '#FFFFFF']
+}) => {
+  return (
+    <View style={styles.capsuleWrapper}>
+      <LinearGradient
+        colors={gradientColors}
+        style={styles.capsule}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <View style={[styles.capsuleAccent, { backgroundColor: accentColor }]} />
+        <Text style={styles.capsuleValue}>{value}</Text>
+        <Text style={styles.capsuleLabel}>{label}</Text>
+      </LinearGradient>
+    </View>
+  );
+};
+
 export const ProgressCard: React.FC<ProgressCardProps> = ({
   currentYearProgress,
   user,
@@ -26,6 +57,15 @@ export const ProgressCard: React.FC<ProgressCardProps> = ({
   progressShadowAnim,
   onAddEntry,
 }) => {
+  const earnedCredits = currentYearProgress?.totalCompleted?.toFixed(1) || '0';
+  const goalCredits = currentYearProgress?.totalRequired || user?.annualRequirement || 0;
+  const remainingCredits = Math.max(
+    (currentYearProgress?.totalRequired || 0) - (currentYearProgress?.totalCompleted || 0),
+    0
+  ).toFixed(1);
+  const daysRemaining = currentYearProgress?.remainingDays || 0;
+  const creditUnit = user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits';
+
   return (
     <View style={styles.container}>
       <ProgressAnimatedBackground
@@ -40,6 +80,7 @@ export const ProgressCard: React.FC<ProgressCardProps> = ({
           shadowOpacity: progressShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.12] }),
         }
       ]}>
+        {/* Header */}
         <View style={styles.progressHeader}>
           <View style={styles.progressTitleContainer}>
             <Text style={styles.progressMainTitle}>Your Progress</Text>
@@ -52,57 +93,47 @@ export const ProgressCard: React.FC<ProgressCardProps> = ({
           </View>
         </View>
 
-        <View style={styles.progressMainContent}>
-          {/* Days remaining moved to left of circle */}
-          <View style={styles.progressTimeInfoLeft}>
-            <Text style={styles.progressTimeValue}>
-              {currentYearProgress?.remainingDays || 0}
-            </Text>
-            <Text style={styles.progressTimeLabel}>
-              days remaining in cycle
-            </Text>
-          </View>
+        {/* Progress Ring - Centered and Prominent */}
+        <View style={styles.progressRingSection}>
+          <SimpleProgressRing
+            progress={currentYearProgress ? currentYearProgress.percentage / 100 : 0}
+            size={160}
+            color={currentYearProgress ? getProgressColor(currentYearProgress.status) : theme.colors.gray.medium}
+            backgroundColor={theme.colors.gray.light + '40'}
+            strokeWidth={12}
+            duration={2000}
+          />
+        </View>
 
-          <View style={styles.progressCircleContainer}>
-            <SimpleProgressRing
-              progress={currentYearProgress ? currentYearProgress.percentage / 100 : 0}
-              size={140}
-              color={currentYearProgress ? getProgressColor(currentYearProgress.status) : theme.colors.gray.medium}
-              backgroundColor={theme.colors.gray.light + '60'}
-              strokeWidth={10}
-              duration={2000}
+        {/* Premium Stats Grid - 2x2 Capsules */}
+        <View style={styles.statsGrid}>
+          <View style={styles.statsRow}>
+            <StatCapsule
+              value={earnedCredits}
+              label={`${creditUnit} Earned`}
+              accentColor="#10B981"
+              gradientColors={['#ECFDF5', '#FFFFFF']}
+            />
+            <StatCapsule
+              value={goalCredits}
+              label="Annual Goal"
+              accentColor="#3B82F6"
+              gradientColors={['#EFF6FF', '#FFFFFF']}
             />
           </View>
-
-          <View style={styles.progressStats}>
-            <View style={styles.progressStatItem}>
-              <Text style={styles.progressStatValue}>
-                {currentYearProgress?.totalCompleted?.toFixed(1) || '0'}
-              </Text>
-              <Text style={styles.progressStatLabel}>{user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits'} Earned</Text>
-            </View>
-
-            <View style={styles.progressStatDivider} />
-
-            <View style={styles.progressStatItem}>
-              <Text style={styles.progressStatValue}>
-                {currentYearProgress?.totalRequired || user?.annualRequirement || 0}
-              </Text>
-              <Text style={styles.progressStatLabel}>Goal
-              </Text>
-            </View>
-
-            <View style={styles.progressStatDivider} />
-
-            <View style={styles.progressStatItem}>
-              <Text style={styles.progressStatValue}>
-                {Math.max(
-                  (currentYearProgress?.totalRequired || 0) - (currentYearProgress?.totalCompleted || 0),
-                  0
-                ).toFixed(1)}
-              </Text>
-              <Text style={styles.progressStatLabel}>Remaining</Text>
-            </View>
+          <View style={styles.statsRow}>
+            <StatCapsule
+              value={remainingCredits}
+              label="Remaining"
+              accentColor="#F59E0B"
+              gradientColors={['#FFFBEB', '#FFFFFF']}
+            />
+            <StatCapsule
+              value={daysRemaining}
+              label="Days Left"
+              accentColor="#8B5CF6"
+              gradientColors={['#F5F3FF', '#FFFFFF']}
+            />
           </View>
         </View>
 
@@ -127,20 +158,15 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
     marginBottom: 8,
   },
-  upperSection: {
-    marginTop: 16,
-    marginHorizontal: 0,
-    marginBottom: 8,
-  },
   progressCard: {
-    padding: theme.spacing[5], // Primary card padding
+    padding: theme.spacing[5],
     backgroundColor: '#FFFFFF',
   },
   progressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   progressTitleContainer: {
     flex: 1,
@@ -156,56 +182,63 @@ const styles = StyleSheet.create({
     color: theme.colors.text.secondary,
     fontWeight: '500',
   },
-  progressMainContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 24,
-  },
-  progressTimeInfoLeft: {
-    flex: 1,
-    alignItems: 'flex-start',
-  },
-  progressTimeValue: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: theme.colors.primary,
-    marginBottom: 4,
-  },
-  progressTimeLabel: {
-    fontSize: 12,
-    color: theme.colors.text.secondary,
-    textAlign: 'left',
-    maxWidth: 80,
-  },
-  progressCircleContainer: {
+  // Progress Ring Section
+  progressRingSection: {
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 24,
+    paddingVertical: 12,
   },
-  progressStats: {
+  // Premium Stats Grid
+  statsGrid: {
+    marginBottom: 20,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  // Capsule Styles
+  capsuleWrapper: {
     flex: 1,
-    alignItems: 'flex-end',
+    marginHorizontal: 6,
   },
-  progressStatItem: {
-    alignItems: 'flex-end',
-    marginBottom: 8,
+  capsule: {
+    borderRadius: 12,
+    padding: 12,
+    paddingLeft: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.06)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    minHeight: 64,
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
-  progressStatValue: {
+  capsuleAccent: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 3,
+  },
+  capsuleValue: {
     fontSize: 20,
     fontWeight: '700',
     color: theme.colors.text.primary,
+    marginBottom: 2,
   },
-  progressStatLabel: {
-    fontSize: 11,
+  capsuleLabel: {
+    fontSize: 10,
+    fontWeight: '600',
     color: theme.colors.text.secondary,
-    marginTop: 2,
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
   },
-  progressStatDivider: {
-    height: 1,
-    width: 40,
-    backgroundColor: theme.colors.border.medium,
-    marginVertical: 8,
-  },
+  // Add Entry Button
   addEntryInUpperSection: {
     marginTop: 8,
   },
