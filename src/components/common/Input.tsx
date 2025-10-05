@@ -149,11 +149,6 @@ export const Input = React.memo<InputProps>(({
 
   const animatedErrorStyle = useAnimatedStyle(() => ({
     opacity: errorAnimation.value,
-    transform: [
-      {
-        translateY: errorAnimation.value * -5,
-      },
-    ],
   }));
 
   const getInputStyle = (): TextStyle => {
