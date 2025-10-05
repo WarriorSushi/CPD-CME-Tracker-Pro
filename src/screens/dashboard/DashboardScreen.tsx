@@ -424,6 +424,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             >
               <EventRemindersSection
                 eventReminders={eventReminders}
+                remindersCardAnim={remindersCardAnim}
                 remindersShadowAnim={remindersShadowAnim}
                 onAddReminder={() => (navigation as any).navigate('AddReminder')}
               />
@@ -448,6 +449,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 <LicensesSection
                   licenses={licenses}
                   user={user}
+                  licensesCardAnim={licensesCardAnim}
                   licensesShadowAnim={licensesShadowAnim}
                   onAddLicense={() => (navigation.getParent() as any).navigate('AddLicense')}
                   onEditLicense={(license) =>
@@ -475,6 +477,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 ]}
               >
                 <NoLicensesPlaceholder
+                  licensesCardAnim={licensesCardAnim}
                   licensesShadowAnim={licensesShadowAnim}
                   onAddLicense={() => (navigation.getParent() as any).navigate('AddLicense')}
                 />
@@ -500,6 +503,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 <RecentEntriesSection
                   recentEntries={recentEntries}
                   user={user}
+                  recentCardAnim={recentCardAnim}
                   recentShadowAnim={recentShadowAnim}
                   onViewAll={() => navigation.navigate('CME')}
                   onViewCertificate={(imageUri) =>
