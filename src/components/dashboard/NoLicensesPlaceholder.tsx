@@ -62,7 +62,7 @@ export const NoLicensesPlaceholder: React.FC<NoLicensesPlaceholderProps> = ({
 
 const styles = StyleSheet.create({
   noLicensesSection: {
-    marginHorizontal: 16,
+    marginHorizontal: 0,
     marginBottom: 16,
   },
   noLicensesCard: {

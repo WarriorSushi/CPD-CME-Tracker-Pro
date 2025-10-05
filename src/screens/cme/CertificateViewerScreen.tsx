@@ -7,10 +7,9 @@ import {
   Alert,
   ScrollView
 } from 'react-native';
-import { PinchGestureHandler, State } from 'react-native-gesture-handler';
-import Animated, { 
-  useAnimatedGestureHandler, 
-  useAnimatedStyle, 
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  useAnimatedStyle,
   useSharedValue,
   withSpring,
   runOnJS
@@ -36,23 +35,22 @@ export const CertificateViewerScreen: React.FC<Props> = ({ navigation, route }) 
   const { imageUri } = route.params;
   
   const scale = useSharedValue(1);
-  const baseScale = useSharedValue(1);
+  const savedScale = useSharedValue(1);
 
-  const pinchHandler = useAnimatedGestureHandler({
-    onStart: () => {
-      baseScale.value = scale.value;
-    },
-    onActive: (event) => {
-      scale.value = baseScale.value * event.scale;
-    },
-    onEnd: () => {
+  const pinchGesture = Gesture.Pinch()
+    .onUpdate((event) => {
+      scale.value = Math.max(1, Math.min(savedScale.value * event.scale, 3));
+    })
+    .onEnd(() => {
+      savedScale.value = scale.value;
       if (scale.value < 1) {
         scale.value = withSpring(1);
+        savedScale.value = 1;
       } else if (scale.value > 3) {
         scale.value = withSpring(3);
+        savedScale.value = 3;
       }
-    },
-  });
+    });
 
   const imageStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -102,15 +100,15 @@ export const CertificateViewerScreen: React.FC<Props> = ({ navigation, route }) 
       />
 
       <View style={styles.imageContainer}>
-        <PinchGestureHandler onGestureEvent={pinchHandler}>
+        <GestureDetector gesture={pinchGesture}>
           <Animated.View style={styles.imageWrapper}>
-            <Animated.Image 
+            <Animated.Image
               source={{ uri: imageUri }}
               style={[styles.image, imageStyle]}
               resizeMode="contain"
             />
           </Animated.View>
-        </PinchGestureHandler>
+        </GestureDetector>
       </View>
 
       <View style={styles.footer}>

@@ -124,12 +124,12 @@ const styles = StyleSheet.create({
   container: {
     position: 'relative',
     marginTop: 16,
-    marginHorizontal: 16,
+    marginHorizontal: 0,
     marginBottom: 8,
   },
   upperSection: {
     marginTop: 16,
-    marginHorizontal: 16,
+    marginHorizontal: 0,
     marginBottom: 8,
   },
   progressCard: {

@@ -8,6 +8,7 @@ import {
   Dimensions,
   ViewStyle,
   TextStyle,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSound } from '../../hooks/useSound';
@@ -78,7 +79,7 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
         ]}
       >
         <LinearGradient
-          colors={disabled ? ['#E2E8F0', '#CBD5E0'] : ['#667EEA', '#764BA2']}
+          colors={disabled || loading ? ['#E2E8F0', '#CBD5E0'] : ['#667EEA', '#764BA2']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={[
@@ -86,14 +87,18 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
             isPressed && styles.newPrimaryButtonGradientPressed,
           ]}
         >
-          <Text
-            style={[
-              styles.newPrimaryButtonText,
-              disabled && styles.newPrimaryButtonTextDisabled,
-            ]}
-          >
-            {title}
-          </Text>
+          {loading ? (
+            <ActivityIndicator size="small" color="#4A5568" />
+          ) : (
+            <Text
+              style={[
+                styles.newPrimaryButtonText,
+                (disabled || loading) && styles.newPrimaryButtonTextDisabled,
+              ]}
+            >
+              {title}
+            </Text>
+          )}
         </LinearGradient>
       </TouchableOpacity>
     );
@@ -346,6 +351,8 @@ export const PremiumCard: React.FC<PremiumCardProps> = ({
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
       toValue: 0.98,
+      tension: 40,
+      friction: 8,
       useNativeDriver: true,
     }).start();
   };
@@ -353,8 +360,8 @@ export const PremiumCard: React.FC<PremiumCardProps> = ({
   const handlePressOut = () => {
     Animated.spring(scaleAnim, {
       toValue: 1,
-      friction: 3,
       tension: 40,
+      friction: 8,
       useNativeDriver: true,
     }).start();
   };
@@ -426,7 +433,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   newPrimaryButtonTextDisabled: {
-    color: '#A0AEC0',
+    color: '#4A5568',
   },
   
   newSecondaryButton: {
