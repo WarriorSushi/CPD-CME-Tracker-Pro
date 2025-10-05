@@ -10,6 +10,7 @@ import { CreditSystem } from '../../types';
 import { getCreditTerminology } from '../../utils/creditTerminology';
 import { userOperations } from '../../services/database';
 import { AnimatedGradientBackground, PremiumButton, PremiumCard } from '../../components/common/OnboardingComponents';
+import { theme } from '../../constants/theme';
 
 type AnnualTargetScreenNavigationProp = StackNavigationProp<OnboardingStackParamList, 'AnnualTarget'>;
 

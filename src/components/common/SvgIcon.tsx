@@ -83,6 +83,16 @@ const iconSources = {
   checkmark: `<svg viewBox="0 0 24 24" fill="none">
     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
   </svg>`,
+
+  // Alias for checkmark
+  check: `<svg viewBox="0 0 24 24" fill="none">
+    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
+  </svg>`,
+
+  // User icon
+  user: `<svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
+  </svg>`,
   
   // Green tick with circle (from yellow tick.svg)
   tickWithCircle: `<svg viewBox="0 0 1024 1024" fill="none">

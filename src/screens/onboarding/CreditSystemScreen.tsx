@@ -5,7 +5,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ProgressIndicator } from '../../components';
 import { SvgIcon, IconName } from '../../components/common/SvgIcon';
-import { SvgIcon } from '../../components/common/SvgIcon';
 import { OnboardingStackParamList } from '../../types/navigation';
 import { CreditSystem } from '../../types';
 import { userOperations } from '../../services/database';

@@ -346,6 +346,8 @@ export const PremiumCard: React.FC<PremiumCardProps> = ({
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
       toValue: 0.98,
+      tension: 40,
+      friction: 8,
       useNativeDriver: true,
     }).start();
   };
@@ -353,8 +355,8 @@ export const PremiumCard: React.FC<PremiumCardProps> = ({
   const handlePressOut = () => {
     Animated.spring(scaleAnim, {
       toValue: 1,
-      friction: 3,
       tension: 40,
+      friction: 8,
       useNativeDriver: true,
     }).start();
   };
