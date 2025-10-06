@@ -286,11 +286,6 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
                         }),
                       } as any
                     ]}
-                    cardOverride={{
-                      elevation: 0,
-                      shadowOpacity: 0,
-                      borderWidth: 0,
-                    }}
                   >
                     <View style={styles.gridOptionContent}>
                       <Text style={[
@@ -348,11 +343,6 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
                     }),
                   } as any
                 ]}
-                cardOverride={{
-                  elevation: 0,
-                  shadowOpacity: 0,
-                  borderWidth: 0,
-                }}
               >
                 <View style={styles.customOptionContent}>
                   <View style={styles.customOptionTextContent}>

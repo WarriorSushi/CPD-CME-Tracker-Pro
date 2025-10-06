@@ -263,11 +263,6 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                       }),
                     } as any
                   ]}
-                  cardOverride={{
-                    elevation: 0,
-                    shadowOpacity: 0,
-                    borderWidth: 0,
-                  }}
                 >
                   <Text style={[
                     styles.optionText,
@@ -311,11 +306,6 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                     }),
                   } as any
                 ]}
-                cardOverride={{
-                  elevation: 0,
-                  shadowOpacity: 0,
-                  borderWidth: 0,
-                }}
               >
                 {selectedTarget === 'custom' ? (
                   <TextInput
@@ -378,11 +368,6 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                       }),
                     } as any
                   ]}
-                  cardOverride={{
-                    elevation: 0,
-                    shadowOpacity: 0,
-                    borderWidth: 0,
-                  }}
                 >
                   <Text style={[
                     styles.optionText,
@@ -426,11 +411,6 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                     }),
                   } as any
                 ]}
-                cardOverride={{
-                  elevation: 0,
-                  shadowOpacity: 0,
-                  borderWidth: 0,
-                }}
               >
                 {selectedPeriod === 'custom' ? (
                   <TextInput

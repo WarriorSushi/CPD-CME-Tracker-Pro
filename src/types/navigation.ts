@@ -8,7 +8,10 @@ export type RootStackParamList = {
 
 export type OnboardingStackParamList = {
   Welcome: undefined;
+  Features: undefined;
+  Privacy: undefined;
   Profession: undefined;
+  Country: undefined;
   CreditSystem: undefined;
   AnnualTarget: undefined;
   CycleStartDate: undefined;

@@ -237,11 +237,6 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
                         }),
                       } as any
                     ]}
-                    cardOverride={{
-                      elevation: 0,
-                      shadowOpacity: 0,
-                      borderWidth: 0,
-                    }}
                   >
                     <View style={styles.stepContent}>
                       <View style={styles.stepIconContainer}>
