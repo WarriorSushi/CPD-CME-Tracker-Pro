@@ -140,3 +140,16 @@ px tsc --noEmit exits 0.
 - Fix premium button accessibility (loading/disabled contrast)
 - Test critical user flows
 - Consider these errors non-blocking for runtime functionality
+
+---
+
+9. **Android Elevation Animation Crash** (Commits: af8d975, e3f98a3) ✅ **CRITICAL**
+   - **Runtime Error:** "Error while updating property 'elevation' of a view managed by: RCTView - null cannot set 'elevation' to Float.NaN"
+   - **Root Cause:** Android's `elevation` property cannot accept animated/interpolated values (must be static number)
+   - **Initial Fix (af8d975):** Removed animated elevation from 3 onboarding screens
+   - **User Feedback:** Error persisted after initial fix
+   - **Comprehensive Fix (e3f98a3):** Used Python script to remove ALL 28 instances of animated elevation across 19 files
+   - **Pattern Removed:** `elevation: Number(...interpolate(...))` and `elevation: <var>.interpolate({ ... })`
+   - **Kept:** iOS-compatible `shadowOpacity` animations (work across platforms)
+   - **Files Fixed:** AddCMEScreen, AddLicenseScreen, AddReminderScreen, CMEHistoryScreen, CertificateVaultScreen, CreditSystemScreen, CycleStartDateScreen, EventRemindersSection, LicensesSection, NoLicensesPlaceholder, ProfessionScreen, ProfileEditScreen, ProgressCard, RecentEntriesSection, SettingsScreen, SetupCompleteScreen, SoundSettingsScreen, UrgentLicenseWarnings, WelcomeScreen
+   - **Testing Required:** User needs to reload Expo Go app to verify fix
