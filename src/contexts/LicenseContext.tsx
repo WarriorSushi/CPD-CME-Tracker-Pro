@@ -68,7 +68,7 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({ children }) =>
 
           await AuditTrailService.logLicenseAction(
             'add_license',
-            result.data?.id || 0,
+            (result.data ?? 0),
             {
               type: license.licenseType,
               authority: license.issuingAuthority,
@@ -185,3 +185,4 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({ children }) =>
 
   return <LicenseContext.Provider value={value}>{children}</LicenseContext.Provider>;
 };
+

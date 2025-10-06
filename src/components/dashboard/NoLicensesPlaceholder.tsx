@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, ViewStyle } from 'react-native';
 import { PremiumCard, PremiumButton } from '../common/OnboardingComponents';
 import { SvgIcon } from '../common/SvgIcon';
 import { theme } from '../../constants/theme';
@@ -33,8 +33,8 @@ export const NoLicensesPlaceholder: React.FC<NoLicensesPlaceholderProps> = ({
       <PremiumCard style={[
         styles.noLicensesCard,
         {
-          elevation: licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
-          shadowOpacity: licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+          elevation: Number(licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
+          shadowOpacity: Number(licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
         }
       ]}>
         <View style={styles.noLicensesContent}>
@@ -90,3 +90,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 });
+
+
+
+

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, TouchableOpacityProps } from 'react-native';
+import { TouchableOpacity, TouchableOpacityProps, GestureResponderEvent } from 'react-native';
 import { useSound } from '../../hooks/useSound';
 import { SoundType } from '../../services/sound/SoundManager';
 
@@ -22,10 +22,10 @@ export const SoundButton: React.FC<SoundButtonProps> = ({
 }) => {
   const { playSound } = useSound({ enabled: enableSound, volume: soundVolume });
 
-  const handlePress = async (event: GestureResponderEvent) => {
+  const handlePress = (event: GestureResponderEvent) => {
     // Play sound first for immediate feedback
     if (enableSound) {
-      await playSound(soundType, soundVolume);
+      void playSound(soundType, soundVolume);
     }
 
     // Add haptic feedback if requested (iOS/Android)
@@ -50,3 +50,5 @@ export const SoundButton: React.FC<SoundButtonProps> = ({
 };
 
 export default SoundButton;
+
+

@@ -1,3 +1,8 @@
+export {};
+declare global {
+  // eslint-disable-next-line no-var
+  var __appContextMountCount: number | undefined;
+}
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo, useRef } from 'react';
 import { 
   User, 
@@ -444,7 +449,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
       if (result.success) {
 
-        await AuditTrailService.logCMEAction('add_entry', result.data?.id || 0, {
+        await AuditTrailService.logCMEAction('add_entry', (result.data ?? 0), {
           title: entry.title,
           provider: entry.provider,
           credits: entry.creditsEarned,
@@ -830,3 +835,4 @@ export const useAppContext = (): AppContextType => {
   }
   return context;
 };
+

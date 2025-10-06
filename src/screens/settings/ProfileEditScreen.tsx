@@ -330,8 +330,8 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
             <PremiumCard style={[
               styles.profilePictureCard,
               {
-                elevation: profileShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] }),
-                shadowOpacity: profileShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] }),
+                elevation: Number(profileShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] })),
+                shadowOpacity: Number(profileShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] })),
               }
             ]}>
           <Text style={styles.sectionTitle}>Profile Picture</Text>
@@ -385,8 +385,8 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
             <PremiumCard style={[
               styles.profileInfoCard,
               {
-                elevation: infoShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] }),
-                shadowOpacity: infoShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] }),
+                elevation: Number(infoShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] })),
+                shadowOpacity: Number(infoShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] })),
               }
             ]}>
           <Text style={styles.sectionTitle}>Personal Information</Text>
@@ -456,8 +456,8 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
             <PremiumCard style={[
               styles.previewCard,
               {
-                elevation: previewShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
-                shadowOpacity: previewShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+                elevation: Number(previewShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
+                shadowOpacity: Number(previewShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
           <Text style={styles.sectionTitle}>Preview</Text>

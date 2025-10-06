@@ -17,6 +17,7 @@ interface StandardHeaderProps {
   rightTextPress?: () => void;
   rightTextStyle?: 'default' | 'button';
   rightButton?: boolean; // Use actual Button component instead of text
+  rightAction?: React.ReactNode;
   style?: ViewStyle;
   showBackButton?: boolean;
   titleAlign?: 'center' | 'left';
@@ -34,6 +35,7 @@ export const StandardHeader: React.FC<StandardHeaderProps> = ({
   rightTextPress,
   rightTextStyle = 'default',
   rightButton = false,
+  rightAction,
   style,
   showBackButton = true,
   titleAlign = 'center',
@@ -88,6 +90,7 @@ export const StandardHeader: React.FC<StandardHeaderProps> = ({
 
         {/* Right - Icon or Text */}
         <View style={styles.rightSection}>
+          {rightAction}
           {rightIcon && rightIconPress && (
             <TouchableOpacity 
               style={styles.rightButton}

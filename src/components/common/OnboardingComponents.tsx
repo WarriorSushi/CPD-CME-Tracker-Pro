@@ -8,6 +8,7 @@ import {
   Dimensions,
   ViewStyle,
   TextStyle,
+  StyleProp,
   ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -23,7 +24,7 @@ interface PremiumButtonProps {
   variant?: 'primary' | 'secondary' | 'ghost';
   disabled?: boolean;
   loading?: boolean;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   enableSound?: boolean;
   soundVolume?: number;
 }
@@ -159,7 +160,7 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
 };
 
 // Animated Gradient Background Component
-export const AnimatedGradientBackground: React.FC = () => {
+export const AnimatedGradientBackground: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const animation1 = useRef(new Animated.Value(0)).current;
   const animation2 = useRef(new Animated.Value(0)).current;
   const animation3 = useRef(new Animated.Value(0)).current;
@@ -328,6 +329,10 @@ export const AnimatedGradientBackground: React.FC = () => {
           end={{ x: 1, y: 1 }}
         />
       </Animated.View>
+
+      <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+        {children}
+      </View>
     </View>
   );
 };
@@ -337,7 +342,7 @@ interface PremiumCardProps {
   children: React.ReactNode;
   selected?: boolean;
   onPress?: () => void;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 
 export const PremiumCard: React.FC<PremiumCardProps> = ({
@@ -542,3 +547,5 @@ const styles = StyleSheet.create({
     transform: [{ scale: 1.02 }],
   },
 });
+
+

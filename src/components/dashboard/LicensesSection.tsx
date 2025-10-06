@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Alert, ViewStyle } from 'react-native';
 import { PremiumCard, PremiumButton } from '../common/OnboardingComponents';
 import { SvgIcon } from '../common/SvgIcon';
 import { theme } from '../../constants/theme';
@@ -24,6 +24,11 @@ export const LicensesSection: React.FC<LicensesSectionProps> = ({
   onEditLicense,
   onSetReminders,
 }) => {
+  const cardShadowStyle: ViewStyle = {
+    elevation: Number(licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })) as unknown as number,
+    shadowOpacity: Number(licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })) as unknown as number,
+  };
+
   // Helper function to calculate days between dates
   const calculateDaysUntil = (expirationDateString: string): number => {
     const today = new Date();
@@ -80,10 +85,7 @@ export const LicensesSection: React.FC<LicensesSectionProps> = ({
     >
       <PremiumCard style={[
         styles.sectionCard,
-        {
-          elevation: licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
-          shadowOpacity: licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
-        }
+        cardShadowStyle
       ]}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardHeaderTitle}>Your Licenses</Text>
@@ -345,3 +347,4 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
 });
+

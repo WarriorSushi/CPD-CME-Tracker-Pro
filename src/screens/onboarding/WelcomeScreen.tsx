@@ -145,8 +145,8 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
               styles.featureCard, 
               styles.featureCardOverride,
               {
-                elevation: shadow1Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
-                shadowOpacity: shadow1Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+                elevation: Number(shadow1Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
+                shadowOpacity: Number(shadow1Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
               <View style={styles.featureIconContainer}>
@@ -186,8 +186,8 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
               styles.featureCard, 
               styles.featureCardOverride,
               {
-                elevation: shadow2Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
-                shadowOpacity: shadow2Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+                elevation: Number(shadow2Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
+                shadowOpacity: Number(shadow2Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
               <View style={styles.featureIconContainer}>
@@ -227,8 +227,8 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
               styles.featureCard, 
               styles.featureCardOverride,
               {
-                elevation: shadow3Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
-                shadowOpacity: shadow3Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+                elevation: Number(shadow3Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
+                shadowOpacity: Number(shadow3Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
               <View style={styles.featureIconContainer}>

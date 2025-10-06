@@ -214,8 +214,8 @@ export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
                     styles.optionCard,
                     styles.optionCardOverride,
                     {
-                      elevation: shadowAnims[index].interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
-                      shadowOpacity: shadowAnims[index].interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+                      elevation: Number(shadowAnims[index].interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
+                      shadowOpacity: Number(shadowAnims[index].interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
                     }
                   ]}
                 >

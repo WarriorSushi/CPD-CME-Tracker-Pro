@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, ColorValue } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { PremiumCard, PremiumButton } from '../common/OnboardingComponents';
 import { SimpleProgressRing } from '../charts/SimpleProgressRing';
@@ -23,14 +23,14 @@ interface StatCapsuleProps {
   value: string | number;
   label: string;
   accentColor?: string;
-  gradientColors?: string[];
+  gradientColors?: readonly [ColorValue, ColorValue];
 }
 
 const StatCapsule: React.FC<StatCapsuleProps> = ({
   value,
   label,
   accentColor = theme.colors.primary,
-  gradientColors = ['#F8F9FA', '#FFFFFF']
+  gradientColors = ['#F8F9FA', '#FFFFFF'] as const
 }) => {
   return (
     <View style={styles.capsuleWrapper}>
@@ -76,8 +76,8 @@ export const ProgressCard: React.FC<ProgressCardProps> = ({
       <PremiumCard style={[
         styles.progressCard,
         {
-          elevation: progressShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 6] }),
-          shadowOpacity: progressShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.12] }),
+          elevation: Number(progressShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 6] })),
+          shadowOpacity: Number(progressShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.12] })),
         }
       ]}>
         {/* Header */}
@@ -112,13 +112,13 @@ export const ProgressCard: React.FC<ProgressCardProps> = ({
               value={earnedCredits}
               label={`${creditUnit} Earned`}
               accentColor="#10B981"
-              gradientColors={['#ECFDF5', '#FFFFFF']}
+              gradientColors={['#ECFDF5', '#FFFFFF'] as const}
             />
             <StatCapsule
               value={goalCredits}
               label="Annual Goal"
               accentColor="#3B82F6"
-              gradientColors={['#EFF6FF', '#FFFFFF']}
+              gradientColors={['#EFF6FF', '#FFFFFF'] as const}
             />
           </View>
           <View style={styles.statsRow}>
@@ -126,13 +126,13 @@ export const ProgressCard: React.FC<ProgressCardProps> = ({
               value={remainingCredits}
               label="Remaining"
               accentColor="#F59E0B"
-              gradientColors={['#FFFBEB', '#FFFFFF']}
+              gradientColors={['#FFFBEB', '#FFFFFF'] as const}
             />
             <StatCapsule
               value={daysRemaining}
               label="Days Left"
               accentColor="#8B5CF6"
-              gradientColors={['#F5F3FF', '#FFFFFF']}
+              gradientColors={['#F5F3FF', '#FFFFFF'] as const}
             />
           </View>
         </View>
@@ -246,3 +246,5 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 });
+
+

@@ -16,7 +16,7 @@ export const initializeDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
 export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => {
   try {
     // Check schema version to avoid repeated migrations
-    const schemaVersion = await db.getFirstAsync(`
+    const schemaVersion = await db.getFirstAsync<{ value: string }>(`
       SELECT value FROM app_settings WHERE key = 'schema_version' LIMIT 1
     `).catch(() => null);
     
@@ -24,7 +24,7 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
     const latestVersion = '2'; // Increment when schema changes
     
     // First, handle users table migration/creation
-    const tableExists = await db.getFirstAsync(`
+    const tableExists = await db.getFirstAsync<{ name: string }>(`
       SELECT name FROM sqlite_master WHERE type='table' AND name='users'
     `);
     
@@ -35,7 +35,7 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
     
     if (tableExists) {
       // Check if we need migration (either country column exists or profile columns are missing)
-      const columns = await db.getAllAsync('PRAGMA table_info(users)');
+      const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(users)');
       const columnNames = columns.map((col: { name: string }) => col.name);
       
       const countryColumnExists = columnNames.includes('country');
@@ -278,7 +278,7 @@ export const migrateDatabase = async (
     if (currentVersion < 1 && targetVersion >= 1) {
 
       // Check if users table exists and add missing columns if needed
-      const tableInfo = await db.getAllAsync(`PRAGMA table_info(users)`);
+      const tableInfo = await db.getAllAsync<{ name: string }>(`PRAGMA table_info(users)`);
       const hasRequirementPeriod = tableInfo.some((col: { name: string }) => col.name === 'requirement_period');
       const hasCycleStartDate = tableInfo.some((col: { name: string }) => col.name === 'cycle_start_date');
       const hasCycleEndDate = tableInfo.some((col: { name: string }) => col.name === 'cycle_end_date');
@@ -417,3 +417,4 @@ const ensureTablesExist = async (db: SQLite.SQLiteDatabase): Promise<void> => {
     await createTables(db);
   }
 };
+

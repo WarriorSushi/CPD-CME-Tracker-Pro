@@ -39,7 +39,7 @@ export const userOperations = {
       
       return dbMutex.runDatabaseRead('getCurrentUser', async () => {
         // First check which columns exist to build safe query
-        const columns = await db.getAllAsync('PRAGMA table_info(users)');
+        const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(users)');
         const columnNames = columns.map((col: { name: string }) => col.name);
         
         const hasProfileColumns = columnNames.includes('profile_name') && columnNames.includes('age') && columnNames.includes('profile_picture_path');
@@ -98,7 +98,7 @@ export const userOperations = {
       const db = await getDatabase();
       
       return dbMutex.runDatabaseWrite('updateUser', async () => {
-        const columns = await db.getAllAsync('PRAGMA table_info(users)');
+        const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(users)');
         const columnNames = columns.map((col: { name: string }) => col.name);
         const hasProfileColumns = columnNames.includes('profile_name') && columnNames.includes('age') && columnNames.includes('profile_picture_path');
         const hasUpdatedAt = columnNames.includes('updated_at');

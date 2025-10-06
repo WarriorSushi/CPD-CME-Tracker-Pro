@@ -1,5 +1,5 @@
 import React, { useCallback, useRef } from 'react';
-import { View, StyleSheet, ScrollView, Animated, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, Animated, KeyboardAvoidingView, Platform, StyleProp, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -246,6 +246,6 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing[3],
     backgroundColor: theme.colors.background,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
+    borderTopColor: theme.colors.border.light,
   },
 });

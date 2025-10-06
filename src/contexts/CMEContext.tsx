@@ -64,12 +64,31 @@ export const CMEProvider: React.FC<CMEProviderProps> = ({ children }) => {
     const completed = currentYearEntries.reduce((sum, entry) => sum + (entry.creditsEarned || 0), 0);
     const percentage = annualRequirement > 0 ? (completed / annualRequirement) * 100 : 0;
 
+    const remainingDays = (() => {
+      if (user?.cycleEndDate) {
+        const end = new Date(user.cycleEndDate);
+        const today = new Date();
+        const diff = Math.ceil((end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        return Math.max(diff, 0);
+      }
+      return 0;
+    })();
+
+    let status: Progress['status'] = 'on_track';
+    if (percentage >= 100) {
+      status = 'completed';
+    } else if (remainingDays === 0) {
+      status = 'overdue';
+    } else if (percentage < 50) {
+      status = 'behind';
+    }
+
     return {
-      year: currentYear,
-      required: annualRequirement,
-      completed,
-      remaining: Math.max(0, annualRequirement - completed),
+      totalRequired: annualRequirement,
+      totalCompleted: completed,
       percentage: Math.min(100, percentage),
+      remainingDays,
+      status,
     };
   }, [user, recentCMEEntries]);
 
@@ -134,7 +153,7 @@ export const CMEProvider: React.FC<CMEProviderProps> = ({ children }) => {
 
           await AuditTrailService.logCMEAction(
             'add_entry',
-            result.data?.id || 0,
+            (result.data ?? 0),
             {
               title: entry.title,
               credits: entry.creditsEarned,

@@ -68,12 +68,12 @@ export const Input = React.memo<InputProps>(({
   const focusAnimation = useSharedValue(0);
   const errorAnimation = useSharedValue(0);
 
-  const handleFocus = async (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+  const handleFocus: NonNullable<TextInputProps["onFocus"]> = (e) => {
     setIsFocused(true);
     
     // Play subtle focus sound
     if (enableSound) {
-      await playFocus();
+      void playFocus();
     }
     
     focusAnimation.value = withTiming(1, {
@@ -82,7 +82,7 @@ export const Input = React.memo<InputProps>(({
     onFocus?.(e);
   };
 
-  const handleBlur = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+  const handleBlur: NonNullable<TextInputProps["onBlur"]> = (e) => {
     setIsFocused(false);
     focusAnimation.value = withTiming(0, {
       duration: theme.animation.duration.fast,
@@ -269,3 +269,4 @@ const styles = StyleSheet.create({
 });
 
 export default Input;
+

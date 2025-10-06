@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Image, ViewStyle } from 'react-native';
 import { PremiumCard } from '../common/OnboardingComponents';
 import { SvgIcon } from '../common/SvgIcon';
 import { theme } from '../../constants/theme';
@@ -22,6 +22,11 @@ export const RecentEntriesSection: React.FC<RecentEntriesSectionProps> = ({
   onViewAll,
   onViewCertificate,
 }) => {
+  const cardShadowStyle: ViewStyle = {
+    elevation: Number(recentShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 3] })),
+    shadowOpacity: Number(recentShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.06] })),
+  };
+
   if (recentEntries.length === 0) {
     return null;
   }
@@ -53,10 +58,7 @@ export const RecentEntriesSection: React.FC<RecentEntriesSectionProps> = ({
           key={entry.id}
           style={[
             styles.activityItem,
-            {
-              elevation: recentShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 3] }),
-              shadowOpacity: recentShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.06] }),
-            }
+            cardShadowStyle
           ]}
         >
           <View style={styles.activityContent}>
@@ -182,3 +184,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 });
+
+
+

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, PressableProps, ViewStyle } from 'react-native';
+import { Pressable, PressableProps, ViewStyle, StyleProp, GestureResponderEvent } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -10,8 +10,8 @@ import Animated, {
 } from 'react-native-reanimated';
 
 export interface PressableFXProps extends Omit<PressableProps, 'style'> {
-  style?: ViewStyle | ViewStyle[];
-  pressedStyle?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
+  pressedStyle?: StyleProp<ViewStyle>;
   ledgeHeight?: number; // Height of the bottom shadow/ledge
   pressTranslateY?: number; // How much to translate down when pressed
   pressAnimationDuration?: number;
@@ -84,9 +84,13 @@ export const PressableFX: React.FC<PressableFXProps> = ({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >
-      <Animated.View style={[style, animatedStyle, pressedStyle && pressAnimation.value > 0 && pressedStyle]}>
+      <Animated.View
+        style={[style, animatedStyle, pressedStyle && pressAnimation.value > 0 ? pressedStyle : undefined]}
+      >
         {children}
       </Animated.View>
     </Pressable>
   );
 };
+
+

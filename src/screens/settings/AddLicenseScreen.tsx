@@ -274,8 +274,8 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
             <PremiumCard style={[
               styles.formCard,
               {
-                elevation: formShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] }),
-                shadowOpacity: formShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] }),
+                elevation: Number(formShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] })),
+                shadowOpacity: Number(formShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] })),
               }
             ]}>
           <View style={styles.formHeader}>
@@ -408,8 +408,8 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
             <PremiumCard style={[
               styles.infoCard,
               {
-                elevation: infoShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
-                shadowOpacity: infoShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+                elevation: Number(infoShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
+                shadowOpacity: Number(infoShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
           <View style={styles.infoHeader}>

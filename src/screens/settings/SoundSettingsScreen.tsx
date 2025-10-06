@@ -222,8 +222,8 @@ export const SoundSettingsScreen: React.FC<Props> = ({ navigation }) => {
             <PremiumCard style={[
               styles.settingsCard,
               {
-                elevation: settingsShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] }),
-                shadowOpacity: settingsShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] }),
+                elevation: Number(settingsShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] })),
+                shadowOpacity: Number(settingsShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] })),
               }
             ]}>
               <Text style={styles.cardTitle}>Audio Feedback</Text>
@@ -297,8 +297,8 @@ export const SoundSettingsScreen: React.FC<Props> = ({ navigation }) => {
             <PremiumCard style={[
               styles.testCard,
               {
-                elevation: testShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
-                shadowOpacity: testShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+                elevation: Number(testShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
+                shadowOpacity: Number(testShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
               <Text style={styles.cardTitle}>Test Sounds</Text>

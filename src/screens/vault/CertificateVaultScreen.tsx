@@ -516,8 +516,8 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
           <PremiumCard style={[
             styles.prominentAddSection,
             {
-              elevation: headerShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 4] }),
-              shadowOpacity: headerShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0.02, 0.08] }),
+              elevation: Number(headerShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 4] })),
+              shadowOpacity: Number(headerShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0.02, 0.08] })),
             }
           ]}>
         <View style={styles.addSectionTitleContainer}>

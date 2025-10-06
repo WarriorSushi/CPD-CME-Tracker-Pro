@@ -182,9 +182,7 @@ const AnimatedTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navig
     paddingBottom: Math.max(insets.bottom, responsive.edgeToEdgeStyles.paddingBottom),
     maxWidth: responsive.isTablet ? 800 : '100%',
     alignSelf: 'center' as const,
-    width: responsive.isTablet ? Math.min(responsive.width, 800) : '100%',
-    marginHorizontal: responsive.isTablet ? 'auto' : 0,
-  };
+    width: responsive.isTablet ? Math.min(responsive.width, 800) : '100%',  };
 
   return (
     <View style={dynamicTabBarStyle}>
@@ -459,4 +457,6 @@ export const MainTabNavigator: React.FC = () => {
     </Stack.Navigator>
   );
 };
+
+
 

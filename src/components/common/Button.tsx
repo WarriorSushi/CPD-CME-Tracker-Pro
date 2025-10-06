@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   ViewStyle,
   TextStyle,
+  StyleProp,
 } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -219,15 +220,15 @@ export const Button = React.memo<ButtonProps>(({
   const baseStyle = getBaseStyle();
   const variantStyle = getVariantStyle();
 
-  const buttonStyle: ViewStyle[] = [
+  const buttonStyle: StyleProp<ViewStyle> = [
     styles.button,
     baseStyle,
     variantStyle,
     // Removed disabled opacity fade - using proper disabled colors instead
-    ...(Array.isArray(style) ? style : [style]).filter(Boolean),
+    ...(Array.isArray(style) ? style : style ? [style] : []),
   ];
 
-  const finalTextStyle = [
+  const finalTextStyle: StyleProp<TextStyle> = [
     styles.text,
     { color: variantStyle.color },
     // Color is now handled in getVariantStyle for disabled state
@@ -263,3 +264,5 @@ const styles = StyleSheet.create({
   },
   // Removed opacity-based disabled styling - using proper HSL colors instead
 });
+
+

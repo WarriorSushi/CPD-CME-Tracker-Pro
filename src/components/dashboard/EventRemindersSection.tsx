@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, ViewStyle } from 'react-native';
 import { PremiumCard, PremiumButton } from '../common/OnboardingComponents';
 import { SvgIcon } from '../common/SvgIcon';
 import { theme } from '../../constants/theme';
@@ -17,6 +17,11 @@ export const EventRemindersSection: React.FC<EventRemindersSectionProps> = ({
   remindersShadowAnim,
   onAddReminder,
 }) => {
+  const cardShadowStyle: ViewStyle = {
+    elevation: Number(remindersShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })) as unknown as number,
+    shadowOpacity: Number(remindersShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })) as unknown as number,
+  };
+
   return (
     <Animated.View
       style={[
@@ -34,10 +39,7 @@ export const EventRemindersSection: React.FC<EventRemindersSectionProps> = ({
     >
       <PremiumCard style={[
         styles.sectionCard,
-        {
-          elevation: remindersShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
-          shadowOpacity: remindersShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
-        }
+        cardShadowStyle
       ]}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardHeaderTitle}>Event Reminders</Text>
@@ -64,7 +66,7 @@ export const EventRemindersSection: React.FC<EventRemindersSectionProps> = ({
 
                 let statusColor = theme.colors.primary;
                 let statusText = 'Upcoming';
-                let statusIcon: JSX.Element = <SvgIcon name="calendar" size={16} color={statusColor} />;
+                let statusIcon: React.ReactNode = <SvgIcon name="calendar" size={16} color={statusColor} />;
 
                 if (daysUntil < 0) {
                   statusColor = theme.colors.gray.medium;
@@ -235,3 +237,5 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 });
+
+

@@ -428,8 +428,8 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
             <PremiumCard style={[
               styles.sectionCard,
               {
-                elevation: profileShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
-                shadowOpacity: profileShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+                elevation: Number(profileShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
+                shadowOpacity: Number(profileShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
             <View style={styles.cardHeader}>
@@ -494,8 +494,8 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
             <PremiumCard style={[
               styles.sectionCard,
               {
-                elevation: dataShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
-                shadowOpacity: dataShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+                elevation: Number(dataShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
+                shadowOpacity: Number(dataShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
             <View style={styles.cardHeader}>
@@ -533,8 +533,8 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
             <PremiumCard style={[
               styles.sectionCard,
               {
-                elevation: aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
-                shadowOpacity: aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+                elevation: Number(aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
+                shadowOpacity: Number(aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
             <View style={styles.cardHeader}>
@@ -606,8 +606,8 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
             <PremiumCard style={[
               styles.sectionCard,
               {
-                elevation: aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] }),
-                shadowOpacity: aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] }),
+                elevation: Number(aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
+                shadowOpacity: Number(aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
             <View style={styles.cardHeader}>

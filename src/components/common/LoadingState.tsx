@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: theme.spacing[3],
     fontSize: 16,
-    color: theme.colors.textSecondary,
+    color: theme.colors.text.secondary,
     textAlign: 'center',
   },
   errorContainer: {
@@ -112,13 +112,13 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme.colors.textPrimary,
+    color: theme.colors.text.primary,
     marginBottom: theme.spacing[2],
     textAlign: 'center',
   },
   errorMessage: {
     fontSize: 14,
-    color: theme.colors.textSecondary,
+    color: theme.colors.text.secondary,
     textAlign: 'center',
     marginBottom: theme.spacing[4],
     lineHeight: 20,
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   },
   skeletonLine: {
     height: 16,
-    backgroundColor: theme.colors.gray200,
+    backgroundColor: theme.colors.gray[200],
     borderRadius: 8,
     marginBottom: theme.spacing[2],
   },
@@ -150,3 +150,4 @@ const styles = StyleSheet.create({
     width: '80%',
   },
 });
+
