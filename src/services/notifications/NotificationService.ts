@@ -184,10 +184,7 @@ export class NotificationService {
           priority: this.getPriorityForType(notification.type),
           sound: 'default',
         },
-        trigger: {
-          type: 'date',
-          date: notification.scheduledFor,
-        },
+        trigger: notification.scheduledFor as any,
       });
 
       // Store in our local storage

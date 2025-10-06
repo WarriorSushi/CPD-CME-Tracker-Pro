@@ -25,10 +25,10 @@ class GlobalErrorHandler {
     this.isInitialized = true;
 
     // Handle unhandled JavaScript errors
-    if (typeof global.ErrorUtils !== 'undefined') {
-      const originalHandler = global.ErrorUtils.getGlobalHandler();
+    if (typeof (global as any).ErrorUtils !== 'undefined') {
+      const originalHandler = (global as any).ErrorUtils.getGlobalHandler();
 
-      global.ErrorUtils.setGlobalHandler((error: Error, isFatal?: boolean) => {
+      (global as any).ErrorUtils.setGlobalHandler((error: Error, isFatal?: boolean) => {
         this.handleError({
           error,
           source: 'javascript',
