@@ -729,8 +729,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
             <PremiumCard style={[
               styles.formCard,
               {
-                elevation: Number(formShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] })),
-                shadowOpacity: Number(formShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] })),
+                                shadowOpacity: Number(formShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] })),
               }
             ]}>
           {/* Row 1: Title and Provider */}

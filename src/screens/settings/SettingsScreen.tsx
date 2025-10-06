@@ -429,8 +429,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
             <PremiumCard style={[
               styles.sectionCard,
               {
-                elevation: Number(profileShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
-                shadowOpacity: Number(profileShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
+                                shadowOpacity: Number(profileShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
             <View style={styles.cardHeader}>
@@ -495,8 +494,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
             <PremiumCard style={[
               styles.sectionCard,
               {
-                elevation: Number(dataShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
-                shadowOpacity: Number(dataShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
+                                shadowOpacity: Number(dataShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
             <View style={styles.cardHeader}>
@@ -534,8 +532,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
             <PremiumCard style={[
               styles.sectionCard,
               {
-                elevation: Number(aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
-                shadowOpacity: Number(aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
+                                shadowOpacity: Number(aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
             <View style={styles.cardHeader}>
@@ -607,8 +604,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
             <PremiumCard style={[
               styles.sectionCard,
               {
-                elevation: Number(aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
-                shadowOpacity: Number(aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
+                                shadowOpacity: Number(aboutShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
             <View style={styles.cardHeader}>

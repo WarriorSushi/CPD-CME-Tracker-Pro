@@ -227,11 +227,7 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
                     style={[
                       styles.stepCard,
                       {
-                        elevation: stepShadowAnims[index].interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0, 4],
-                        }),
-                        shadowOpacity: stepShadowAnims[index].interpolate({
+                                                shadowOpacity: stepShadowAnims[index].interpolate({
                           inputRange: [0, 1],
                           outputRange: [0, 0.15],
                         }),

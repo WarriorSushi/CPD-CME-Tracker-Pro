@@ -41,8 +41,7 @@ export const UrgentLicenseWarnings: React.FC<UrgentLicenseWarningsProps> = ({
       <PremiumCard style={[
         styles.urgentWarningCard,
         {
-          elevation: Number(remindersShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 6] })),
-          shadowOpacity: Number(remindersShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] })),
+                    shadowOpacity: Number(remindersShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] })),
         }
       ]}>
         <View style={styles.urgentWarningHeader}>

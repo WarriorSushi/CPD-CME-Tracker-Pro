@@ -18,8 +18,7 @@ export const EventRemindersSection: React.FC<EventRemindersSectionProps> = ({
   onAddReminder,
 }) => {
   const cardShadowStyle: ViewStyle = {
-    elevation: Number(remindersShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })) as unknown as number,
-    shadowOpacity: Number(remindersShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })) as unknown as number,
+        shadowOpacity: Number(remindersShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })) as unknown as number,
   };
 
   return (

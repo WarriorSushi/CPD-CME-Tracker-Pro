@@ -33,8 +33,7 @@ export const NoLicensesPlaceholder: React.FC<NoLicensesPlaceholderProps> = ({
       <PremiumCard style={[
         styles.noLicensesCard,
         {
-          elevation: Number(licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
-          shadowOpacity: Number(licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
+                    shadowOpacity: Number(licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
         }
       ]}>
         <View style={styles.noLicensesContent}>

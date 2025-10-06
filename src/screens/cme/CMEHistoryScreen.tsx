@@ -364,8 +364,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
           <PremiumCard style={[
             styles.controls,
             {
-              elevation: Number(searchShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
-              shadowOpacity: Number(searchShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
+                            shadowOpacity: Number(searchShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
             }
           ]}>
         {/* 1. Search bar */}

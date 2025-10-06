@@ -23,8 +23,7 @@ export const RecentEntriesSection: React.FC<RecentEntriesSectionProps> = ({
   onViewCertificate,
 }) => {
   const cardShadowStyle: ViewStyle = {
-    elevation: Number(recentShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 3] })),
-    shadowOpacity: Number(recentShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.06] })),
+        shadowOpacity: Number(recentShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.06] })),
   };
 
   if (recentEntries.length === 0) {

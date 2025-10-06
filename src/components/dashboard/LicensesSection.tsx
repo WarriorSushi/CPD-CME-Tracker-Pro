@@ -25,8 +25,7 @@ export const LicensesSection: React.FC<LicensesSectionProps> = ({
   onSetReminders,
 }) => {
   const cardShadowStyle: ViewStyle = {
-    elevation: Number(licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })) as unknown as number,
-    shadowOpacity: Number(licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })) as unknown as number,
+        shadowOpacity: Number(licensesShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })) as unknown as number,
   };
 
   // Helper function to calculate days between dates

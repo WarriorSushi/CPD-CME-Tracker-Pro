@@ -156,8 +156,7 @@ export const ProfessionScreen: React.FC<Props> = ({ navigation }) => {
                   styles.inputCard,
                   styles.inputCardOverride,
                   {
-                    elevation: Number(inputShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
-                    shadowOpacity: Number(inputShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
+                                        shadowOpacity: Number(inputShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
                   }
                 ]}>
                   <View style={styles.inputWrapper}>

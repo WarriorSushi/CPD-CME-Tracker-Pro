@@ -181,8 +181,7 @@ export const AddReminderScreen: React.FC<Props> = ({ navigation }) => {
             <PremiumCard style={[
               styles.formCard,
               {
-                elevation: Number(formShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] })),
-                shadowOpacity: Number(formShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] })),
+                                shadowOpacity: Number(formShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.15] })),
               }
             ]}>
           <View style={styles.formHeader}>
@@ -257,8 +256,7 @@ export const AddReminderScreen: React.FC<Props> = ({ navigation }) => {
             <PremiumCard style={[
               styles.infoCard,
               {
-                elevation: Number(infoShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
-                shadowOpacity: Number(infoShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
+                                shadowOpacity: Number(infoShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
           <View style={styles.infoHeader}>

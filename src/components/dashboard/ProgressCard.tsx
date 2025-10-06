@@ -76,8 +76,7 @@ export const ProgressCard: React.FC<ProgressCardProps> = ({
       <PremiumCard style={[
         styles.progressCard,
         {
-          elevation: Number(progressShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 6] })),
-          shadowOpacity: Number(progressShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.12] })),
+                    shadowOpacity: Number(progressShadowAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.12] })),
         }
       ]}>
         {/* Header */}

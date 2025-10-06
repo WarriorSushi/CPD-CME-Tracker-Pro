@@ -276,11 +276,7 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
                     style={[
                       styles.gridOptionCard,
                       {
-                        elevation: optionShadowAnims[index].interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0, 4],
-                        }),
-                        shadowOpacity: optionShadowAnims[index].interpolate({
+                                                shadowOpacity: optionShadowAnims[index].interpolate({
                           inputRange: [0, 1],
                           outputRange: [0, 0.15],
                         }),

@@ -145,8 +145,7 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
               styles.featureCard, 
               styles.featureCardOverride,
               {
-                elevation: Number(shadow1Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
-                shadowOpacity: Number(shadow1Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
+                                shadowOpacity: Number(shadow1Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
               <View style={styles.featureIconContainer}>
@@ -186,8 +185,7 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
               styles.featureCard, 
               styles.featureCardOverride,
               {
-                elevation: Number(shadow2Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
-                shadowOpacity: Number(shadow2Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
+                                shadowOpacity: Number(shadow2Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
               <View style={styles.featureIconContainer}>
@@ -227,8 +225,7 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
               styles.featureCard, 
               styles.featureCardOverride,
               {
-                elevation: Number(shadow3Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 4] })),
-                shadowOpacity: Number(shadow3Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
+                                shadowOpacity: Number(shadow3Anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.08] })),
               }
             ]}>
               <View style={styles.featureIconContainer}>
