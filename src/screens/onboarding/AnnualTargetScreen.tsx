@@ -23,8 +23,8 @@ const TIME_PERIODS = [1, 2, 3, 5];
 
 export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const [customTarget, setCustomTarget] = useState('');
-  const [customPeriod, setCustomPeriod] = useState('');
+  const [customTarget, setCustomTarget] = useState<string>('');
+  const [customPeriod, setCustomPeriod] = useState<string>('');
   const [selectedTarget, setSelectedTarget] = useState<number | 'custom' | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<number | 'custom' | null>(null);
   const [creditSystem, setCreditSystem] = useState<CreditSystem>('CME');
@@ -314,7 +314,7 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                 ) : (
                   <Text style={[
                     styles.optionText,
-                    selectedTarget === 'custom' && styles.selectedText,
+                    (selectedTarget as any) === 'custom' && styles.selectedText,
                   ]}>
                     Custom
                   </Text>
@@ -411,7 +411,7 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                 ) : (
                   <Text style={[
                     styles.optionText,
-                    selectedPeriod === 'custom' && styles.selectedText,
+                    (selectedPeriod as any) === 'custom' && styles.selectedText,
                   ]}>
                     Custom
                   </Text>

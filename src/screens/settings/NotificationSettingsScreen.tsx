@@ -265,7 +265,7 @@ export const NotificationSettingsScreen: React.FC<Props> = ({ navigation }) => {
           onBackPress={() => navigation.goBack()}
         />
         <View style={styles.loadingContainer}>
-          <LoadingSpinner size="large" />
+          <LoadingSpinner size={48} />
           <Text style={styles.loadingText}>Loading settings...</Text>
         </View>
       </View>

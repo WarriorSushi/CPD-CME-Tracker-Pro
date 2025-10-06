@@ -180,12 +180,13 @@ const AnimatedTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navig
     ...styles.tabBar,
     height: (responsive.isTablet ? 80 : 70) + Math.max(insets.bottom, responsive.edgeToEdgeStyles.paddingBottom),
     paddingBottom: Math.max(insets.bottom, responsive.edgeToEdgeStyles.paddingBottom),
-    maxWidth: responsive.isTablet ? 800 : '100%',
+    maxWidth: responsive.isTablet ? 800 : '100%' as any,
     alignSelf: 'center' as const,
-    width: responsive.isTablet ? Math.min(responsive.width, 800) : '100%',  };
+    width: responsive.isTablet ? Math.min(responsive.width, 800) : '100%' as any,
+  };
 
   return (
-    <View style={dynamicTabBarStyle}>
+    <View style={dynamicTabBarStyle as any}>
       {/* Animated Blob Indicator */}
       <Animated.View
         style={[
@@ -253,7 +254,7 @@ const AnimatedTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navig
                   styles.tabLabel,
                   { color: isFocused ? '#003087' : '#374151' }
                 ]}>
-                  {label}
+                  {typeof label === 'string' ? label : ''}
                 </Text>
               </Animated.View>
             )}
@@ -416,7 +417,7 @@ export const MainTabNavigator: React.FC = () => {
       />
       <Stack.Screen
         name="AddLicense"
-        component={AddLicenseScreen}
+        component={AddLicenseScreen as any}
         options={{
           headerShown: false,
           ...modalTransition, // Modal slide-up transition

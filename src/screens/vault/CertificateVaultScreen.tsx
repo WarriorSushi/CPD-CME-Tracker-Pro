@@ -351,8 +351,8 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
                 try {
                   // Handle both string paths and thumbnail result objects
                   let thumbnailUri = certificate.thumbnailPath;
-                  if (typeof certificate.thumbnailPath === 'object' && certificate.thumbnailPath.thumbnailUri) {
-                    thumbnailUri = certificate.thumbnailPath.thumbnailUri;
+                  if (typeof certificate.thumbnailPath === 'object' && (certificate.thumbnailPath as any).thumbnailUri) {
+                    thumbnailUri = (certificate.thumbnailPath as any).thumbnailUri;
                   }
                   
                   const thumbnailInfo = await FileSystem.getInfoAsync(thumbnailUri);

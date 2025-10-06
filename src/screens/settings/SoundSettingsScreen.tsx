@@ -134,9 +134,9 @@ export const SoundSettingsScreen: React.FC<Props> = ({ navigation }) => {
 
   const testSounds = [
     { name: 'Button Press', action: playButtonTap, description: 'All button interactions (65% volume)' },
-    { name: 'Navigation', action: () => soundManager.play('navigationSwipe'), description: 'Screen transitions (35% volume)' },
+    { name: 'Navigation', action: async () => soundManager.play('navigationSwipe'), description: 'Screen transitions (35% volume)' },
     { name: 'Error', action: playError, description: 'Validation errors & failures (70% volume)' },
-    { name: 'Notification', action: () => soundManager.play('notification'), description: 'Alerts & notifications (100% volume)' },
+    { name: 'Notification', action: async () => soundManager.play('notification'), description: 'Alerts & notifications (100% volume)' },
   ];
 
   const handleTestSound = async (action: () => Promise<void>, name: string) => {
@@ -272,7 +272,6 @@ export const SoundSettingsScreen: React.FC<Props> = ({ navigation }) => {
                   disabled={!isEnabled || isLoading}
                   minimumTrackTintColor={theme.colors.primary}
                   maximumTrackTintColor={theme.colors.gray.light}
-                  thumbStyle={{ backgroundColor: theme.colors.primary }}
                 />
                 <Text style={styles.sliderLabel}>Loud</Text>
               </View>
@@ -311,7 +310,7 @@ export const SoundSettingsScreen: React.FC<Props> = ({ navigation }) => {
                     styles.testButton,
                     !isEnabled && styles.testButtonDisabled
                   ]}
-                  onPress={() => handleTestSound(sound.action, sound.name)}
+                  onPress={() => handleTestSound(sound.action as any, sound.name)}
                   disabled={!isEnabled}
                 >
                   <View style={styles.testButtonContent}>
@@ -332,10 +331,7 @@ export const SoundSettingsScreen: React.FC<Props> = ({ navigation }) => {
                     name="play"
                     size={18}
                     color={isEnabled ? theme.colors.primary : theme.colors.text.disabled}
-                    style={[
-                      styles.testButtonIcon,
-                      !isEnabled && styles.testButtonIconDisabled
-                    ]}
+                    style={styles.testButtonIcon}
                   />
                 </TouchableOpacity>
               ))}

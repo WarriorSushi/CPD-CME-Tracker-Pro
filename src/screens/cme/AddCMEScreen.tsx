@@ -88,7 +88,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
     title: editEntry?.title || ocrData?.title || '',
     provider: editEntry?.provider || ocrData?.provider || '',
     dateAttended: editEntry ? new Date(editEntry.dateAttended) : parseOCRDate(ocrData?.date),
-    creditsEarned: editEntry?.creditsEarned?.toString() || ocrData?.credits || '',
+    creditsEarned: editEntry?.creditsEarned?.toString() || ocrData?.credits?.toString() || '',
     category: editEntry?.category || ocrData?.category || CME_CATEGORIES[0],
     notes: editEntry?.notes || '',
     certificatePath: editEntry?.certificatePath || ocrData?.certificatePath || undefined,
@@ -143,10 +143,10 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
     setFormData({
       title: currentEditEntry?.title || currentOcrData?.title || '',
       provider: currentEditEntry?.provider || currentOcrData?.provider || '',
-      dateAttended: currentEditEntry 
-        ? new Date(currentEditEntry.dateAttended) 
+      dateAttended: currentEditEntry
+        ? new Date(currentEditEntry.dateAttended)
         : parseOCRDate(currentOcrData?.date),
-      creditsEarned: currentEditEntry?.creditsEarned?.toString() || currentOcrData?.credits || '',
+      creditsEarned: currentEditEntry?.creditsEarned?.toString() || currentOcrData?.credits?.toString() || '',
       category: currentEditEntry?.category || currentOcrData?.category || CME_CATEGORIES[0],
       notes: currentEditEntry?.notes || '',
       certificatePath: currentEditEntry?.certificatePath || currentOcrData?.certificatePath || undefined,

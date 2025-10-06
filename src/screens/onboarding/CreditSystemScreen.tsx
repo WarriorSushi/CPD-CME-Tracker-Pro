@@ -221,7 +221,7 @@ export const CreditSystemScreen: React.FC<Props> = ({ navigation }) => {
                   <View style={styles.optionContent}>
                     <View style={styles.optionIconContainer}>
                       <LinearGradient
-                        colors={system.colors}
+                        colors={system.colors as any}
                         style={styles.optionIconGradient}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}

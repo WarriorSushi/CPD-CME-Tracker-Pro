@@ -237,7 +237,7 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
                     <View style={styles.stepContent}>
                       <View style={styles.stepIconContainer}>
                         <LinearGradient
-                          colors={step.colors}
+                          colors={step.colors as any}
                           style={styles.stepIcon}
                           start={{ x: 0, y: 0 }}
                           end={{ x: 1, y: 1 }}

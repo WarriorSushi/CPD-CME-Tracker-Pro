@@ -376,7 +376,6 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
           minLines={1}
           maxLines={2}
           style={styles.searchInput}
-          inputStyle={styles.searchInputField}
         />
         
         {/* 2. Information bar with stats */}
@@ -664,6 +663,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: theme.spacing[3],
+  },
+  certificateIcon: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
   },
   entryInfo: {
     flex: 1,

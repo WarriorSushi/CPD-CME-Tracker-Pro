@@ -121,7 +121,7 @@ export const DesignSystemDemo: React.FC = () => {
                 Primary: {theme.colors.primary}
               </Text>
               <Text style={[styles.tokenText, { color: theme.colors.text.secondary }]}>
-                Selected: {theme.colors.selectedBg}
+                Success: {theme.colors.success}
               </Text>
               <Text style={[styles.tokenText, { color: theme.colors.text.secondary }]}>
                 Success: {theme.colors.success}

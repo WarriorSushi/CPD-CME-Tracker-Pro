@@ -25,7 +25,7 @@ export type MainTabParamList = {
   CME: undefined;
   Vault: undefined;
   Settings: undefined;
-  AddCME: { 
+  AddCME: {
     editEntry?: CMEEntry;
     ocrData?: {
       title?: string;
@@ -35,12 +35,13 @@ export type MainTabParamList = {
       category?: string;
       certificatePath?: string;
     };
-  };
-  AddLicense: undefined;
+  } | undefined;
+  AddLicense: { editLicense?: any } | undefined;
   AddReminder: undefined;
   CertificateViewer: { imageUri: string };
   ProfileEdit: undefined;
   NotificationSettings: undefined;
+  CMEHistory: undefined;
 };
 
 export type TabParamList = {

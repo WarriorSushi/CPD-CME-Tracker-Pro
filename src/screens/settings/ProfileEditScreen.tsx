@@ -359,18 +359,16 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
                 title={isUploadingImage ? "Uploading..." : profilePicturePath ? "Change Photo" : "Add Photo"}
                 onPress={handleImagePicker}
                 variant="primary"
-                size="small"
                 disabled={isUploadingImage}
                 loading={isUploadingImage}
                 style={styles.changePhotoButton}
               />
-              
+
               {profilePicturePath && (
                 <PremiumButton
                   title="Remove"
                   onPress={handleRemoveProfilePicture}
                   variant="secondary"
-                  size="small"
                   style={styles.removePhotoButton}
                 />
               )}
