@@ -40,7 +40,7 @@ export const CertificateProvider: React.FC<CertificateProviderProps> = ({ childr
     setError(null);
 
     try {
-      const result = await databaseOperations.certificateOperations.getAllCertificates();
+      const result = await databaseOperations.certificates.getAllCertificates();
 
       if (result.success && result.data) {
         setCertificates(result.data);

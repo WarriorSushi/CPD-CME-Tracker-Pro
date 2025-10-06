@@ -43,7 +43,7 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({ children }) =>
     setError(null);
 
     try {
-      const result = await databaseOperations.licenseOperations.getAllLicenses();
+      const result = await databaseOperations.licenses.getAllLicenses();
 
       if (result.success && result.data) {
         setLicenses(result.data);
@@ -61,7 +61,7 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({ children }) =>
   const addLicense = useCallback(
     async (license: Omit<LicenseRenewal, 'id' | 'createdAt' | 'updatedAt'>): Promise<boolean> => {
       try {
-        const result = await databaseOperations.licenseOperations.addLicense(license);
+        const result = await databaseOperations.licenses.addLicense(license);
 
         if (result.success) {
           await refreshLicenses();
@@ -101,7 +101,7 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({ children }) =>
   const updateLicense = useCallback(
     async (id: number, license: Partial<LicenseRenewal>): Promise<boolean> => {
       try {
-        const result = await databaseOperations.licenseOperations.updateLicense(id, license);
+        const result = await databaseOperations.licenses.updateLicense(id, license);
 
         if (result.success) {
           await refreshLicenses();
@@ -138,7 +138,7 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({ children }) =>
   const deleteLicense = useCallback(
     async (id: number): Promise<boolean> => {
       try {
-        const result = await databaseOperations.licenseOperations.deleteLicense(id);
+        const result = await databaseOperations.licenses.deleteLicense(id);
 
         if (result.success) {
           await refreshLicenses();

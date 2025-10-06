@@ -62,15 +62,15 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const updateUser = useCallback(async (userData: Partial<User>): Promise<boolean> => {
     try {
-      if (!user?.id) {
-        throw new Error('No user ID found');
-      }
+      const result = await databaseOperations.user.updateUser(userData);
 
-      const result = await databaseOperations.userOperations.updateUser(user.id, userData);
+      if (result.success) {
+        const refreshed = await refreshUserCache();
+        const nextUser = result.data ?? refreshed ?? null;
 
-      if (result.success && result.data) {
-        setUser(result.data);
-        await refreshUserCache();
+        if (nextUser) {
+          setUser(nextUser);
+        }
 
         await AuditTrailService.logUserAction(
           'update_user',
@@ -95,7 +95,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
       return false;
     }
-  }, [user]);
+  }, []);
 
   const updateUserProfile = useCallback(
     async (userData: Partial<User>): Promise<boolean> => {
@@ -128,3 +128,4 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
+

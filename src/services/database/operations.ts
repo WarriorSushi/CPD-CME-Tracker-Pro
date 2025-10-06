@@ -92,25 +92,53 @@ export const userOperations = {
   },
 
   // Update user information
-  updateUser: async (userData: Partial<User>): Promise<DatabaseOperationResult> => {
+  updateUser: async (userData: Partial<User>): Promise<DatabaseOperationResult<User>> => {
     try {
 
       const db = await getDatabase();
       
       return dbMutex.runDatabaseWrite('updateUser', async () => {
-        // Check which columns exist to avoid SQL errors
         const columns = await db.getAllAsync('PRAGMA table_info(users)');
         const columnNames = columns.map((col: { name: string }) => col.name);
         const hasProfileColumns = columnNames.includes('profile_name') && columnNames.includes('age') && columnNames.includes('profile_picture_path');
-        
-        // First, check if user exists
+        const hasUpdatedAt = columnNames.includes('updated_at');
+
+        const selectFields = [
+          'id',
+          'profession',
+          'credit_system as creditSystem',
+          'annual_requirement as annualRequirement',
+          'requirement_period as requirementPeriod',
+          'cycle_start_date as cycleStartDate',
+          'cycle_end_date as cycleEndDate',
+          'created_at as createdAt',
+        ];
+
+        if (hasProfileColumns) {
+          selectFields.push('profile_name as profileName', 'age', 'profile_picture_path as profilePicturePath');
+        }
+
+        if (hasUpdatedAt) {
+          selectFields.push('updated_at as updatedAt');
+        }
+
+        const selectUserQuery = `
+          SELECT ${selectFields.join(', ')}
+          FROM users
+          WHERE id = 1
+        `;
+
+        const fetchUpdatedUser = async () => {
+          const user = await getFirstSafe<User>(db, selectUserQuery);
+          return user || undefined;
+        };
+
         const existingUser = await getFirstSafe<any>(db, 'SELECT id FROM users WHERE id = 1');
-        
+
         if (!existingUser) {
 
-          // Create user with only the fields that were actually provided
           const createFields = ['id'];
-          const createPlaceholders = ['1']; // User ID is always 1
+          const createPlaceholders = ['1'];
           const createValues: any[] = [];
           
           if (userData.profession) {
@@ -164,11 +192,11 @@ export const userOperations = {
             VALUES (${createPlaceholders.join(', ')})
           `, createValues);
 
-          return { success: true };
+          return { success: true, data: await fetchUpdatedUser() };
         }
         
-        const fields = [];
-        const values = [];
+        const fields: string[] = [];
+        const values: any[] = [];
         
         if (userData.profession) {
           fields.push('profession = ?');
@@ -207,18 +235,21 @@ export const userOperations = {
           fields.push('profile_picture_path = ?');
           values.push(userData.profilePicturePath);
         }
-
-        if (fields.length === 0) {
-          return { success: true };
+        if (hasUpdatedAt) {
+          fields.push('updated_at = CURRENT_TIMESTAMP');
         }
 
-        values.push(1); // user ID
+        if (fields.length === 0) {
+          return { success: true, data: await fetchUpdatedUser() };
+        }
+
+        values.push(1);
 
         const query = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
 
-        const result = await runSafe(db, query, values);
+        await runSafe(db, query, values);
 
-        return { success: true };
+        return { success: true, data: await fetchUpdatedUser() };
       });
     } catch (error) {
       return {
@@ -227,6 +258,7 @@ export const userOperations = {
       };
     }
   },
+
 };
 
 // CME entry operations
@@ -282,6 +314,45 @@ export const cmeOperations = {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to get CME entries',
+      };
+    }
+  },
+
+  // Get recent CME entries with optional limit
+  getRecentEntries: async (limit: number = 10): Promise<DatabaseOperationResult<CMEEntry[]>> => {
+    try {
+      const db = await getDatabase();
+
+      return dbMutex.runDatabaseRead('getRecentEntries', async () => {
+        const safeLimit = Math.max(1, Math.min(Math.floor(limit) || 1, 100));
+
+        const entries = await getAllSafe<CMEEntry>(db, `
+          SELECT 
+            id,
+            title,
+            provider,
+            date_attended as dateAttended,
+            credits_earned as creditsEarned,
+            category,
+            notes,
+            certificate_path as certificatePath,
+            created_at as createdAt,
+            updated_at as updatedAt
+          FROM cme_entries 
+          WHERE user_id = 1
+          ORDER BY date_attended DESC, id DESC
+          LIMIT ?
+        `, [safeLimit]);
+
+        return {
+          success: true,
+          data: entries,
+        };
+      });
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get recent CME entries',
       };
     }
   },
@@ -1135,9 +1206,15 @@ export const eventReminderOperations = {
 // Export all operations
 export const databaseOperations = {
   user: userOperations,
+  userOperations,
   cme: cmeOperations,
+  cmeOperations,
   certificates: certificateOperations,
+  certificateOperations,
   licenses: licenseOperations,
+  licenseOperations,
   eventReminders: eventReminderOperations,
+  eventReminderOperations,
   settings: settingsOperations,
+  settingsOperations,
 };

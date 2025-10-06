@@ -83,7 +83,7 @@ export const CMEProvider: React.FC<CMEProviderProps> = ({ children }) => {
     setError(null);
 
     try {
-      const entriesResult = await databaseOperations.cmeOperations.getRecentCMEEntries(10);
+      const entriesResult = await databaseOperations.cme.getRecentEntries(10);
 
       if (entriesResult.success && entriesResult.data) {
         setRecentCMEEntries(entriesResult.data);
@@ -109,7 +109,7 @@ export const CMEProvider: React.FC<CMEProviderProps> = ({ children }) => {
 
   const loadAllCMEEntries = useCallback(async (): Promise<CMEEntry[]> => {
     try {
-      const result = await databaseOperations.cmeOperations.getAllCMEEntries();
+      const result = await databaseOperations.cme.getAllEntries();
 
       if (result.success && result.data) {
         return result.data;
@@ -126,7 +126,7 @@ export const CMEProvider: React.FC<CMEProviderProps> = ({ children }) => {
   const addCMEEntry = useCallback(
     async (entry: Omit<CMEEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<boolean> => {
       try {
-        const result = await databaseOperations.cmeOperations.addCMEEntry(entry);
+        const result = await databaseOperations.cme.addEntry(entry);
 
         if (result.success) {
           entriesStaleRef.current = true;
@@ -168,7 +168,7 @@ export const CMEProvider: React.FC<CMEProviderProps> = ({ children }) => {
   const updateCMEEntry = useCallback(
     async (id: number, entry: Partial<CMEEntry>): Promise<boolean> => {
       try {
-        const result = await databaseOperations.cmeOperations.updateCMEEntry(id, entry);
+        const result = await databaseOperations.cme.updateEntry(id, entry);
 
         if (result.success) {
           entriesStaleRef.current = true;
@@ -206,7 +206,7 @@ export const CMEProvider: React.FC<CMEProviderProps> = ({ children }) => {
   const deleteCMEEntry = useCallback(
     async (id: number): Promise<boolean> => {
       try {
-        const result = await databaseOperations.cmeOperations.deleteCMEEntry(id);
+        const result = await databaseOperations.cme.deleteEntry(id);
 
         if (result.success) {
           entriesStaleRef.current = true;
