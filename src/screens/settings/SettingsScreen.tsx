@@ -687,7 +687,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'transparent', // Let AnimatedGradientBackground show through
   },
-  scrollContent: {
+  scrollContentOld: {
     flex: 1,
     paddingHorizontal: theme.spacing[4],
     paddingTop: theme.spacing[2],
@@ -758,7 +758,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: theme.colors.primary,
   },
-  profileIconWrapper: {
+  profileIconWrapperOld: {
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -920,7 +920,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
-  modernActionIcon: {
+  modernActionIconOld: {
     fontSize: 24,
     marginBottom: theme.spacing[2],
   },
@@ -1018,7 +1018,7 @@ const styles = StyleSheet.create({
   licenseCard: {
     padding: theme.spacing[4],
   },
-  licenseHeader: {
+  licenseHeaderOld: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
@@ -1034,12 +1034,12 @@ const styles = StyleSheet.create({
     color: theme.colors.text.primary,
     marginBottom: theme.spacing[1],
   },
-  licenseAuthority: {
+  licenseAuthorityOld: {
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
     marginBottom: theme.spacing[1],
   },
-  licenseNumber: {
+  licenseNumberOld: {
     fontSize: theme.typography.fontSize.xs,
     color: theme.colors.text.secondary,
   },
@@ -1056,7 +1056,7 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.background,
   },
-  licenseDetails: {
+  licenseDetailsOld: {
     marginBottom: theme.spacing[3],
   },
   licenseDate: {
@@ -1081,7 +1081,7 @@ const styles = StyleSheet.create({
   creditsProgress: {
     height: '100%',
   },
-  licenseActions: {
+  licenseActionsOld: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: theme.spacing[3],
