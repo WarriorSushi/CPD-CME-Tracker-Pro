@@ -27,12 +27,13 @@ import { LicenseRenewal } from '../../types';
 import { MainTabParamList, TabParamList } from '../../types/navigation';
 import { APP_CONFIG } from '../../constants';
 import { getCreditUnit } from '../../utils/creditTerminology';
-import { 
-  exportCMEToCSV, 
-  exportLicensesToCSV, 
-  generateSummaryReport, 
-  createBackup 
+import {
+  exportCMEToCSV,
+  exportLicensesToCSV,
+  generateSummaryReport,
+  createBackup
 } from '../../utils/dataExport';
+import { databaseOperations } from '../../services/database';
 import { soundManager } from '../../services/sound/SoundManager';
 import { useSound } from '../../hooks/useSound';
 

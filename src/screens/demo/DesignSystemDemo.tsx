@@ -118,19 +118,19 @@ export const DesignSystemDemo: React.FC = () => {
             </Text>
             <View style={styles.tokensContainer}>
               <Text style={[styles.tokenText, { color: theme.colors.text.secondary }]}>
-                Primary: {tokens.color.primary}
+                Primary: {theme.colors.primary}
               </Text>
               <Text style={[styles.tokenText, { color: theme.colors.text.secondary }]}>
-                Selected: {tokens.color.selectedBg}
+                Selected: {theme.colors.selectedBg}
               </Text>
               <Text style={[styles.tokenText, { color: theme.colors.text.secondary }]}>
-                Success: {tokens.color.success}
+                Success: {theme.colors.success}
               </Text>
               <Text style={[styles.tokenText, { color: theme.colors.text.secondary }]}>
-                Warning: {tokens.color.warningBorder}
+                Warning: {theme.colors.warning}
               </Text>
               <Text style={[styles.tokenText, { color: theme.colors.text.secondary }]}>
-                Error: {tokens.color.error}
+                Error: {theme.colors.error}
               </Text>
             </View>
           </View>
