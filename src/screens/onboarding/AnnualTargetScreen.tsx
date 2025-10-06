@@ -253,10 +253,6 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                   style={[
                     styles.optionCard,
                     {
-                      elevation: targetShadowAnims[index].interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, 4],
-                      }),
                       shadowOpacity: targetShadowAnims[index].interpolate({
                         inputRange: [0, 1],
                         outputRange: [0, 0.15],
@@ -296,10 +292,6 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                   styles.optionCard,
                   styles.customTileCard,
                   {
-                    elevation: customTargetShadowAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0, 4],
-                    }),
                     shadowOpacity: customTargetShadowAnim.interpolate({
                       inputRange: [0, 1],
                       outputRange: [0, 0.15],
@@ -358,10 +350,6 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                   style={[
                     styles.optionCard,
                     {
-                      elevation: periodShadowAnims[index].interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, 4],
-                      }),
                       shadowOpacity: periodShadowAnims[index].interpolate({
                         inputRange: [0, 1],
                         outputRange: [0, 0.15],
@@ -401,10 +389,6 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                   styles.optionCard,
                   styles.customTileCard,
                   {
-                    elevation: customPeriodShadowAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0, 4],
-                    }),
                     shadowOpacity: customPeriodShadowAnim.interpolate({
                       inputRange: [0, 1],
                       outputRange: [0, 0.15],

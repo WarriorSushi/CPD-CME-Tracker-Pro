@@ -333,11 +333,7 @@ export const CycleStartDateScreen: React.FC<Props> = ({ navigation }) => {
                 style={[
                   styles.customOptionCard,
                   {
-                    elevation: customShadowAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0, 4],
-                    }),
-                    shadowOpacity: customShadowAnim.interpolate({
+                                        shadowOpacity: customShadowAnim.interpolate({
                       inputRange: [0, 1],
                       outputRange: [0, 0.15],
                     }),
