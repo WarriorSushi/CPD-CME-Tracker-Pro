@@ -261,7 +261,7 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                         inputRange: [0, 1],
                         outputRange: [0, 0.15],
                       }),
-                    }
+                    } as any
                   ]}
                   cardOverride={{
                     elevation: 0,
@@ -309,7 +309,7 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                       inputRange: [0, 1],
                       outputRange: [0, 0.15],
                     }),
-                  }
+                  } as any
                 ]}
                 cardOverride={{
                   elevation: 0,
@@ -376,7 +376,7 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                         inputRange: [0, 1],
                         outputRange: [0, 0.15],
                       }),
-                    }
+                    } as any
                   ]}
                   cardOverride={{
                     elevation: 0,
@@ -424,7 +424,7 @@ export const AnnualTargetScreen: React.FC<Props> = ({ navigation }) => {
                       inputRange: [0, 1],
                       outputRange: [0, 0.15],
                     }),
-                  }
+                  } as any
                 ]}
                 cardOverride={{
                   elevation: 0,

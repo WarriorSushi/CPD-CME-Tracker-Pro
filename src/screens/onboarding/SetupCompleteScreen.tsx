@@ -223,7 +223,7 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
                     },
                   ]}
                 >
-                  <PremiumCard 
+                  <PremiumCard
                     style={[
                       styles.stepCard,
                       {
@@ -235,7 +235,7 @@ export const SetupCompleteScreen: React.FC<Props> = ({ navigation }) => {
                           inputRange: [0, 1],
                           outputRange: [0, 0.15],
                         }),
-                      }
+                      } as any
                     ]}
                     cardOverride={{
                       elevation: 0,
