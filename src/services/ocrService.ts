@@ -1,28 +1,14 @@
-import { extractTextFromImage } from 'expo-text-extractor';
+// OCR functionality not implemented - expo-text-extractor is not available in Expo 54
+// import { extractTextFromImage } from 'expo-text-extractor';
 import { OCRResult } from '../types';
 
 export class OCRService {
   /**
    * Extract text from image using ML Kit OCR
+   * @deprecated OCR functionality not implemented in current version
    */
   static async extractText(imageUri: string): Promise<OCRResult> {
-    try {
-
-      const result = await extractTextFromImage(imageUri);
-      const extractedText = (result as any).text || '';
-
-      // Parse the extracted text to identify CME-relevant data
-      const parsedData = this.parseCMEData(extractedText);
-      
-      return {
-        text: extractedText,
-        confidence: 0.85, // expo-text-extractor doesn't return confidence, use default
-        extractedData: parsedData,
-      };
-    } catch (error) {
-      __DEV__ && console.error('[ERROR] OCRService: Text extraction failed:', error);
-      throw new Error('Failed to extract text from image');
-    }
+    throw new Error('OCR functionality is not implemented in this version. Please enter data manually.');
   }
 
   /**
