@@ -328,7 +328,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <ErrorBoundary>
-      <View style={dynamicStyles.container}>
+      <View style={dynamicStyles.container as any}>
         <AnimatedGradientBackground />
 
         <StandardHeader
@@ -351,7 +351,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             {/* Progress Card */}
             <Animated.View
               style={[
-                dynamicStyles.upperSection,
+                dynamicStyles.upperSection as any,
                 {
                   opacity: progressCardAnim,
                   transform: [{
@@ -381,7 +381,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             {urgentRenewals.length > 0 && (
               <Animated.View
                 style={[
-                  dynamicStyles.sectionContainer,
+                  dynamicStyles.sectionContainer as any,
                   {
                     opacity: remindersCardAnim,
                     transform: [{
@@ -395,8 +395,9 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
               >
                 <UrgentLicenseWarnings
                   urgentRenewals={urgentRenewals}
+                  remindersCardAnim={remindersShadowAnim}
                   remindersShadowAnim={remindersShadowAnim}
-                  onEditLicense={(license) =>
+                  onRenewLicense={(license: any) =>
                     (navigation.getParent() as any).navigate('AddLicense', { editLicense: license })
                   }
                   onViewAll={() => navigation.navigate('Settings')}
@@ -410,7 +411,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             {/* Event Reminders Section */}
             <Animated.View
               style={[
-                dynamicStyles.sectionContainer,
+                dynamicStyles.sectionContainer as any,
                 {
                   opacity: remindersCardAnim,
                   transform: [{
@@ -434,7 +435,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             {licenses && licenses.length > 0 && (
               <Animated.View
                 style={[
-                  dynamicStyles.sectionContainer,
+                  dynamicStyles.sectionContainer as any,
                   {
                     opacity: licensesCardAnim,
                     transform: [{
@@ -464,7 +465,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             {(!licenses || licenses.length === 0) && (
               <Animated.View
                 style={[
-                  dynamicStyles.noLicensesSection,
+                  dynamicStyles.noLicensesSection as any,
                   {
                     opacity: licensesCardAnim,
                     transform: [{
@@ -488,7 +489,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             {recentEntries.length > 0 && (
               <Animated.View
                 style={[
-                  dynamicStyles.recentSection,
+                  dynamicStyles.recentSection as any,
                   {
                     opacity: recentCardAnim,
                     transform: [{
