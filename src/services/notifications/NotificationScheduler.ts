@@ -13,7 +13,7 @@ export class NotificationScheduler {
    * Calculate cycle ending notifications based on user data
    */
   static calculateCycleEndingNotifications(
-    user: User, 
+    user: User,
     currentProgress: number,
     settings: NotificationSettings
   ): ScheduledNotification[] {
@@ -23,6 +23,13 @@ export class NotificationScheduler {
 
     const notifications: ScheduledNotification[] = [];
     const cycleEndDate = new Date(user.cycleEndDate);
+
+    // Validate date - prevent crash on invalid dates
+    if (isNaN(cycleEndDate.getTime())) {
+      __DEV__ && console.warn('[WARN] NotificationScheduler: Invalid cycle end date:', user.cycleEndDate);
+      return [];
+    }
+
     const creditUnit = getCreditUnit(user.creditSystem || 'CME');
     const remaining = Math.max(0, (user.annualRequirement || 0) - currentProgress);
 
@@ -83,7 +90,19 @@ export class NotificationScheduler {
     licenses.forEach(license => {
       if (license.status !== 'active') return;
 
+      // Validate expiration date exists
+      if (!license.expirationDate) {
+        __DEV__ && console.warn('[WARN] NotificationScheduler: License missing expiration date:', license.id);
+        return;
+      }
+
       const expiryDate = new Date(license.expirationDate);
+
+      // Validate date - prevent crash on invalid dates
+      if (isNaN(expiryDate.getTime())) {
+        __DEV__ && console.warn('[WARN] NotificationScheduler: Invalid license expiration date:', license.expirationDate);
+        return;
+      }
 
       settings.licenseReminders.intervals.forEach(days => {
         const notificationDate = new Date(expiryDate);
@@ -138,7 +157,20 @@ export class NotificationScheduler {
     const notifications: ScheduledNotification[] = [];
 
     events.forEach(event => {
+      // Validate event date exists
+      if (!event.eventDate) {
+        __DEV__ && console.warn('[WARN] NotificationScheduler: Event missing date:', event.id);
+        return;
+      }
+
       const eventDate = new Date(event.eventDate);
+
+      // Validate date - prevent crash on invalid dates
+      if (isNaN(eventDate.getTime())) {
+        __DEV__ && console.warn('[WARN] NotificationScheduler: Invalid event date:', event.eventDate);
+        return;
+      }
+
       const reminderDate = new Date(eventDate);
       reminderDate.setDate(eventDate.getDate() - settings.eventReminders.defaultInterval);
 
