@@ -294,7 +294,8 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   const dynamicStyles = {
     container: {
       ...styles.container,
-      paddingTop: responsive.edgeToEdgeStyles.paddingTop,
+      // Don't add paddingTop - StandardHeader handles safe area insets
+      // AnimatedGradientBackground needs to extend into status bar area
     },
     upperSection: {
       ...styles.upperSection,
