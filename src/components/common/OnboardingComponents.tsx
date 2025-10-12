@@ -80,7 +80,7 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
         ]}
       >
         <LinearGradient
-          colors={disabled || loading ? ['#E2E8F0', '#CBD5E0'] : ['#667EEA', '#764BA2']}
+          colors={disabled || loading ? ['#CBD5E0', '#A0AEC0'] : ['#667EEA', '#764BA2']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={[
@@ -89,7 +89,7 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
           ]}
         >
           {loading ? (
-            <ActivityIndicator size="small" color="#4A5568" />
+            <ActivityIndicator size="small" color="#2D3748" />
           ) : (
             <Text
               style={[
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   newPrimaryButtonTextDisabled: {
-    color: '#4A5568',
+    color: '#2D3748', // Darker gray for better contrast on light disabled background
   },
   
   newSecondaryButton: {

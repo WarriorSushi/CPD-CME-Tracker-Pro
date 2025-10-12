@@ -565,6 +565,11 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const handleSubmit = async () => {
+    // Prevent double submission - critical for preventing race conditions
+    if (isLoading) {
+      __DEV__ && console.warn('[WARN] handleSubmit: Already processing, ignoring duplicate call');
+      return;
+    }
 
     if (!validateForm()) {
       // Play error sound for validation failure
@@ -573,7 +578,7 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       Alert.alert('Validation Error', 'Please fix the errors in the form.');
       return;
     }
-    
+
     // Play form submit sound when starting submission
     await playFormSubmit();
 
@@ -611,12 +616,13 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
         // Mark as saved to prevent unsaved changes warning
         setWasSaved(true);
 
-        // Show success confirmation
+        // Show success confirmation - safely handle empty title
+        const entryTitle = formData.title?.trim() || 'Entry';
         Alert.alert(
           isEditing ? 'Entry Updated' : 'Entry Added',
           isEditing
-            ? `${formData.title} has been updated successfully.`
-            : `${formData.title} has been added successfully.`,
+            ? `${entryTitle} has been updated successfully.`
+            : `${entryTitle} has been added successfully.`,
           [{
             text: 'OK',
             onPress: () => navigation.goBack()
