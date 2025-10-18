@@ -34,6 +34,7 @@ export const Button = React.memo<ButtonProps>(({
   textStyle,
 }) => {
   const pressAnimation = useSharedValue(0);
+  const showDisabledStyles = disabled && !loading;
 
   const handlePressIn = () => {
     if (!disabled) { // No animation for disabled buttons
@@ -74,12 +75,12 @@ export const Button = React.memo<ButtonProps>(({
   const colors = {
     primary: theme.colors.primary,
     primaryDark: theme.colors.primaryDark,
-    primaryDisabled: theme.colors.button.disabled,
     gray100: theme.colors.gray[100],
     gray300: theme.colors.gray[300],
     gray400: theme.colors.gray[400],
+    gray600: theme.colors.gray[600],
+    gray700: theme.colors.gray[700],
     error: theme.colors.error,
-    errorDisabled: theme.colors.button.disabled,
     white: theme.colors.white,
   };
 
@@ -194,25 +195,25 @@ export const Button = React.memo<ButtonProps>(({
       case 'outline':
         return {
           backgroundColor: 'transparent',
-          borderColor: disabled ? theme.colors.gray[200] : theme.colors.gray[300],
+          borderColor: showDisabledStyles ? colors.gray300 : colors.gray400,
           borderWidth: 1,
-          borderBottomWidth: disabled ? 1 : 6, // Remove ledge when disabled
-          borderBottomColor: disabled ? theme.colors.gray[200] : theme.colors.gray[400],
-          color: disabled ? theme.colors.text.disabled : theme.colors.text.primary,
+          borderBottomWidth: showDisabledStyles ? 1 : 6, // Remove ledge when disabled
+          borderBottomColor: showDisabledStyles ? colors.gray300 : colors.gray400,
+          color: showDisabledStyles ? colors.gray600 : theme.colors.text.primary,
         };
       case 'destructive':
         return {
-          backgroundColor: disabled ? colors.errorDisabled : colors.error,
-          borderBottomWidth: disabled ? 0 : 5, // Remove ledge when disabled
-          borderBottomColor: disabled ? 'transparent' : colors.error,
-          color: disabled ? `rgba(255, 255, 255, 0.85)` : colors.white, // 85% white opacity for disabled
+          backgroundColor: showDisabledStyles ? colors.gray300 : colors.error,
+          borderBottomWidth: showDisabledStyles ? 0 : 5, // Remove ledge when disabled
+          borderBottomColor: showDisabledStyles ? colors.gray400 : colors.error,
+          color: showDisabledStyles ? colors.gray700 : colors.white,
         };
       default: // primary
         return {
-          backgroundColor: disabled ? colors.primaryDisabled : colors.primary,
-          borderBottomWidth: disabled ? 0 : 5, // Remove ledge when disabled
-          borderBottomColor: disabled ? 'transparent' : colors.primaryDark,
-          color: disabled ? `rgba(255, 255, 255, 0.85)` : colors.white, // 85% white opacity for disabled
+          backgroundColor: showDisabledStyles ? colors.gray300 : colors.primary,
+          borderBottomWidth: showDisabledStyles ? 0 : 5, // Remove ledge when disabled
+          borderBottomColor: showDisabledStyles ? colors.gray400 : colors.primaryDark,
+          color: showDisabledStyles ? colors.gray700 : colors.white,
         };
     }
   };

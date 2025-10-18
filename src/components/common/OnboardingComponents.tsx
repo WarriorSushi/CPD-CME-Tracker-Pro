@@ -42,7 +42,38 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
 }) => {
   const { playButtonPress, playButtonTap } = useSound({ enabled: enableSound, volume: soundVolume });
 
-  const canInteract = !disabled && !loading;
+  const isDisabledState = disabled;
+  const isLoadingState = loading;
+  const canInteract = !isDisabledState && !isLoadingState;
+  const showDisabledStyles = isDisabledState && !isLoadingState;
+
+  const primaryPalette = {
+    baseGradient: ['#667EEA', '#764BA2'] as const,
+    pressedGradient: ['#5A67D8', '#6B46C1'] as const,
+    disabledGradient: ['#C3DAFE', '#A3BFFA'] as const,
+    text: theme.colors.white,
+    textDisabled: '#1F2937',
+    spinner: '#1F2937',
+    border: 'rgba(102, 126, 234, 0.3)',
+    disabledBorder: '#A3BFFA',
+  };
+
+  const secondaryPalette = {
+    background: '#FFFFFF',
+    pressedBackground: '#EEF2FF',
+    disabledBackground: '#E2E8F0',
+    border: 'rgba(102, 126, 234, 0.3)',
+    disabledBorder: '#CBD5F0',
+    text: '#4C51BF',
+    textDisabled: '#4A5568',
+  };
+
+  const ghostPalette = {
+    background: 'transparent',
+    pressedBackground: 'rgba(102, 126, 234, 0.12)',
+    text: '#4A5568',
+    textDisabled: '#A0AEC0',
+  };
 
   const playSoundForVariant = useCallback(async () => {
     if (!enableSound || !canInteract) {
@@ -96,14 +127,22 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
         disabled={!canInteract}
         style={({ pressed }) => [
           styles.newPrimaryButton,
-          !canInteract && styles.newPrimaryButtonDisabled,
+          {
+            borderBottomColor: showDisabledStyles ? primaryPalette.disabledBorder : primaryPalette.border,
+          },
           pressed && canInteract && styles.newPrimaryButtonPressed,
           ...resolveUserStyles(style),
         ]}
       >
         {({ pressed }) => (
           <LinearGradient
-            colors={!canInteract ? ['#CBD5E0', '#A0AEC0'] : ['#667EEA', '#764BA2']}
+            colors={
+              showDisabledStyles
+                ? primaryPalette.disabledGradient
+                : pressed && !isLoadingState
+                  ? primaryPalette.pressedGradient
+                  : primaryPalette.baseGradient
+            }
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={[
@@ -112,12 +151,17 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
             ]}
           >
             {loading ? (
-              <ActivityIndicator size="small" color="#2D3748" />
+              <ActivityIndicator
+                size="small"
+                color={showDisabledStyles ? primaryPalette.spinner : primaryPalette.text}
+              />
             ) : (
               <Text
                 style={[
                   styles.newPrimaryButtonText,
-                  (!canInteract || loading) && styles.newPrimaryButtonTextDisabled,
+                  {
+                    color: showDisabledStyles ? primaryPalette.textDisabled : primaryPalette.text,
+                  },
                 ]}
               >
                 {title}
@@ -136,7 +180,15 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
         disabled={!canInteract}
         style={({ pressed }) => [
           styles.newSecondaryButton,
-          !canInteract && styles.newSecondaryButtonDisabled,
+          {
+            backgroundColor: showDisabledStyles
+              ? secondaryPalette.disabledBackground
+              : pressed && !isLoadingState
+                ? secondaryPalette.pressedBackground
+                : secondaryPalette.background,
+            borderColor: showDisabledStyles ? secondaryPalette.disabledBorder : secondaryPalette.border,
+            borderBottomColor: showDisabledStyles ? secondaryPalette.disabledBorder : secondaryPalette.border,
+          },
           pressed && canInteract && styles.newSecondaryButtonPressed,
           ...resolveUserStyles(style),
         ]}
@@ -144,7 +196,9 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
         <Text
           style={[
             styles.newSecondaryButtonText,
-            (!canInteract || loading) && styles.newSecondaryButtonTextDisabled,
+            {
+              color: showDisabledStyles ? secondaryPalette.textDisabled : secondaryPalette.text,
+            },
           ]}
         >
           {title}
@@ -159,15 +213,22 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
       disabled={!canInteract}
       style={({ pressed }) => [
         styles.newGhostButton,
+        {
+          backgroundColor:
+            showDisabledStyles || !pressed || isLoadingState
+              ? ghostPalette.background
+              : ghostPalette.pressedBackground,
+        },
         !canInteract && styles.newGhostButtonDisabled,
-        pressed && canInteract && styles.newGhostButtonPressed,
         ...resolveUserStyles(style),
       ]}
     >
       <Text
         style={[
           styles.newGhostButtonText,
-          (!canInteract || loading) && styles.newGhostButtonTextDisabled,
+          {
+            color: showDisabledStyles ? ghostPalette.textDisabled : ghostPalette.text,
+          },
         ]}
       >
         {title}
@@ -434,9 +495,6 @@ const styles = StyleSheet.create({
     borderLeftColor: 'rgba(102, 126, 234, 0.2)',
     borderRightColor: 'rgba(102, 126, 234, 0.2)',
   },
-  newPrimaryButtonDisabled: {
-    borderBottomColor: '#E2E8F0',
-  },
   newPrimaryButtonGradient: {
     paddingVertical: 14,
     paddingHorizontal: 20,
@@ -453,9 +511,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 0.5,
     textAlign: 'center',
-  },
-  newPrimaryButtonTextDisabled: {
-    color: '#2D3748', // Darker gray for better contrast on light disabled background
   },
   
   newSecondaryButton: {
@@ -478,19 +533,12 @@ const styles = StyleSheet.create({
     borderLeftColor: 'rgba(102, 126, 234, 0.2)',
     borderRightColor: 'rgba(102, 126, 234, 0.2)',
   },
-  newSecondaryButtonDisabled: {
-    borderBottomColor: '#E2E8F0',
-    borderColor: '#E2E8F0',
-  },
   newSecondaryButtonText: {
-    color: '#667EEA',
+    color: '#4C51BF',
     fontSize: 14,
     fontWeight: '600',
     letterSpacing: 0.5,
     textAlign: 'center',
-  },
-  newSecondaryButtonTextDisabled: {
-    color: '#A0AEC0',
   },
   
   newGhostButton: {
@@ -500,9 +548,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: 'center',
   },
-  newGhostButtonPressed: {
-    backgroundColor: 'rgba(102, 126, 234, 0.05)',
-  },
   newGhostButtonDisabled: {
     // No special disabled styling for ghost
   },
@@ -511,9 +556,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     textAlign: 'center',
-  },
-  newGhostButtonTextDisabled: {
-    color: '#CBD5E0',
   },
   
   // Gradient background styles
