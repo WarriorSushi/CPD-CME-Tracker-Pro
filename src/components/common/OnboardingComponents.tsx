@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
+  Pressable,
   StyleSheet,
   Animated,
   Dimensions,
@@ -39,123 +40,139 @@ export const PremiumButton: React.FC<PremiumButtonProps> = ({
   enableSound = true,
   soundVolume,
 }) => {
-  const [isPressed, setIsPressed] = React.useState(false);
   const { playButtonPress, playButtonTap } = useSound({ enabled: enableSound, volume: soundVolume });
 
-  const handlePressIn = () => {
-    setIsPressed(true);
-  };
+  const canInteract = !disabled && !loading;
 
-  const handlePressOut = () => {
-    setIsPressed(false);
-  };
-
-  const handlePress = async () => {
-    // Play appropriate sound based on button variant
-    if (enableSound && !disabled && !loading) {
-      if (variant === 'primary') {
-        await playButtonPress(); // More substantial sound for primary actions
-      } else {
-        await playButtonTap(); // Lighter sound for secondary/ghost buttons
-      }
+  const playSoundForVariant = useCallback(async () => {
+    if (!enableSound || !canInteract) {
+      return;
     }
-    
-    // Call the original onPress handler
-    onPress();
+
+    if (variant === 'primary') {
+      await playButtonPress();
+    } else {
+      await playButtonTap();
+    }
+  }, [enableSound, canInteract, variant, playButtonPress, playButtonTap]);
+
+  const handlePress = useCallback(async () => {
+    if (!canInteract) {
+      return;
+    }
+
+    try {
+      await playSoundForVariant();
+    } catch (error) {
+      __DEV__ && console.warn('[WARN] PremiumButton: Sound playback failed:', error);
+    }
+
+    try {
+      await Promise.resolve(onPress());
+    } catch (error) {
+      __DEV__ && console.error('[ERROR] PremiumButton: onPress handler threw:', error);
+    }
+  }, [canInteract, playSoundForVariant, onPress]);
+
+  const resolveUserStyles = (providedStyle?: StyleProp<ViewStyle>) => {
+    if (!providedStyle) {
+      return [] as StyleProp<ViewStyle>[];
+    }
+    if (Array.isArray(providedStyle)) {
+      return providedStyle.reduce<StyleProp<ViewStyle>[]>((acc, item) => {
+        if (item != null) {
+          acc.push(item as StyleProp<ViewStyle>);
+        }
+        return acc;
+      }, []);
+    }
+    return [providedStyle];
   };
 
   if (variant === 'primary') {
     return (
-      <TouchableOpacity
+      <Pressable
         onPress={handlePress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        disabled={disabled || loading}
-        activeOpacity={1}
-        style={[
+        disabled={!canInteract}
+        style={({ pressed }) => [
           styles.newPrimaryButton,
-          isPressed && styles.newPrimaryButtonPressed,
-          disabled && styles.newPrimaryButtonDisabled,
-          style,
+          !canInteract && styles.newPrimaryButtonDisabled,
+          pressed && canInteract && styles.newPrimaryButtonPressed,
+          ...resolveUserStyles(style),
         ]}
       >
-        <LinearGradient
-          colors={disabled || loading ? ['#CBD5E0', '#A0AEC0'] : ['#667EEA', '#764BA2']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={[
-            styles.newPrimaryButtonGradient,
-            isPressed && styles.newPrimaryButtonGradientPressed,
-          ]}
-        >
-          {loading ? (
-            <ActivityIndicator size="small" color="#2D3748" />
-          ) : (
-            <Text
-              style={[
-                styles.newPrimaryButtonText,
-                (disabled || loading) && styles.newPrimaryButtonTextDisabled,
-              ]}
-            >
-              {title}
-            </Text>
-          )}
-        </LinearGradient>
-      </TouchableOpacity>
+        {({ pressed }) => (
+          <LinearGradient
+            colors={!canInteract ? ['#CBD5E0', '#A0AEC0'] : ['#667EEA', '#764BA2']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={[
+              styles.newPrimaryButtonGradient,
+              pressed && canInteract && styles.newPrimaryButtonGradientPressed,
+            ]}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="#2D3748" />
+            ) : (
+              <Text
+                style={[
+                  styles.newPrimaryButtonText,
+                  (!canInteract || loading) && styles.newPrimaryButtonTextDisabled,
+                ]}
+              >
+                {title}
+              </Text>
+            )}
+          </LinearGradient>
+        )}
+      </Pressable>
     );
   }
 
   if (variant === 'secondary') {
     return (
-      <TouchableOpacity
+      <Pressable
         onPress={handlePress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        disabled={disabled || loading}
-        activeOpacity={1}
-        style={[
+        disabled={!canInteract}
+        style={({ pressed }) => [
           styles.newSecondaryButton,
-          isPressed && styles.newSecondaryButtonPressed,
-          disabled && styles.newSecondaryButtonDisabled,
-          style,
+          !canInteract && styles.newSecondaryButtonDisabled,
+          pressed && canInteract && styles.newSecondaryButtonPressed,
+          ...resolveUserStyles(style),
         ]}
       >
         <Text
           style={[
             styles.newSecondaryButtonText,
-            disabled && styles.newSecondaryButtonTextDisabled,
+            (!canInteract || loading) && styles.newSecondaryButtonTextDisabled,
           ]}
         >
           {title}
         </Text>
-      </TouchableOpacity>
+      </Pressable>
     );
   }
 
-  // Ghost variant
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={handlePress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      disabled={disabled || loading}
-      activeOpacity={1}
-      style={[
+      disabled={!canInteract}
+      style={({ pressed }) => [
         styles.newGhostButton,
-        isPressed && styles.newGhostButtonPressed,
-        disabled && styles.newGhostButtonDisabled,
-        style,
+        !canInteract && styles.newGhostButtonDisabled,
+        pressed && canInteract && styles.newGhostButtonPressed,
+        ...resolveUserStyles(style),
       ]}
     >
       <Text
         style={[
           styles.newGhostButtonText,
-          disabled && styles.newGhostButtonTextDisabled,
+          (!canInteract || loading) && styles.newGhostButtonTextDisabled,
         ]}
       >
         {title}
       </Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
