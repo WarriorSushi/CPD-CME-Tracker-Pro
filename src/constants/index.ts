@@ -1,10 +1,13 @@
 // Export all constants
 export * from './theme';
 
+// Import version from package.json to keep it in sync
+import packageJson from '../../package.json';
+
 // App configuration constants
 export const APP_CONFIG = {
   NAME: 'CPD & CME Tracker',
-  VERSION: '1.0.0',
+  VERSION: packageJson.version,
   DATABASE_VERSION: 2,
   DATABASE_NAME: 'cme_tracker.db',
 } as const;
