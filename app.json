@@ -19,7 +19,6 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "requiresFullScreen": false,
       "bundleIdentifier": "com.cmetrackerpro.app",
       "buildNumber": "1",
       "infoPlist": {
@@ -30,9 +29,7 @@
     },
     "android": {
       "package": "com.cmetrackerpro.app",
-      "versionCode": 1,
-      "resizeableActivity": true,
-      "supportsTv": false,
+      "versionCode": 2,
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
@@ -73,7 +70,8 @@
             "enableEdgeToEdge": true
           }
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "extra": {
       "eas": {
