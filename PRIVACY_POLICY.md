@@ -1,6 +1,6 @@
 # Privacy Policy for CPD & CME Tracker
 
-**Last Updated: January 14, 2025**
+**Last Updated: January 7, 2025**
 
 ## Introduction
 
@@ -50,16 +50,36 @@ All information is stored exclusively on your device using:
 ## Data Security
 
 ### Local Security Measures
-- **Database Encryption**: Your local database is protected with encryption
-- **Secure File Storage**: Certificates are stored securely on your device
-- **Access Controls**: App-level security controls protect your data
-- **Audit Trail**: Local audit logs track data access (stored locally only)
 
-### Device Security
-Your data security depends on your device's security:
-- Use device lock screens (PIN, pattern, biometric)
-- Keep your device updated
-- Use reputable security software
+**IMPORTANT NOTICE:** CPD & CME Tracker stores all data locally on your device **without encryption**. This includes:
+- Your profile information (name, age, profession)
+- All CME/CPD entry records
+- License information and credentials
+- Certificate images and documents
+- Notes and custom data
+
+### Your Responsibility for Data Security
+
+Since data is stored without encryption, **you are responsible for securing your data** by:
+
+- **Device Lock**: Always use a strong device lock (PIN, password, pattern, or biometric)
+- **Physical Security**: Keep your device physically secure and do not share it with others
+- **Device Updates**: Keep your device operating system and security patches up to date
+- **Avoid Root/Jailbreak**: Do not use the app on rooted or jailbroken devices
+- **Regular Backups**: Export your data regularly to secure locations
+
+### Why No Encryption?
+
+We designed this app for maximum simplicity and offline functionality. If your device is lost or stolen:
+- The data is accessible if someone bypasses your device lock
+- You should consider the device lock as your primary security layer
+
+### Additional Security Recommendations
+
+- Use device-level encryption (available in Android Settings → Security → Encrypt Device)
+- Consider using a secure folder or work profile feature if available on your device
+- Be cautious when sharing screenshots or exported data
+- Delete the app data if you sell or give away your device
 
 ## Your Rights and Choices
 
@@ -151,6 +171,6 @@ Where applicable under GDPR, our legal basis for processing personal information
 
 ---
 
-**This Privacy Policy is effective as of January 14, 2025, and will remain in effect except with respect to any changes in its provisions in the future, which will be in effect immediately after being posted in the application.**
+**This Privacy Policy is effective as of January 7, 2025, and will remain in effect except with respect to any changes in its provisions in the future, which will be in effect immediately after being posted in the application.**
 
 **By using CPD & CME Tracker, you acknowledge that you have read and understood this Privacy Policy.**

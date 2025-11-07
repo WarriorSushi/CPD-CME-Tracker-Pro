@@ -57,7 +57,12 @@ export const CMEProvider: React.FC<CMEProviderProps> = ({ children }) => {
 
     // Filter entries for current year
     const currentYearEntries = recentCMEEntries.filter(entry => {
-      const entryYear = new Date(entry.dateAttended).getFullYear();
+      const entryDate = new Date(entry.dateAttended);
+      // Validate date before using it
+      if (isNaN(entryDate.getTime())) {
+        return false; // Skip entries with invalid dates
+      }
+      const entryYear = entryDate.getFullYear();
       return entryYear === currentYear;
     });
 
@@ -68,6 +73,12 @@ export const CMEProvider: React.FC<CMEProviderProps> = ({ children }) => {
       if (user?.cycleEndDate) {
         const end = new Date(user.cycleEndDate);
         const today = new Date();
+
+        // Validate end date before using it
+        if (isNaN(end.getTime())) {
+          return 0; // Invalid date, no remaining days
+        }
+
         const diff = Math.ceil((end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
         return Math.max(diff, 0);
       }

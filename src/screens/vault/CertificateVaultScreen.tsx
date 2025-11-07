@@ -592,6 +592,10 @@ export const CertificateVaultScreen: React.FC<Props> = ({ navigation }) => {
           numColumns={2}
           contentContainerStyle={styles.masonryList}
           showsVerticalScrollIndicator={false}
+          initialNumToRender={6}
+          maxToRenderPerBatch={4}
+          windowSize={5}
+          removeClippedSubviews={true}
           key={certificates?.length || 0} // Force re-render for masonry
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

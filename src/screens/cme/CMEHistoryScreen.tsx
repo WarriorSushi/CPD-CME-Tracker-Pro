@@ -249,7 +249,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
     </View>
   );
 
-  const renderEntry = ({ item }: { item: CMEEntry }) => (
+  const renderEntry = useCallback(({ item }: { item: CMEEntry }) => (
     <Card variant="entry" style={styles.entryCard}>
       <View style={styles.entryHeader}>
         <View style={styles.entryInfo}>
@@ -269,14 +269,14 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* Certificate Thumbnail */}
         {item.certificatePath && (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.certificateThumbnailContainer}
             onPress={() => {
 
               (navigation.getParent() as any).navigate('CertificateViewer', { imageUri: item.certificatePath });
             }}
           >
-            <Image 
+            <Image
               source={{ uri: item.certificatePath }}
               style={styles.certificateThumbnail}
               resizeMode="cover"
@@ -284,7 +284,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
             <SvgIcon name="document" size={16} color="#FFFFFF" style={styles.certificateIcon} />
           </TouchableOpacity>
         )}
-        
+
         <View style={styles.entryCredits}>
           <Text style={styles.creditsValue}>{item.creditsEarned}</Text>
           <Text style={styles.creditsLabel}>{user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits'}</Text>
@@ -298,7 +298,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
       )}
 
       <View style={styles.entryActions}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.actionButton, styles.editButton]}
           onPress={() => {
 
@@ -308,8 +308,8 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
         >
           <Text style={styles.editButtonText}>Edit</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[styles.actionButton, styles.deleteButton]}
           onPress={() => {
 
@@ -321,7 +321,7 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
     </Card>
-  );
+  ), [navigation, user, handleEditEntry, handleDeleteEntry]);
 
   const renderYearButton = (year: number) => (
     <TouchableOpacity
@@ -437,6 +437,10 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          initialNumToRender={5}
+          maxToRenderPerBatch={3}
+          windowSize={5}
+          removeClippedSubviews={true}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
