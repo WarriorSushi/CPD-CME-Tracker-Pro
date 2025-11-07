@@ -171,10 +171,11 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
     try {
       if (isEditing && editLicense) {
         // Update existing license
+        const trimmedLicenseNumber = licenseNumber.trim();
         const updateData: Partial<LicenseRenewal> = {
           licenseType: licenseType.trim(),
           issuingAuthority: issuingAuthority.trim(),
-          licenseNumber: licenseNumber.trim() || undefined,
+          ...(trimmedLicenseNumber && { licenseNumber: trimmedLicenseNumber }),
           expirationDate: expirationDate.toISOString().split('T')[0], // Convert to YYYY-MM-DD
         };
 
@@ -197,12 +198,12 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
         }
       } else {
         // Add new license
+        const trimmedLicenseNumber = licenseNumber.trim();
         const licenseData: Omit<LicenseRenewal, 'id' | 'createdAt' | 'updatedAt'> = {
           licenseType: licenseType.trim(),
           issuingAuthority: issuingAuthority.trim(),
-          licenseNumber: licenseNumber.trim() || undefined,
+          ...(trimmedLicenseNumber && { licenseNumber: trimmedLicenseNumber }),
           expirationDate: expirationDate.toISOString().split('T')[0], // Convert to YYYY-MM-DD
-          renewalDate: undefined,
           requiredCredits: 0, // Default to 0, can be edited later
           completedCredits: 0,
           status: 'active',
