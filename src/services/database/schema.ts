@@ -255,9 +255,10 @@ export const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => 
 
     // Update schema version if migrations were performed
     if (currentVersion < latestVersion) {
-      await db.execAsync(`
-        INSERT OR REPLACE INTO app_settings (key, value) VALUES ('schema_version', '${latestVersion}')
-      `);
+      await db.runAsync(
+        'INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)',
+        ['schema_version', latestVersion.toString()]
+      );
     }
 
   } catch (error) {

@@ -171,18 +171,34 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const calculateProgress = useCallback((user: User, totalCredits: number): Progress => {
     const now = new Date();
     const periodYears = user.requirementPeriod || 1;
-    
+
     // Use actual cycle dates if available, otherwise fall back to current year calculation
     let startOfPeriod: Date;
     let endOfPeriod: Date;
-    
+
     if (user.cycleStartDate && user.cycleEndDate) {
       // User has set their actual cycle dates
       startOfPeriod = new Date(user.cycleStartDate);
       endOfPeriod = new Date(user.cycleEndDate);
+
+      // Validate dates to prevent NaN in calculations
+      if (isNaN(startOfPeriod.getTime()) || isNaN(endOfPeriod.getTime())) {
+        // Invalid dates, fall back to current year
+        const currentYear = now.getFullYear();
+        startOfPeriod = new Date(currentYear, 0, 1);
+        endOfPeriod = new Date(currentYear + periodYears, 0, 1);
+      }
     } else if (user.cycleStartDate) {
       // User has set start date, calculate end date
       startOfPeriod = new Date(user.cycleStartDate);
+
+      // Validate start date
+      if (isNaN(startOfPeriod.getTime())) {
+        // Invalid date, fall back to current year
+        const currentYear = now.getFullYear();
+        startOfPeriod = new Date(currentYear, 0, 1);
+      }
+
       endOfPeriod = new Date(startOfPeriod);
       endOfPeriod.setFullYear(startOfPeriod.getFullYear() + periodYears);
     } else {
@@ -191,11 +207,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       startOfPeriod = new Date(currentYear, 0, 1);
       endOfPeriod = new Date(currentYear + periodYears, 0, 1);
     }
-    
+
     const totalDaysInPeriod = Math.ceil((endOfPeriod.getTime() - startOfPeriod.getTime()) / (1000 * 60 * 60 * 24));
     const daysPassed = Math.ceil((now.getTime() - startOfPeriod.getTime()) / (1000 * 60 * 60 * 24));
     const remainingDays = Math.max(Math.ceil((endOfPeriod.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)), 0);
-    
+
     const percentage = user.annualRequirement > 0 ? (totalCredits / user.annualRequirement) * 100 : 0;
     const expectedProgress = daysPassed > 0 ? (daysPassed / totalDaysInPeriod) * 100 : 0;
     

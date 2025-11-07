@@ -549,8 +549,8 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
       const credits = parseFloat(formData.creditsEarned);
       const creditUnit = user?.creditSystem ? getCreditUnit(user.creditSystem) : 'Credits';
 
-      if (isNaN(credits) || credits <= 0) {
-        newErrors.creditsEarned = `${creditUnit} must be a positive number`;
+      if (isNaN(credits) || !isFinite(credits) || credits <= 0) {
+        newErrors.creditsEarned = `${creditUnit} must be a valid positive number`;
       } else if (credits > 500) {
         newErrors.creditsEarned = `${creditUnit} cannot exceed 500`;
       }

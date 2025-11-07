@@ -150,51 +150,61 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     }
   }, [isInitializing, user]);
 
-  // Progress section animated gradient loop
-  useEffect(() => {
-    Animated.loop(
-      Animated.parallel([
-        Animated.sequence([
-          Animated.timing(progressGradient1, {
-            toValue: 1,
-            duration: 6000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(progressGradient1, {
-            toValue: 0,
-            duration: 6000,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.sequence([
-          Animated.timing(progressGradient2, {
-            toValue: 1,
-            duration: 8000,
-            delay: 1000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(progressGradient2, {
-            toValue: 0,
-            duration: 8000,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.sequence([
-          Animated.timing(progressGradient3, {
-            toValue: 1,
-            duration: 10000,
-            delay: 2000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(progressGradient3, {
-            toValue: 0,
-            duration: 10000,
-            useNativeDriver: true,
-          }),
-        ]),
-      ])
-    ).start();
-  }, []);
+  // Progress section animated gradient loop - stop when screen not visible to save battery
+  useFocusEffect(
+    useCallback(() => {
+      // Start animations when screen is focused
+      const animationLoop = Animated.loop(
+        Animated.parallel([
+          Animated.sequence([
+            Animated.timing(progressGradient1, {
+              toValue: 1,
+              duration: 6000,
+              useNativeDriver: true,
+            }),
+            Animated.timing(progressGradient1, {
+              toValue: 0,
+              duration: 6000,
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.sequence([
+            Animated.timing(progressGradient2, {
+              toValue: 1,
+              duration: 8000,
+              delay: 1000,
+              useNativeDriver: true,
+            }),
+            Animated.timing(progressGradient2, {
+              toValue: 0,
+              duration: 8000,
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.sequence([
+            Animated.timing(progressGradient3, {
+              toValue: 1,
+              duration: 10000,
+              delay: 2000,
+              useNativeDriver: true,
+            }),
+            Animated.timing(progressGradient3, {
+              toValue: 0,
+              duration: 10000,
+              useNativeDriver: true,
+            }),
+          ]),
+        ])
+      );
+
+      animationLoop.start();
+
+      // Stop animations when screen loses focus (cleanup function)
+      return () => {
+        animationLoop.stop();
+      };
+    }, [progressGradient1, progressGradient2, progressGradient3])
+  );
 
   // Handle setting license reminders
   const handleSetLicenseReminders = async (license: any) => {

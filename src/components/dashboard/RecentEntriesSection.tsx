@@ -14,7 +14,7 @@ interface RecentEntriesSectionProps {
   onViewCertificate: (certificatePath: string) => void;
 }
 
-export const RecentEntriesSection: React.FC<RecentEntriesSectionProps> = ({
+const RecentEntriesSectionComponent: React.FC<RecentEntriesSectionProps> = ({
   recentEntries,
   user,
   recentCardAnim,
@@ -184,5 +184,5 @@ const styles = StyleSheet.create({
   },
 });
 
-
-
+// Memoized export to prevent unnecessary re-renders
+export const RecentEntriesSection = React.memo(RecentEntriesSectionComponent);

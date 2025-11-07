@@ -48,7 +48,7 @@ const StatCapsule: React.FC<StatCapsuleProps> = ({
   );
 };
 
-export const ProgressCard: React.FC<ProgressCardProps> = ({
+const ProgressCardComponent: React.FC<ProgressCardProps> = ({
   currentYearProgress,
   user,
   progressGradient1,
@@ -246,4 +246,6 @@ const styles = StyleSheet.create({
   },
 });
 
+// Memoized export to prevent unnecessary re-renders
+export const ProgressCard = React.memo(ProgressCardComponent);
 

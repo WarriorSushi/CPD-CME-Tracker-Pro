@@ -410,9 +410,23 @@ export const cmeOperations = {
           };
         }
 
+        // Validate credit value before inserting
+        if (!entry.creditsEarned || !isFinite(entry.creditsEarned) || entry.creditsEarned <= 0) {
+          return {
+            success: false,
+            error: 'Credits must be a valid positive number',
+          };
+        }
+        if (entry.creditsEarned > 500) {
+          return {
+            success: false,
+            error: 'Credits value seems unusually high (>500). Please verify the amount.',
+          };
+        }
+
         const result = await runSafe(db, `
           INSERT INTO cme_entries (
-            title, provider, date_attended, credits_earned, 
+            title, provider, date_attended, credits_earned,
             category, notes, certificate_path, user_id
           ) VALUES (?, ?, ?, ?, ?, ?, ?, 1)
         `, [
@@ -445,10 +459,26 @@ export const cmeOperations = {
       try {
 
         const db = await getDatabase();
-        
+
+        // Validate credit value if being updated
+        if (entry.creditsEarned !== undefined) {
+          if (!entry.creditsEarned || !isFinite(entry.creditsEarned) || entry.creditsEarned <= 0) {
+            return {
+              success: false,
+              error: 'Credits must be a valid positive number',
+            };
+          }
+          if (entry.creditsEarned > 500) {
+            return {
+              success: false,
+              error: 'Credits value seems unusually high (>500). Please verify the amount.',
+            };
+          }
+        }
+
         const fields = [];
         const values = [];
-        
+
         if (entry.title) {
           fields.push('title = ?');
           values.push(entry.title);
