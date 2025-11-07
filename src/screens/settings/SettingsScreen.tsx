@@ -31,7 +31,13 @@ import {
   exportCMEToCSV,
   exportLicensesToCSV,
   generateSummaryReport,
-  createBackup
+  createBackup,
+  generateCMEEntriesPDF,
+  generateSummaryPDF,
+  generateLicenseRenewalPDF,
+  createCompleteBackup,
+  BackupOptions,
+  BackupProgress
 } from '../../utils/dataExport';
 import { databaseOperations } from '../../services/database';
 import { soundManager } from '../../services/sound/SoundManager';
@@ -222,7 +228,28 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
 
     Alert.alert(
       'Export Data',
-      'What would you like to export?',
+      'Choose your export format:',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'CSV Exports',
+          onPress: () => showCSVExportOptions(),
+        },
+        {
+          text: 'PDF Reports',
+          onPress: () => showPDFExportOptions(),
+        },
+      ]
+    );
+  };
+
+  const showCSVExportOptions = () => {
+    Alert.alert(
+      'CSV Export',
+      'Select data to export as CSV:',
       [
         {
           text: 'Cancel',
@@ -232,41 +259,126 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
           text: 'CME Entries',
           onPress: async () => {
             setIsExporting(true);
-
-            // Load ALL entries for export, not just recent 10
             const allEntriesResult = await databaseOperations.cme.getAllEntries();
             const allEntries = allEntriesResult.success && allEntriesResult.data
               ? allEntriesResult.data
               : [];
 
-            const success = await exportCMEToCSV(allEntries, user);
+            const success = await exportCMEToCSV(allEntries, user!);
             setIsExporting(false);
 
             if (success) {
-              Alert.alert('Success', `${allEntries.length} CME entries exported successfully!`);
+              Alert.alert('Success', `${allEntries.length} CME entries exported to CSV!`);
             } else {
               Alert.alert('Error', 'Failed to export CME entries.');
             }
           },
         },
         {
-          text: 'Summary Report',
+          text: 'Licenses',
           onPress: async () => {
             setIsExporting(true);
+            const success = await exportLicensesToCSV(licenses);
+            setIsExporting(false);
 
-            // Load ALL entries for comprehensive report
+            if (success) {
+              Alert.alert('Success', `${licenses.length} licenses exported to CSV!`);
+            } else {
+              Alert.alert('Error', 'Failed to export licenses.');
+            }
+          },
+        },
+        {
+          text: 'Summary (TXT)',
+          onPress: async () => {
+            setIsExporting(true);
             const allEntriesResult = await databaseOperations.cme.getAllEntries();
             const allEntries = allEntriesResult.success && allEntriesResult.data
               ? allEntriesResult.data
               : [];
 
-            const success = await generateSummaryReport(user, allEntries, licenses);
+            const success = await generateSummaryReport(user!, allEntries, licenses);
             setIsExporting(false);
 
             if (success) {
-              Alert.alert('Success', 'Summary report generated successfully!');
+              Alert.alert('Success', 'Summary report generated!');
             } else {
               Alert.alert('Error', 'Failed to generate summary report.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const showPDFExportOptions = () => {
+    Alert.alert(
+      'PDF Export',
+      'Select report type:',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'CME Entries Report',
+          onPress: async () => {
+            setIsExporting(true);
+            const allEntriesResult = await databaseOperations.cme.getAllEntries();
+            const allEntries = allEntriesResult.success && allEntriesResult.data
+              ? allEntriesResult.data
+              : [];
+
+            const result = await generateCMEEntriesPDF(allEntries, user!);
+            setIsExporting(false);
+
+            if (result.success) {
+              Alert.alert('Success', result.message);
+            } else {
+              Alert.alert('Error', result.message);
+            }
+          },
+        },
+        {
+          text: 'Professional Summary',
+          onPress: async () => {
+            setIsExporting(true);
+            const allEntriesResult = await databaseOperations.cme.getAllEntries();
+            const allEntries = allEntriesResult.success && allEntriesResult.data
+              ? allEntriesResult.data
+              : [];
+
+            const result = await generateSummaryPDF(user!, allEntries, licenses);
+            setIsExporting(false);
+
+            if (result.success) {
+              Alert.alert('Success', result.message);
+            } else {
+              Alert.alert('Error', result.message);
+            }
+          },
+        },
+        {
+          text: 'License Renewal Report',
+          onPress: async () => {
+            if (licenses.length === 0) {
+              Alert.alert('No Licenses', 'You have no licenses to include in the report.');
+              return;
+            }
+
+            setIsExporting(true);
+            const allEntriesResult = await databaseOperations.cme.getAllEntries();
+            const allEntries = allEntriesResult.success && allEntriesResult.data
+              ? allEntriesResult.data
+              : [];
+
+            const result = await generateLicenseRenewalPDF(user!, licenses, allEntries);
+            setIsExporting(false);
+
+            if (result.success) {
+              Alert.alert('Success', result.message);
+            } else {
+              Alert.alert('Error', result.message);
             }
           },
         },
@@ -280,29 +392,76 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
+    // Show backup options modal
+    showBackupOptionsModal();
+  };
+
+  const showBackupOptionsModal = () => {
     Alert.alert(
       'Create Backup',
-      'This will create a complete backup of your data including CME entries and licenses.',
+      'Choose backup type:',
       [
         {
           text: 'Cancel',
           style: 'cancel',
         },
         {
-          text: 'Create Backup',
-          onPress: async () => {
-            setIsExporting(true);
-            const success = await createBackup(user, recentCMEEntries, licenses);
-            setIsExporting(false);
-            if (success) {
-              Alert.alert('Success', 'Backup created successfully!');
-            } else {
-              Alert.alert('Error', 'Failed to create backup.');
-            }
-          },
+          text: 'Data Only (JSON)',
+          onPress: () => createBackupWithOptions({ includeCertificates: false }),
+        },
+        {
+          text: 'Complete with Certificates (ZIP)',
+          onPress: () => createBackupWithOptions({ includeCertificates: true }),
         },
       ]
     );
+  };
+
+  const createBackupWithOptions = async (options: BackupOptions) => {
+    if (!user) return;
+
+    setIsExporting(true);
+
+    try {
+      // Get ALL entries and certificates for complete backup
+      const allEntriesResult = await databaseOperations.cme.getAllEntries();
+      const allEntries = allEntriesResult.success && allEntriesResult.data
+        ? allEntriesResult.data
+        : [];
+
+      const certificatesResult = await databaseOperations.certificates.getAllCertificates();
+      const certificates = certificatesResult.success && certificatesResult.data
+        ? certificatesResult.data
+        : [];
+
+      // Track progress
+      let progressMessage = '';
+      const onProgress = (progress: BackupProgress) => {
+        progressMessage = progress.message;
+        __DEV__ && console.log(`[Backup] ${progress.step}: ${progress.progress}% - ${progress.message}`);
+      };
+
+      const result = await createCompleteBackup(
+        user,
+        allEntries,
+        licenses,
+        certificates,
+        options,
+        onProgress
+      );
+
+      setIsExporting(false);
+
+      if (result.success) {
+        Alert.alert('Success', result.message);
+      } else {
+        Alert.alert('Error', result.message);
+      }
+    } catch (error) {
+      setIsExporting(false);
+      Alert.alert('Error', 'Failed to create backup. Please try again.');
+      __DEV__ && console.error('Backup error:', error);
+    }
   };
 
   const getExpirationStatus = (expirationDate: string) => {
