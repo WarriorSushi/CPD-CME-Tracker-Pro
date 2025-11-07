@@ -29,7 +29,7 @@
     },
     "android": {
       "package": "com.cmetrackerpro.app",
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
