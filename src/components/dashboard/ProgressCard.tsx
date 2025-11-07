@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     marginTop: 16,
     marginHorizontal: 0,
-    marginBottom: 8,
+    marginBottom: 0,
   },
   progressCard: {
     padding: theme.spacing[5],

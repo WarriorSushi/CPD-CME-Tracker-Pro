@@ -400,16 +400,6 @@ export const CMEHistoryScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         </View>
 
-        {/* 3. Add Entry Button */}
-        <View style={styles.addButtonContainer}>
-          <PremiumButton
-            title="Add Entry"
-            onPress={() => navigation.navigate('AddCME', {})}
-            variant="primary"
-            style={styles.addEntryButton}
-          />
-        </View>
-
         {/* Year Filter */}
         {availableYears.length > 1 && (
           <View style={styles.yearFilter}>

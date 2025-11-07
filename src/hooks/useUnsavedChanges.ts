@@ -54,6 +54,7 @@ export function useUnsavedChanges({
 }: UseUnsavedChangesOptions) {
   const navigation = useNavigation();
   const hasChangesRef = useRef(hasChanges);
+  const isHandlingBackRef = useRef(false);
 
   // Keep ref in sync
   useEffect(() => {
@@ -104,6 +105,11 @@ export function useUnsavedChanges({
           return;
         }
 
+        // If hardware back is already handling this, skip
+        if (isHandlingBackRef.current) {
+          return;
+        }
+
         // Prevent navigation
         e.preventDefault();
 
@@ -150,12 +156,20 @@ export function useUnsavedChanges({
           return false;
         }
 
+        // Mark that we're handling hardware back to prevent double prompt
+        isHandlingBackRef.current = true;
+
         // Show confirmation
         showAlert(() => {
           try {
             navigation.goBack();
           } catch (error) {
             console.error('Hardware back navigation error:', error);
+          } finally {
+            // Reset flag after navigation completes
+            setTimeout(() => {
+              isHandlingBackRef.current = false;
+            }, 500);
           }
         });
 
