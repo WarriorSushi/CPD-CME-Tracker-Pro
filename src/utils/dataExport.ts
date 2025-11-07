@@ -9,6 +9,22 @@ import { AuditTrailService } from '../services/AuditTrailService';
 import { BadgeService } from '../services/BadgeService';
 import { APP_CONFIG } from '../constants';
 
+// Re-export PDF generation functions
+export {
+  generateCMEEntriesPDF,
+  generateSummaryPDF,
+  generateLicenseRenewalPDF
+} from '../services/pdfGenerator';
+
+// Re-export ZIP backup functions
+export {
+  createCompleteBackup,
+  isValidBackupFile,
+  extractZipBackup,
+  type BackupOptions,
+  type BackupProgress
+} from '../services/zipBackupService';
+
 // CSV Export functionality
 export const exportCMEToCSV = async (entries: CMEEntry[], user: User): Promise<boolean> => {
   try {
