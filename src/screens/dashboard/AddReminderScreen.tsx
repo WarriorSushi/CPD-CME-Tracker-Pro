@@ -198,7 +198,7 @@ export const AddReminderScreen: React.FC<Props> = ({ navigation }) => {
               <Input
                 value={eventName}
                 onChangeText={setEventName}
-                placeholder="e.g., Annual Cardiology Conference, CME Workshop"
+                placeholder="e.g., Annual Cardiology Conference"
                 style={styles.input}
                 autoCapitalize="words"
                 returnKeyType="next"
@@ -228,7 +228,7 @@ export const AddReminderScreen: React.FC<Props> = ({ navigation }) => {
             />
             
             <PremiumButton
-              title={isSubmitting ? 'Adding...' : 'Add Reminder'}
+              title={isSubmitting ? 'Adding...' : 'Save'}
               onPress={handleSubmit}
               disabled={!isFormValid || isSubmitting}
               variant="primary"

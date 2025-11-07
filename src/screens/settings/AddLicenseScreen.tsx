@@ -298,7 +298,7 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
                     setErrors(prev => ({ ...prev, licenseType: 'License type is required' }));
                   }
                 }}
-                placeholder="e.g., Medical License, RN License, PharmD"
+                placeholder="e.g., Medical License"
                 autoExpand={true}
                 minLines={1}
                 maxLines={2}
@@ -322,7 +322,7 @@ export const AddLicenseScreen: React.FC<Props> = ({ navigation, route }) => {
                     setErrors(prev => ({ ...prev, issuingAuthority: 'Issuing authority is required' }));
                   }
                 }}
-                placeholder="e.g., State Medical Board, College of Physicians"
+                placeholder="e.g., State Medical Board"
                 autoExpand={true}
                 minLines={1}
                 maxLines={3}

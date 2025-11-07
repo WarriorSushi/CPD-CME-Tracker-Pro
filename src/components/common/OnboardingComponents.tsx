@@ -291,9 +291,9 @@ export const AnimatedGradientBackground: React.FC<{ children?: React.ReactNode }
 
   return (
     <View style={StyleSheet.absoluteFillObject}>
-      {/* Base gradient - very subtle */}
+      {/* Base gradient - more visible */}
       <LinearGradient
-        colors={['#FAFBFD', '#F7F9FC', '#F3F4F6']}
+        colors={['#EBF4FF', '#E0E7FF', '#DDD6FE']}
         style={StyleSheet.absoluteFillObject}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -324,12 +324,12 @@ export const AnimatedGradientBackground: React.FC<{ children?: React.ReactNode }
                 }),
               },
             ],
-            opacity: 0.4,
+            opacity: 0.6,
           },
         ]}
       >
         <LinearGradient
-          colors={['rgba(102, 126, 234, 0.1)', 'rgba(118, 75, 162, 0.05)']}
+          colors={['rgba(102, 126, 234, 0.25)', 'rgba(118, 75, 162, 0.15)']}
           style={styles.orb}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -360,12 +360,12 @@ export const AnimatedGradientBackground: React.FC<{ children?: React.ReactNode }
                 }),
               },
             ],
-            opacity: 0.3,
+            opacity: 0.5,
           },
         ]}
       >
         <LinearGradient
-          colors={['rgba(139, 92, 246, 0.08)', 'rgba(236, 72, 153, 0.04)']}
+          colors={['rgba(139, 92, 246, 0.2)', 'rgba(236, 72, 153, 0.12)']}
           style={styles.orb}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -396,12 +396,12 @@ export const AnimatedGradientBackground: React.FC<{ children?: React.ReactNode }
                 }),
               },
             ],
-            opacity: 0.3,
+            opacity: 0.5,
           },
         ]}
       >
         <LinearGradient
-          colors={['rgba(59, 130, 246, 0.06)', 'rgba(147, 51, 234, 0.03)']}
+          colors={['rgba(59, 130, 246, 0.18)', 'rgba(147, 51, 234, 0.1)']}
           style={styles.orb}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}

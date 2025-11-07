@@ -416,8 +416,15 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
               </Animated.View>
             )}
 
-            {/* Dividing Line */}
-            <View style={styles.dividerLine} />
+            {/* Scroll Indicator with Dividing Line */}
+            <View style={styles.scrollIndicatorContainer}>
+              <View style={styles.arrowRow}>
+                <SvgIcon name="chevron-down" size={20} color={theme.colors.gray[400]} />
+                <SvgIcon name="chevron-down" size={20} color={theme.colors.gray[400]} style={{ marginLeft: theme.spacing[2] }} />
+                <SvgIcon name="chevron-down" size={20} color={theme.colors.gray[400]} style={{ marginLeft: theme.spacing[2] }} />
+              </View>
+              <View style={styles.dividerLine} />
+            </View>
 
             {/* Event Reminders Section */}
             <Animated.View
@@ -576,11 +583,20 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[4],
     backgroundColor: 'transparent',
   },
+  scrollIndicatorContainer: {
+    alignItems: 'center',
+    marginBottom: theme.spacing[6],
+  },
+  arrowRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: theme.spacing[1],
+  },
   dividerLine: {
     height: 1,
     backgroundColor: theme.colors.gray[600],
-    marginHorizontal: 0,
-    marginBottom: theme.spacing[8],
+    width: '100%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
