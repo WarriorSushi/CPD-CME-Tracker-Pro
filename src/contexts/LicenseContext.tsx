@@ -33,9 +33,12 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({ children }) =>
   const [licenses, setLicenses] = useState<LicenseRenewal[]>([]);
   const [isLoadingLicenses, setIsLoadingLicenses] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
 
   const clearError = useCallback(() => {
     setError(null);
+    setRetryCount(0);
   }, []);
 
   const refreshLicenses = useCallback(async () => {
@@ -47,16 +50,26 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({ children }) =>
 
       if (result.success && result.data) {
         setLicenses(result.data);
+        setRetryCount(0); // Reset retry count on success
       } else {
         throw new Error(result.error || 'Failed to load licenses');
       }
     } catch (error) {
       __DEV__ && console.error('Failed to load licenses:', error);
-      setError('Failed to load licenses');
+
+      if (retryCount < MAX_RETRIES) {
+        // Exponential backoff retry
+        setTimeout(() => {
+          setRetryCount(prev => prev + 1);
+          refreshLicenses();
+        }, 1000 * (retryCount + 1));
+      } else {
+        setError('Failed to load licenses after 3 attempts. Please restart the app.');
+      }
     } finally {
       setIsLoadingLicenses(false);
     }
-  }, []);
+  }, [retryCount]);
 
   const addLicense = useCallback(
     async (license: Omit<LicenseRenewal, 'id' | 'createdAt' | 'updatedAt'>): Promise<boolean> => {

@@ -421,7 +421,6 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
               <View style={styles.arrowRow}>
                 <SvgIcon name="chevron-down" size={20} color={theme.colors.gray[400]} />
                 <SvgIcon name="chevron-down" size={20} color={theme.colors.gray[400]} style={{ marginLeft: theme.spacing[2] }} />
-                <SvgIcon name="chevron-down" size={20} color={theme.colors.gray[400]} style={{ marginLeft: theme.spacing[2] }} />
               </View>
               <View style={styles.dividerLine} />
             </View>

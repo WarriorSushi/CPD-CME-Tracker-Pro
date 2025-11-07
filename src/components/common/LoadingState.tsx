@@ -28,7 +28,7 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
     return (
       <View style={[styles.container, minimal && styles.minimalContainer]}>
         <View style={styles.errorContainer}>
-          <SvgIcon name="alert" size={32} color="#F59E0B" />
+          <SvgIcon name="alert" size={32} color={theme.colors.error} />
           <Text style={styles.errorTitle}>Something went wrong</Text>
           <Text style={styles.errorMessage}>
             {errorText || error}

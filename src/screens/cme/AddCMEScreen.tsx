@@ -330,23 +330,23 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
 
           // Refresh certificates in AppContext so vault shows the new certificate
           await refreshCertificates();
+
+          // Update form data with certificate path
+          const updatedFormData = {
+            ...formData,
+            certificatePath: newFilePath,
+          };
+          setFormData(updatedFormData);
+
+          // Update initialFormData ONLY after database success
+          // Certificate is already saved to vault, so this is the new baseline
+          initialFormData.current = updatedFormData;
         } else {
           console.warn('[WARN] Failed to add certificate to vault:', addResult.error);
         }
       } catch (certError) {
       __DEV__ && console.error('[ERROR] Error adding certificate to vault:', certError);
       }
-
-      // Update form data with certificate path
-      const updatedFormData = {
-        ...formData,
-        certificatePath: newFilePath,
-      };
-      setFormData(updatedFormData);
-
-      // Update initialFormData to prevent false unsaved changes warning
-      // Certificate is already saved to vault, so this is the new baseline
-      initialFormData.current = updatedFormData;
 
       Alert.alert('Success', 'Certificate added to entry and saved to vault!');
 
@@ -444,22 +444,22 @@ export const AddCMEScreen: React.FC<Props> = ({ navigation, route }) => {
 
           // Refresh certificates in AppContext so vault shows the new certificate
           await refreshCertificates();
+
+          // Update form data with certificate path
+          const updatedFormData = {
+            ...formData,
+            certificatePath: newFilePath,
+          };
+          setFormData(updatedFormData);
+
+          // Update initialFormData ONLY after database success
+          initialFormData.current = updatedFormData;
         } else {
           console.warn('[WARN] Failed to add document to vault:', addResult.error);
         }
       } catch (certError) {
       __DEV__ && console.error('[ERROR] Error adding document to vault:', certError);
       }
-
-      // Update form data with certificate path
-      const updatedFormData = {
-        ...formData,
-        certificatePath: newFilePath,
-      };
-      setFormData(updatedFormData);
-
-      // Update initialFormData to prevent false unsaved changes warning
-      initialFormData.current = updatedFormData;
 
       Alert.alert('Success', 'Document added to entry and saved to vault!');
 

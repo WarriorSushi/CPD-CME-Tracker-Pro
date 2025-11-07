@@ -152,7 +152,14 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   
   // Error state
   const [error, setError] = useState<string | null>(null);
-  
+
+  // Retry mechanism state
+  const [cmeRetryCount, setCmeRetryCount] = useState(0);
+  const [certsRetryCount, setCertsRetryCount] = useState(0);
+  const [licensesRetryCount, setLicensesRetryCount] = useState(0);
+  const [remindersRetryCount, setRemindersRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
+
   // Staleness tracking for entries data
   const lastEntriesRefreshRef = useRef<number>(0);
   const ENTRIES_STALENESS_TTL = 60000; // 1 minute
@@ -160,6 +167,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Clear error function
   const clearError = useCallback(() => {
     setError(null);
+    setCmeRetryCount(0);
+    setCertsRetryCount(0);
+    setLicensesRetryCount(0);
+    setRemindersRetryCount(0);
   }, []);
   
   // Use singleton user cache instead of local caching
@@ -406,13 +417,25 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       const result = await databaseOperations.certificates.getAllCertificates();
       if (result.success) {
         setCertificates(result.data || []);
+        setCertsRetryCount(0); // Reset on success
+      } else {
+        throw new Error(result.error || 'Failed to load certificates');
       }
     } catch (error) {
       __DEV__ && console.error('Error refreshing certificates:', error);
+
+      if (certsRetryCount < MAX_RETRIES) {
+        setTimeout(() => {
+          setCertsRetryCount(prev => prev + 1);
+          refreshCertificates();
+        }, 1000 * (certsRetryCount + 1));
+      } else {
+        setError('Failed to load certificates after 3 attempts. Please restart the app.');
+      }
     } finally {
       setIsLoadingCertificates(false);
     }
-  }, []);
+  }, [certsRetryCount, MAX_RETRIES]);
 
   const refreshLicenses = useCallback(async (): Promise<void> => {
     try {
@@ -420,13 +443,25 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       const result = await databaseOperations.licenses.getAllLicenses();
       if (result.success) {
         setLicenses(result.data || []);
+        setLicensesRetryCount(0); // Reset on success
+      } else {
+        throw new Error(result.error || 'Failed to load licenses');
       }
     } catch (error) {
       __DEV__ && console.error('Error refreshing licenses:', error);
+
+      if (licensesRetryCount < MAX_RETRIES) {
+        setTimeout(() => {
+          setLicensesRetryCount(prev => prev + 1);
+          refreshLicenses();
+        }, 1000 * (licensesRetryCount + 1));
+      } else {
+        setError('Failed to load licenses after 3 attempts. Please restart the app.');
+      }
     } finally {
       setIsLoadingLicenses(false);
     }
-  }, []);
+  }, [licensesRetryCount, MAX_RETRIES]);
 
   const refreshReminders = useCallback(async (): Promise<void> => {
     try {
@@ -434,13 +469,25 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       const result = await databaseOperations.eventReminders.getAllReminders();
       if (result.success) {
         setEventReminders(result.data || []);
+        setRemindersRetryCount(0); // Reset on success
+      } else {
+        throw new Error(result.error || 'Failed to load reminders');
       }
     } catch (error) {
       __DEV__ && console.error('Error refreshing reminders:', error);
+
+      if (remindersRetryCount < MAX_RETRIES) {
+        setTimeout(() => {
+          setRemindersRetryCount(prev => prev + 1);
+          refreshReminders();
+        }, 1000 * (remindersRetryCount + 1));
+      } else {
+        setError('Failed to load reminders after 3 attempts. Please restart the app.');
+      }
     } finally {
       setIsLoadingReminders(false);
     }
-  }, []);
+  }, [remindersRetryCount, MAX_RETRIES]);
 
   const refreshAllData = useCallback(async (): Promise<void> => {
     await Promise.all([
