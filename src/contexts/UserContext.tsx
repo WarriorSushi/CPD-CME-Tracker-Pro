@@ -114,7 +114,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
     // Then refresh from database
     refreshUserData();
-  }, [refreshUserData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run once on mount only
 
   const value: UserContextType = {
     user,

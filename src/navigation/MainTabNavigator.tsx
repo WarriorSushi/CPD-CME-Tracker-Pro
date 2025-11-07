@@ -241,7 +241,7 @@ const AnimatedTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navig
             {({ pressed }) => (
               <Animated.View style={[
                 styles.tabContent,
-                pressed && { transform: [{ scale: 0.92 }] }
+                pressed && { transform: [{ scale: 0.88 }] }
               ]}>
                 {IconComponent && (
                   <IconComponent
