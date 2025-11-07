@@ -3,7 +3,7 @@
     "name": "CPD & CME Tracker",
     "slug": "cme-tracker-pro",
     "description": "Professional continuing medical education tracking application for healthcare professionals. Track CME/CPD credits, manage licenses, store certificates, and maintain compliance - all offline and secure.",
-    "version": "3.0.0",
+    "version": "3.1.0",
     "orientation": "default",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
@@ -29,7 +29,7 @@
     },
     "android": {
       "package": "com.cmetrackerpro.app",
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
