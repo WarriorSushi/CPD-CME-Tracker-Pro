@@ -66,19 +66,19 @@ export const DesignSystemDemo: React.FC = () => {
               <Button
                 title="Primary"
                 variant="primary"
-                onPress={() => console.log('Primary pressed')}
+                onPress={() => __DEV__ && console.log('Primary pressed')}
                 style={styles.demoButton}
               />
               <Button
                 title="Outline"
                 variant="outline"
-                onPress={() => console.log('Outline pressed')}
+                onPress={() => __DEV__ && console.log('Outline pressed')}
                 style={styles.demoButton}
               />
               <Button
                 title="Destructive"
                 variant="destructive"
-                onPress={() => console.log('Destructive pressed')}
+                onPress={() => __DEV__ && console.log('Destructive pressed')}
                 style={styles.demoButton}
               />
             </View>
@@ -93,19 +93,19 @@ export const DesignSystemDemo: React.FC = () => {
               <Chip
                 label="Unselected"
                 variant="default"
-                onPress={() => console.log('Default chip pressed')}
+                onPress={() => __DEV__ && console.log('Default chip pressed')}
                 style={styles.demoChip}
               />
               <Chip
                 label="Selected"
                 variant="selected"
-                onPress={() => console.log('Selected chip pressed')}
+                onPress={() => __DEV__ && console.log('Selected chip pressed')}
                 style={styles.demoChip}
               />
               <Chip
                 label="Warning"
                 variant="warning"
-                onPress={() => console.log('Warning chip pressed')}
+                onPress={() => __DEV__ && console.log('Warning chip pressed')}
                 style={styles.demoChip}
               />
             </View>

@@ -15,7 +15,7 @@ interface LicensesSectionProps {
   onSetReminders: (license: any) => void;
 }
 
-export const LicensesSection: React.FC<LicensesSectionProps> = ({
+const LicensesSectionComponent: React.FC<LicensesSectionProps> = ({
   licenses,
   user,
   licensesCardAnim,
@@ -347,3 +347,5 @@ const styles = StyleSheet.create({
   },
 });
 
+// Memoized export to prevent unnecessary re-renders
+export const LicensesSection = React.memo(LicensesSectionComponent);

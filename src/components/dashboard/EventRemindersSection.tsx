@@ -11,7 +11,7 @@ interface EventRemindersSectionProps {
   onAddReminder: () => void;
 }
 
-export const EventRemindersSection: React.FC<EventRemindersSectionProps> = ({
+const EventRemindersSectionComponent: React.FC<EventRemindersSectionProps> = ({
   eventReminders,
   remindersCardAnim,
   remindersShadowAnim,
@@ -237,4 +237,6 @@ const styles = StyleSheet.create({
   },
 });
 
+// Memoized export to prevent unnecessary re-renders
+export const EventRemindersSection = React.memo(EventRemindersSectionComponent);
 

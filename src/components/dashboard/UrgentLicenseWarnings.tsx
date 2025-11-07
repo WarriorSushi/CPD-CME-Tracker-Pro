@@ -12,7 +12,7 @@ interface UrgentLicenseWarningsProps {
   onViewAll: () => void;
 }
 
-export const UrgentLicenseWarnings: React.FC<UrgentLicenseWarningsProps> = ({
+const UrgentLicenseWarningsComponent: React.FC<UrgentLicenseWarningsProps> = ({
   urgentRenewals,
   remindersCardAnim,
   remindersShadowAnim,
@@ -225,3 +225,6 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
   },
 });
+
+// Memoized export to prevent unnecessary re-renders
+export const UrgentLicenseWarnings = React.memo(UrgentLicenseWarningsComponent);
